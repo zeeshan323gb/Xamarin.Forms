@@ -20,6 +20,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		readonly TapGestureHandler _tapGestureHandler;
 
 		float _defaultElevation = -1f;
+		int? _defaultLabelFor;
 
 		bool _clickable;
 		bool _disposed;
@@ -103,6 +104,14 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 			if (!string.IsNullOrEmpty(Element.AutomationId))
 				ContentDescription = Element.AutomationId;
+		}
+
+		void IVisualElementRenderer.SetLabelFor(int? id)
+		{
+			if (_defaultLabelFor == null)
+				_defaultLabelFor = LabelFor;
+
+			LabelFor = (int)(id ?? _defaultLabelFor);
 		}
 
 		VisualElementTracker IVisualElementRenderer.Tracker => _visualElementTracker;
