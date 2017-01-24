@@ -212,6 +212,7 @@ namespace Xamarin.Forms.Controls
 				}		
 			};
 #endif
+			SetValue(Accessibility.NameProperty, "SwapRoot");
 		}
 	}
 
@@ -348,6 +349,8 @@ namespace Xamarin.Forms.Controls
 
 				SelectedItem = null;
 			};
+
+			SetValue(Accessibility.NameProperty, "Core Pages");
 		}
 
 		NavigationBehavior navigationBehavior;
