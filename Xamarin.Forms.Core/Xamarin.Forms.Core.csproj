@@ -63,6 +63,7 @@
     <Compile Include="BindingTypeConverter.cs" />
     <Compile Include="BoundsConstraint.cs" />
     <Compile Include="BoundsTypeConverter.cs" />
+    <Compile Include="CarouselView.cs" />
     <Compile Include="CastingEnumerator.cs" />
     <Compile Include="Cells\EntryCell.cs" />
     <Compile Include="Cells\ICellController.cs" />
