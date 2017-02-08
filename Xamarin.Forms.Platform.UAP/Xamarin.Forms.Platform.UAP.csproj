@@ -134,6 +134,12 @@
     <Compile Include="..\Xamarin.Forms.Platform.WinRT\BrushHelpers.cs">
       <Link>BrushHelpers.cs</Link>
     </Compile>
+    <Compile Include="..\Xamarin.Forms.Platform.WinRT\CarouselViewRenderer.cs">
+      <Link>CarouselViewRenderer.cs</Link>
+    </Compile>
+    <Compile Include="..\Xamarin.Forms.Platform.WinRT\FlipViewControl.xaml.cs">
+      <Link>FlipViewControl.xaml.cs</Link>
+    </Compile>
     <Compile Include="..\Xamarin.Forms.Platform.WinRT\FormsProgressBar.cs">
       <Link>FormsProgressBar.cs</Link>
     </Compile>
@@ -175,6 +181,9 @@
     </Compile>
     <Compile Include="..\Xamarin.Forms.Platform.WinRT\UriImageSourceHandler.cs">
       <Link>UriImageSourceHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Xamarin.Forms.Platform.WinRT\VerticalFlipViewControl.xaml.cs">
+      <Link>VerticalFlipViewControl.xaml.cs</Link>
     </Compile>
     <Compile Include="..\Xamarin.Forms.Platform.WinRT\ViewExtensions.cs">
       <Link>ViewExtensions.cs</Link>
@@ -440,6 +449,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="FlipViewControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="FormsCommandBarStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -472,6 +485,10 @@
     <Page Include="TabbedPageStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="VerticalFlipViewControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
