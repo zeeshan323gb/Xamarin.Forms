@@ -29,6 +29,13 @@ namespace Xamarin.Forms.Platform
 #endif
 	internal class _BoxViewRenderer { }
 
+#if !WINDOWS_PHONE && !WINDOWS_PHONE_APP
+	[RenderWith(typeof(CarouselViewRenderer))]
+#else
+	[RenderWith (null)]
+#endif
+	internal class _CarouselViewRenderer { }
+
 	[RenderWith(typeof(EntryRenderer))]
 	internal class _EntryRenderer { }
 
