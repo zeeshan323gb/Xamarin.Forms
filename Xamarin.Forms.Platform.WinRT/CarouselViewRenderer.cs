@@ -28,6 +28,9 @@ namespace Xamarin.Forms.Platform.WinRT
 		const string NextButtonHorizontal = "NextButtonHorizontal";
 		const string PreviousButtonVertical = "PreviousButtonVertical";
 		const string NextButtonVertical = "NextButtonVertical";
+		const string DotsPanelName = "dotsPanel";
+		const string IndicatorsName = "indicators";
+		const string FlipViewName = "flipView";
 
 		bool _disposed;
 		ObservableCollection<Shape> _Dots;
@@ -45,7 +48,7 @@ namespace Xamarin.Forms.Platform.WinRT
 		ObservableCollection<FrameworkElement> _Source;
 		Timer _timer;
 
-		public async void InsertItem(object item, int position)
+		public void InsertItem(object item, int position)
 		{
 			if (Element != null && _flipView != null && Element.ItemsSource != null)
 			{
@@ -64,12 +67,10 @@ namespace Xamarin.Forms.Platform.WinRT
 					_Source.Insert(position, CreateView(item));
 					_Dots.Insert(position, CreateDot(position, position));
 				}
-
-				await Task.Delay(100);
 			}
 		}
 
-		public async void ItemsSourceChanged()
+		public void ItemsSourceChanged()
 		{
 			if (Element != null && _flipView != null)
 			{
@@ -114,12 +115,10 @@ namespace Xamarin.Forms.Platform.WinRT
 
 					_Dots = new ObservableCollection<Shape>(dots);
 
-					var dotsPanel = _nativeView.FindName("dotsPanel") as ItemsControl;
+					var dotsPanel = _nativeView.FindName(DotsPanelName) as ItemsControl;
 					dotsPanel.ItemsSource = _Dots;
 
 					_flipView.SelectedIndex = Element.Position;
-
-					await Task.Delay(100);
 
 					for (var j = Element.Position + 1; j <= Element.ItemsSource.Count - 1; j++)
 					{
@@ -142,7 +141,7 @@ namespace Xamarin.Forms.Platform.WinRT
 					var dots = new List<Shape>();
 					_Dots = new ObservableCollection<Shape>(dots);
 
-					var dotsPanel = _nativeView.FindName("dotsPanel") as ItemsControl;
+					var dotsPanel = _nativeView.FindName(DotsPanelName) as ItemsControl;
 					dotsPanel.ItemsSource = _Dots;
 				}
 
@@ -150,7 +149,7 @@ namespace Xamarin.Forms.Platform.WinRT
 			}
 		}
 
-		public async void RemoveItem(int position)
+		public void RemoveItem(int position)
 		{
 			if (Element != null && _flipView != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
 			{
@@ -176,8 +175,6 @@ namespace Xamarin.Forms.Platform.WinRT
 
 							_flipView.SelectedIndex = newPos;
 						}
-
-						await Task.Delay(100);
 					}
 
 					Element.ItemsSource.RemoveAt(position);
@@ -238,9 +235,9 @@ namespace Xamarin.Forms.Platform.WinRT
 				else
 					_nativeView = new VerticalFlipViewControl();
 
-				_flipView = _nativeView.FindName("flipView") as FlipView;
+				_flipView = _nativeView.FindName(FlipViewName) as FlipView;
 
-				_indicators = _nativeView.FindName("indicators") as StackPanel;
+				_indicators = _nativeView.FindName(IndicatorsName) as StackPanel;
 				_indicators.Visibility = Element.ShowIndicators ? Visibility.Visible : Visibility.Collapsed;
 
 				var converter = new ColorConverter();
@@ -428,7 +425,7 @@ namespace Xamarin.Forms.Platform.WinRT
 					_timer.Dispose();
 				_timer = null;
 
-				_timer = new Timer(OnTick, e.NewSize, 100, 100);
+				_timer = new Timer(OnTick, e.NewSize, 0, 0);
 			}
 		}
 
@@ -460,7 +457,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void UpdateIndicators()
 		{
-			var dotsPanel = _nativeView.FindName("dotsPanel") as ItemsControl;
+			var dotsPanel = _nativeView.FindName(DotsPanelName) as ItemsControl;
 			int i = 0;
 			foreach (var item in dotsPanel.Items)
 			{

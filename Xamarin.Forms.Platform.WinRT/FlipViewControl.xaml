@@ -13,9 +13,16 @@
 			<ItemsControl x:Name="dotsPanel" HorizontalAlignment="Center" VerticalAlignment="Bottom">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
-						<StackPanel Orientation="Horizontal" />
+						<ItemsStackPanel Orientation="Horizontal" />
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
+				<ItemsControl.Template>
+					<ControlTemplate>
+						<ScrollViewer VerticalScrollMode="Disabled" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" x:Name="ScrollHost">
+							<ItemsPresenter />
+						</ScrollViewer>
+					</ControlTemplate>
+				</ItemsControl.Template>
 			</ItemsControl>
 		</StackPanel>
 	</Grid>

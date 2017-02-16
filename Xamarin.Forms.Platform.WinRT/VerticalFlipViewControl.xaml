@@ -15,13 +15,20 @@
 				</ItemsPanelTemplate>
 			</FlipView.ItemsPanel>
 		</FlipView>
-		<StackPanel x:Name="indicators" HorizontalAlignment="Right" VerticalAlignment="Center" Width="32" Visibility="Collapsed">
-			<ItemsControl x:Name="dotsPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+		<StackPanel Orientation="Horizontal" x:Name="indicators" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="32" Visibility="Collapsed">
+			<ItemsControl x:Name="dotsPanel" HorizontalAlignment="Right" VerticalAlignment="Center">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
-						<StackPanel Orientation="Vertical"/>
+						<ItemsStackPanel Orientation="Vertical"/>
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
+				<ItemsControl.Template>
+					<ControlTemplate>
+						<ScrollViewer VerticalScrollMode="Enabled" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden" x:Name="ScrollHost">
+							<ItemsPresenter />
+						</ScrollViewer>
+					</ControlTemplate>
+				</ItemsControl.Template>
 			</ItemsControl>
 		</StackPanel>
 	</Grid>
