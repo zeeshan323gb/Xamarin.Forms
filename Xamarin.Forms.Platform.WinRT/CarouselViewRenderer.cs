@@ -8,6 +8,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
+using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 using WButton = Windows.UI.Xaml.Controls.Button;
 using WThickness = Windows.UI.Xaml.Thickness;
 using WRectangle = Windows.UI.Xaml.Shapes.Rectangle;
@@ -394,7 +395,8 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void FlipView_Loaded(object sender, RoutedEventArgs e)
 		{
-			if (!Element.Arrows)
+			bool arrows = Element.OnThisPlatform().GetArrows();
+			if (!arrows)
 			{
 				ButtonHide(_flipView, PreviousButtonHorizontal);
 				ButtonHide(_flipView, NextButtonHorizontal);

@@ -15,25 +15,13 @@ namespace Xamarin.Forms
 		Vertical
 	}
 
-	public class CarouselView : View
+	public class CarouselView : View, IElementConfiguration<CarouselView>
 	{
 		public static readonly BindableProperty AnimateTransitionProperty = BindableProperty.Create(nameof(AnimateTransition), typeof(bool), typeof(CarouselView), true);
-
-		// UWP only
-		public static readonly BindableProperty ArrowsProperty = BindableProperty.Create(nameof(Arrows), typeof(bool), typeof(CarouselView), false);
-
-		// iOS only
-		public static readonly BindableProperty BouncesProperty = BindableProperty.Create(nameof(Bounces), typeof(bool), typeof(CarouselView), true);
 
 		public static readonly BindableProperty CurrentPageIndicatorTintColorProperty = BindableProperty.Create(nameof(CurrentPageIndicatorTintColor), typeof(Color), typeof(CarouselView), Color.Gray);
 
 		public static readonly BindableProperty IndicatorsShapeProperty = BindableProperty.Create(nameof(IndicatorsShape), typeof(CarouselViewIndicatorsShape), typeof(CarouselView), CarouselViewIndicatorsShape.Circle);
-
-		// Android and iOS only
-		public static readonly BindableProperty InterPageSpacingColorProperty = BindableProperty.Create(nameof(InterPageSpacingColor), typeof(Color), typeof(CarouselView), Color.White);
-
-		// Android and iOS only
-		public static readonly BindableProperty InterPageSpacingProperty = BindableProperty.Create(nameof(InterPageSpacing), typeof(int), typeof(CarouselView), 0);
 
 		public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList), typeof(CarouselView), null);
 
@@ -54,22 +42,18 @@ namespace Xamarin.Forms
 
 		public Action<int> RemoveAction;
 
+		readonly Lazy<PlatformConfigurationRegistry<CarouselView>> _platformConfigurationRegistry;
+
+		public CarouselView()
+		{
+			_platformConfigurationRegistry = new Lazy<PlatformConfigurationRegistry<CarouselView>>(() => new PlatformConfigurationRegistry<CarouselView>(this));
+
+		}
+
 		public bool AnimateTransition
 		{
 			get { return (bool)GetValue(AnimateTransitionProperty); }
 			set { SetValue(AnimateTransitionProperty, value); }
-		}
-
-		public bool Arrows
-		{
-			get { return (bool)GetValue(ArrowsProperty); }
-			set { SetValue(ArrowsProperty, value); }
-		}
-
-		public bool Bounces
-		{
-			get { return (bool)GetValue(BouncesProperty); }
-			set { SetValue(BouncesProperty, value); }
 		}
 
 		public Color CurrentPageIndicatorTintColor
@@ -82,18 +66,6 @@ namespace Xamarin.Forms
 		{
 			get { return (CarouselViewIndicatorsShape)GetValue(IndicatorsShapeProperty); }
 			set { SetValue(IndicatorsShapeProperty, value); }
-		}
-
-		public int InterPageSpacing
-		{
-			get { return (int)GetValue(InterPageSpacingProperty); }
-			set { SetValue(InterPageSpacingProperty, value); }
-		}
-
-		public Color InterPageSpacingColor
-		{
-			get { return (Color)GetValue(InterPageSpacingColorProperty); }
-			set { SetValue(InterPageSpacingColorProperty, value); }
 		}
 
 		public IList ItemsSource
@@ -135,6 +107,11 @@ namespace Xamarin.Forms
 		public void InsertPage(object item, int position = -1)
 		{
 			InsertAction?.Invoke(item, position);
+		}
+
+		public IPlatformElementConfiguration<T, CarouselView> On<T>() where T : IConfigPlatform
+		{
+			return _platformConfigurationRegistry.Value.On<T>();
 		}
 
 		public void RemovePage(int position)

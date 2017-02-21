@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.PlatformConfiguration;
+using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 
 namespace Xamarin.Forms.Controls.GalleryPages
 {
@@ -82,8 +85,6 @@ namespace Xamarin.Forms.Controls.GalleryPages
 				VerticalOptions = LayoutOptions.FillAndExpand,
 				AnimateTransition = true,
 				IndicatorsShape = CarouselViewIndicatorsShape.Square,
-				InterPageSpacing = 10,
-				InterPageSpacingColor = Color.Purple,
 				Orientation = CarouselViewOrientation.Horizontal,
 				ShowIndicators = true,
 				ItemTemplate = new MyTemplateSelector(),
@@ -91,6 +92,10 @@ namespace Xamarin.Forms.Controls.GalleryPages
 				Position = 0
 			};
 			carouselView.PositionSelected += PositionSelected;
+
+			carouselView.On<iOS>().SetInterPageSpacing(10).SetInterPageSpacingColor(Color.Purple);
+			carouselView.On<Android>().SetInterPageSpacing(10).SetInterPageSpacingColor(Color.Purple);
+
 			return carouselView;
 		}
 

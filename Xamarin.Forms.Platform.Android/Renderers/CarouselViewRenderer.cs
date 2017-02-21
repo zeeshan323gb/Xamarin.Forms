@@ -10,6 +10,8 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
+
 using AColor = Android.Graphics.Color;
 using ARelativeLayout = Android.Widget.RelativeLayout;
 using AView = Android.Views.View;
@@ -206,7 +208,7 @@ namespace Xamarin.Forms.Platform.Android
 					// the SetNativeControl method
 
 					var metrics = Resources.DisplayMetrics;
-					var interPageSpacing = e.NewElement.InterPageSpacing * metrics.Density;
+					var interPageSpacing = e.NewElement.OnThisPlatform().GetInterPageSpacing() * metrics.Density;
 
 					var isHorizontal = Element.Orientation == CarouselViewOrientation.Horizontal;
 					int indicatorPaddingLeft = 20;
@@ -227,7 +229,7 @@ namespace Xamarin.Forms.Platform.Android
 
 					_viewPager.LayoutParameters = new LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
 					_viewPager.PageMargin = (int)interPageSpacing;
-					_viewPager.SetBackgroundColor(e.NewElement.InterPageSpacingColor.ToAndroid());
+					_viewPager.SetBackgroundColor(e.NewElement.OnThisPlatform().GetInterPageSpacingColor().ToAndroid());
 
 					_indicator = new CirclePageIndicator(Context);
 					_indicator.SetViewPager(_viewPager);

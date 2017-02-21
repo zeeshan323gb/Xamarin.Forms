@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CoreGraphics;
 using Foundation;
 using UIKit;
+using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
 
 namespace Xamarin.Forms.Platform.iOS
 {
@@ -362,11 +363,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void ConfigurePageController()
 		{
-			var interPageSpacing = (float)Element.InterPageSpacing;
+			var interPageSpacing = (float)Element.OnThisPlatform().GetInterPageSpacing();
 			var orientation = (UIPageViewControllerNavigationOrientation)Element.Orientation;
 			_pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll,
 													  orientation, UIPageViewControllerSpineLocation.None, interPageSpacing);
-			_pageController.View.BackgroundColor = Element.InterPageSpacingColor.ToUIColor();
+			_pageController.View.BackgroundColor = Element.OnThisPlatform().GetInterPageSpacingColor().ToUIColor();
 
 			_pageControl = new UIPageControl();
 			_pageControl.PageIndicatorTintColor = Element.PageIndicatorTintColor.ToUIColor();
@@ -395,7 +396,7 @@ namespace Xamarin.Forms.Platform.iOS
 				var scroller = view as UIScrollView;
 				if (scroller != null)
 				{
-					scroller.Bounces = Element.Bounces;
+					scroller.Bounces = Element.OnThisPlatform().GetBounces();
 				}
 			}
 
