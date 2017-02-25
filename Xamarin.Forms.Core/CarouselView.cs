@@ -23,6 +23,8 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty IndicatorsShapeProperty = BindableProperty.Create(nameof(IndicatorsShape), typeof(CarouselViewIndicatorsShape), typeof(CarouselView), CarouselViewIndicatorsShape.Circle);
 
+		public static readonly BindableProperty ItemProperty = BindableProperty.Create(nameof(Item), typeof(object), typeof(CarouselView), null, BindingMode.TwoWay, coerceValue: (b, o) => ((CarouselView)b).OnCoerceItem(o));
+
 		public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IList), typeof(CarouselView), null);
 
 		public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(CarouselView), null);
@@ -33,12 +35,13 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(int), typeof(CarouselView), 0, BindingMode.TwoWay);
 
-		// Page Indicators properties
 		public static readonly BindableProperty ShowIndicatorsProperty = BindableProperty.Create(nameof(ShowIndicators), typeof(bool), typeof(CarouselView), false);
 
 		public Action<object, int> InsertAction;
 
-		public EventHandler PositionSelected;
+		public EventHandler<SelectedItemChangedEventArgs> ItemSelected;
+
+		public EventHandler<SelectedPositionChangedEventArgs> PositionSelected;
 
 		public Action<int> RemoveAction;
 
@@ -47,7 +50,6 @@ namespace Xamarin.Forms
 		public CarouselView()
 		{
 			_platformConfigurationRegistry = new Lazy<PlatformConfigurationRegistry<CarouselView>>(() => new PlatformConfigurationRegistry<CarouselView>(this));
-
 		}
 
 		public bool AnimateTransition
@@ -66,6 +68,12 @@ namespace Xamarin.Forms
 		{
 			get { return (CarouselViewIndicatorsShape)GetValue(IndicatorsShapeProperty); }
 			set { SetValue(IndicatorsShapeProperty, value); }
+		}
+
+		public object Item
+		{
+			get { return GetValue(ItemProperty); }
+			set { SetValue(ItemProperty, value); }
 		}
 
 		public IList ItemsSource
@@ -118,6 +126,8 @@ namespace Xamarin.Forms
 		{
 			RemoveAction?.Invoke(position);
 		}
+
+		object OnCoerceItem(object item) => item == new object() ? null : item;
 	}
 
 	public class CarouselViewException : Exception

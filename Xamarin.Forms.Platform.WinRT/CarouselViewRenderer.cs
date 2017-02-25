@@ -87,10 +87,13 @@ namespace Xamarin.Forms.Platform.WinRT
 
 						if (Element.Position == -1)
 							Element.Position = 0;
+
+						SetItemFromPosition(Element.Position);
 					}
 					else
 					{
 						Element.Position = 0;
+						Element.Item = null;
 					}
 					_isSwiping = false;
 
@@ -132,6 +135,7 @@ namespace Xamarin.Forms.Platform.WinRT
 				{
 					_isSwiping = true;
 					Element.Position = 0;
+					Element.Item = null;
 					_isSwiping = false;
 
 					var source = new List<FrameworkElement>();
@@ -183,14 +187,17 @@ namespace Xamarin.Forms.Platform.WinRT
 
 					_IsRemoving = false;
 
+					var newIdx = _flipView.SelectedIndex;
+
 					_isSwiping = true;
-					Element.Position = _flipView.SelectedIndex;
+					Element.Position = newIdx;
+					SetItemFromPosition(newIdx);
 					_isSwiping = false;
 
 					_Dots.RemoveAt(position);
 					UpdateIndicators();
 
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(newIdx);
 				}
 			}
 		}
@@ -308,6 +315,17 @@ namespace Xamarin.Forms.Platform.WinRT
 				if (Element.Position != -1 && !_isSwiping)
 					SetCurrentItem(Element.Position);
 			}
+			else if (e.PropertyName == CarouselView.ItemProperty.PropertyName)
+			{
+				if (Element?.ItemsSource?.Count > 0)
+				{
+					var item = Element.Item;
+					int index = Element.ItemsSource.IndexOf(item);
+
+					if (index != -1 && !_isSwiping && index != Element.Position)
+						Element.Position = index;
+				}
+			}
 
 			if (_Source == null && _ElementWidth > 0 && _ElementHeight > 0)
 				ItemsSourceChanged();
@@ -409,13 +427,16 @@ namespace Xamarin.Forms.Platform.WinRT
 		{
 			if (!_IsLoading && !_IsRemoving)
 			{
+				var newPos = _flipView.SelectedIndex;
+
 				_isSwiping = true;
-				Element.Position = _flipView.SelectedIndex;
+				Element.Position = newPos;
+				SetItemFromPosition(newPos);
 				_isSwiping = false;
 
 				UpdateIndicators();
 
-				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+				SendChangeEvents(newPos);
 			}
 		}
 
@@ -433,7 +454,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnTick(object args)
 		{
-			_timer.Dispose();
+			_timer?.Dispose();
 			_timer = null;
 
 			var size = (Windows.Foundation.Size)args;
@@ -446,6 +467,17 @@ namespace Xamarin.Forms.Platform.WinRT
 			});
 		}
 
+		void SendChangeEvents(int position)
+		{
+			Element.PositionSelected?.Invoke(Element, new SelectedPositionChangedEventArgs(position));
+
+			var itemsCount = Element.ItemsSource?.Count;
+			if (itemsCount > 0 && itemsCount > position && position > -1)
+				Element.ItemSelected?.Invoke(Element, new SelectedItemChangedEventArgs(Element.ItemsSource[position]));
+			else
+				Element.ItemSelected?.Invoke(Element, new SelectedItemChangedEventArgs(null));
+		}
+
 		void SetCurrentItem(int position)
 		{
 			if (Element != null && _flipView != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
@@ -453,8 +485,25 @@ namespace Xamarin.Forms.Platform.WinRT
 				if (position > Element.ItemsSource.Count - 1)
 					throw new CarouselViewException("Current page index cannot be bigger than ItemsSource.Count - 1");
 
+				SetItemFromPosition(position);
+
 				_flipView.SelectedIndex = position;
 			}
+		}
+
+		void SetItemFromPosition(int position)
+		{
+			if (Element == null)
+				return;
+
+			if (Element.ItemsSource?.Count > 0 && position > -1)
+			{
+				var thisItem = Element.ItemsSource[position];
+				if (Element.Item != thisItem)
+					Element.Item = thisItem;
+			}
+			else if (Element.Item != null)
+				Element.Item = null;
 		}
 
 		void UpdateIndicators()

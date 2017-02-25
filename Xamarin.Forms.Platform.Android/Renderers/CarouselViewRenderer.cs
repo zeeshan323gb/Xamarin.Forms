@@ -59,7 +59,7 @@ namespace Xamarin.Forms.Platform.Android
 			void SetViewPager(ViewPager view, int initialPosition);
 		}
 
-		public async void InsertItem(object item, int position)
+		public void InsertItem(object item, int position)
 		{
 			if (Element != null && _viewPager != null && Element.ItemsSource != null)
 			{
@@ -72,12 +72,10 @@ namespace Xamarin.Forms.Platform.Android
 					Element.ItemsSource.Insert(position, item);
 
 				_viewPager.Adapter.NotifyDataSetChanged();
-
-				await Task.Delay(100);
 			}
 		}
 
-		public async void RemoveItem(int position)
+		public void RemoveItem(int position)
 		{
 			if (Element != null && _viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
 			{
@@ -108,20 +106,17 @@ namespace Xamarin.Forms.Platform.Android
 						{
 							_viewPager.SetCurrentItem(1, Element.AnimateTransition);
 
-							await Task.Delay(100);
-
 							Element.ItemsSource.RemoveAt(position);
 
 							_viewPager.Adapter.NotifyDataSetChanged();
 							_viewPager.SetCurrentItem(0, false);
 
 							Element.Position = 0;
+							SetItemFromPosition(0);
 						}
 						else
 						{
 							_viewPager.SetCurrentItem(newPos, Element.AnimateTransition);
-
-							await Task.Delay(100);
 
 							Element.ItemsSource.RemoveAt(position);
 							if (position == 1)
@@ -129,6 +124,7 @@ namespace Xamarin.Forms.Platform.Android
 							else
 								_viewPager.Adapter.NotifyDataSetChanged();
 							Element.Position = newPos;
+							SetItemFromPosition(newPos);
 						}
 
 						_isSwiping = false;
@@ -143,7 +139,7 @@ namespace Xamarin.Forms.Platform.Android
 							_viewPager.Adapter.NotifyDataSetChanged();
 					}
 
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(Element.Position);
 				}
 
 				_isRemoving = false;
@@ -292,13 +288,24 @@ namespace Xamarin.Forms.Platform.Android
 
 					_indicator.SetViewPager(_viewPager);
 
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(Element.Position);
 				}
 			}
 			else if (e.PropertyName == CarouselView.PositionProperty.PropertyName)
 			{
 				if (Element.Position != -1 && !_isSwiping)
 					SetCurrentItem(Element.Position);
+			}
+			else if (e.PropertyName == CarouselView.ItemProperty.PropertyName)
+			{
+				if (Element?.ItemsSource?.Count > 0)
+				{
+					var item = Element.Item;
+					int index = Element.ItemsSource.IndexOf(item);
+
+					if (index != -1 && !_isSwiping && index != Element.Position)
+						Element.Position = index;
+				}
 			}
 		}
 
@@ -331,15 +338,29 @@ namespace Xamarin.Forms.Platform.Android
 
 				if (Element.Position == -1)
 					Element.Position = 0;
+
+				SetItemFromPosition(Element.Position);
 			}
 			else
 			{
 				Element.Position = 0;
+				Element.Item = null;
 			}
 			_isSwiping = false;
 
 			if (_indicator != null)
 				_indicator.SetSnapPage(Element.Position);
+		}
+
+		void SendChangeEvents(int position)
+		{
+			Element.PositionSelected?.Invoke(Element, new SelectedPositionChangedEventArgs(position));
+
+			var itemsCount = Element.ItemsSource?.Count;
+			if (itemsCount > 0 && itemsCount > position && position > -1)
+				Element.ItemSelected?.Invoke(Element, new SelectedItemChangedEventArgs(Element.ItemsSource[position]));
+			else
+				Element.ItemSelected?.Invoke(Element, new SelectedItemChangedEventArgs(null));
 		}
 
 		void SetCurrentItem(int position)
@@ -349,11 +370,29 @@ namespace Xamarin.Forms.Platform.Android
 				if (position > Element.ItemsSource.Count - 1)
 					throw new CarouselViewException("Current page index cannot be bigger than ItemsSource.Count - 1");
 
-				_viewPager.SetCurrentItem(Element.Position, Element.AnimateTransition);
+				_viewPager.SetCurrentItem(position, Element.AnimateTransition);
 
+				SetItemFromPosition(position);
+
+				// TODO: Events won't get sent 
 				if (!Element.AnimateTransition)
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(position);
 			}
+		}
+
+		void SetItemFromPosition(int position)
+		{
+			if (Element == null)
+				return;
+
+			if (Element.ItemsSource?.Count > 0 && position > -1)
+			{
+				var thisItem = Element.ItemsSource[position];
+				if (Element.Item != thisItem)
+					Element.Item = thisItem;
+			}
+			else if (Element.Item != null)
+				Element.Item = null;
 		}
 
 		void ViewPager_PageScrollStateChanged(object sender, ViewPager.PageScrollStateChangedEventArgs e)
@@ -361,7 +400,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (e.State == 0)
 			{
 				if (!_isRemoving)
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(Element.Position);
 			}
 		}
 
@@ -369,6 +408,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			_isSwiping = true;
 			Element.Position = e.Position;
+			SetItemFromPosition(e.Position);
 			_isSwiping = false;
 		}
 

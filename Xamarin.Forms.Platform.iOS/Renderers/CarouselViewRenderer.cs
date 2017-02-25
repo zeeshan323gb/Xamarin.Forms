@@ -46,16 +46,14 @@ namespace Xamarin.Forms.Platform.iOS
 				else
 					firstViewController = CreateViewController(0);
 
-				_pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, async s =>
+				_pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 				{
 					ConfigurePageControl();
-
-					await Task.Delay(100);
 				});
 			}
 		}
 
-		public async void RemoveController(int position)
+		public void RemoveController(int position)
 		{
 			if (Element != null && _pageController != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
 			{
@@ -79,19 +77,18 @@ namespace Xamarin.Forms.Platform.iOS
 						if (newPos == -1)
 							newPos = 0;
 
-						//TODO: maybe move this to SetViewControllers to match InsertController
-						await Task.Delay(100);
 						var direction = position == 0 ? UIPageViewControllerNavigationDirection.Forward : UIPageViewControllerNavigationDirection.Reverse;
 						var firstViewController = CreateViewController(newPos);
 						_pageController.SetViewControllers(new[] { firstViewController }, direction, Element.AnimateTransition, s =>
 						{
 							_isSwiping = true;
 							Element.Position = newPos;
+							SetItemFromPosition(newPos);
 							_isSwiping = false;
 
 							ConfigurePageControl();
 
-							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+							SendChangeEvents(Element.Position);
 						});
 					}
 					else
@@ -101,7 +98,7 @@ namespace Xamarin.Forms.Platform.iOS
 						{
 							ConfigurePageControl();
 
-							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+							SendChangeEvents(Element.Position);
 						});
 					}
 				}
@@ -234,7 +231,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 					ConfigurePageControl();
 
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(Element.Position);
 				}
 			}
 			else if (e.PropertyName == CarouselView.PositionProperty.PropertyName)
@@ -242,12 +239,24 @@ namespace Xamarin.Forms.Platform.iOS
 				if (Element.Position != -1 && !_isSwiping)
 					SetCurrentController(Element.Position);
 			}
+			else if (e.PropertyName == CarouselView.ItemProperty.PropertyName)
+			{
+				if (Element?.ItemsSource?.Count > 0)
+				{
+					var item = Element.Item;
+					int index = Element.ItemsSource.IndexOf(item);
+
+					if (index != -1 && !_isSwiping && index != Element.Position)
+						Element.Position = index;
+				}
+			}
 		}
 
 		static UIView AddView(View view, CGRect size)
 		{
 			if (Platform.GetRenderer(view) == null)
 				Platform.SetRenderer(view, Platform.CreateRenderer(view));
+
 			var vRenderer = Platform.GetRenderer(view);
 
 			vRenderer.NativeView.Frame = size;
@@ -331,10 +340,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 				if (Element.Position == -1)
 					Element.Position = 0;
+
+				SetItemFromPosition(Element.Position);
 			}
 			else
 			{
 				Element.Position = 0;
+				Element.Item = null;
 			}
 			_isSwiping = false;
 		}
@@ -452,12 +464,24 @@ namespace Xamarin.Forms.Platform.iOS
 
 				_isSwiping = true;
 				Element.Position = position;
+				SetItemFromPosition(position);
 				_isSwiping = false;
 
 				ConfigurePageControl();
 
-				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+				SendChangeEvents(Element.Position);
 			}
+		}
+
+		void SendChangeEvents(int position)
+		{
+			Element.PositionSelected?.Invoke(Element, new SelectedPositionChangedEventArgs(position));
+
+			var itemsCount = Element.ItemsSource?.Count;
+			if (itemsCount > 0 && itemsCount > position && position > -1)
+				Element.ItemSelected?.Invoke(Element, new SelectedItemChangedEventArgs(Element.ItemsSource[position]));
+			else
+				Element.ItemSelected?.Invoke(Element, new SelectedItemChangedEventArgs(null));
 		}
 
 		void SetCurrentController(int position)
@@ -473,10 +497,28 @@ namespace Xamarin.Forms.Platform.iOS
 				_pageController.SetViewControllers(new[] { firstViewController }, direction, Element.AnimateTransition, s =>
 				{
 					ConfigurePageControl();
+					_isSwiping = true;
+					SetItemFromPosition(position);
+					_isSwiping = false;
 
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					SendChangeEvents(Element.Position);
 				});
 			}
+		}
+
+		void SetItemFromPosition(int position)
+		{
+			if (Element == null)
+				return;
+
+			if (Element.ItemsSource?.Count > 0 && position > -1)
+			{
+				var thisItem = Element.ItemsSource[position];
+				if (Element.Item != thisItem)
+					Element.Item = thisItem;
+			}
+			else if (Element.Item != null)
+				Element.Item = null;
 		}
 	}
 
