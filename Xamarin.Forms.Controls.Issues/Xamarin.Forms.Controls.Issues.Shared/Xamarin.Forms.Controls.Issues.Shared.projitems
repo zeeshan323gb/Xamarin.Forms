@@ -388,6 +388,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla51657.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla42996.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla40696.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla42234.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla53362.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla45874.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransparentOverlayTests.cs" />
