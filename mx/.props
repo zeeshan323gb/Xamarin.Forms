@@ -5,6 +5,10 @@
   xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
 >
   <Import Project="$(MxbuildDir)root.props"/>
+  <PropertyGroup>
+    <AndroidSdkDirectory>$(LfxDir)sdk\android</AndroidSdkDirectory>
+    <JavaSdkDirectory>$(LfxDir)sdk\java</JavaSdkDirectory>
+  </PropertyGroup>
 
   <!--version-->
   <PropertyGroup>
