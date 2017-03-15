@@ -117,7 +117,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public void Update(UITableView tableView, Cell cell, UITableViewCell nativeCell)
 		{
-			var parentListView = cell.RealParent as IListViewController;
+			var parentListView = (ListView)cell.RealParent;
 			var recycling = parentListView != null && parentListView.CachingStrategy == ListViewCachingStrategy.RecycleElement;
 			if (_cell != cell && recycling)
 			{
@@ -448,7 +448,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (e.PropertyName == "HasContextActions")
 			{
-				var parentListView = _cell.RealParent as IListViewController;
+				var parentListView = (ListView)_cell.RealParent;
 				var recycling = parentListView != null && parentListView.CachingStrategy == ListViewCachingStrategy.RecycleElement;
 				if (!recycling)
 					ReloadRow();
@@ -457,7 +457,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnContextItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			var parentListView = _cell.RealParent as IListViewController;
+			var parentListView = (ListView)_cell.RealParent;
 			var recycling = parentListView != null && parentListView.CachingStrategy == ListViewCachingStrategy.RecycleElement;
 			if (recycling)
 				Update(_tableView, _cell, ContentCell);
@@ -468,7 +468,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnMenuItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			var parentListView = _cell.RealParent as IListViewController;
+			var parentListView = (ListView)_cell.RealParent;
 			var recycling = parentListView != null && parentListView.CachingStrategy == ListViewCachingStrategy.RecycleElement;
 			if (recycling)
 				Update(_tableView, _cell, ContentCell);

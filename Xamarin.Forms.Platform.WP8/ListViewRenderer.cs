@@ -194,7 +194,6 @@ namespace Xamarin.Forms.Platform.WinPhone
 		System.Windows.Controls.ProgressBar _progressBar;
 
 		ViewportControl _viewport;
-		IListViewController Controller => Element;
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
 
 		public override SizeRequest GetDesiredSize(double widthConstraint, double heightConstraint)
@@ -228,7 +227,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 		{
 			base.OnElementChanged(e);
 
-			Controller.ScrollToRequested += OnScrollToRequested;
+			Element.ScrollToRequested += OnScrollToRequested;
 
 			if (Element.SelectedItem != null)
 				_itemNeedsSelecting = true;
@@ -472,10 +471,10 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 			if (Element.IsGroupingEnabled)
 			{
-				Controller.NotifyRowTapped(parentCell.GetIndex<ItemsView<Cell>, Cell>(), cell.GetIndex<ItemsView<Cell>, Cell>(), null);
+				Element.NotifyRowTapped(parentCell.GetIndex<ItemsView<Cell>, Cell>(), cell.GetIndex<ItemsView<Cell>, Cell>(), null);
 			}
 			else
-				Controller.NotifyRowTapped(cell.GetIndex<ItemsView<Cell>, Cell>(), null);
+				Element.NotifyRowTapped(cell.GetIndex<ItemsView<Cell>, Cell>(), null);
 		}
 
 		void OnNativeSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -499,22 +498,22 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 		void OnPullToRefreshCanceled(object sender, EventArgs args)
 		{
-			if (Element.IsPullToRefreshEnabled && Controller.RefreshAllowed)
+			if (Element.IsPullToRefreshEnabled && Element.RefreshAllowed)
 				_progressBar.Visibility = Visibility.Collapsed;
 		}
 
 		void OnPullToRefreshCompleted(object sender, EventArgs args)
 		{
-			if (Element.IsPullToRefreshEnabled && Controller.RefreshAllowed)
+			if (Element.IsPullToRefreshEnabled && Element.RefreshAllowed)
 			{
 				_progressBar.IsIndeterminate = true;
-				Controller.SendRefreshing();
+				Element.SendRefreshing();
 			}
 		}
 
 		void OnPullToRefreshStarted(object sender, EventArgs args)
 		{
-			if (Element.IsPullToRefreshEnabled && Controller.RefreshAllowed)
+			if (Element.IsPullToRefreshEnabled && Element.RefreshAllowed)
 			{
 				_progressBar.Visibility = Visibility.Visible;
 				_progressBar.IsIndeterminate = false;
@@ -524,7 +523,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 		void OnPullToRefreshStatusUpdated(object sender, EventArgs eventArgs)
 		{
-			if (Element.IsPullToRefreshEnabled && Controller.RefreshAllowed)
+			if (Element.IsPullToRefreshEnabled && Element.RefreshAllowed)
 				_progressBar.Value = Math.Max(0, Math.Min(1, _listBox.PullToRefreshStatus));
 		}
 
@@ -688,12 +687,12 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 		void UpdateFooter()
 		{
-			Control.ListFooter = Controller.FooterElement;
+			Control.ListFooter = Element.FooterElement;
 		}
 
 		void UpdateHeader()
 		{
-			Control.ListHeader = Controller.HeaderElement;
+			Control.ListHeader = Element.HeaderElement;
 		}
 
 		void UpdateIsRefreshing()
@@ -706,7 +705,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 			else
 			{
 				_progressBar.IsIndeterminate = false;
-				_progressBar.Visibility = _listBox.IsInPullToRefresh && Element.IsPullToRefreshEnabled && Controller.RefreshAllowed ? Visibility.Visible : Visibility.Collapsed;
+				_progressBar.Visibility = _listBox.IsInPullToRefresh && Element.IsPullToRefreshEnabled && Element.RefreshAllowed ? Visibility.Visible : Visibility.Collapsed;
 			}
 		}
 

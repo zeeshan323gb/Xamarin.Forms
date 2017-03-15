@@ -18,8 +18,6 @@ namespace Xamarin.Forms.Platform.MacOS
 		readonly NSTableView _nsTableView;
 		protected readonly ListView List;
 
-		IListViewController Controller => List;
-
 		ITemplatedItemsView<Cell> TemplatedItemsView => List;
 
 		bool _selectionFromNative;
@@ -63,7 +61,7 @@ namespace Xamarin.Forms.Platform.MacOS
 				return;
 
 			_selectionFromNative = true;
-			Controller.NotifyRowTapped((int)indexPath.Section, (int)indexPath.Item, cell);
+			List.NotifyRowTapped((int)indexPath.Section, (int)indexPath.Item, cell);
 		}
 
 
@@ -158,7 +156,7 @@ namespace Xamarin.Forms.Platform.MacOS
 
 			NSView nativeCell;
 
-			var cachingStrategy = Controller.CachingStrategy;
+			var cachingStrategy = List.CachingStrategy;
 			if (cachingStrategy == ListViewCachingStrategy.RetainElement)
 			{
 				cell = GetCellForPath(indexPath, isHeader);

@@ -157,7 +157,7 @@ namespace Xamarin.Forms
 		{
 			OnAppearing();
 
-			var container = RealParent as IListViewController;
+			var container = RealParent as ListView;
 			if (container != null)
 				container.SendCellAppearing(this);
 		}
@@ -167,7 +167,7 @@ namespace Xamarin.Forms
 		{
 			OnDisappearing();
 
-			var container = RealParent as IListViewController;
+			var container = RealParent as ListView;
 			if (container != null)
 				container.SendCellDisappearing(this);
 		}

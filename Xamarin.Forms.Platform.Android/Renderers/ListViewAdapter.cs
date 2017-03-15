@@ -33,7 +33,6 @@ namespace Xamarin.Forms.Platform.Android
 		AView _lastSelected;
 		WeakReference<Cell> _selectedCell;
 
-		IListViewController Controller => _listView;
 		ITemplatedItemsView<Cell> TemplatedItemsView => _listView;
 
 		public ListViewAdapter(Context context, AListView realListView, ListView listView) : base(context)
@@ -175,7 +174,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			Performance.Start();
 
-			ListViewCachingStrategy cachingStrategy = Controller.CachingStrategy;
+			ListViewCachingStrategy cachingStrategy = _listView.CachingStrategy;
 			var nextCellIsHeader = false;
 			if (cachingStrategy == ListViewCachingStrategy.RetainElement || convertView == null)
 			{
@@ -310,7 +309,7 @@ namespace Xamarin.Forms.Platform.Android
 				return leftOver > 0;
 			}
 
-			if (((IListViewController)list).CachingStrategy == ListViewCachingStrategy.RecycleElement)
+			if (list.CachingStrategy == ListViewCachingStrategy.RecycleElement)
 			{
 				if (_enabledCheckCell == null)
 					_enabledCheckCell = GetCellForPosition(position);
@@ -362,7 +361,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			Cell cell = null;
 
-			if (Controller.CachingStrategy == ListViewCachingStrategy.RecycleElement)
+			if (_listView.CachingStrategy == ListViewCachingStrategy.RecycleElement)
 			{
 				AView cellOwner = view;
 				var layout = cellOwner as ConditionalFocusLayout;
@@ -380,7 +379,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (_lastSelected != view)
 				_fromNative = true;
 			Select(position, view);
-			Controller.NotifyRowTapped(position, cell);
+			_listView.NotifyRowTapped(position, cell);
 		}
 
 		// TODO: We can optimize this by storing the last position, group index and global index

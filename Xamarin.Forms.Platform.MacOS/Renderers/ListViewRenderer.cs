@@ -16,8 +16,6 @@ namespace Xamarin.Forms.Platform.MacOS
 		IVisualElementRenderer _headerRenderer;
 		IVisualElementRenderer _footerRenderer;
 
-		IListViewController Controller => Element;
-
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
 
 		public const int DefaultRowHeight = 44;
@@ -91,8 +89,7 @@ namespace Xamarin.Forms.Platform.MacOS
 		{
 			if (e.OldElement != null)
 			{
-				var controller = (IListViewController)e.OldElement;
-				controller.ScrollToRequested -= OnScrollToRequested;
+				e.OldElement.ScrollToRequested -= OnScrollToRequested;
 
 				var templatedItems = ((ITemplatedItemsView<Cell>)e.OldElement).TemplatedItems;
 				templatedItems.CollectionChanged -= OnCollectionChanged;
@@ -112,8 +109,7 @@ namespace Xamarin.Forms.Platform.MacOS
 					SetNativeControl(scroller);
 				}
 
-				var controller = (IListViewController)e.NewElement;
-				controller.ScrollToRequested += OnScrollToRequested;
+				e.NewElement.ScrollToRequested += OnScrollToRequested;
 
 				var templatedItems = ((ITemplatedItemsView<Cell>)e.NewElement).TemplatedItems;
 				templatedItems.CollectionChanged += OnCollectionChanged;
@@ -175,7 +171,7 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		void UpdateHeader()
 		{
-			var header = Controller.HeaderElement;
+			var header = Element.HeaderElement;
 			var headerView = (View)header;
 
 			if (headerView != null)

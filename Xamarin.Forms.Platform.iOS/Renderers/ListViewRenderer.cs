@@ -26,7 +26,6 @@ namespace Xamarin.Forms.Platform.iOS
 		bool _shouldEstimateRowHeight = true;
 
 		FormsUITableViewController _tableViewController;
-		IListViewController Controller => Element;
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
 		public override UIViewController ViewController => _tableViewController;
 		bool _disposed;
@@ -156,12 +155,12 @@ namespace Xamarin.Forms.Platform.iOS
 					_footerRenderer = null;
 				}
 
-				var headerView = Controller?.HeaderElement as VisualElement;
+				var headerView = Element?.HeaderElement as VisualElement;
 				if (headerView != null)
 					headerView.MeasureInvalidated -= OnHeaderMeasureInvalidated;
 				Control?.TableHeaderView?.Dispose();
 
-				var footerView = Controller?.FooterElement as VisualElement;
+				var footerView = Element?.FooterElement as VisualElement;
 				if (footerView != null)
 					footerView.MeasureInvalidated -= OnFooterMeasureInvalidated;
 				Control?.TableFooterView?.Dispose();
@@ -178,16 +177,15 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (e.OldElement != null)
 			{
-				var controller = (IListViewController)e.OldElement;
-				var headerView = (VisualElement)controller.HeaderElement;
+				var headerView = (VisualElement)e.OldElement.HeaderElement;
 				if (headerView != null)
 					headerView.MeasureInvalidated -= OnHeaderMeasureInvalidated;
 
-				var footerView = (VisualElement)controller.FooterElement;
+				var footerView = (VisualElement)e.OldElement.FooterElement;
 				if (footerView != null)
 					footerView.MeasureInvalidated -= OnFooterMeasureInvalidated;
 
-				controller.ScrollToRequested -= OnScrollToRequested;
+				e.OldElement.ScrollToRequested -= OnScrollToRequested;
 				var templatedItems = ((ITemplatedItemsView<Cell>)e.OldElement).TemplatedItems;
 
 				templatedItems.CollectionChanged -= OnCollectionChanged;
@@ -212,9 +210,7 @@ namespace Xamarin.Forms.Platform.iOS
 				}
 				_shouldEstimateRowHeight = true;
 
-				var controller = (IListViewController)e.NewElement;
-
-				controller.ScrollToRequested += OnScrollToRequested;
+				e.NewElement.ScrollToRequested += OnScrollToRequested;
 				var templatedItems = ((ITemplatedItemsView<Cell>)e.NewElement).TemplatedItems;
 
 				templatedItems.CollectionChanged += OnCollectionChanged;
@@ -395,7 +391,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void UpdateFooter()
 		{
-			var footer = Controller.FooterElement;
+			var footer = Element.FooterElement;
 			var footerView = (View)footer;
 
 			if (footerView != null)
@@ -441,7 +437,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void UpdateHeader()
 		{
-			var header = Controller.HeaderElement;
+			var header = Element.HeaderElement;
 			var headerView = (View)header;
 
 			if (headerView != null)
@@ -574,7 +570,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (_tableViewController != null)
 			{
-				var isPullToRequestEnabled = Element.IsPullToRefreshEnabled && Controller.RefreshAllowed;
+				var isPullToRequestEnabled = Element.IsPullToRefreshEnabled && Element.RefreshAllowed;
 				_tableViewController.UpdatePullToRefreshEnabled(isPullToRequestEnabled);
 			}
 		}
@@ -729,7 +725,6 @@ namespace Xamarin.Forms.Platform.iOS
 			UITableView _uiTableView;
 			FormsUITableViewController _uiTableViewController;
 			protected ListView List;
-			IListViewController Controller => List;
 			protected ITemplatedItemsView<Cell> TemplatedItemsView => List;
 			bool _isDragging;
 			bool _selectionFromNative;
@@ -781,7 +776,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				UITableViewCell nativeCell = null;
 
-				var cachingStrategy = Controller.CachingStrategy;
+				var cachingStrategy = List.CachingStrategy;
 				if (cachingStrategy == ListViewCachingStrategy.RetainElement)
 				{
 					var cell = GetCellForPath(indexPath);
@@ -909,7 +904,7 @@ namespace Xamarin.Forms.Platform.iOS
 					return;
 
 				Cell formsCell = null;
-				if (Controller.CachingStrategy == ListViewCachingStrategy.RecycleElement)
+				if (List.CachingStrategy == ListViewCachingStrategy.RecycleElement)
 					formsCell = (Cell)((INativeElementView)cell).Element;
 
 				SetCellBackgroundColor(cell, UIColor.Clear);
@@ -918,7 +913,7 @@ namespace Xamarin.Forms.Platform.iOS
 					_selectionFromNative = true;
 
 				tableView.EndEditing(true);
-				Controller.NotifyRowTapped(indexPath.Section, indexPath.Row, formsCell);
+				List.NotifyRowTapped(indexPath.Section, indexPath.Row, formsCell);
 			}
 
 			public override nint RowsInSection(UITableView tableview, nint section)
@@ -1094,7 +1089,6 @@ namespace Xamarin.Forms.Platform.iOS
 	internal class FormsUITableViewController : UITableViewController
 	{
 		ListView _list;
-		IListViewController Controller => _list;
 		UIRefreshControl _refresh;
 
 		bool _refreshAdded;
@@ -1212,7 +1206,7 @@ namespace Xamarin.Forms.Platform.iOS
 		void OnRefreshingChanged(object sender, EventArgs eventArgs)
 		{
 			if (_refresh.Refreshing)
-				Controller.SendRefreshing();
+				_list.SendRefreshing();
 		}
 
 		void RemoveRefresh()

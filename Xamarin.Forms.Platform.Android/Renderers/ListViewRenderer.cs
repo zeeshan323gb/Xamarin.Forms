@@ -22,7 +22,6 @@ namespace Xamarin.Forms.Platform.Android
 		ScrollToRequestedEventArgs _pendingScrollTo;
 
 		SwipeRefreshLayout _refresh;
-		IListViewController Controller => Element;
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
 
 		public ListViewRenderer()
@@ -32,8 +31,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void SwipeRefreshLayout.IOnRefreshListener.OnRefresh()
 		{
-			IListViewController controller = Element;
-			controller.SendRefreshing();
+			Element.SendRefreshing();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -69,7 +67,7 @@ namespace Xamarin.Forms.Platform.Android
 					_adapter = null;
 				}
 
-				Controller.ScrollToRequested -= OnScrollToRequested;
+				Element.ScrollToRequested -= OnScrollToRequested;
 			}
 
 			base.Dispose(disposing);
@@ -108,7 +106,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (e.OldElement != null)
 			{
-				((IListViewController)e.OldElement).ScrollToRequested -= OnScrollToRequested;
+				e.OldElement.ScrollToRequested -= OnScrollToRequested;
 
 				if (_adapter != null)
 				{
@@ -135,7 +133,7 @@ namespace Xamarin.Forms.Platform.Android
 					nativeListView.AddFooterView(_footerView, null, false);
 				}
 
-				((IListViewController)e.NewElement).ScrollToRequested += OnScrollToRequested;
+				e.NewElement.ScrollToRequested += OnScrollToRequested;
 
 				nativeListView.DividerHeight = 0;
 				nativeListView.Focusable = false;
@@ -259,7 +257,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateFooter()
 		{
-			var footer = (VisualElement)Controller.FooterElement;
+			var footer = (VisualElement)Element.FooterElement;
 			if (_footerRenderer != null && (footer == null || Registrar.Registered.GetHandlerType(footer.GetType()) != _footerRenderer.GetType()))
 			{
 				if (_footerView != null)
@@ -285,7 +283,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateHeader()
 		{
-			var header = (VisualElement)Controller.HeaderElement;
+			var header = (VisualElement)Element.HeaderElement;
 			if (_headerRenderer != null && (header == null || Registrar.Registered.GetHandlerType(header.GetType()) != _headerRenderer.GetType()))
 			{
 				if (_headerView != null)
@@ -330,7 +328,7 @@ namespace Xamarin.Forms.Platform.Android
 		void UpdateIsSwipeToRefreshEnabled()
 		{
 			if (_refresh != null)
-				_refresh.Enabled = Element.IsPullToRefreshEnabled && (Element as IListViewController).RefreshAllowed;
+				_refresh.Enabled = Element.IsPullToRefreshEnabled && Element.RefreshAllowed;
 		}
 
 		void UpdateFastScrollEnabled()
