@@ -90,7 +90,7 @@ namespace Xamarin.Forms.Platform.Android
 			else if (_dialog != null)
 			{
 				_dialog.Hide();
-				((IElementController)Element).SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
+				Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
 				Control.ClearFocus();
 
 				if (Forms.IsLollipopOrNewer)

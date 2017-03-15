@@ -200,7 +200,7 @@ namespace Xamarin.Forms.Platform.WinRT
 		void OnUserClosedPopover(object sender, EventArgs e)
 		{
 			if (Element != null)
-				((IElementController)Element).SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, false);
+				Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, false);
 		}
 
 		void SetDetail(Page detailPage)

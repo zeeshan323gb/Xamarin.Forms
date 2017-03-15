@@ -227,7 +227,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void OnIsPaneOpenChanged(DependencyObject sender, DependencyProperty dp)
 		{
-			((IElementController)Element).SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, Control.IsPaneOpen);
+			Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, Control.IsPaneOpen);
 			UpdateBounds();
 		}
 

@@ -44,7 +44,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnNativeToggled(object sender, RoutedEventArgs routedEventArgs)
 		{
-			((IElementController)Element).SetValueFromRenderer(Switch.IsToggledProperty, Control.IsOn);
+			Element.SetValueFromRenderer(Switch.IsToggledProperty, Control.IsOn);
 		}
 	}
 }

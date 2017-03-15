@@ -17,8 +17,6 @@ namespace Xamarin.Forms.Platform.Android
 			AutoPackage = false;
 		}
 
-        IEditorController ElementController => Element;
-
 		void ITextWatcher.AfterTextChanged(IEditable s)
 		{
 		}
@@ -33,7 +31,7 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 
 			if (Element.Text != s.ToString())
-				((IElementController)Element).SetValueFromRenderer(Editor.TextProperty, s.ToString());
+				Element.SetValueFromRenderer(Editor.TextProperty, s.ToString());
 		}
 
 		protected override EditorEditText CreateNativeControl()
@@ -56,7 +54,7 @@ namespace Xamarin.Forms.Platform.Android
 				edit.AddTextChangedListener(this);
 				edit.OnBackKeyboardPressed += (sender, args) =>
 				{
-                    ElementController.SendCompleted();
+                    Element.SendCompleted();
 					edit.ClearFocus();
 				};
 			}
@@ -100,7 +98,7 @@ namespace Xamarin.Forms.Platform.Android
 		internal override void OnNativeFocusChanged(bool hasFocus)
 		{
 			if (Element.IsFocused && !hasFocus) // Editor has requested an unfocus, fire completed event
-                ElementController.SendCompleted();
+                Element.SendCompleted();
 		}
 
 		void UpdateFont()

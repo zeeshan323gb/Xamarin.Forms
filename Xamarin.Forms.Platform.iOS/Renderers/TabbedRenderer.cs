@@ -21,7 +21,6 @@ namespace Xamarin.Forms.Platform.iOS
 		Size _queuedSize;
 
 		IPageController PageController => Element as IPageController;
-		IElementController ElementController => Element as IElementController;
 
 		public override UIViewController SelectedViewController
 		{
@@ -266,9 +265,9 @@ namespace Xamarin.Forms.Platform.iOS
 		void SetControllers()
 		{
 			var list = new List<UIViewController>();
-			for (var i = 0; i < ElementController.LogicalChildren.Count; i++)
+			for (var i = 0; i < Element.LogicalChildren.Count; i++)
 			{
-				var child = ElementController.LogicalChildren[i];
+				var child = Element.LogicalChildren[i];
 				var v = child as VisualElement;
 				if (v == null)
 					continue;

@@ -58,7 +58,7 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		void OnButtonActivated(object sender, EventArgs eventArgs)
 		{
-			((IButtonController)Element)?.SendClicked();
+			Element?.SendClicked();
 		}
 
 		void UpdateBackgroundVisibility()

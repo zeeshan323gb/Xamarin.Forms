@@ -107,7 +107,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnQueryChanged(SearchBox sender, SearchBoxQueryChangedEventArgs e)
 		{
-			((IElementController)Element).SetValueFromRenderer(SearchBar.TextProperty, e.QueryText);
+			Element.SetValueFromRenderer(SearchBar.TextProperty, e.QueryText);
 		}
 
 		void UpdateText()

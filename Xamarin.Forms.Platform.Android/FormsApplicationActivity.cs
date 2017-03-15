@@ -103,7 +103,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (application == null)
 				throw new ArgumentNullException("application");
 
-			(application as IApplicationController)?.SetAppIndexingProvider(new AndroidAppIndexProvider(this));
+			application.SetAppIndexingProvider(new AndroidAppIndexProvider(this));
 
 			_application = application;
 			Xamarin.Forms.Application.SetCurrentApplication(application);

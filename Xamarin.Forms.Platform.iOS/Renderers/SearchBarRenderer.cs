@@ -15,8 +15,6 @@ namespace Xamarin.Forms.Platform.iOS
 		UIColor _defaultTintColor;
 		UITextField _textField;
 
-		IElementController ElementController => Element as IElementController;
-
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing)
@@ -121,18 +119,18 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnCancelClicked(object sender, EventArgs args)
 		{
-			ElementController.SetValueFromRenderer(SearchBar.TextProperty, null);
+			Element.SetValueFromRenderer(SearchBar.TextProperty, null);
 			Control.ResignFirstResponder();
 		}
 
 		void OnEditingEnded(object sender, EventArgs e)
 		{
-			ElementController?.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
+			Element?.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
 		}
 
 		void OnEditingStarted(object sender, EventArgs e)
 		{
-			ElementController?.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
+			Element?.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
 
 		void OnSearchButtonClicked(object sender, EventArgs e)
@@ -143,7 +141,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnTextChanged(object sender, UISearchBarTextChangedEventArgs a)
 		{
-			ElementController.SetValueFromRenderer(SearchBar.TextProperty, Control.Text);
+			Element.SetValueFromRenderer(SearchBar.TextProperty, Control.Text);
 		}
 
 		void UpdateAlignment()

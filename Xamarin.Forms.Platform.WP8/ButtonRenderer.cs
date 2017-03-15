@@ -63,13 +63,13 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 		void HandleButtonClick(object sender, RoutedEventArgs e)
 		{
-			((IButtonController)Element)?.SendPressed();
+			Element?.SendPressed();
 		}
 
 		void HandleButtonTap(object sender, GestureEventArgs e)
 		{
-			((IButtonController)Element)?.SendReleased();
-			((IButtonController)Element)?.SendClicked();
+			Element?.SendReleased();
+			Element?.SendClicked();
 		}
 
 		void UpdateBackground()

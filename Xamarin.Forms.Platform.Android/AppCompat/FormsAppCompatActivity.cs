@@ -57,8 +57,6 @@ namespace Xamarin.Forms.Platform.Android
 			_currentState = AndroidApplicationLifecycleState.Uninitialized;
 		}
 
-		IApplicationController Controller => _application;
-
 		public event EventHandler ConfigurationChanged;
 
 		int IStartActivityForResult.RegisterActivityResultCallback(Action<Result, Intent> callback)
@@ -128,7 +126,7 @@ namespace Xamarin.Forms.Platform.Android
 				throw new ArgumentNullException("application");
 
 			_application = application;
-			(application as IApplicationController)?.SetAppIndexingProvider(new AndroidAppIndexProvider(this));
+			application.SetAppIndexingProvider(new AndroidAppIndexProvider(this));
 			Xamarin.Forms.Application.SetCurrentApplication(application);
 
 			SetSoftInputMode();

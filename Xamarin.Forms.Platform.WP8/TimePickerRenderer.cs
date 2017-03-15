@@ -63,7 +63,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 		void TimePickerOnValueChanged(object sender, DateTimeValueChangedEventArgs dateTimeValueChangedEventArgs)
 		{
 			if (Control.Value != null)
-				((IElementController)Element).SetValueFromRenderer(TimePicker.TimeProperty, Control.Value.Value - DateTime.Today);
+				Element.SetValueFromRenderer(TimePicker.TimeProperty, Control.Value.Value - DateTime.Today);
 		}
 
 		void UpdateFormatString()

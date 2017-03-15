@@ -200,7 +200,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 				_renderer._ignoreSourceChanges = true;
 				var url = GetCurrentUrl();
-				((IElementController)WebView).SetValueFromRenderer(WebView.SourceProperty, new UrlWebViewSource { Url = url });
+				WebView.SetValueFromRenderer(WebView.SourceProperty, new UrlWebViewSource { Url = url });
 				_renderer._ignoreSourceChanges = false;
 
 				var args = new WebNavigatedEventArgs(_lastEvent, WebView.Source, url, WebNavigationResult.Success);

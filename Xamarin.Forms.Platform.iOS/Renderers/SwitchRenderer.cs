@@ -36,7 +36,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnControlValueChanged(object sender, EventArgs e)
 		{
-			((IElementController)Element).SetValueFromRenderer(Switch.IsToggledProperty, Control.On);
+			Element.SetValueFromRenderer(Switch.IsToggledProperty, Control.On);
 		}
 
 		void OnElementToggled(object sender, EventArgs e)

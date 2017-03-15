@@ -361,7 +361,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			if (_isPresentingFromCore)
 				return;
 			if (Presented != Element.IsPresented)
-				((IElementController)Element).SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, Presented);
+				Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, Presented);
 		}
 
 		void UpdateMaster()

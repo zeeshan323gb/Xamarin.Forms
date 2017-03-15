@@ -84,7 +84,7 @@ namespace Xamarin.Forms.Platform.UWP
 			if (e.Reason == AutoSuggestionBoxTextChangeReason.ProgrammaticChange)
 				return;
 
-			((IElementController)Element).SetValueFromRenderer(SearchBar.TextProperty, sender.Text);
+			Element.SetValueFromRenderer(SearchBar.TextProperty, sender.Text);
 		}
 
 		void UpdateAlignment()

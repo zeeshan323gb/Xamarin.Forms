@@ -8,7 +8,6 @@ namespace Xamarin.Forms.Platform.iOS
 	public class EditorRenderer : ViewRenderer<Editor, UITextView>
 	{
 		bool _disposed;
-        IEditorController ElementController => Element;
 
         protected override void Dispose(bool disposing)
 		{
@@ -51,7 +50,7 @@ namespace Xamarin.Forms.Platform.iOS
 					var doneButton = new UIBarButtonItem(UIBarButtonSystemItem.Done, (o, a) =>
 					{
 						Control.ResignFirstResponder();
-                        ElementController.SendCompleted();
+                        Element.SendCompleted();
 					});
 					accessoryView.SetItems(new[] { spacer, doneButton }, false);
 					Control.InputAccessoryView = accessoryView;
@@ -91,21 +90,21 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void HandleChanged(object sender, EventArgs e)
 		{
-			ElementController.SetValueFromRenderer(Editor.TextProperty, Control.Text);
+			Element.SetValueFromRenderer(Editor.TextProperty, Control.Text);
 		}
 
 		void OnEnded(object sender, EventArgs eventArgs)
 		{
 			if (Control.Text != Element.Text)
-				ElementController.SetValueFromRenderer(Editor.TextProperty, Control.Text);
+				Element.SetValueFromRenderer(Editor.TextProperty, Control.Text);
 
 			Element.SetValue(VisualElement.IsFocusedPropertyKey, false);
-			ElementController.SendCompleted();
+			Element.SendCompleted();
 		}
 
 		void OnStarted(object sender, EventArgs eventArgs)
 		{
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
 
 		void UpdateEditable()

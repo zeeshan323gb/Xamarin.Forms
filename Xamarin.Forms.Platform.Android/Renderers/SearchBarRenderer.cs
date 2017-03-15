@@ -25,7 +25,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool SearchView.IOnQueryTextListener.OnQueryTextChange(string newText)
 		{
-			((IElementController)Element).SetValueFromRenderer(SearchBar.TextProperty, newText);
+			Element.SetValueFromRenderer(SearchBar.TextProperty, newText);
 
 			return true;
 		}

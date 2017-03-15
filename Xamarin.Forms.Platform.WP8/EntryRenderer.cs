@@ -183,7 +183,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 		void TextBoxOnKeyUp(object sender, KeyEventArgs keyEventArgs)
 		{
 			if (keyEventArgs.Key == Key.Enter)
-				((IEntryController)Element).SendCompleted();
+				Element.SendCompleted();
 		}
 
 		void TextBoxOnTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs textChangedEventArgs)
@@ -191,7 +191,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 			// Signal to the UpdateText method that the change to TextProperty doesn't need to update the control
 			// This prevents the cursor position from getting lost
 			_ignoreTextChange = true;
-			((IElementController)Element).SetValueFromRenderer(Entry.TextProperty, Control.Text);
+			Element.SetValueFromRenderer(Entry.TextProperty, Control.Text);
 
 			// If an Entry.TextChanged handler modified the value of the Entry's text, the values could now be 
 			// out-of-sync; re-sync them and force the TextBox cursor to the end of the text

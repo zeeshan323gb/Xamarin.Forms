@@ -36,10 +36,6 @@ namespace Xamarin.Forms.Platform.MacOS
 		bool _disposed;
 		NSColor _defaultTextColor;
 
-		IElementController ElementController => Element;
-
-		IEntryController EntryController => Element;
-
 		protected override void OnElementChanged(ElementChangedEventArgs<Entry> e)
 		{
 			base.OnElementChanged(e);
@@ -131,23 +127,23 @@ namespace Xamarin.Forms.Platform.MacOS
 		}
 		void TextFieldFocusChanged(object sender, BoolEventArgs e)
 		{
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, e.Value);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, e.Value);
 		}
 
 		void OnEditingBegan(object sender, EventArgs e)
 		{
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
 
 		void OnChanged(object sender, EventArgs eventArgs)
 		{
-			ElementController.SetValueFromRenderer(Entry.TextProperty, Control.StringValue);
+			Element.SetValueFromRenderer(Entry.TextProperty, Control.StringValue);
 		}
 
 		void OnEditingEnded(object sender, EventArgs e)
 		{
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
-			EntryController?.SendCompleted();
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
+			Element?.SendCompleted();
 		}
 
 		void UpdateAlignment()

@@ -56,7 +56,6 @@ namespace Xamarin.Forms.Platform.iOS
 		VisualElementTracker _tracker;
 
 		IPageController PageController => Element as IPageController;
-		IElementController ElementController => Element as IElementController;
 
 		protected MasterDetailPage MasterDetailPage => _masterDetailPage ?? (_masterDetailPage = (MasterDetailPage)Element);
 
@@ -292,14 +291,14 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			_masterVisible = true;
 			if (MasterDetailPageController.CanChangeIsPresented)
-				ElementController.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, true);
+				Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, true);
 		}
 
 		void MasterControllerWillDisappear(object sender, EventArgs e)
 		{
 			_masterVisible = false;
 			if (MasterDetailPageController.CanChangeIsPresented)
-				ElementController.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, false);
+				Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, false);
 		}
 
 		void PerformButtonSelector()

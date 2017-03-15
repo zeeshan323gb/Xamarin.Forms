@@ -205,7 +205,7 @@ if(bases.length == 0){
 		void SendNavigated(UrlWebViewSource source, WebNavigationEvent evnt, WebNavigationResult result)
 		{
 			_updating = true;
-			((IElementController)Element).SetValueFromRenderer(WebView.SourceProperty, source);
+			Element.SetValueFromRenderer(WebView.SourceProperty, source);
 			_updating = false;
 
 			ElementController.SendNavigated(new WebNavigatedEventArgs(evnt, source, source.Url, result));

@@ -101,13 +101,13 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnButtonClick(object sender, RoutedEventArgs e)
 		{
-			((IButtonController)Element)?.SendReleased();
-			((IButtonController)Element)?.SendClicked();
+			Element?.SendReleased();
+			Element?.SendClicked();
 		}
 
 		void OnPointerPressed(object sender, RoutedEventArgs e)
 		{
-			((IButtonController)Element)?.SendPressed();
+			Element?.SendPressed();
 		}
 
 			void UpdateBackground()

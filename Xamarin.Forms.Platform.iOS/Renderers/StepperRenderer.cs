@@ -50,7 +50,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnValueChanged(object sender, EventArgs e)
 		{
-			((IElementController)Element).SetValueFromRenderer(Stepper.ValueProperty, Control.Value);
+			Element.SetValueFromRenderer(Stepper.ValueProperty, Control.Value);
 		}
 
 		void UpdateIncrement()

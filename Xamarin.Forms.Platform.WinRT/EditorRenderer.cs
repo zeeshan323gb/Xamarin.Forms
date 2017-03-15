@@ -17,8 +17,6 @@ namespace Xamarin.Forms.Platform.WinRT
 		bool _fontApplied;
 		Brush _backgroundColorFocusedDefaultBrush;
 
-        IEditorController ElementController => Element;
-
         protected override void OnElementChanged(ElementChangedEventArgs<Editor> e)
 		{
 			if (e.NewElement != null)
@@ -86,7 +84,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnLostFocus(object sender, RoutedEventArgs e)
 		{
-            ElementController.SendCompleted();
+            Element.SendCompleted();
 		}
 
 		protected override void UpdateBackgroundColor()

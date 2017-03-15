@@ -93,7 +93,7 @@ namespace Xamarin.Forms.Platform.Android
 		void UpdateCurrentItem()
 		{
 			int index = CarouselPage.GetIndex(Element.CurrentPage);
-			if (index < 0 || index >= ((IElementController)Element).LogicalChildren.Count)
+			if (index < 0 || index >= Element.LogicalChildren.Count)
 				return;
 
 			_viewPager.CurrentItem = index;

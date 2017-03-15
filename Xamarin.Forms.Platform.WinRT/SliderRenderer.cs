@@ -73,7 +73,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnNativeValueChanged(object sender, RangeBaseValueChangedEventArgs e)
 		{
-			((IElementController)Element).SetValueFromRenderer(Slider.ValueProperty, e.NewValue);
+			Element.SetValueFromRenderer(Slider.ValueProperty, e.NewValue);
 		}
 	}
 }

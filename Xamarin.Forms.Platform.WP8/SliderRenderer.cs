@@ -37,7 +37,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 		void HandleValueChanged(object sender, RoutedPropertyChangedEventArgs<double> routedPropertyChangedEventArgs)
 		{
-			((IElementController)Element).SetValueFromRenderer(Slider.ValueProperty, Control.Value);
+			Element.SetValueFromRenderer(Slider.ValueProperty, Control.Value);
 		}
 	}
 }

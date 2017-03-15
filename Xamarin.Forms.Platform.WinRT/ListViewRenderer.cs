@@ -546,7 +546,7 @@ namespace Xamarin.Forms.Platform.WinRT
 		{
 			if (List.SelectedItem != null && Element.SelectedItem != List.SelectedItem)
 			{
-				((IElementController)Element).SetValueFromRenderer(ListView.SelectedItemProperty, List?.SelectedItem);
+				Element.SetValueFromRenderer(ListView.SelectedItemProperty, List?.SelectedItem);
 				OnElementItemSelected(null, new SelectedItemChangedEventArgs(Element?.SelectedItem));
 			}
 		}

@@ -28,7 +28,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				Control.ClearFocus();
 				v.HideKeyboard();
-				((IEntryController)Element).SendCompleted();
+				Element.SendCompleted();
 			}
 
 			return true;
@@ -47,7 +47,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (string.IsNullOrEmpty(Element.Text) && s.Length() == 0)
 				return;
 
-			((IElementController)Element).SetValueFromRenderer(Entry.TextProperty, s.ToString());
+			Element.SetValueFromRenderer(Entry.TextProperty, s.ToString());
 		}
 
 		protected override EntryEditText CreateNativeControl()

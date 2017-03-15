@@ -13,8 +13,6 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		bool _isDisposed;
 
-		IElementController ElementController => Renderer.Element as IElementController;
-
 		public VisualElementPackager(IVisualElementRenderer renderer)
 		{
 			if (renderer == null)
@@ -34,9 +32,9 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		public void Load()
 		{
-			for (var i = 0; i < ElementController.LogicalChildren.Count; i++)
+			for (var i = 0; i < Renderer.Element.LogicalChildren.Count; i++)
 			{
-				var child = ElementController.LogicalChildren[i] as VisualElement;
+				var child = Renderer.Element.LogicalChildren[i] as VisualElement;
 				if (child != null)
 					OnChildAdded(child);
 			}
@@ -91,12 +89,12 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		void EnsureChildrenOrder()
 		{
-			if (ElementController.LogicalChildren.Count == 0)
+			if (Renderer.Element.LogicalChildren.Count == 0)
 				return;
 
-			for (var z = 0; z < ElementController.LogicalChildren.Count; z++)
+			for (var z = 0; z < Renderer.Element.LogicalChildren.Count; z++)
 			{
-				var child = ElementController.LogicalChildren[z] as VisualElement;
+				var child = Renderer.Element.LogicalChildren[z] as VisualElement;
 				if (child == null)
 					continue;
 				var childRenderer = Platform.GetRenderer(child);
@@ -154,11 +152,9 @@ namespace Xamarin.Forms.Platform.MacOS
 				}
 				else
 				{
-					var elementController = ((IElementController)oldElement);
-
-					for (var i = 0; i < elementController.LogicalChildren.Count; i++)
+					for (var i = 0; i < oldElement.LogicalChildren.Count; i++)
 					{
-						var child = elementController.LogicalChildren[i] as VisualElement;
+						var child = oldElement.LogicalChildren[i] as VisualElement;
 						if (child != null)
 							OnChildRemoved(child);
 					}

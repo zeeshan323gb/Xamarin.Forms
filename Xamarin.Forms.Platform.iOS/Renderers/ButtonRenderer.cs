@@ -107,13 +107,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnButtonTouchUpInside(object sender, EventArgs eventArgs)
 		{
-			((IButtonController)Element)?.SendReleased();
-			((IButtonController)Element)?.SendClicked();
+			Element?.SendReleased();
+			Element?.SendClicked();
 		}
 
 		void OnButtonTouchDown(object sender, EventArgs eventArgs)
 		{
-			((IButtonController)Element)?.SendPressed();
+			Element?.SendPressed();
 		}
 
 		void UpdateBorder()

@@ -85,7 +85,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			else if (_dialog != null)
 			{
 				_dialog.Hide();
-				((IElementController)Element).SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
+				Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
 				Control.ClearFocus();
 				_dialog = null;
 			}
@@ -100,18 +100,18 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 				{
 					builder.SetTitle(model.Title ?? "");
 					string[] items = model.Items.ToArray();
-					builder.SetItems(items, (s, e) => ((IElementController)model).SetValueFromRenderer(Picker.SelectedIndexProperty, e.Which));
+					builder.SetItems(items, (s, e) => model.SetValueFromRenderer(Picker.SelectedIndexProperty, e.Which));
 
 					builder.SetNegativeButton(global::Android.Resource.String.Cancel, (o, args) => { });
 					
-					((IElementController)Element).SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
+					Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 
 					_dialog = builder.Create();
 				}
 				_dialog.SetCanceledOnTouchOutside(true);
 				_dialog.DismissEvent += (sender, args) =>
 				{
-					((IElementController)Element).SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
+					Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
 					_dialog.Dispose();
 					_dialog = null;
 				};

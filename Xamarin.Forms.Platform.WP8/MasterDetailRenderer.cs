@@ -124,7 +124,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 			Visible = !Visible;
 
-			((IElementController)Element).SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, Visible);
+			Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, Visible);
 		}
 
 		void HandleBackButtonPressed(object sender, BackButtonPressedEventArgs e)

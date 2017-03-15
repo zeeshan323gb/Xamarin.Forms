@@ -9,8 +9,6 @@ namespace Xamarin.Forms.Platform.WinPhone
 	{
 		bool _fontApplied;
 
-        IEditorController ElementController => Element;
-
         protected override void OnElementChanged(ElementChangedEventArgs<Editor> e)
 		{
 			base.OnElementChanged(e);
@@ -23,7 +21,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 			UpdateInputScope();
 			UpdateTextColor();
 
-			Control.LostFocus += (sender, args) => ElementController.SendCompleted();
+			Control.LostFocus += (sender, args) => Element.SendCompleted();
 
 			textBox.TextChanged += TextBoxOnTextChanged;
 		}
@@ -53,7 +51,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 
 		void TextBoxOnTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs textChangedEventArgs)
 		{
-			((IElementController)Element).SetValueFromRenderer(Editor.TextProperty, Control.Text);
+			Element.SetValueFromRenderer(Editor.TextProperty, Control.Text);
 		}
 
 		void UpdateFont()

@@ -63,7 +63,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnControlValueChanged(object sender, EventArgs eventArgs)
 		{
-			((IElementController)Element).SetValueFromRenderer(Slider.ValueProperty, Control.Value);
+			Element.SetValueFromRenderer(Slider.ValueProperty, Control.Value);
 		}
 
 		void UpdateMaximum()

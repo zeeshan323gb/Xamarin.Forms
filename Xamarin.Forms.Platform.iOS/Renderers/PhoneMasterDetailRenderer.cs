@@ -46,7 +46,7 @@ namespace Xamarin.Forms.Platform.iOS
 				else
 					RemoveClickOffView();
 
-				((IElementController)Element).SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, value);
+				Element.SetValueFromRenderer(MasterDetailPage.IsPresentedProperty, value);
 			}
 		}
 

@@ -119,7 +119,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			Application.SetCurrentApplication(application);
 			_application = application;
-			(application as IApplicationController)?.SetAppIndexingProvider(new IOSAppIndexingProvider());
+			application.SetAppIndexingProvider(new IOSAppIndexingProvider());
 
 			application.PropertyChanged += ApplicationOnPropertyChanged;
 		}

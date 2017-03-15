@@ -29,7 +29,7 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 			}
 
-			((IElementController)Element).SetValueFromRenderer(Slider.ValueProperty, Value);
+			Element.SetValueFromRenderer(Slider.ValueProperty, Value);
 		}
 
 		void SeekBar.IOnSeekBarChangeListener.OnStartTrackingTouch(SeekBar seekBar)

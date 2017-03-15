@@ -303,7 +303,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				var renderer = v.Tag as ButtonRenderer;
 				if (renderer != null)
-					((IButtonController)renderer.Element).SendClicked();
+					renderer.Element.SendClicked();
 			}
 		}
 
@@ -316,14 +316,13 @@ namespace Xamarin.Forms.Platform.Android
 				var renderer = v.Tag as ButtonRenderer;
 				if (renderer != null)
 				{
-					var buttonController = renderer.Element as IButtonController;
 					if (e.Action == AMotionEventActions.Down)
 					{
-						buttonController?.SendPressed();
+						renderer.Element?.SendPressed();
 					}
 					else if (e.Action == AMotionEventActions.Up)
 					{
-						buttonController?.SendReleased();
+						renderer.Element?.SendReleased();
 					}
 				}
 				return false;

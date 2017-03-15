@@ -10,8 +10,6 @@ namespace Xamarin.Forms.Platform.MacOS
 		const string NewLineSelector = "insertNewline";
 		bool _disposed;
 
-		IEditorController ElementController => Element;
-
 		protected override void OnElementChanged(ElementChangedEventArgs<Editor> e)
 		{
 			base.OnElementChanged(e);
@@ -88,18 +86,18 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		void HandleChanged(object sender, EventArgs e)
 		{
-			ElementController.SetValueFromRenderer(Editor.TextProperty, Control.StringValue);
+			Element.SetValueFromRenderer(Editor.TextProperty, Control.StringValue);
 		}
 
 		void OnEditingEnded(object sender, EventArgs eventArgs)
 		{
 			Element.SetValue(VisualElement.IsFocusedPropertyKey, false);
-            ElementController.SendCompleted();
+            Element.SendCompleted();
 		}
 
 		void OnEditingBegan(object sender, EventArgs eventArgs)
 		{
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
 
 		void UpdateEditable()

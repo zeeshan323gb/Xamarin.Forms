@@ -62,7 +62,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			OnNativeFocusChanged(hasFocus);
 
-			((IElementController)Element).SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, hasFocus);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, hasFocus);
 		}
 
 		public override SizeRequest GetDesiredSize(int widthConstraint, int heightConstraint)

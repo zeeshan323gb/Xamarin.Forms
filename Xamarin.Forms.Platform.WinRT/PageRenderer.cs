@@ -26,7 +26,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 			if (Element != null)
 			{
-				ReadOnlyCollection<Element> children = ((IElementController)Element).LogicalChildren;
+				ReadOnlyCollection<Element> children = Element.LogicalChildren;
 				for (var i = 0; i < children.Count; i++)
 				{
 					var visualChild = children[i] as VisualElement;

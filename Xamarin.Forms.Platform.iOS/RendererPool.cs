@@ -52,8 +52,8 @@ namespace Xamarin.Forms.Platform.MacOS
 
 			var sameChildrenTypes = true;
 
-			var oldChildren = ((IElementController)_oldElement).LogicalChildren;
-			var newChildren = ((IElementController)newElement).LogicalChildren;
+			var oldChildren = _oldElement.LogicalChildren;
+			var newChildren = newElement.LogicalChildren;
 
 			if (oldChildren.Count == newChildren.Count)
 			{
@@ -101,7 +101,7 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		void FillChildrenWithRenderers(VisualElement element)
 		{
-			foreach (var logicalChild in ((IElementController)element).LogicalChildren)
+			foreach (var logicalChild in element.LogicalChildren)
 			{
 				var child = logicalChild as VisualElement;
 				if (child != null)
@@ -127,9 +127,7 @@ namespace Xamarin.Forms.Platform.MacOS
 
 		void UpdateRenderers(Element newElement)
 		{
-			var newElementController = (IElementController)newElement;
-
-			if (newElementController.LogicalChildren.Count == 0)
+			if (newElement.LogicalChildren.Count == 0)
 				return;
 
 			var subviews = _parent.NativeView.Subviews;
@@ -140,7 +138,7 @@ namespace Xamarin.Forms.Platform.MacOS
 					continue;
 
 				var x = (int)childRenderer.NativeView.Layer.ZPosition / 1000;
-				var element = newElementController.LogicalChildren[x] as VisualElement;
+				var element = newElement.LogicalChildren[x] as VisualElement;
 				if (element == null)
 					continue;
 

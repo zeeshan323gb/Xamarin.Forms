@@ -62,7 +62,7 @@ namespace Xamarin.Forms.Platform.WinPhone
 		void DatePickerOnValueChanged(object sender, DateTimeValueChangedEventArgs dateTimeValueChangedEventArgs)
 		{
 			if (Control.Value.HasValue)
-				((IElementController)Element).SetValueFromRenderer(DatePicker.DateProperty, Control.Value.Value);
+				Element.SetValueFromRenderer(DatePicker.DateProperty, Control.Value.Value);
 		}
 
 		void UpdateFormatString()

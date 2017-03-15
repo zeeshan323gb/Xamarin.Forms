@@ -24,8 +24,6 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 		}
 
-		IElementController ElementController => Element as IElementController;
-
 		protected CarouselPage Carousel
 		{
 			get { return (CarouselPage)Element; }
@@ -130,9 +128,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 			View.Add(_scrollView);
 
-			for (var i = 0; i < ElementController.LogicalChildren.Count; i++)
+			for (var i = 0; i < Element.LogicalChildren.Count; i++)
 			{
-				Element element = ElementController.LogicalChildren[i];
+				Element element = Element.LogicalChildren[i];
 				var child = element as ContentPage;
 				if (child != null)
 					InsertPage(child, i);
@@ -257,10 +255,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnDecelerationEnded(object sender, EventArgs eventArgs)
 		{
-			if (_ignoreNativeScrolling || SelectedIndex >= ElementController.LogicalChildren.Count)
+			if (_ignoreNativeScrolling || SelectedIndex >= Element.LogicalChildren.Count)
 				return;
 
-			Carousel.CurrentPage = (ContentPage)ElementController.LogicalChildren[SelectedIndex];
+			Carousel.CurrentPage = (ContentPage)Element.LogicalChildren[SelectedIndex];
 		}
 
 		void OnPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -326,9 +324,9 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			Clear();
 
-			for (var i = 0; i < ElementController.LogicalChildren.Count; i++)
+			for (var i = 0; i < Element.LogicalChildren.Count; i++)
 			{
-				Element element = ElementController.LogicalChildren[i];
+				Element element = Element.LogicalChildren[i];
 				var child = element as ContentPage;
 				if (child != null)
 					InsertPage(child, i);

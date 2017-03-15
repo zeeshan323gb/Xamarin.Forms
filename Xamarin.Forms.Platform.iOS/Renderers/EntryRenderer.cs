@@ -17,8 +17,6 @@ namespace Xamarin.Forms.Platform.iOS
 			Frame = new RectangleF(0, 20, 320, 40);
 		}
 
-		IElementController ElementController => Element as IElementController;
-
 		protected override void Dispose(bool disposing)
 		{
 			if (_disposed)
@@ -108,12 +106,12 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnEditingBegan(object sender, EventArgs e)
 		{
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
 
 		void OnEditingChanged(object sender, EventArgs eventArgs)
 		{
-			ElementController.SetValueFromRenderer(Entry.TextProperty, Control.Text);
+			Element.SetValueFromRenderer(Entry.TextProperty, Control.Text);
 		}
 
 		void OnEditingEnded(object sender, EventArgs e)
@@ -121,16 +119,16 @@ namespace Xamarin.Forms.Platform.iOS
 			// Typing aid changes don't always raise EditingChanged event
 			if (Control.Text != Element.Text)
 			{
-				ElementController.SetValueFromRenderer(Entry.TextProperty, Control.Text);
+				Element.SetValueFromRenderer(Entry.TextProperty, Control.Text);
 			}
 
-			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
+			Element.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, false);
 		}
 
 		bool OnShouldReturn(UITextField view)
 		{
 			Control.ResignFirstResponder();
-			((IEntryController)Element).SendCompleted();
+			Element.SendCompleted();
 			return false;
 		}
 
