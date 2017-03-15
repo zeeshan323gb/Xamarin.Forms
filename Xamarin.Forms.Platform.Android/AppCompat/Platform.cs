@@ -193,10 +193,18 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 		void IPlatformLayout.OnLayout(bool changed, int l, int t, int r, int b)
 		{
-			if (changed)
-				LayoutRootPage((FormsAppCompatActivity)_context, Page, r - l, b - t);
+			//Sometimes on resume this will fail with NRE
+			var formsAppCompactActivity = _context as FormsAppCompatActivity;
+			if (formsAppCompactActivity == null || Page == null)
+				return;
 
-			Android.Platform.GetRenderer(Page).UpdateLayout();
+			if (changed)
+				LayoutRootPage(formsAppCompactActivity, Page, r - l, b - t);
+
+			Android.Platform.GetRenderer(Page)?.UpdateLayout();
+
+			if (_renderer == null)
+				return;
 
 			for (var i = 0; i < _renderer.ChildCount; i++)
 			{
