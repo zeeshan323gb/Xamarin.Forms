@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Android.Graphics;
 using Java.IO;
@@ -8,7 +9,7 @@ namespace Xamarin.Forms.Platform.Android
 {
 	internal static class ImageViewExtensions
 	{
-		public static async void UpdateBitmap(this AImageView imageView, Image newImage, Image previousImage = null)
+		public static async Task UpdateBitmap(this AImageView imageView, Image newImage, Image previousImage = null)
 		{
 			if (Device.IsInvokeRequired)
 				throw new InvalidOperationException("Image Bitmap must not be updated from background thread");
@@ -18,7 +19,8 @@ namespace Xamarin.Forms.Platform.Android
 
 			((IImageController)newImage).SetIsLoading(true);
 
-			(imageView as IImageRendererController).SkipInvalidate();
+			var formsImageView = imageView as IImageRendererController;
+			formsImageView?.SkipInvalidate();
 
 			imageView.SetImageResource(global::Android.Resource.Color.Transparent);
 
@@ -30,14 +32,21 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				try
 				{
+					// TODO hartez Some of the test cases don't throw an exception, they just return null
+					// This is because the BitmapFactory methods return null if they can't decode.
+
 					bitmap = await handler.LoadImageAsync(source, imageView.Context);
 				}
 				catch (TaskCanceledException)
 				{
 				}
-				catch (IOException ex)
+
+				// TODO verify that when this is down here, you don't get double exceptions
+				if (bitmap == null)
 				{
-					Internals.Log.Warning("Xamarin.Forms.Platform.Android.ImageRenderer", "Error updating bitmap: {0}", ex);
+					// Could not decode the bitmap, throw an exception to indicate 
+					// the data wasn't decodable
+					throw new InvalidDataException($"Could not load Bitmap from source {source}");
 				}
 			}
 

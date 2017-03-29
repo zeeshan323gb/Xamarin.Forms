@@ -5,6 +5,7 @@ using Android.Views;
 using AImageView = Android.Widget.ImageView;
 using Xamarin.Forms.Internals;
 using static Xamarin.Forms.Platform.Android.ImageViewExtensions;
+using System.Threading.Tasks;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -20,7 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public ImageRenderer()
 		{
-            System.Diagnostics.Debug.WriteLine(">>>>> Old Image Renderer");
+			System.Diagnostics.Debug.WriteLine(">>>>> Old Image Renderer");
 			AutoPackage = false;
 		}
 
@@ -39,7 +40,7 @@ namespace Xamarin.Forms.Platform.Android
 			return new FormsImageView(Context);
 		}
 
-		protected override void OnElementChanged(ElementChangedEventArgs<Image> e)
+		protected async override void OnElementChanged(ElementChangedEventArgs<Image> e)
 		{
 			base.OnElementChanged(e);
 
@@ -50,18 +51,18 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			_motionEventHelper.UpdateElement(e.NewElement);
-			
-			Control.UpdateBitmap(e.NewElement, e.OldElement);
+
+			await TryUpdateBitmap(e.NewElement, e.OldElement);
 
 			UpdateAspect();
 		}
 
-		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected async override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
 
 			if (e.PropertyName == Image.SourceProperty.PropertyName)
-				Control.UpdateBitmap(Element);
+				await TryUpdateBitmap();
 			else if (e.PropertyName == Image.AspectProperty.PropertyName)
 				UpdateAspect();
 		}
@@ -72,12 +73,26 @@ namespace Xamarin.Forms.Platform.Android
 			Control.SetScaleType(type);
 		}
 
-        public override bool OnTouchEvent(MotionEvent e)
-        {
-            if (base.OnTouchEvent(e))
-                return true;
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			if (base.OnTouchEvent(e))
+				return true;
 
-            return _motionEventHelper.HandleMotionEvent(Parent);
-        }
-    }
+			return _motionEventHelper.HandleMotionEvent(Parent);
+		}
+
+		// TODO hartez Write up an example of a custom renderer with alternate handling of these errors
+		// TODO Set up a TryUpdateBitmap equivalent for Windows, iOS
+		protected virtual async Task TryUpdateBitmap(Image newImage = null, Image previous = null)
+		{
+			try
+			{
+				await Control.UpdateBitmap(newImage ?? Element, previous);
+			}
+			catch (Exception ex)
+			{
+				Log.Warning("Xamarin.Forms.Platform.Android.ImageRenderer", "Error updating bitmap: {0}", ex);
+			}
+		}
+	}
 }
