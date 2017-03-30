@@ -80,12 +80,13 @@ namespace Xamarin.Forms.Platform.Android
 
 			return _motionEventHelper.HandleMotionEvent(Parent);
 		}
-
 		// TODO hartez Write up an example of a custom renderer with alternate handling of these errors
 		// TODO Set up a TryUpdateBitmap equivalent for Windows
 		protected virtual async Task TryUpdateBitmap(Image newImage = null, Image previous = null)
 		{
-			// TODO hartez 2017/03/29 18:00:25 add blurb here	
+			// By default we'll just catch and log any exceptions thrown by UpdateBitmap so they don't bring down
+			// the application; a custom renderer can override this method and handle exceptions from
+			// UpdateBitmap differently if it wants to
 
 			try
 			{
@@ -93,7 +94,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			catch (Exception ex)
 			{
-				Log.Warning("Xamarin.Forms.Platform.Android.ImageRenderer", "Error updating bitmap: {0}", ex);
+				Log.Warning(nameof(ImageRenderer), "Error loading image: {0}", ex);
 			}
 			finally
 			{
