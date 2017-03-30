@@ -40,7 +40,7 @@ namespace Xamarin.Forms.Platform.Android
 			return new FormsImageView(Context);
 		}
 
-		protected async override void OnElementChanged(ElementChangedEventArgs<Image> e)
+		protected override async void OnElementChanged(ElementChangedEventArgs<Image> e)
 		{
 			base.OnElementChanged(e);
 
@@ -57,7 +57,7 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateAspect();
 		}
 
-		protected async override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected override async void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
 
@@ -82,9 +82,11 @@ namespace Xamarin.Forms.Platform.Android
 		}
 
 		// TODO hartez Write up an example of a custom renderer with alternate handling of these errors
-		// TODO Set up a TryUpdateBitmap equivalent for Windows, iOS
+		// TODO Set up a TryUpdateBitmap equivalent for Windows
 		protected virtual async Task TryUpdateBitmap(Image newImage = null, Image previous = null)
 		{
+			// TODO hartez 2017/03/29 18:00:25 add blurb here	
+
 			try
 			{
 				await Control.UpdateBitmap(newImage ?? Element, previous);
@@ -92,6 +94,10 @@ namespace Xamarin.Forms.Platform.Android
 			catch (Exception ex)
 			{
 				Log.Warning("Xamarin.Forms.Platform.Android.ImageRenderer", "Error updating bitmap: {0}", ex);
+			}
+			finally
+			{
+				((IImageController)Element).SetIsLoading(false);
 			}
 		}
 	}
