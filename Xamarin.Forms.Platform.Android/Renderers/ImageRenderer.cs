@@ -80,6 +80,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			return _motionEventHelper.HandleMotionEvent(Parent);
 		}
+
 		// TODO hartez Write up an example of a custom renderer with alternate handling of these errors
 		// TODO Set up a TryUpdateBitmap equivalent for Windows
 		protected virtual async Task TryUpdateBitmap(Image newImage = null, Image previous = null)
