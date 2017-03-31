@@ -261,6 +261,13 @@
     <Compile Include="GalleryPages\MacTwitterDemo.xaml.cs">
       <DependentUpon>MacTwitterDemo.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GalleryPages\CarouselView\CarouselPageViewModel.cs" />
+    <Compile Include="GalleryPages\CarouselView\MyView.xaml.cs">
+      <DependentUpon>MyView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GalleryPages\CarouselViewGalleryPage.xaml.cs">
+      <DependentUpon>CarouselViewGalleryPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\.nuspec\Xamarin.Forms.targets" />
@@ -295,6 +302,12 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Include="HanselForms\TwitterPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GalleryPages\CarouselView\MyView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GalleryPages\CarouselViewGalleryPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

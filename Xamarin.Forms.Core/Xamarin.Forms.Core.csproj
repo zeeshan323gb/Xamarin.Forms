@@ -460,6 +460,10 @@
     <Compile Include="ITextElement.cs" />
     <Compile Include="TextElement.cs" />
     <Compile Include="Internals\ResourceLoader.cs" />
+    <Compile Include="CarouselView\CarouselView.cs" />
+    <Compile Include="CarouselView\CarouselViewException.cs" />
+    <Compile Include="CarouselView\CarouselViewOrientation.cs" />
+    <Compile Include="CarouselView\IndicatorsShape.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

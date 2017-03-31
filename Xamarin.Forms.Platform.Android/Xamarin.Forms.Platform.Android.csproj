@@ -14,12 +14,13 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
     <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <AndroidTlsProvider></AndroidTlsProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -106,7 +107,6 @@
     <Compile Include="AppCompat\IManageFragments.cs" />
     <Compile Include="AppCompat\MasterDetailContainer.cs" />
     <Compile Include="AppCompat\Platform.cs" />
-    <Compile Include="AppCompat\Resource.cs" />
     <Compile Include="CellAdapter.cs" />
     <Compile Include="Cells\EntryCellEditText.cs" />
     <Compile Include="Cells\EntryCellView.cs" />
@@ -246,6 +246,14 @@
     <Compile Include="Extensions\NativeBindingExtensions.cs" />
     <Compile Include="NativeValueConverterService.cs" />
     <Compile Include="NativeBindingservice.cs" />
+    <Compile Include="CarouselView\CarouselViewRenderer.cs" />
+    <Compile Include="CarouselView\CirclePageIndicator.cs" />
+    <Compile Include="CarouselView\CustomViewPager.cs" />
+    <Compile Include="CarouselView\DefaultPageTransformer.cs" />
+    <Compile Include="CarouselView\FormsToNativeDroid.cs" />
+    <Compile Include="CarouselView\PageIndicator.cs" />
+    <Compile Include="CarouselView\VerticalViewPager.cs" />
+    <Compile Include="Resources\Resource.Designer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -267,8 +275,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="AppCompat\Resource.cs" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\horizontal_viewpager.xml" />
+    <AndroidResource Include="Resources\layout\vertical_viewpager.xml" />
+    <AndroidResource Include="Resources\values\vpi__attrs.xml" />
+    <AndroidResource Include="Resources\values\vpi__colors.xml" />
+    <AndroidResource Include="Resources\values\vpi__defaults.xml" />
+    <AndroidResource Include="Resources\values\vpi__styles.xml" />
+  </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
