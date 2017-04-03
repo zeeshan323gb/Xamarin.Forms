@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Xamarin.Forms.Core.UITests;
 using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
 
@@ -10,7 +11,11 @@ using NUnit.Framework;
 
 namespace Xamarin.Forms.Controls.Issues
 {
-	[Preserve(AllMembers = true)]
+#if UITEST
+    [Category(UITestCategories.Image)]
+#endif
+
+    [Preserve(AllMembers = true)]
 	[Issue(IssueTracker.Bugzilla, 51173, "ImageRenderer, async void SetImage - Cannot catch exceptions", PlatformAffected.All)]
 	public class Bugzilla51173 : TestContentPage
 	{
@@ -109,7 +114,7 @@ namespace Xamarin.Forms.Controls.Issues
 
 		protected override void Init()
 		{
-			_results = new Label { Margin = 20, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.Silver, HorizontalTextAlignment = TextAlignment.Center};
+			_results = new Label { Margin = 10, FontAttributes = FontAttributes.Bold, BackgroundColor = Color.Silver, HorizontalTextAlignment = TextAlignment.Center};
 
 			var errorMessage = new Label();
 
@@ -126,7 +131,7 @@ namespace Xamarin.Forms.Controls.Issues
 					"Pressing the 'Valid Image' button should display an image of a coffee cup. Every other button should cause the messager 'Error logged' to appear at the top of the page."
 			};
 
-			_image = new Image { BackgroundColor = Color.White };
+			_image = new Image { BackgroundColor = Color.Bisque, HeightRequest = 20 };
 
 			var loadingState = new Label();
 			loadingState.SetBinding(Label.TextProperty, new Binding(Image.IsLoadingProperty.PropertyName, BindingMode.Default, new LoadingConverter()));
@@ -148,7 +153,7 @@ namespace Xamarin.Forms.Controls.Issues
 
 			Content = new StackLayout
 			{
-				Margin = new Thickness(5, 40, 5, 0),
+				Margin = new Thickness(5, 20, 5, 0),
 				Children =
 				{
 					_image,
