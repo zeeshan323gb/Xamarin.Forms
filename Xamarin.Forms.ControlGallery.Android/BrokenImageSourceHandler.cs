@@ -21,11 +21,11 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 	public class _51173CustomImageRenderer : ImageRenderer
 	{
-		protected override async Task TryUpdateBitmap(Image previous = null)
+		protected override async Task TryUpdateBitmap(Image newImage = null, Image previous = null)
 		{
 			try
 			{
-				await UpdateBitmap(previous).ConfigureAwait(false);
+				await UpdateBitmap(newImage, previous).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{

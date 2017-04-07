@@ -91,7 +91,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			try
 			{
-				await Control.UpdateBitmap(newImage ?? Element, previous);
+				await UpdateBitmap(newImage ?? Element, previous);
 			}
 			catch (Exception ex)
 			{
@@ -101,6 +101,11 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				((IImageController)Element).SetIsLoading(false);
 			}
+		}
+
+		protected Task UpdateBitmap(Image newImage, Image previous = null)
+		{
+			return Control.UpdateBitmap(newImage, previous); ;
 		}
 	}
 }
