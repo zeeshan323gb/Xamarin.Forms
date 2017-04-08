@@ -20,7 +20,7 @@ using Android.Views;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class VerticalViewPager : ViewPager
+	public class VerticalViewPager : ViewPager, IViewPager
 	{
 		private bool isSwipingEnabled = true;
 
@@ -43,7 +43,7 @@ namespace Xamarin.Forms.Platform.Android
 			float swappedX = (ev.GetY() / height) * width;
 			float swappedY = (ev.GetX() / width) * height;
 
-		    ev.SetLocation(swappedX, swappedY);
+			ev.SetLocation(swappedX, swappedY);
 
 			return ev;
 		}

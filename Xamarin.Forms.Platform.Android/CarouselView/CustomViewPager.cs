@@ -6,7 +6,7 @@ using Android.Views;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class CustomViewPager : ViewPager
+	public class CustomViewPager : ViewPager, IViewPager
 	{
 		private bool isSwipingEnabled = true;
 
@@ -18,14 +18,14 @@ namespace Xamarin.Forms.Platform.Android
 		{
 		}
 
-		public override bool OnTouchEvent(MotionEvent e)
+		public override bool OnTouchEvent(MotionEvent ev)
 		{
 			if (this.isSwipingEnabled)
 			{
-				return base.OnTouchEvent(e);
-		    }
+				return base.OnTouchEvent(ev);
+			}
 
-            return false;
+			return false;
 		}
 
 		public override bool OnInterceptTouchEvent(MotionEvent ev)
@@ -33,9 +33,9 @@ namespace Xamarin.Forms.Platform.Android
 			if (this.isSwipingEnabled)
 			{
 				return base.OnInterceptTouchEvent(ev);
-		    }
+			}
 
-            return false;
+			return false;
 		}
 
 		public void SetPagingEnabled(bool enabled)

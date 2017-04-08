@@ -254,6 +254,7 @@
     <Compile Include="CarouselView\PageIndicator.cs" />
     <Compile Include="CarouselView\VerticalViewPager.cs" />
     <Compile Include="AppCompat\Resource.cs" />
+    <Compile Include="CarouselView\IViewPager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

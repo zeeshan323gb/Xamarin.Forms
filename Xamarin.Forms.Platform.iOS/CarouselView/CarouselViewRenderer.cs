@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,11 +19,14 @@ namespace Xamarin.Forms.Platform.iOS
 		UIPageControl pageControl;
 		bool _disposed;
 
+		// A local copy of ItemsSource so we can use CollectionChanged events
+		List<object> Source;
+
 		int Count
 		{
 			get
 			{
-				return Element.ItemsSource?.Count ?? 0;
+				return Source?.Count ?? 0;
 			}
 		}
 
@@ -35,45 +40,38 @@ namespace Xamarin.Forms.Platform.iOS
 			if (Control == null)
 			{
 				// Instantiate the native control and assign it to the Control property with
-				// the SetNativeControl method
-
-				ConfigurePageController();
+				// the SetNativeControl method (called when Height BP changes)
 			}
 
 			if (e.OldElement != null)
 			{
 				// Unsubscribe from event handlers and cleanup any resources
-
 				if (pageController != null)
 				{
-					pageController.GetPresentationCount = null;
-					pageController.GetPresentationIndex = null;
-
 					pageController.DidFinishAnimating -= PageController_DidFinishAnimating;
-
 					pageController.GetPreviousViewController = null;
 					pageController.GetNextViewController = null;
-				}
-
-				if (Element != null)
-				{
-					Element.RemoveAction = null;
-					Element.InsertAction = null;
 				}
 			}
 
 			if (e.NewElement != null)
 			{
 				// Configure the control and subscribe to event handlers
-				Element.RemoveAction = new Func<int, Task>(RemoveController);
-				Element.InsertAction = new Func<object, int, Task>(InsertController);
+				if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+					((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+			}
+		}
+
+		async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			if (e.Action == NotifyCollectionChangedAction.Add)
+			{
+				InsertPage(Element.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
 			}
 
-			// Fix for issues after recreating the control #86
-			var element = e.OldElement ?? e.NewElement;
-			if (element != null && element.Position > -1)
+			if (e.Action == NotifyCollectionChangedAction.Remove)
 			{
-				prevPosition = element.Position;
+				await RemovePage(e.OldStartingIndex);
 			}
 		}
 
@@ -85,37 +83,82 @@ namespace Xamarin.Forms.Platform.iOS
 
 			switch (e.PropertyName)
 			{
+				case "Renderer":
+					// Fix for issues after recreating the control #86
+					prevPosition = Element.Position;
+					break;
 				case "Width":
 					ElementWidth = rect.Width;
 					break;
 				case "Height":
 					ElementHeight = rect.Height;
-					if (Element != null && pageController != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
-					{
-						var firstViewController = CreateViewController(Element.Position);
-						pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s => { });
-						ConfigurePageControl();
-					}
+					SetNativeView();
+					SetIndicators();
+					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					break;
+				case "Orientation":
+					SetNativeView();
+					SetIndicators();
+					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					break;
+				case "InterPageSpacing":
+					// InterPageSpacing not exposed as a property in UIPageViewController :(
+					//ConfigurePageController();
+					//ConfigurePageControl();
+					break;
+				case "InterPageSpacingColor":
+					if (pageController != null)
+						pageController.View.BackgroundColor = Element.InterPageSpacingColor.ToUIColor();
+					break;
+				case "IsSwipingEnabled":
+					SetIsSwipingEnabled();
+					break;
+				case "IndicatorsTintColor":
+					SetIndicators();
+					break;
+				case "CurrentPageIndicatorTintColor":
+					SetIndicators();
+					break;
+				case "IndicatorsShape":
+					SetIndicators();
 					break;
 				case "ShowIndicators":
-					pageControl.Hidden = !Element.ShowIndicators;
+					if (pageControl != null)
+						pageControl.Hidden = !Element.ShowIndicators;
 					break;
-				case "ItemsSource": // TODO: don't execute the first time
-					if (Element != null && pageController != null)
-					{
-						ConfigurePageController();
-						ConfigurePageControl();
-						Element?.PositionSelected?.Invoke(Element, EventArgs.Empty);
-					}
+				case "ItemsSource":
+					SetPosition();
+					SetNativeView();
+					SetIndicators();
+					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
 					break;
-                case "Position":
-					if (Element.Position != -1 && !isSwiping)
-					    SetCurrentController(Element.Position);
+				case "ItemTemplate":
+					SetNativeView();
+					SetIndicators();
+					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					break;
+				case "Position":
+					if (!isSwiping)
+						SetCurrentPage(Element.Position);
 					break;
 			}
 		}
 
-		// To avoid triggering Position changed
+		void SetIsSwipingEnabled()
+		{
+			foreach (var view in pageController?.View.Subviews)
+			{
+				var scroller = view as UIScrollView;
+				if (scroller != null)
+				{
+					scroller.ScrollEnabled = Element.IsSwipingEnabled;
+				}
+			}
+		}
+
+		// To avoid triggering Position changed more than once
 		bool isSwiping;
 
 		void PageController_DidFinishAnimating(object sender, UIPageViewFinishedAnimationEventArgs e)
@@ -124,43 +167,54 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				var controller = (ViewContainer)pageController.ViewControllers[0];
 				var position = controller.Tag;
-
 				isSwiping = true;
 				Element.Position = position;
 				prevPosition = position;
 				isSwiping = false;
-
-				ConfigurePageControl();
-
+				SetIndicators();
 				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 			}
 		}
 
-		void ConfigurePageController()
+		void SetPosition()
 		{
 			isSwiping = true;
 			if (Element.ItemsSource != null)
 			{
-				if (Element.Position > Element.ItemsSource.Count - 1)
-					Element.Position = Element.ItemsSource.Count - 1;
-
+				if (Element.Position > Element.ItemsSource.GetCount() - 1)
+					Element.Position = Element.ItemsSource.GetCount() - 1;
 				if (Element.Position == -1)
 					Element.Position = 0;
 			}
-			else {
+			else
+			{
 				Element.Position = 0;
 			}
+			prevPosition = Element.Position;
 			isSwiping = false;
+		}
 
+		void SetNativeView()
+		{
 			var interPageSpacing = (float)Element.InterPageSpacing;
+
+			// Orientation BP
 			var orientation = (UIPageViewControllerNavigationOrientation)Element.Orientation;
+
+			// InterPageSpacing BP
 			pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll,
 													  orientation, UIPageViewControllerSpineLocation.None, interPageSpacing);
+
+			Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
+
+			// InterPageSpacingColor BP
 			pageController.View.BackgroundColor = Element.InterPageSpacingColor.ToUIColor();
 
+			// IsSwipingEnabled BP
+			SetIsSwipingEnabled();
+
+			// INDICATORS
 			pageControl = new UIPageControl();
-			pageControl.PageIndicatorTintColor = Element.PageIndicatorTintColor.ToUIColor();
-			pageControl.CurrentPageIndicatorTintColor = Element.CurrentPageIndicatorTintColor.ToUIColor();
 			pageControl.TranslatesAutoresizingMaskIntoConstraints = false;
 			pageControl.Enabled = false;
 			pageController.View.AddSubview(pageControl);
@@ -170,22 +224,13 @@ namespace Xamarin.Forms.Platform.iOS
 				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:|[pageControl]|", NSLayoutFormatOptions.AlignAllCenterX, new NSDictionary(), viewsDictionary));
 				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:[pageControl]|", 0, new NSDictionary(), viewsDictionary));
 			}
-			else {
+			else
+			{
 				pageControl.Transform = CGAffineTransform.MakeRotation(3.14159265f / 2);
 
 				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("[pageControl(==36)]", 0, new NSDictionary(), viewsDictionary));
 				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:[pageControl]|", 0, new NSDictionary(), viewsDictionary));
 				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:|[pageControl]|", NSLayoutFormatOptions.AlignAllTop, new NSDictionary(), viewsDictionary));
-			}
-			pageControl.Hidden = !Element.ShowIndicators;
-
-			foreach (var view in pageController.View.Subviews)
-			{
-				var scroller = view as UIScrollView;
-				if (scroller != null)
-				{
-					scroller.Bounces = Element.IsSwipingEnabled;
-				}
 			}
 
 			pageController.DidFinishAnimating += PageController_DidFinishAnimating;
@@ -198,18 +243,20 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					var position = controller.Tag;
 
-					// Determine if we are on the first page
-					if (position == 0)
+		// Determine if we are on the first page
+		if (position == 0)
 					{
-						// We are on the first page, so there is no need for a controller before that
-						return null;
+			// We are on the first page, so there is no need for a controller before that
+			return null;
 					}
-					else {
+					else
+					{
 						int previousPageIndex = position - 1;
 						return CreateViewController(previousPageIndex);
 					}
 				}
-				else {
+				else
+				{
 					return null;
 				}
 			};
@@ -222,23 +269,25 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					var position = controller.Tag;
 
-					// Determine if we are on the last page
-					if (position == Count - 1)
+		            // Determine if we are on the last page
+		            if (position == Count - 1)
 					{
-						// We are on the last page, so there is no need for a controller after that
-						return null;
+			            // We are on the last page, so there is no need for a controller after that
+			            return null;
 					}
-					else {
+					else
+					{
 						int nextPageIndex = position + 1;
 						return CreateViewController(nextPageIndex);
 					}
 				}
-				else {
+				else
+				{
 					return null;
 				}
 			};
 
-			if (Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
+			if (Source != null && Source?.Count > 0)
 			{
 				var firstViewController = CreateViewController(Element.Position);
 				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s => { });
@@ -247,86 +296,96 @@ namespace Xamarin.Forms.Platform.iOS
 			SetNativeControl(pageController.View);
 		}
 
-		void ConfigurePageControl()
+		void SetIndicators()
 		{
-			if (Element != null && pageControl != null)
+			if (pageControl != null)
 			{
 				pageControl.Pages = Count;
 				pageControl.CurrentPage = Element.Position;
 
+				// IndicatorsTintColor BP
+				pageControl.PageIndicatorTintColor = Element.IndicatorsTintColor.ToUIColor();
+
+				// CurrentPageIndicatorTintColor BP
+				pageControl.CurrentPageIndicatorTintColor = Element.CurrentPageIndicatorTintColor.ToUIColor();
+
+				// IndicatorsShape BP
 				if (Element.IndicatorsShape == IndicatorsShape.Square)
 				{
 					foreach (var view in pageControl.Subviews)
 					{
-						view.Layer.CornerRadius = 0;
 						if (view.Frame.Width == 7)
 						{
+							view.Layer.CornerRadius = 0;
 							var frame = new CGRect(view.Frame.X, view.Frame.Y, view.Frame.Width - 1, view.Frame.Height - 1);
 							view.Frame = frame;
 						}
 					}
 				}
+				else
+				{
+					foreach (var view in pageControl.Subviews)
+					{
+						if (view.Frame.Width == 6)
+						{
+							view.Layer.CornerRadius = 3.5f;
+							var frame = new CGRect(view.Frame.X, view.Frame.Y, view.Frame.Width + 1, view.Frame.Height + 1);
+							view.Frame = frame;
+						}
+					}
+				}
+
+				// ShowIndicators BP
+				pageControl.Hidden = !Element.ShowIndicators;
 			}
 		}
 
-		public async Task InsertController(object item, int position)
+		void InsertPage(object item, int position)
 		{
-			if (Element != null && pageController != null && Element.ItemsSource != null)
+			if (pageController != null && Source != null)
 			{
+				Source.Insert(position, item);
 
-				if (position > Element.ItemsSource.Count + 1)
-					throw new CarouselViewException("Page cannot be inserted at a position bigger than ItemsSource.Count");
-
-				if (position == -1)
-					Element.ItemsSource.Add(item);
-				else
-					Element.ItemsSource.Insert(position, item);
-
-				//UIViewController firstViewController;
-				//if (pageController.ViewControllers.Count() > 0)
-					//firstViewController = pageController.ViewControllers[0];
-				//else
 				var firstViewController = CreateViewController(Element.Position);
 
-				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, async s =>
+				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 				{
-					ConfigurePageControl();
+					SetIndicators();
 
-					await Task.Delay(100);
-
-					if (Element.ItemsSource.Count == 1)
+	                // Call position selected when inserting first page
+	                if (Element.ItemsSource.GetCount() == 1)
 						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 				});
-
-				await Task.Delay(0);
 			}
 		}
 
-		public async Task RemoveController(int position)
+		async Task RemovePage(int position)
 		{
-			if (Element != null && pageController != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
+			if (pageController != null && Source != null && Source?.Count > 0)
 			{
-				if (position > Element.ItemsSource.Count - 1)
-					throw new CarouselViewException("Page cannot be removed at a position bigger than ItemsSource.Count - 1");
-
-				if (Element.ItemsSource?.Count == 1)
+				// To remove latest page, rebuild pageController or the page wont disappear
+				if (Source.Count == 1)
 				{
-					Element.ItemsSource.RemoveAt(position);
-					ConfigurePageController();
-					ConfigurePageControl();
+					Source.RemoveAt(position);
+					SetNativeView();
+					SetIndicators();
 				}
-				else {
+				else
+				{
 
-					Element.ItemsSource.RemoveAt(position);
+					Source.RemoveAt(position);
 
+					// To remove current page
 					if (position == Element.Position)
 					{
-
 						var newPos = position - 1;
 						if (newPos == -1)
 							newPos = 0;
 
-						await Task.Delay(100);
+						// With a swipe transition
+						if (Element.AnimateTransition)
+							await Task.Delay(100);
+
 						var direction = position == 0 ? UIPageViewControllerNavigationDirection.Forward : UIPageViewControllerNavigationDirection.Reverse;
 						var firstViewController = CreateViewController(newPos);
 						pageController.SetViewControllers(new[] { firstViewController }, direction, Element.AnimateTransition, s =>
@@ -335,42 +394,46 @@ namespace Xamarin.Forms.Platform.iOS
 							Element.Position = newPos;
 							isSwiping = false;
 
-							ConfigurePageControl();
+							SetIndicators();
 
-							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+	                        // Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
+	                        Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 						});
 					}
-					else {
+					else
+					{
 
 						var firstViewController = pageController.ViewControllers[0];
 						pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 						{
-							ConfigurePageControl();
+							SetIndicators();
 
+							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 						});
 					}
 				}
+
+				prevPosition = Element.Position;
 			}
 		}
 
 		int prevPosition;
 
-		void SetCurrentController(int position)
+		void SetCurrentPage(int position)
 		{
-			if (Element != null && pageController != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
+			if (pageController != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
 			{
-				if (position > Element.ItemsSource.Count - 1)
-					throw new CarouselViewException("Current page index cannot be bigger than ItemsSource.Count - 1");
-
-				var direction = position > prevPosition ? UIPageViewControllerNavigationDirection.Forward : UIPageViewControllerNavigationDirection.Reverse;
+				// Transition direction based on prevPosition
+				var direction = position >= prevPosition ? UIPageViewControllerNavigationDirection.Forward : UIPageViewControllerNavigationDirection.Reverse;
 				prevPosition = position;
 
 				var firstViewController = CreateViewController(position);
 				pageController.SetViewControllers(new[] { firstViewController }, direction, Element.AnimateTransition, s =>
 				{
-					ConfigurePageControl();
+					SetIndicators();
 
+					// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 				});
 			}
@@ -378,30 +441,33 @@ namespace Xamarin.Forms.Platform.iOS
 
 		UIViewController CreateViewController(int index)
 		{
-			Xamarin.Forms.View formsView = null;
+			View formsView = null;
 
 			object bindingContext = null;
 
-			if (Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
-				bindingContext = Element.ItemsSource.Cast<object>().ElementAt(index);
+			if (Source != null && Source?.Count > 0)
+				bindingContext = Source.Cast<object>().ElementAt(index);
 
 			var dt = bindingContext as DataTemplate;
 
+			// Support for List<DataTemplate> as ItemsSource
 			if (dt != null)
 			{
-				formsView = (Xamarin.Forms.View)dt.CreateContent();
+				formsView = (View)dt.CreateContent();
 			}
-			else {
+			else
+			{
 
 				var selector = Element.ItemTemplate as DataTemplateSelector;
 				if (selector != null)
-					formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+					formsView = (View)selector.SelectTemplate(bindingContext, Element).CreateContent();
 				else
-					formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
+					formsView = (View)Element.ItemTemplate.CreateContent();
 
 				formsView.BindingContext = bindingContext;
 			}
 
+			// HeightRequest fix
 			formsView.Parent = this.Element;
 
 			// UIScreen.MainScreen.Bounds.Width, UIScreen.MainScreen.Bounds.Height
@@ -421,8 +487,6 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (pageController != null)
 				{
-					pageController.GetPresentationCount = null;
-					pageController.GetPresentationIndex = null;
 					pageController.DidFinishAnimating -= PageController_DidFinishAnimating;
 					pageController.GetPreviousViewController = null;
 					pageController.GetNextViewController = null;
@@ -440,6 +504,8 @@ namespace Xamarin.Forms.Platform.iOS
 					pageControl = null;
 				}
 
+				Source = null;
+
 				_disposed = true;
 			}
 
@@ -453,13 +519,5 @@ namespace Xamarin.Forms.Platform.iOS
 				return;
 			}
 		}
-
-		/// <summary>
-		/// Used for registration with dependency service
-		/// </summary>
-		/*public static void Init()
-		{
-			var temp = DateTime.Now;
-		}*/
 	}
 }

@@ -5,6 +5,8 @@ using Android.Support.V4.View;
 using System.ComponentModel;
 
 using AViews = Android.Views;
+using System.Collections.Specialized;
+using System.Collections.Generic;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -15,60 +17,19 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		AViews.View nativeView;
 		ViewPager viewPager;
-		CirclePageIndicator indicator;
+		CirclePageIndicator indicators;
 		bool _disposed;
 
-		protected override void OnElementChanged (ElementChangedEventArgs<CarouselView> e)
+		double ElementHeight;
+
+		protected override void OnElementChanged(ElementChangedEventArgs<CarouselView> e)
 		{
-			base.OnElementChanged (e);
+			base.OnElementChanged(e);
 
 			if (Control == null)
 			{
 				// Instantiate the native control and assign it to the Control property with
-				// the SetNativeControl method
-
-				var inflater = AViews.LayoutInflater.From(Forms.Context);
-
-				if (Element.Orientation == CarouselViewOrientation.Horizontal)
-				    nativeView = inflater.Inflate(Resource.Layout.horizontal_viewpager, null);
-				else
-					nativeView = inflater.Inflate(Resource.Layout.vertical_viewpager, null);
-
-				var metrics = Resources.DisplayMetrics;
-				var interPageSpacing = Element.InterPageSpacing * metrics.Density;
-
-				viewPager = nativeView.FindViewById<ViewPager>(Resource.Id.pager);
-				viewPager.PageMargin = (int)interPageSpacing;
-
-				viewPager.SetBackgroundColor(Element.InterPageSpacingColor.ToAndroid());
-
-				if (!Element.IsSwipingEnabled)
-				{
-					if (Element.Orientation == CarouselViewOrientation.Horizontal)
-					    ((CustomViewPager)viewPager).SetPagingEnabled(false);
-					else
-						((VerticalViewPager)viewPager).SetPagingEnabled(false);
-				}
-
-				// Fix for NullReferenceException on Android tabbed page #59
-				if (viewPager.Adapter == null)
-				{
-					viewPager.Adapter = new PageAdapter(Element);
-				}
-
-				indicator = nativeView.FindViewById<CirclePageIndicator>(Resource.Id.indicator);
-
-				indicator.SetViewPager(viewPager);
-
-				configPosition();
-
-				indicator.SetPageColor(Element.PageIndicatorTintColor.ToAndroid());
-				indicator.SetFillColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
-				indicator.SetStyle(Element.IndicatorsShape); // Rounded or Squared
-
-				indicator.Visibility = Element.ShowIndicators ? AViews.ViewStates.Visible : AViews.ViewStates.Gone;
-
-				SetNativeControl(nativeView);
+				// the SetNativeControl method (called when Height BP changes)
 			}
 
 			if (e.OldElement != null)
@@ -80,22 +41,26 @@ namespace Xamarin.Forms.Platform.Android
 					viewPager.PageSelected -= ViewPager_PageSelected;
 					viewPager.PageScrollStateChanged -= ViewPager_PageScrollStateChanged;
 				}
-
-				if (Element != null)
-				{
-					Element.RemoveAction = null;
-					Element.InsertAction = null;
-				}
 			}
 
 			if (e.NewElement != null)
 			{
 				// Configure the control and subscribe to event handlers
-				viewPager.PageSelected += ViewPager_PageSelected;
-				viewPager.PageScrollStateChanged += ViewPager_PageScrollStateChanged;
+				if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+					((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+			}
+		}
 
-				Element.RemoveAction = new Func<int, Task>(RemoveItem);
-				Element.InsertAction = new Func<object, int, Task>(InsertItem);
+		async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			if (e.Action == NotifyCollectionChangedAction.Add)
+			{
+				InsertPage(Element.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+			}
+
+			if (e.Action == NotifyCollectionChangedAction.Remove)
+			{
+				await RemovePage(e.OldStartingIndex);
 			}
 		}
 
@@ -103,87 +68,195 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			base.OnElementPropertyChanged(sender, e);
 
+			var rect = this.Element.Bounds;
+
 			switch (e.PropertyName)
 			{
+				case "Renderer":
+					// Fix for NullReferenceException on Android tabbed page #59
+					if (!Element.Height.Equals(-1))
+					{
+						SetNativeView();
+						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					}
+					break;
 				case "Width":
-					//var rect = this.Element.Bounds;
+					//ElementWidth = rect.Width;
 					break;
 				case "Height":
-					//var rect = this.Element.Bounds;
-					viewPager.Adapter = new PageAdapter(Element);
-					viewPager.SetCurrentItem(Element.Position, false);
+					// To avoid calling ConfigureViewPager twice on launch;
+					if (ElementHeight.Equals(0))
+					{
+						ElementHeight = rect.Height;
+						SetNativeView();
+						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					}
+					break;
+				case "Orientation":
+					SetNativeView();
+					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					break;
+				case "InterPageSpacing":
+					//var metrics = Resources.DisplayMetrics;
+					//var interPageSpacing = Element.InterPageSpacing * metrics.Density;
+					//viewPager.PageMargin = (int)interPageSpacing;
+					break;
+				case "InterPageSpacingColor":
+					viewPager?.SetBackgroundColor(Element.InterPageSpacingColor.ToAndroid());
+					break;
+				case "IsSwipingEnabled":
+					SetIsSwipingEnabled();
+					break;
+				case "IndicatorsTintColor":
+					indicators?.SetFillColor(Element.IndicatorsTintColor.ToAndroid());
+					break;
+				case "CurrentPageIndicatorTintColor":
+					indicators?.SetPageColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
+					break;
+				case "IndicatorsShape":
+					indicators?.SetStyle(Element.IndicatorsShape);
 					break;
 				case "ShowIndicators":
-					indicator.Visibility = Element.ShowIndicators ? AViews.ViewStates.Visible : AViews.ViewStates.Gone;
+					if (indicators != null)
+						indicators.Visibility = Element.ShowIndicators ? AViews.ViewStates.Visible : AViews.ViewStates.Gone;
 					break;
 				case "ItemsSource":
-					if (Element != null && viewPager != null)
+					if (viewPager != null)
 					{
-						configPosition();
-
+						SetPosition();
 						viewPager.Adapter = new PageAdapter(Element);
 						viewPager.SetCurrentItem(Element.Position, false);
-
-						indicator.SetViewPager(viewPager);
-
+						indicators?.SetViewPager(viewPager);
+						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+						if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+							((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+					}
+					break;
+				case "ItemTemplate":
+					if (viewPager != null)
+					{
+						viewPager.Adapter = new PageAdapter(Element);
+						viewPager.SetCurrentItem(Element.Position, false);
+						indicators?.SetViewPager(viewPager);
 						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 					}
 					break;
 				case "Position":
-					if (Element.Position != -1 && !isSwiping)
-					    SetCurrentItem(Element.Position);
+					if (!isSwiping)
+						SetCurrentPage(Element.Position);
 					break;
 			}
 		}
 
-		// To avoid triggering Position changed
+		// To avoid triggering Position changed more than once
 		bool isSwiping;
 
-		void ViewPager_PageSelected (object sender, ViewPager.PageSelectedEventArgs e)
+		// To assign position when page selected
+		void ViewPager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
 		{
+			// To avoid calling SetCurrentPage
 			isSwiping = true;
 			Element.Position = e.Position;
+			// Call PositionSelected from here when 0
+			if (e.Position == 0)
+				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 			isSwiping = false;
 		}
 
-		void ViewPager_PageScrollStateChanged (object sender, ViewPager.PageScrollStateChangedEventArgs e)
+		// To invoke PositionSelected
+		void ViewPager_PageScrollStateChanged(object sender, ViewPager.PageScrollStateChangedEventArgs e)
 		{
-			if (e.State == 0 && !isSwiping) {
+			// Call PositionSelected when scroll finish, after swiping finished and position > 0
+			if (e.State == 0 && !isSwiping && Element.Position > 0)
+			{
 				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 			}
 		}
 
-		void configPosition()
+		void SetIsSwipingEnabled()
+		{
+			((IViewPager)viewPager)?.SetPagingEnabled(Element.IsSwipingEnabled);
+		}
+
+		void SetPosition()
 		{
 			isSwiping = true;
 			if (Element.ItemsSource != null)
 			{
-				if (Element.Position > Element.ItemsSource.Count - 1)
-					Element.Position = Element.ItemsSource.Count - 1;
-
+				if (Element.Position > Element.ItemsSource.GetCount() - 1)
+					Element.Position = Element.ItemsSource.GetCount() - 1;
 				if (Element.Position == -1)
 					Element.Position = 0;
 			}
-			else {
+			else
+			{
 				Element.Position = 0;
 			}
 			isSwiping = false;
 
-			indicator.mSnapPage = Element.Position;
+			indicators.mSnapPage = Element.Position;
 		}
 
-		public async Task InsertItem(object item, int position)
+		void SetNativeView()
 		{
-			if (Element != null && viewPager != null && Element.ItemsSource != null)
+			var inflater = AViews.LayoutInflater.From(Forms.Context);
+
+			// Orientation BP
+			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				nativeView = inflater.Inflate(Resource.Layout.horizontal_viewpager, null);
+			else
+				nativeView = inflater.Inflate(Resource.Layout.vertical_viewpager, null);
+
+			viewPager = nativeView.FindViewById<ViewPager>(Resource.Id.pager);
+
+			viewPager.Adapter = new PageAdapter(Element);
+			viewPager.SetCurrentItem(Element.Position, false);
+
+			// InterPageSpacing BP
+			var metrics = Resources.DisplayMetrics;
+			var interPageSpacing = Element.InterPageSpacing * metrics.Density;
+			viewPager.PageMargin = (int)interPageSpacing;
+
+			// InterPageSpacingColor BP
+			viewPager.SetBackgroundColor(Element.InterPageSpacingColor.ToAndroid());
+
+			// IsSwipingEnabled BP
+			SetIsSwipingEnabled();
+
+			// INDICATORS
+			indicators = nativeView.FindViewById<CirclePageIndicator>(Resource.Id.indicator);
+
+			SetPosition();
+
+			indicators.SetViewPager(viewPager);
+
+			// IndicatorsTintColor BP
+			indicators.SetFillColor(Element.IndicatorsTintColor.ToAndroid());
+
+			// CurrentPageIndicatorTintColor BP
+			indicators.SetPageColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
+
+			// IndicatorsShape BP
+			indicators.SetStyle(Element.IndicatorsShape); // Rounded or Squared
+
+			// ShowIndicators BP
+			indicators.Visibility = Element.ShowIndicators ? AViews.ViewStates.Visible : AViews.ViewStates.Gone;
+
+			viewPager.PageSelected += ViewPager_PageSelected;
+			viewPager.PageScrollStateChanged += ViewPager_PageScrollStateChanged;
+
+			SetNativeControl(nativeView);
+		}
+
+		void InsertPage(object item, int position)
+		{
+			var Source = ((PageAdapter)viewPager?.Adapter).Source;
+
+			if (viewPager != null && Source != null)
 			{
-				if (position > Element.ItemsSource.Count)
-					throw new CarouselViewException("Page cannot be inserted at a position bigger than ItemsSource.Count");
+				Source.Insert(position, item);
 
-				if (position == -1)
-					Element.ItemsSource.Add(item);
-				else
-					Element.ItemsSource.Insert(position, item);
-
+				// To insert in current position rebuild viewpager or get an exception
 				if (position == Element.Position)
 				{
 					viewPager.Adapter = new PageAdapter(Element);
@@ -192,48 +265,49 @@ namespace Xamarin.Forms.Platform.Android
 				else
 					viewPager.Adapter.NotifyDataSetChanged();
 
-				await Task.Delay(100);
-
-				if (Element.ItemsSource.Count == 1)
+				// Call position selected when inserting first page
+				if (Element.ItemsSource.GetCount() == 1)
 					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 			}
 		}
 
 		// Android ViewPager is the most complicated piece of code ever :)
-		public async Task RemoveItem(int position)
+		async Task RemovePage(int position)
 		{
-			if (Element != null && viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0) {
-				
+			var Source = ((PageAdapter)viewPager?.Adapter).Source;
+
+			if (viewPager != null && Source != null && Source?.Count > 0)
+			{
+
 				isSwiping = true;
 
-				if (position > Element.ItemsSource.Count - 1)
-					throw new CarouselViewException("Page cannot be removed at a position bigger than ItemsSource.Count - 1");
-
-				if (Element.ItemsSource?.Count == 1)
+				// To remove latest page, rebuild viewpager or the page wont disappear
+				if (Source.Count == 1)
 				{
-					Element.ItemsSource.RemoveAt(position);
+					Source.RemoveAt(position);
 					viewPager.Adapter = new PageAdapter(Element);
 					viewPager.SetCurrentItem(Element.Position, false);
-
-					indicator.SetViewPager(viewPager);
+					indicators?.SetViewPager(viewPager);
 				}
-				else {
-
+				else
+				{
+					// To remove current page
 					if (position == Element.Position)
 					{
-
 						var newPos = position - 1;
 						if (newPos == -1)
 							newPos = 0;
 
 						if (position == 0)
 						{
-
+							// Move to next page
 							viewPager.SetCurrentItem(1, Element.AnimateTransition);
 
-							await Task.Delay(100);
+							// With a swipe transition
+							if (Element.AnimateTransition)
+								await Task.Delay(100);
 
-							Element.ItemsSource.RemoveAt(position);
+							Source.RemoveAt(position);
 
 							//viewPager.Adapter = new PageAdapter(Element, viewPager);
 							viewPager.Adapter.NotifyDataSetChanged();
@@ -242,25 +316,35 @@ namespace Xamarin.Forms.Platform.Android
 							Element.Position = 0;
 
 						}
-						else {
+						else
+						{
 
+							// Move to previous page
 							viewPager.SetCurrentItem(newPos, Element.AnimateTransition);
 
-							await Task.Delay(100);
+							// With a swipe transition
+							if (Element.AnimateTransition)
+								await Task.Delay(100);
 
-							Element.ItemsSource.RemoveAt(position);
+							Source.RemoveAt(position);
+
+							// To remove at position 1, reassign adapter or touch to swipe wont work anymore
 							if (position == 1)
 								viewPager.Adapter = new PageAdapter(Element);
 							else
 								viewPager.Adapter.NotifyDataSetChanged();
+
 							Element.Position = newPos;
 						}
 
 					}
-					else {
+					// To remove non current page
+					else
+					{
 
-						Element.ItemsSource.RemoveAt(position);
+						Source.RemoveAt(position);
 
+						// To remove at position 1, reassign adapter or touch to swipe wont work anymore
 						if (position == 1)
 							viewPager.Adapter = new PageAdapter(Element);
 						else
@@ -273,15 +357,14 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		void SetCurrentItem(int position)
+		void SetCurrentPage(int position)
 		{
-			if (Element != null && viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.Count > 0) {
+			if (viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+			{
 
-				if (position > Element.ItemsSource.Count - 1)
-					throw new CarouselViewException("Current page index cannot be bigger than ItemsSource.Count - 1");
-				
-				viewPager.SetCurrentItem (position, Element.AnimateTransition);
+				viewPager.SetCurrentItem(position, Element.AnimateTransition);
 
+				// Invoke PositionSelected when AnimateTransition is disabled
 				if (!Element.AnimateTransition)
 					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 			}
@@ -291,38 +374,50 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			CarouselView Element;
 
+			// A local copy of ItemsSource so we can use CollectionChanged events
+			public List<object> Source;
+
+			//string TAG_VIEWS = "TAG_VIEWS";
+			//SparseArray<Parcelable> mViewStates = new SparseArray<Parcelable>();
+			//ViewPager mViewPager;
+
 			public PageAdapter(CarouselView element)
 			{
 				Element = element;
+				Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
 			}
 
-			public override int Count {
-				get {
-					return Element.ItemsSource?.Count ?? 0;
+			public override int Count
+			{
+				get
+				{
+					return Source?.Count ?? 0;
 				}
 			}
 
-			public override bool IsViewFromObject (AViews.View view, Java.Lang.Object objectValue)
+			public override bool IsViewFromObject(AViews.View view, Java.Lang.Object objectValue)
 			{
 				return view == objectValue;
-			} 
+			}
 
-			public override Java.Lang.Object InstantiateItem (AViews.ViewGroup container, int position)
+			public override Java.Lang.Object InstantiateItem(AViews.ViewGroup container, int position)
 			{
 				View formsView = null;
 
 				object bindingContext = null;
 
-				if (Element.ItemsSource != null && Element.ItemsSource?.Count > 0)
-				    bindingContext = Element.ItemsSource.Cast<object> ().ElementAt (position);
-				
+				if (Source != null && Source?.Count > 0)
+					bindingContext = Source.Cast<object>().ElementAt(position);
+
 				var dt = bindingContext as DataTemplate;
 
+				// Support for List<DataTemplate> as ItemsSource
 				if (dt != null)
 				{
 					formsView = (View)dt.CreateContent();
 				}
-				else {
+				else
+				{
 
 					var selector = Element.ItemTemplate as DataTemplateSelector;
 					if (selector != null)
@@ -333,46 +428,74 @@ namespace Xamarin.Forms.Platform.Android
 					formsView.BindingContext = bindingContext;
 				}
 
+				// HeightRequest fix
 				formsView.Parent = this.Element;
 
-				var nativeConverted = FormsToNativeDroid.ConvertFormsToNative (formsView, new Rectangle (0, 0, Element.Width, Element.Height));
+				var nativeConverted = FormsToNativeDroid.ConvertFormsToNative(formsView, new Rectangle(0, 0, Element.Width, Element.Height));
 				nativeConverted.Tag = position;
 
 				var pager = (ViewPager)container;
 
-				pager.AddView (nativeConverted);
+				//nativeConverted.RestoreHierarchyState(mViewStates);
+
+				pager.AddView(nativeConverted);
 
 				return nativeConverted;
 			}
 
-			public override void DestroyItem (AViews.ViewGroup container, int position, Java.Lang.Object objectValue)
+			public override void DestroyItem(AViews.ViewGroup container, int position, Java.Lang.Object objectValue)
 			{
 				var pager = (ViewPager)container;
 				var view = (AViews.ViewGroup)objectValue;
-				pager.RemoveView (view);
+				//view.SaveHierarchyState(mViewStates);
+				pager.RemoveView(view);
 			}
 
-			public override int GetItemPosition (Java.Lang.Object objectValue)
+			public override int GetItemPosition(Java.Lang.Object objectValue)
 			{
 				var tag = int.Parse(((AViews.View)objectValue).Tag.ToString());
 				if (tag == Element.Position)
 					return tag;
 				return PositionNone;
 			}
+
+			/*public override IParcelable SaveState()
+			{
+				var count = mViewPager.ChildCount;
+				for (int i = 0; i < count; i++)
+				{
+					var c = mViewPager.GetChildAt(i);
+					if (c.SaveFromParentEnabled)
+					{
+						c.SaveHierarchyState(mViewStates);
+					}
+				}
+				var bundle = new Bundle();
+				bundle.PutSparseParcelableArray(TAG_VIEWS, mViewStates);
+				return bundle;
+			}
+
+			public override void RestoreState(IParcelable state, Java.Lang.ClassLoader loader)
+			{
+				var bundle = (Bundle)state;
+				bundle.SetClassLoader(loader);
+				mViewStates = (SparseArray<Parcelable>)bundle.GetSparseParcelableArray(TAG_VIEWS);
+			}*/
 		}
 
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing && !_disposed)
 			{
-				if (viewPager != null) {
+				if (viewPager != null)
+				{
 
 					viewPager.PageSelected -= ViewPager_PageSelected;
-                    viewPager.PageScrollStateChanged -= ViewPager_PageScrollStateChanged;
+					viewPager.PageScrollStateChanged -= ViewPager_PageScrollStateChanged;
 
-                    if (viewPager.Adapter != null)
-						viewPager.Adapter.Dispose ();
-					viewPager.Dispose ();
+					if (viewPager.Adapter != null)
+						viewPager.Adapter.Dispose();
+					viewPager.Dispose();
 					viewPager = null;
 				}
 
@@ -383,11 +506,11 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				base.Dispose(disposing);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
 				return;
 			}
 		}
-    }
+	}
 }

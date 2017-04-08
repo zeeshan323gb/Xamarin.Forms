@@ -7,6 +7,25 @@ using Android.Util;
 using Java.Lang;
 using Android.Support.V4.Content;
 
+/*
+ * Copyright 2013 Tomasz Cielecki
+ * Copyright 2012 Jake Wharton
+ * Copyright 2011 Patrik Åkerfeldt
+ * Copyright 2011 Francisco Figueiredo Jr.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 namespace Xamarin.Forms.Platform.Android
 {
 	public class CirclePageIndicator : global::Android.Views.View, PageIndicator
@@ -73,15 +92,16 @@ namespace Xamarin.Forms.Platform.Android
 
 		}
 
-		public void SetPageColor(global::Android.Graphics.Color pageColor)
-		{
-			mPaintPageFill.Color = pageColor;
-			Invalidate();
-		}
-
 		public void SetFillColor(global::Android.Graphics.Color fillColor)
 		{
-			mPaintFill.Color = fillColor;
+			mPaintPageFill.Color = fillColor;
+			Invalidate();
+
+		}
+
+		public void SetPageColor(global::Android.Graphics.Color pageColor)
+		{
+			mPaintFill.Color = pageColor;
 			Invalidate();
 		}
 
@@ -123,7 +143,8 @@ namespace Xamarin.Forms.Platform.Android
 				longPaddingAfter = PaddingRight;
 				shortPaddingBefore = PaddingTop;
 			}
-			else {
+			else
+			{
 				longSize = Height;
 				longPaddingBefore = PaddingTop;
 				longPaddingAfter = PaddingBottom;
@@ -156,7 +177,8 @@ namespace Xamarin.Forms.Platform.Android
 					dX = drawLong;
 					dY = shortOffset;
 				}
-				else {
+				else
+				{
 					dX = shortOffset;
 					dY = drawLong;
 				}
@@ -201,7 +223,8 @@ namespace Xamarin.Forms.Platform.Android
 				dX = longOffset + cx;
 				dY = shortOffset;
 			}
-			else {
+			else
+			{
 				dX = shortOffset;
 				dY = longOffset + cx;
 			}
@@ -308,18 +331,19 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				SetMeasuredDimension(MeasureLong(widthMeasureSpec), MeasureShort(heightMeasureSpec));
 			}
-			else {
+			else
+			{
 				SetMeasuredDimension(MeasureShort(widthMeasureSpec), MeasureLong(heightMeasureSpec));
 			}
 		}
 
 		/**
-	     * Determines the width of this view
-	     *
-	     * @param measureSpec
-	     *            A measureSpec packed into an int
-	     * @return The width of the view, honoring constraints from measureSpec
-	     */
+		 * Determines the width of this view
+		 *
+		 * @param measureSpec
+		 *            A measureSpec packed into an int
+		 * @return The width of the view, honoring constraints from measureSpec
+		 */
 		private int MeasureLong(int measureSpec)
 		{
 			int result = 0;
@@ -331,7 +355,8 @@ namespace Xamarin.Forms.Platform.Android
 				//We were told how big to be
 				result = specSize;
 			}
-			else {
+			else
+			{
 				//Calculate the width according the views count
 				int count = mViewPager.Adapter.Count;
 				result = (int)(PaddingLeft + PaddingRight
@@ -346,12 +371,12 @@ namespace Xamarin.Forms.Platform.Android
 		}
 
 		/**
-	     * Determines the height of this view
-	     *
-	     * @param measureSpec
-	     *            A measureSpec packed into an int
-	     * @return The height of the view, honoring constraints from measureSpec
-	     */
+		 * Determines the height of this view
+		 *
+		 * @param measureSpec
+		 *            A measureSpec packed into an int
+		 * @return The height of the view, honoring constraints from measureSpec
+		 */
 		private int MeasureShort(int measureSpec)
 		{
 			int result = 0;
@@ -363,7 +388,8 @@ namespace Xamarin.Forms.Platform.Android
 				//We were told how big to be
 				result = specSize;
 			}
-			else {
+			else
+			{
 				//Measure the height
 				result = (int)(2 * mRadius + PaddingTop + PaddingBottom + 1);
 				//Respect AT_MOST value if that was what is called for by measureSpec

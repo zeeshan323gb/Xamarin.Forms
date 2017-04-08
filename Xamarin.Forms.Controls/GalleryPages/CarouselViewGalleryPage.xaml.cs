@@ -31,13 +31,13 @@ namespace Xamarin.Forms.Controls
 			{
 				Text = "Add",
 				Order = ToolbarItemOrder.Primary,
-				Command = new Command(async () =>
+				Command = new Command(() =>
 				{
 					var source = ((CarouselViewModel)BindingContext).Source;
 					int context = 1;
 					if (source.Count > 0)
 						context = source.Max() + 1;
-					await myCarousel.InsertPage(context);
+					source.Add(context);
 					myCarousel.Position = source.Count - 1;
 				})
 			});
@@ -46,11 +46,11 @@ namespace Xamarin.Forms.Controls
 			{
 				Text = "Remove",
 				Order = ToolbarItemOrder.Primary,
-				Command = new Command(async () =>
+				Command = new Command(() =>
 				{
 					var source = ((CarouselViewModel)BindingContext).Source;
 					if (source.Count > 0)
-						await myCarousel.RemovePage(myCarousel.Position);
+						source.RemoveAt(myCarousel.Position);
 				})
 			});
 
@@ -62,7 +62,7 @@ namespace Xamarin.Forms.Controls
 
 			nextBtn.Clicked += (sender, e) =>
 			{
-				if (myCarousel.Position < myCarousel.ItemsSource?.Count - 1)
+				if (myCarousel.Position < myCarousel.ItemsSource?.GetCount() - 1)
 					myCarousel.Position++;
 			};
 
@@ -77,8 +77,9 @@ namespace Xamarin.Forms.Controls
 
 		void ButtonsVisibility()
 		{
+			var _vm = (CarouselViewModel)BindingContext;
 			prevBtn.IsVisible = myCarousel.Position > 0;
-			nextBtn.IsVisible = myCarousel.Position < myCarousel.ItemsSource?.Count - 1;
+			nextBtn.IsVisible = myCarousel.Position < _vm.Source.Count - 1;
 		}
 	}
 }
