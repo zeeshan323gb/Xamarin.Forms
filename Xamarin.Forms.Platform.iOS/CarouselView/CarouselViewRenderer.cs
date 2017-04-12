@@ -182,12 +182,13 @@ namespace Xamarin.Forms.Platform.iOS
 		// To avoid triggering Position changed more than once
 		bool isSwiping;
 
+		#region adapter callbacks
 		void PageController_DidFinishAnimating(object sender, UIPageViewFinishedAnimationEventArgs e)
 		{
 			if (e.Finished)
 			{
 				var controller = (ViewContainer)pageController.ViewControllers[0];
-				var position = controller.Tag;
+				var position = Source.IndexOf(controller.Tag);
 				isSwiping = true;
 				Element.Position = position;
 				prevPosition = position;
@@ -196,6 +197,7 @@ namespace Xamarin.Forms.Platform.iOS
 				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 			}
 		}
+		#endregion
 
 		void SetPosition()
 		{
@@ -254,6 +256,7 @@ namespace Xamarin.Forms.Platform.iOS
 				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:|[pageControl]|", NSLayoutFormatOptions.AlignAllTop, new NSDictionary(), viewsDictionary));
 			}
 
+			#region adapter
 			pageController.DidFinishAnimating += PageController_DidFinishAnimating;
 
 			pageController.GetPreviousViewController = (pageViewController, referenceViewController) =>
@@ -262,13 +265,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 				if (controller != null)
 				{
-					var position = controller.Tag;
+					var position = Source.IndexOf(controller.Tag);
 
-		// Determine if we are on the first page
-		if (position == 0)
+					// Determine if we are on the first page
+					if (position == 0)
 					{
-			// We are on the first page, so there is no need for a controller before that
-			return null;
+						// We are on the first page, so there is no need for a controller before that
+						return null;
 					}
 					else
 					{
@@ -288,13 +291,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 				if (controller != null)
 				{
-					var position = controller.Tag;
+					var position = Source.IndexOf(controller.Tag);
 
-		            // Determine if we are on the last page
-		            if (position == Count - 1)
+					// Determine if we are on the last page
+					if (position == Count - 1)
 					{
-			            // We are on the last page, so there is no need for a controller after that
-			            return null;
+						// We are on the last page, so there is no need for a controller after that
+						return null;
 					}
 					else
 					{
@@ -307,6 +310,7 @@ namespace Xamarin.Forms.Platform.iOS
 					return null;
 				}
 			};
+			#endregion
 
 			if (Source != null && Source?.Count > 0)
 			{
@@ -373,9 +377,7 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					SetIndicators();
 
-	                // Call position selected when inserting first page
-	                if (Element.ItemsSource.GetCount() == 1)
-						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 				});
 			}
 		}
@@ -417,8 +419,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 							SetIndicators();
 
-	                        // Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
-	                        Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
+							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 						});
 					}
 					else
@@ -460,6 +462,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		#region adapter
 		UIViewController CreateViewController(int index)
 		{
 			View formsView = null;
@@ -496,11 +499,12 @@ namespace Xamarin.Forms.Platform.iOS
 			var nativeConverted = FormsViewToNativeiOS.ConvertFormsToNative(formsView, rect);
 
 			var viewController = new ViewContainer();
-			viewController.Tag = index;
+			viewController.Tag = bindingContext;
 			viewController.View = nativeConverted;
 
 			return viewController;
 		}
+		#endregion
 
 		protected override void Dispose(bool disposing)
 		{

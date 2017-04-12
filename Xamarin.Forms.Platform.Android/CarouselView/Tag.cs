@@ -1,5 +1,4 @@
-﻿
-using UIKit;
+﻿using System;
 
 /*
 The MIT License(MIT)
@@ -22,12 +21,10 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
-namespace Xamarin.Forms.Platform.iOS
+namespace Xamarin.Forms.Platform.Android
 {
-	public class ViewContainer : UIViewController
+	public class Tag : Java.Lang.Object
 	{
-        // To hold binding context
-		public object Tag { get; set; }
+		public object BindingContext { get; set; }
 	}
 }
-
