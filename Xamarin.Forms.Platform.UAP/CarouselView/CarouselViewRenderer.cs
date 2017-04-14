@@ -428,7 +428,7 @@ namespace Xamarin.Forms.Platform.UWP
 
             formsView.Parent = this.Element;
 
-            var element = FormsViewToNativeUWP.ConvertFormsToNative(formsView, new Xamarin.Forms.Rectangle(0, 0, ElementWidth, ElementHeight));
+            var element = formsView.ToWindows(new Xamarin.Forms.Rectangle(0, 0, ElementWidth, ElementHeight));
 
             return element;
         }

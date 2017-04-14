@@ -112,6 +112,7 @@ namespace Xamarin.Forms.Platform.iOS
 					ElementWidth = rect.Width;
 					break;
 				case "Height":
+					ElementWidth = rect.Width; //Content not getting rendered in iOS because ElementWidth is 0 (+ fix) #96
 					ElementHeight = rect.Height;
 					SetNativeView();
 					SetIndicators();
@@ -496,7 +497,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			// UIScreen.MainScreen.Bounds.Width, UIScreen.MainScreen.Bounds.Height
 			var rect = new CGRect(Element.X, Element.Y, ElementWidth, ElementHeight);
-			var nativeConverted = FormsViewToNativeiOS.ConvertFormsToNative(formsView, rect);
+			var nativeConverted = formsView.ToiOS(rect);
 
 			var viewController = new ViewContainer();
 			viewController.Tag = bindingContext;

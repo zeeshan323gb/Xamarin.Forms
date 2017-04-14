@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 #if WINDOWS_UWP
+using Windows.UI.Xaml;
 
 namespace Xamarin.Forms.Platform.UWP
 #else
@@ -22,5 +23,22 @@ namespace Xamarin.Forms.Platform.WinRT
 
 			return result;
 		}
+#if WINDOWS_UWP
+        public static FrameworkElement ToWindows(this Xamarin.Forms.View view, Rectangle size)
+        {
+            //var vRenderer = RendererFactory.GetRenderer (view);
+
+            if (Platform.GetRenderer(view) == null)
+                Platform.SetRenderer(view, Platform.CreateRenderer(view));
+
+            var vRenderer = Platform.GetRenderer(view);
+
+            view.Layout(new Rectangle(0, 0, size.Width, size.Height));
+
+            //vRenderer.ContainerElement.Arrange(new Rect(0, 0, size.Width, size.Height));
+
+            return vRenderer.ContainerElement;
+        }
+#endif
 	}
 }

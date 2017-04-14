@@ -441,7 +441,6 @@
     <Compile Include="MasterDetailPageRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CarouselView\CarouselViewRenderer.cs" />
-    <Compile Include="CarouselView\FormsViewToNativeUWP.cs" />
     <Compile Include="CarouselView\Timer.cs" />
   </ItemGroup>
   <ItemGroup>

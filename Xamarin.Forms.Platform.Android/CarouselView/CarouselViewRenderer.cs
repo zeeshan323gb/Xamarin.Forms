@@ -405,7 +405,7 @@ namespace Xamarin.Forms.Platform.Android
 				// HeightRequest fix
 				formsView.Parent = this.Element;
 
-				var nativeConverted = FormsToNativeDroid.ConvertFormsToNative(formsView, new Rectangle(0, 0, Element.Width, Element.Height));
+				var nativeConverted = formsView.ToAndroid(new Rectangle(0, 0, Element.Width, Element.Height));
 				nativeConverted.Tag = new Tag() { BindingContext = bindingContext }; //position;
 
 				var pager = (ViewPager)container;
