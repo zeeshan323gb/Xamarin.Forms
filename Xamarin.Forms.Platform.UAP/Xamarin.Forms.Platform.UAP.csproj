@@ -128,6 +128,9 @@
     <Compile Include="..\Xamarin.Forms.Platform.WinRT.Phone\FormsPivot.cs">
       <Link>FormsPivot.cs</Link>
     </Compile>
+    <Compile Include="..\Xamarin.Forms.Platform.WinRT\AccessibilityExtensions.cs">
+      <Link>AccessibilityExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\Xamarin.Forms.Platform.WinRT\AlignmentExtensions.cs">
       <Link>AlignmentExtensions.cs</Link>
     </Compile>
