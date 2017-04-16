@@ -10,11 +10,6 @@ namespace Xamarin.Forms.Platform.WinRT
 {
 	public static class AccessibilityExtensions
 	{
-		public static void SetAutomationPropertiesAutomationId(this FrameworkElement Control, string id)
-		{
-			Control.SetValue(AutomationProperties.AutomationIdProperty, id);
-		}
-
 		public static string SetAutomationPropertiesName(this FrameworkElement Control, Element Element, string _defaultAutomationPropertiesName = null)
 		{
 			if (Element == null)
@@ -94,6 +89,33 @@ namespace Xamarin.Forms.Platform.WinRT
 				Control.SetValue(AutomationProperties.LabeledByProperty, _defaultAutomationPropertiesLabeledBy);
 
 			return _defaultAutomationPropertiesLabeledBy;
+		}
+
+		// TODO: This is not having any effect on anything I've tested yet. See if we need it 
+		// after we test the MDP and NP w/ back button explicitly enabled.
+		public static void SetBackButtonTitle(this PageControl Control, Element Element)
+		{
+			if (Element == null)
+				return;
+
+			var elemValue = ConcatenateNameAndHint(Element);
+
+			Control.BackButtonTitle = elemValue;
+		}
+
+		static string ConcatenateNameAndHint(Element Element)
+		{
+			string separator;
+
+			var name = (string)Element.GetValue(Accessibility.NameProperty);
+			var hint = (string)Element.GetValue(Accessibility.HintProperty);
+
+			if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(hint))
+				separator = "";
+			else
+				separator = ". ";
+
+			return string.Join(separator, name, hint);
 		}
 	}
 }

@@ -319,7 +319,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		protected virtual void SetAutomationId(string id)
 		{
-			this.SetAutomationPropertiesAutomationId(id);
+			SetValue(AutomationProperties.AutomationIdProperty, id);
 		}
 
 		protected virtual void SetAutomationPropertiesName()

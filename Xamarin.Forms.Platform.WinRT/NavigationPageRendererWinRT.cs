@@ -19,6 +19,7 @@
 		{
 			bool showBackButton = Element.InternalChildren.Count > 1 && NavigationPage.GetHasBackButton(_currentPage);
 			_container.ShowBackButton = showBackButton;
+			_container.SetBackButtonTitle(Element);
 		}
 
 		void UpdateToolbarPlacement()

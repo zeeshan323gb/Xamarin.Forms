@@ -35,8 +35,8 @@ namespace Xamarin.Forms.Platform.WinRT
 			}
 			else
 			{
-				this.SetAutomationPropertiesAutomationId($"{id}_Container");
-				Control.SetAutomationPropertiesAutomationId(id);
+				SetValue(AutomationProperties.AutomationIdProperty, $"{id}_Container");
+				Control.SetValue(AutomationProperties.AutomationIdProperty, id);
 			}
 		}
 		protected override void SetAutomationPropertiesName()
