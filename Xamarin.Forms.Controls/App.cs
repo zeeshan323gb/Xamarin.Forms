@@ -47,12 +47,18 @@ namespace Xamarin.Forms.Controls
 
 		public Page CreateDefaultMainPage()
 		{
-			return new MasterDetailPage
+			var master = new MasterDetailPage
 			{
 				AutomationId = DefaultMainPageId,
 				Master = new ContentPage { Title = "Master", Content = new View { BackgroundColor = Color.Red } },
 				Detail = CoreGallery.GetMainPage()
 			};
+
+			// Sets the accessibility settings for the master page's back button
+			master.SetAccessibilityName("Master Page");
+			master.SetAccessibilityHint("Tap to go back");
+
+			return master;
 		}
 
 		protected override void OnAppLinkRequestReceived(Uri uri)
