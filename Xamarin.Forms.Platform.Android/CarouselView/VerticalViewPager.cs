@@ -17,21 +17,7 @@ namespace Xamarin.Forms.Platform.Android
 		public VerticalViewPager(Context context, IAttributeSet attrs) : base(context, attrs)
 		{
 			SetPageTransformer(false, new DefaultTransformer());
-			// get rid of the overscroll drawing that happens on the left and right
 			OverScrollMode = OverScrollMode.Never;
-		}
-
-		private MotionEvent SwapTouchEvent(MotionEvent ev)
-		{
-			float width = Width;
-			float height = Height;
-
-			float swappedX = (ev.GetY() / height) * width;
-			float swappedY = (ev.GetX() / width) * height;
-
-			ev.SetLocation(swappedX, swappedY);
-
-			return ev;
 		}
 
 		public override bool OnTouchEvent(MotionEvent ev)
@@ -49,12 +35,24 @@ namespace Xamarin.Forms.Platform.Android
 			if (this.isSwipingEnabled)
 			{
 				bool intercept = base.OnInterceptTouchEvent(SwapTouchEvent(ev));
-				//If not intercept, touch event should not be swapped.
 				SwapTouchEvent(ev);
 				return intercept;
 			}
 
 			return false;
+		}
+
+		private MotionEvent SwapTouchEvent(MotionEvent ev)
+		{
+			float width = Width;
+			float height = Height;
+
+			float swappedX = (ev.GetY() / height) * width;
+			float swappedY = (ev.GetX() / width) * height;
+
+			ev.SetLocation(swappedX, swappedY);
+
+			return ev;
 		}
 
 		public void SetPagingEnabled(bool enabled)
