@@ -249,7 +249,6 @@
     <Compile Include="CarouselView\CarouselViewRenderer.cs" />
     <Compile Include="CarouselView\CirclePageIndicator.cs" />
     <Compile Include="CarouselView\CustomViewPager.cs" />
-    <Compile Include="CarouselView\DefaultPageTransformer.cs" />
     <Compile Include="CarouselView\PageIndicator.cs" />
     <Compile Include="CarouselView\VerticalViewPager.cs" />
     <Compile Include="AppCompat\Resource.cs" />
