@@ -23,7 +23,7 @@ using Android.Support.V4.View;
 using Android.Util;
 using Android.Views;
 
-namespace CarouselView.FormsPlugin.Android
+namespace Xamarin.Forms.Platform.Android
 {
 
 	public class VerticalViewPager : ViewPager, IViewPager
@@ -106,7 +106,7 @@ namespace CarouselView.FormsPlugin.Android
 
 		private class VerticalPageTransformer : Java.Lang.Object, ViewPager.IPageTransformer
 		{
-			public void TransformPage(View view, float position)
+			public void TransformPage(global::Android.Views.View view, float position)
 			{
 				var pageWidth = view.Width;
 				var pageHeight = view.Height;
