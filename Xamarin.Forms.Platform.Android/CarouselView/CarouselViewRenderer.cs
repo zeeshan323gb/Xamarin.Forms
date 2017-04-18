@@ -145,6 +145,7 @@ namespace Xamarin.Forms.Platform.Android
 						SetPosition();
 						viewPager.Adapter = new PageAdapter(Element);
 						viewPager.SetCurrentItem(Element.Position, false);
+						//TODO Update Indicators
 						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 						if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
 							((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
@@ -155,6 +156,7 @@ namespace Xamarin.Forms.Platform.Android
 					{
 						viewPager.Adapter = new PageAdapter(Element);
 						viewPager.SetCurrentItem(Element.Position, false);
+						//TODO Update Indicators
 						Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
 					}
 					break;
@@ -212,6 +214,8 @@ namespace Xamarin.Forms.Platform.Android
 				Element.Position = 0;
 			}
 			isSwiping = false;
+
+			//TODO Update Indicators
 		}
 
 		void SetNativeView()
@@ -239,6 +243,12 @@ namespace Xamarin.Forms.Platform.Android
 			SetIsSwipingEnabled();
 
 			SetPosition();
+
+			// TODO Initialize Indicators
+			// IndicatorsTintColor BP
+			// CurrentPageIndicatorTintColor BP
+			// IndicatorsShape BP
+			// ShowIndicators BP
 
 			viewPager.PageSelected += ViewPager_PageSelected;
 			viewPager.PageScrollStateChanged += ViewPager_PageScrollStateChanged;
@@ -299,6 +309,8 @@ namespace Xamarin.Forms.Platform.Android
 				Source.RemoveAt(position);
 
 				viewPager.Adapter.NotifyDataSetChanged();
+
+				// TODO Update indicators
 
 				isSwiping = false;
 			}
