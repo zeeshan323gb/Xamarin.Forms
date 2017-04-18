@@ -162,6 +162,9 @@
     <Reference Include="Xamarin.Insights">
       <HintPath>..\packages\Xamarin.Insights.1.12.3\lib\MonoAndroid10\Xamarin.Insights.dll</HintPath>
     </Reference>
+    <Reference Include="Com.Android.DeskClock">
+      <HintPath>..\packages\Xamarin.Android.VerticalViewPager.1.0.0\lib\MonoAndroid\Com.Android.DeskClock.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activity1.cs" />

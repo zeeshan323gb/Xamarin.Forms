@@ -94,6 +94,9 @@
       <HintPath>..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\lib\MonoAndroid403\Xamarin.Android.Support.Vector.Drawable.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Com.Android.DeskClock">
+      <HintPath>..\packages\Xamarin.Android.VerticalViewPager.1.0.0\lib\MonoAndroid\Com.Android.DeskClock.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Xamarin.Forms.Core\Properties\GlobalAssemblyInfo.cs">
@@ -249,7 +252,6 @@
     <Compile Include="CarouselView\CarouselViewRenderer.cs" />
     <Compile Include="CarouselView\CustomViewPager.cs" />
     <Compile Include="AppCompat\Resource.cs" />
-    <Compile Include="CarouselView\IViewPager.cs" />
     <Compile Include="CarouselView\Tag.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
@@ -277,6 +279,7 @@
   <ItemGroup />
   <ItemGroup>
     <AndroidResource Include="Resources\layout\horizontal_viewpager.xml" />
+    <AndroidResource Include="Resources\layout\vertical_viewpager.xml" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />

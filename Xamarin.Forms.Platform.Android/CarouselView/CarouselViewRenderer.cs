@@ -7,6 +7,7 @@ using System.ComponentModel;
 using AViews = Android.Views;
 using System.Collections.Specialized;
 using System.Collections.Generic;
+using Com.Android.DeskClock;
 
 /*
 The MIT License(MIT)
@@ -196,7 +197,11 @@ namespace Xamarin.Forms.Platform.Android
 
 		void SetIsSwipingEnabled()
 		{
-			((IViewPager)viewPager)?.SetPagingEnabled(Element.IsSwipingEnabled);
+			//((IViewPager)viewPager)?.SetPagingEnabled(Element.IsSwipingEnabled);
+			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				((CustomViewPager)viewPager)?.SetPagingEnabled(Element.IsSwipingEnabled);
+			else
+				((VerticalViewPager)viewPager)?.SetPagingEnabled(Element.IsSwipingEnabled);
 		}
 
 		void SetPosition()
@@ -222,9 +227,11 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			var inflater = AViews.LayoutInflater.From(Forms.Context);
 
-			// TODO: Orientation BP
-
-			nativeView = inflater.Inflate(Resource.Layout.horizontal_viewpager, null);
+			// Orientation BP
+			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				nativeView = inflater.Inflate(Resource.Layout.horizontal_viewpager, null);
+			else
+				nativeView = inflater.Inflate(Resource.Layout.vertical_viewpager, null);
 
 			viewPager = nativeView.FindViewById<ViewPager>(Resource.Id.pager);
 

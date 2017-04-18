@@ -27,7 +27,7 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class CustomViewPager : ViewPager, IViewPager
+	public class CustomViewPager : ViewPager
 	{
 		private bool isSwipingEnabled = true;
 
