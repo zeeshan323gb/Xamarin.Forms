@@ -247,10 +247,7 @@
     <Compile Include="NativeValueConverterService.cs" />
     <Compile Include="NativeBindingservice.cs" />
     <Compile Include="CarouselView\CarouselViewRenderer.cs" />
-    <Compile Include="CarouselView\CirclePageIndicator.cs" />
     <Compile Include="CarouselView\CustomViewPager.cs" />
-    <Compile Include="CarouselView\PageIndicator.cs" />
-    <Compile Include="CarouselView\VerticalViewPager.cs" />
     <Compile Include="AppCompat\Resource.cs" />
     <Compile Include="CarouselView\IViewPager.cs" />
     <Compile Include="CarouselView\Tag.cs" />
@@ -280,11 +277,6 @@
   <ItemGroup />
   <ItemGroup>
     <AndroidResource Include="Resources\layout\horizontal_viewpager.xml" />
-    <AndroidResource Include="Resources\layout\vertical_viewpager.xml" />
-    <AndroidResource Include="Resources\values\vpi__attrs.xml" />
-    <AndroidResource Include="Resources\values\vpi__colors.xml" />
-    <AndroidResource Include="Resources\values\vpi__defaults.xml" />
-    <AndroidResource Include="Resources\values\vpi__styles.xml" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.23.3.0\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
