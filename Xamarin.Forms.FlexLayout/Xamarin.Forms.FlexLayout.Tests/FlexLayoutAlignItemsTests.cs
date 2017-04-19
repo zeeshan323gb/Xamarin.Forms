@@ -19,7 +19,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
-
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -45,6 +45,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.Platform = platform;
 			layout.AlignItems = Flex.Align.Center;
 			layout.WidthRequest = 100;
@@ -75,6 +76,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.AlignItems = Flex.Align.FlexStart;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
@@ -102,6 +104,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.Platform = platform;
 			layout.AlignItems = Flex.Align.FlexEnd;
 			layout.WidthRequest = 100;
@@ -180,6 +183,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			layout.Children.Add(view0);
 
 			var view1 = new FlexLayout { IsPlatformEnabled = true };
+			view1.FlexDirection = Flex.FlexDirection.Column;
 			view1.WidthRequest = 50;
 			view1.HeightRequest = 20;
 			layout.Children.Add(view1);
@@ -228,12 +232,13 @@ namespace Xamarin.Forms.FlexLayoutTests
 			layout.Children.Add(view0);
 
 			var view1 = new FlexLayout { IsPlatformEnabled = true };
+			view1.FlexDirection = Flex.FlexDirection.Row;
 			view1.Wrap = Flex.Wrap.Wrap;
 			view1.WidthRequest = 50;
 			view1.HeightRequest = 25;
 			layout.Children.Add(view1);
 
-			var view1_child0 = new View { IsPlatformEnabled = true };
+			var view1_child0 = new View { IsPlatformEnabled = true };		
 			view1_child0.WidthRequest = 25;
 			view1_child0.HeightRequest = 20;
 			view1.Children.Add(view1_child0);
@@ -290,5 +295,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			Assert.AreEqual(25f, view1_child3.Width);
 			Assert.AreEqual(10f, view1_child3.Height);
 		}
+
+		//TODO: Missing more Baseline tests
 	}
 }

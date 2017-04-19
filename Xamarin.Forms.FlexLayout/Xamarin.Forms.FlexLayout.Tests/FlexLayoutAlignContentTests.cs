@@ -154,6 +154,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.Platform = platform;
 			layout.Wrap = Flex.Wrap.Wrap;
 			layout.WidthRequest = 100;
@@ -227,6 +228,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.AlignContent = Flex.Align.FlexEnd;
 			layout.Wrap = Flex.Wrap.Wrap;
 			layout.WidthRequest = 100;
@@ -257,6 +259,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			view4.HeightRequest = 10;
 			layout.Children.Add(view4);
 
+			var measure = layout.Measure(100, 100);
 			layout.Layout(new Rectangle(0, 0, 100, 100));
 
 			Assert.AreEqual(0f, layout.X);
@@ -296,6 +299,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.AlignContent = Flex.Align.Stretch;
 			layout.Wrap = Flex.Wrap.Wrap;
 			layout.WidthRequest = 150;
