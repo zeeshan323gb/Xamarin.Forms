@@ -116,12 +116,12 @@ namespace Xamarin.Forms.Platform.iOS
 					ElementHeight = rect.Height;
 					SetNativeView();
 					SetIndicators();
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, Element.Position);
 					break;
 				case "Orientation":
 					SetNativeView();
 					SetIndicators();
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, Element.Position);
 					break;
 				case "InterPageSpacing":
 					// InterPageSpacing not exposed as a property in UIPageViewController :(
@@ -152,14 +152,14 @@ namespace Xamarin.Forms.Platform.iOS
 					SetPosition();
 					SetNativeView();
 					SetIndicators();
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, Element.Position);
 					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
 						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
 					break;
 				case "ItemTemplate":
 					SetNativeView();
 					SetIndicators();
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, Element.Position);
 					break;
 				case "Position":
 					if (!isSwiping)
@@ -195,7 +195,7 @@ namespace Xamarin.Forms.Platform.iOS
 				prevPosition = position;
 				isSwiping = false;
 				SetIndicators();
-				Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+				Element.PositionSelected?.Invoke(Element, position);
 			}
 		}
 		#endregion
@@ -378,7 +378,7 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					SetIndicators();
 
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, position);
 				});
 			}
 		}
@@ -421,7 +421,7 @@ namespace Xamarin.Forms.Platform.iOS
 							SetIndicators();
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
-							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+							Element.PositionSelected?.Invoke(Element, Element.Position);
 						});
 					}
 					else
@@ -433,7 +433,7 @@ namespace Xamarin.Forms.Platform.iOS
 							SetIndicators();
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
-							Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+							Element.PositionSelected?.Invoke(Element, Element.Position);
 						});
 					}
 				}
@@ -458,7 +458,7 @@ namespace Xamarin.Forms.Platform.iOS
 					SetIndicators();
 
 					// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
-					Element.PositionSelected?.Invoke(Element, EventArgs.Empty);
+					Element.PositionSelected?.Invoke(Element, position);
 				});
 			}
 		}

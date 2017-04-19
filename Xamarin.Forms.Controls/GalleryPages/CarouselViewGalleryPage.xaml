@@ -22,7 +22,8 @@
                       InterPageSpacingColor="Silver"
                       ItemsSource="{Binding Source}"
                       Orientation="Horizontal"
-                      ShowIndicators="true" />
+                      ShowIndicators="true"
+		              IndicatorsShape="Circle"/>
 
         <Grid Grid.Row="1"
               Grid.Column="0"

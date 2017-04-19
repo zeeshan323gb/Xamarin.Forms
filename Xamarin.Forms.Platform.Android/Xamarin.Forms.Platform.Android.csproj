@@ -97,6 +97,9 @@
     <Reference Include="Com.Android.DeskClock">
       <HintPath>..\packages\Xamarin.Android.VerticalViewPager.1.0.0\lib\MonoAndroid\Com.Android.DeskClock.dll</HintPath>
     </Reference>
+    <Reference Include="Com.ViewPagerIndicator">
+      <HintPath>..\packages\Xamarin.Android.CirclePageIndicator.1.0.0\lib\MonoAndroid\Com.ViewPagerIndicator.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Xamarin.Forms.Core\Properties\GlobalAssemblyInfo.cs">

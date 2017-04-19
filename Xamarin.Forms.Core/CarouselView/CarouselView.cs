@@ -137,6 +137,6 @@ namespace Xamarin.Forms
 			set { SetValue(ShowArrowsProperty, value); }
 		}
 
-		public EventHandler PositionSelected;
+		public EventHandler<int> PositionSelected;
 	}
 }

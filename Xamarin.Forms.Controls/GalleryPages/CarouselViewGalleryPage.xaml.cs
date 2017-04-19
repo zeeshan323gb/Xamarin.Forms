@@ -69,10 +69,13 @@ namespace Xamarin.Forms.Controls
 			ButtonsVisibility();
 		}
 
-		void MyCarousel_PositionSelected(object sender, EventArgs e)
+		void MyCarousel_PositionSelected(object sender, int position)
 		{
-			Debug.WriteLine("Position " + myCarousel.Position + " selected");
-			ButtonsVisibility();
+			if (position == myCarousel.Position)
+			{
+				Debug.WriteLine("Position " + myCarousel.Position + " selected");
+				ButtonsVisibility();
+			}
 		}
 
 		void ButtonsVisibility()
