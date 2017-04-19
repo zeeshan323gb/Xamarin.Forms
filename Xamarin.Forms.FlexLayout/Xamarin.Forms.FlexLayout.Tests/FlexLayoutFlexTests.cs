@@ -4,8 +4,7 @@ using Xamarin.Forms.Core.UnitTests;
 namespace Xamarin.Forms.FlexLayoutTests
 {
 	[TestFixture]
-
-	public class FlexTest : FlexLayoutBaseTestFixture
+	public class FlexLayoutFlexTests : FlexLayoutBaseTestFixture
 	{
 		[Test]
 		public void TestFlexBasisFlexGrowColumn()

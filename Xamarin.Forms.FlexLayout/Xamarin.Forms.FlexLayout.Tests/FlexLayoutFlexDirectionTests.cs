@@ -6,7 +6,7 @@ using Xamarin.Forms.Core.UnitTests;
 namespace Xamarin.Forms.FlexLayoutTests
 {
     [TestFixture]
-    public class FlexDirectionTests : FlexLayoutBaseTestFixture
+    public class FlexLayoutFlexDirectionTests : FlexLayoutBaseTestFixture
     {
         [Test]
         public void TestFlexDirectionColumnWithoutHeight()

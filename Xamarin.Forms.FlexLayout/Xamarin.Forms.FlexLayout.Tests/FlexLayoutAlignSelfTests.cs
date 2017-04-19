@@ -5,14 +5,14 @@ namespace Xamarin.Forms.FlexLayoutTests
 {
 
     [TestFixture]
-    public class FlexAlignSelfTests : FlexLayoutBaseTestFixture
+    public class FlexLayoutAlignSelfTest : FlexLayoutBaseTestFixture
     {
 
         [Test]
         public void TestAlignSelfCenter()
         {
             var platform = new UnitPlatform();
-            var layout = new FlexLayout();
+            var layout = new Xamarin.Forms.FlexLayout();
             layout.FlexDirection = Flex.FlexDirection.Column;
             layout.Platform = platform;
 
