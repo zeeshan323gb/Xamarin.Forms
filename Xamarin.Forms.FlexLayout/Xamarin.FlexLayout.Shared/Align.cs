@@ -11,6 +11,8 @@ namespace Xamarin.FlexLayout
 		Center,
 		FlexEnd,
 		Stretch,
-		Baseline
+		Baseline,
+		SpaceBetween,
+		SpaceAround,
 	}
 }
