@@ -372,13 +372,29 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				Source.Insert(position, item);
 
-				var firstViewController = CreateViewController(Element.Position);
+				UIViewController firstViewController;
+				if (pageController.ViewControllers.Count() > 0)
+                    firstViewController = pageController.ViewControllers[0];
+				else
+                    firstViewController = CreateViewController(Element.Position);
 
-				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
+                pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 				{
+					var prevPos = Element.Position;
+
+					// To keep the same view visible when inserting in a position <= current (like Android ViewPager)
+					isSwiping = true;
+					if (position <= Element.Position && Source.Count > 1)
+					{
+						Element.Position++;
+						prevPosition = Element.Position;
+					}
+					isSwiping = false;
+
 					SetIndicators();
 
-					Element.PositionSelected?.Invoke(Element, position);
+					if (position <= prevPos)
+					    Element.PositionSelected?.Invoke(Element, Element.Position);
 				});
 			}
 		}

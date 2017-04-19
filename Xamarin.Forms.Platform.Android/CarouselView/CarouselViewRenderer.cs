@@ -279,20 +279,18 @@ namespace Xamarin.Forms.Platform.Android
 
 		void InsertPage(object item, int position)
 		{
-			var Source = ((PageAdapter)viewPager?.Adapter).Source;
+            var Source = ((PageAdapter)viewPager?.Adapter).Source;
 
 			if (viewPager != null && Source != null)
 			{
 				Source.Insert(position, item);
 
 				var prevPos = Element.Position;
-				viewPager.Adapter.NotifyDataSetChanged();
 
-				// Keep current position
-				if (position == prevPos)
-					viewPager.SetCurrentItem(position, false);
+                viewPager.Adapter.NotifyDataSetChanged();
 
-				Element.PositionSelected?.Invoke(Element, position);
+				if (position <= prevPos)
+				    Element.PositionSelected?.Invoke(Element, Element.Position);
 			}
 		}
 

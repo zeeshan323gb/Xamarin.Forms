@@ -330,16 +330,22 @@ namespace Xamarin.Forms.Platform.UWP
         void InsertPage(object item, int position)
         {
             if (flipView != null && Source != null)
-            {
+			{
+                if (position <= Element.Position)
+                {
+                    isSwiping = true;
+                    Element.Position++;
+                    isSwiping = false;
+                }
+
                 Source.Insert(position, CreateView(item));
                 Dots.Insert(position, CreateDot(position, Element.Position));
 
-                if (position == Element.Position)
-                    flipView.SelectedIndex = position;
+                flipView.SelectedIndex = Element.Position;
 
-                //if (Element.ItemsSource.GetCount() == 1)
-                Element.PositionSelected?.Invoke(Element, position);
-            }
+                if (position <= Element.Position)
+                    Element.PositionSelected?.Invoke(Element, flipView.SelectedIndex);
+			}
         }
 
         public async Task RemovePage(int position)
