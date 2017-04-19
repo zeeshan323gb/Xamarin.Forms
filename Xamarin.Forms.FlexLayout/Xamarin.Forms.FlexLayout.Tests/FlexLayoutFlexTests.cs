@@ -373,23 +373,31 @@ namespace Xamarin.Forms.FlexLayoutTests
 		[Test]
 		public void TestFlexGrowShrinkAtMost()
 		{
-			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.FlexDirection = Flex.FlexDirection.Column;
-			layout.Platform = platform;
-			layout.IsPlatformEnabled = true;
+			layout.WidthRequest = 100;
+			layout.HeightRequest = 100;
 
 			var layout2 = new FlexLayout();
 			layout2.FlexDirection = Flex.FlexDirection.Column;
-			layout2.Platform = platform;
+			layout2.Platform = new UnitPlatform((visual, width, height) =>
+			{
+				return new SizeRequest(new Size(0, 0));
+			});
 			layout2.IsPlatformEnabled = true;
+			layout.Children.Add(layout2);
 
-			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
+			var view1 = new View
+			{
+				IsPlatformEnabled = true,
+				Platform = new UnitPlatform((visual, width, height) =>
+				{
+					return new SizeRequest(new Size(0, 0));
+				})
+			};
 			FlexLayout.SetGrow(view1, 1);
 			FlexLayout.SetShrink(view1, 1);
 			layout2.Children.Add(view1);
-
-			layout.Children.Add(layout2);
 
 			layout.Layout(new Rectangle(0, 0, 100, 100));
 

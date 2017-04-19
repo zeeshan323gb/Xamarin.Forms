@@ -32,7 +32,7 @@ namespace Xamarin.FlexLayout
 		{
 			_root.Left = (float)x;
 			_root.Top = (float)y;
-
+			UpdateRootNode();
 			AttachNodesFromViewHierachy(this);
 			CalculateLayoutWithSize((float)width, (float)height);
 			ApplyLayoutToViewHierarchy(this);

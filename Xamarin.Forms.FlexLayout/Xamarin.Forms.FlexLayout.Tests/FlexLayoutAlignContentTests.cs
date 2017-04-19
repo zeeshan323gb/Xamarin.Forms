@@ -1,11 +1,5 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms.Core.UnitTests;
-using Xamarin.Forms.FlexLayoutTests;
 
 namespace Xamarin.Forms.FlexLayoutTests
 {
@@ -85,11 +79,12 @@ namespace Xamarin.Forms.FlexLayoutTests
 		[Test]
 		public void TestAlignContentFlexStartWithoutHeightOnChildren()
 		{
-			var platform = new UnitPlatform();
+			var platform = new UnitPlatform((visual, width, height) => new SizeRequest(new Size(0, 0)));
 			var layout = new FlexLayout();
+			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.Platform = platform;
 			layout.Wrap = Flex.Wrap.Wrap;
-
+		
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -225,36 +220,35 @@ namespace Xamarin.Forms.FlexLayoutTests
 		[Test]
 		public void TestAlignContentFlexEnd()
 		{
-			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
-			layout.Platform = platform;
 			layout.FlexDirection = Flex.FlexDirection.Column;
 			layout.AlignContent = Flex.Align.FlexEnd;
 			layout.Wrap = Flex.Wrap.Wrap;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
+			var platform = new UnitPlatform((visual, width, height) => new SizeRequest(new Size(50, 10)));
 
-			var view0 = new View { IsPlatformEnabled = true };
+			var view0 = new View { IsPlatformEnabled = true,  Platform = platform };
 			view0.WidthRequest = 50;
 			view0.HeightRequest = 10;
 			layout.Children.Add(view0);
 
-			var view1 = new View { IsPlatformEnabled = true };
+			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
 			view1.WidthRequest = 50;
 			view1.HeightRequest = 10;
 			layout.Children.Add(view1);
 
-			var view2 = new View { IsPlatformEnabled = true };
+			var view2 = new View { IsPlatformEnabled = true, Platform = platform };
 			view2.WidthRequest = 50;
 			view2.HeightRequest = 10;
 			layout.Children.Add(view2);
 
-			var view3 = new View { IsPlatformEnabled = true };
+			var view3 = new View { IsPlatformEnabled = true, Platform = platform };
 			view3.WidthRequest = 50;
 			view3.HeightRequest = 10;
 			layout.Children.Add(view3);
 
-			var view4 = new View { IsPlatformEnabled = true };
+			var view4 = new View { IsPlatformEnabled = true, Platform = platform };
 			view4.WidthRequest = 50;
 			view4.HeightRequest = 10;
 			layout.Children.Add(view4);

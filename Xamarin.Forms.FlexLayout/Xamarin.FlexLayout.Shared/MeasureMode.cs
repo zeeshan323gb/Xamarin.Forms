@@ -2,7 +2,7 @@
 {
     public enum FlexMeasureMode
     {
-        None,
+		Undefined,
         Exactly,
         AtMost,
     }

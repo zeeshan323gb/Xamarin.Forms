@@ -13,15 +13,15 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty OrderProperty = BindableProperty.CreateAttached(_FlexOrderPropertyName, typeof(int), typeof(FlexLayout), -1);
 
-		public static readonly BindableProperty FlexProperty = BindableProperty.CreateAttached(_FlexPropertyName, typeof(float), typeof(FlexLayout), default(float), propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).Flex = (float)n; });
+		public static readonly BindableProperty FlexProperty = BindableProperty.CreateAttached(_FlexPropertyName, typeof(float), typeof(FlexLayout), float.NaN, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).Flex = (float)n; });
 
-		public static readonly BindableProperty GrowProperty = BindableProperty.CreateAttached(_FlexGrowPropertyName, typeof(float), typeof(FlexLayout), default(float), propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexGrow = (float)n; });
+		public static readonly BindableProperty GrowProperty = BindableProperty.CreateAttached(_FlexGrowPropertyName, typeof(float), typeof(FlexLayout), float.NaN, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexGrow = (float)n; });
 
-		public static readonly BindableProperty ShrinkProperty = BindableProperty.CreateAttached(_FlexShrinkPropertyName, typeof(float), typeof(FlexLayout), -1f, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexShrink = (float)n; });
+		public static readonly BindableProperty ShrinkProperty = BindableProperty.CreateAttached(_FlexShrinkPropertyName, typeof(float), typeof(FlexLayout), float.NaN, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexShrink = (float)n; });
 
 		public static readonly BindableProperty BasisProperty = BindableProperty.CreateAttached(_FlexBasisPropertyName, typeof(float), typeof(FlexLayout), float.NaN, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexBasis = (float)n; });
 
-		public static readonly BindableProperty AlignSelfProperty = BindableProperty.CreateAttached(_FlexAlignSelfPropertyName, typeof(Align), typeof(FlexLayout), default(Align), propertyChanging: (s, o, n) =>
+		public static readonly BindableProperty AlignSelfProperty = BindableProperty.CreateAttached(_FlexAlignSelfPropertyName, typeof(Align), typeof(FlexLayout), Align.Auto, propertyChanging: (s, o, n) =>
 		{
 			if (GetNode((View)s) == null) return;
 			GetNode((View)s).AlignSelf = (Align)n;
@@ -35,7 +35,7 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty JustifyContentProperty = BindableProperty.Create(nameof(JustifyContent), typeof(Justify), typeof(FlexLayout), Justify.FlexStart, propertyChanging: (s, o, n) => { GetNode((View)s).JustifyContent = (Justify)n; (s as FlexLayout).InvalidateLayout(); });
 
-		public static readonly BindableProperty AlignContentProperty = BindableProperty.Create(nameof(AlignContent), typeof(Align), typeof(FlexLayout), Align.FlexStart, propertyChanging: (s, o, n) => { GetNode((View)s).AlignContent = (Align)n; (s as FlexLayout).InvalidateLayout(); (s as FlexLayout).InvalidateLayout(); });
+		public static readonly BindableProperty AlignContentProperty = BindableProperty.Create(nameof(AlignContent), typeof(Align), typeof(FlexLayout), Align.FlexStart, propertyChanging: (s, o, n) => { GetNode((View)s).AlignContent = (Align)n; (s as FlexLayout).InvalidateLayout(); });
 
 		public static readonly BindableProperty AlignItemsProperty = BindableProperty.Create(nameof(AlignItems), typeof(Align), typeof(FlexLayout), Align.Stretch, propertyChanging: (s, o, n) => { GetNode((View)s).AlignItems = (Align)n; (s as FlexLayout).InvalidateLayout(); });
 
@@ -200,16 +200,15 @@ namespace Xamarin.Forms
 			//set initial values, this could be != from default of the engine
 			_root.FlexDirection = FlexDirection;
 			_root.JustifyContent = JustifyContent;
-			_root.AlignContent = AlignContent;
-			_root.AlignSelf = GetAlignSelf(this);
+			_root.AlignContent = AlignContent;		
 			_root.AlignItems = AlignItems;
 			_root.Overflow = Overflow;
 			_root.PositionType = Position;
 			_root.Wrap = Wrap;
+			_root.AlignSelf = GetAlignSelf(this);
 			_root.FlexGrow = GetGrow(this);
 			_root.FlexBasis = GetBasis(this);
 			_root.FlexShrink = GetShrink(this);
-
 		}
 
 		protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -268,8 +267,8 @@ namespace Xamarin.Forms
 
 		Size MeasureView(IFlexNode node, float width, FlexMeasureMode widthMode, float height, FlexMeasureMode heightMode)
 		{
-			var constrainedWidth = (widthMode == FlexMeasureMode.None) ? float.MaxValue : width;
-			var constrainedHeight = (heightMode == FlexMeasureMode.None) ? float.MaxValue : height;
+			var constrainedWidth = (widthMode == FlexMeasureMode.Undefined) ? float.MaxValue : width;
+			var constrainedHeight = (heightMode == FlexMeasureMode.Undefined) ? float.MaxValue : height;
 
 			View view = null;
 			if (FlexLayoutExtensions.Bridges.ContainsKey(node))
@@ -292,8 +291,7 @@ namespace Xamarin.Forms
 			if (propertyName.Equals(WidthRequestProperty.PropertyName) ||
 				propertyName.Equals(HeightRequestProperty.PropertyName) ||
 				propertyName.Equals(MinimumHeightRequestProperty.PropertyName) ||
-				propertyName.Equals(MinimumWidthRequestProperty.PropertyName) ||
-				propertyName.Equals(_FlexAlignSelfPropertyName))
+				propertyName.Equals(MinimumWidthRequestProperty.PropertyName))
 			{
 				var view = element as View;
 				if (view == null)
