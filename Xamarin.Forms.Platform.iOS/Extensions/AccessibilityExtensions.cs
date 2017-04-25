@@ -30,30 +30,20 @@ namespace Xamarin.Forms.Platform.iOS
 			return _defaultAccessibilityLabel;
 		}
 
-		public static string SetAccessibilityHint(this UIBarItem Control, Element Element, string _defaultAccessibilityHint = null)
+		public static void SetAccessibilityHint(this UIBarItem Control, Element Element)
 		{
 			if (Element == null)
-				return _defaultAccessibilityHint;
+				return;
 
-			if (_defaultAccessibilityHint == null)
-				_defaultAccessibilityHint = Control.AccessibilityHint;
-
-			Control.AccessibilityHint = (string)Element.GetValue(Accessibility.HintProperty) ?? _defaultAccessibilityHint;
-
-			return _defaultAccessibilityHint;
+			Control.AccessibilityHint = (string)Element.GetValue(Accessibility.HintProperty);
 		}
 
-		public static string SetAccessibilityLabel(this UIBarItem Control, Element Element, string _defaultAccessibilityLabel = null)
+		public static void SetAccessibilityLabel(this UIBarItem Control, Element Element)
 		{
 			if (Element == null)
-				return _defaultAccessibilityLabel;
+				return;
 
-			if (_defaultAccessibilityLabel == null)
-				_defaultAccessibilityLabel = Control.AccessibilityLabel;
-
-			Control.AccessibilityLabel = (string)Element.GetValue(Accessibility.NameProperty) ?? _defaultAccessibilityLabel;
-
-			return _defaultAccessibilityLabel;
+			Control.AccessibilityLabel = (string)Element.GetValue(Accessibility.NameProperty);
 		}
 
 		public static bool? SetIsAccessibilityElement(this UIView Control, Element Element, bool? _defaultIsAccessibilityElement = null)
