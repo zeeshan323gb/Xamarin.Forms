@@ -47,15 +47,6 @@ namespace Xamarin.Forms
 			set { SetValue(InterPageSpacingProperty, value); }
 		}
 
-		// Android and iOS only
-		public static readonly BindableProperty InterPageSpacingColorProperty = BindableProperty.Create("InterPageSpacingColor", typeof(Color), typeof(CarouselView), Color.White);
-
-		public Color InterPageSpacingColor
-		{
-			get { return (Color)GetValue(InterPageSpacingColorProperty); }
-			set { SetValue(InterPageSpacingColorProperty, value); }
-		}
-
 		public static readonly BindableProperty IsSwipingEnabledProperty = BindableProperty.Create("IsSwipingEnabled", typeof(bool), typeof(CarouselView), true);
 
 		public bool IsSwipingEnabled

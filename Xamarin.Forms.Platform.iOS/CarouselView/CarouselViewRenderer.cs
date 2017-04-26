@@ -128,9 +128,9 @@ namespace Xamarin.Forms.Platform.iOS
 					//ConfigurePageController();
 					//ConfigurePageControl();
 					break;
-				case "InterPageSpacingColor":
+				case "BackgroundColor":
 					if (pageController != null)
-						pageController.View.BackgroundColor = Element.InterPageSpacingColor.ToUIColor();
+					    pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
 					break;
 				case "IsSwipingEnabled":
 					SetIsSwipingEnabled();
@@ -231,8 +231,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 			Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
 
-			// InterPageSpacingColor BP
-			pageController.View.BackgroundColor = Element.InterPageSpacingColor.ToUIColor();
+			// BackgroundColor BP
+			pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
 
 			// IsSwipingEnabled BP
 			SetIsSwipingEnabled();

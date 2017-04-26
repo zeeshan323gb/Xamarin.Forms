@@ -19,7 +19,7 @@
                       VerticalOptions="FillAndExpand"
                       AnimateTransition="true"
                       InterPageSpacing="5"
-                      InterPageSpacingColor="Silver"
+                      BackgroundColor="Silver"
                       ItemsSource="{Binding Source}"
                       Orientation="Horizontal"
                       ShowIndicators="true"
