@@ -11,7 +11,7 @@ namespace Xamarin.FlexLayoutEngine.Yoga
 	public partial class YogaEngine : YogaNode, IFlexNode
 	{
 
-        public YogaEngine()
+        public YogaEngine() : base(new YogaConfig { })
         {
 
         }

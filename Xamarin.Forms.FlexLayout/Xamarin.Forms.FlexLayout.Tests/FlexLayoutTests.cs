@@ -131,7 +131,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			layout.Layout(new Rectangle(0, 0, 300, 20));
 
 			Assert.AreEqual(300, subView1.Bounds.Size.Width);
-			Assert.AreEqual(10, subView1.Bounds.Size.Height);
+			Assert.AreEqual(20, subView1.Bounds.Size.Height);
 
 			foreach (var subview in subView1.Children)
 			{
@@ -143,7 +143,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			}
 
 			Assert.AreEqual(300, subView2.Bounds.Size.Width);
-			Assert.AreEqual(10, subView2.Bounds.Size.Height);
+			Assert.AreEqual(20, subView2.Bounds.Size.Height);
 
 			foreach (var subview in subView2.Children)
 			{

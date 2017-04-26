@@ -290,7 +290,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		[Test]
 		public void TestAlignContentStretch()
 		{
-			var platform = new UnitPlatform();
+			var platform = new UnitPlatform((visual, width, height) => new SizeRequest(new Size(0, 0)));
 			var layout = new FlexLayout();
 			layout.Platform = platform;
 			layout.FlexDirection = Flex.FlexDirection.Column;
