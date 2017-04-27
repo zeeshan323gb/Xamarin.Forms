@@ -521,8 +521,12 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			if (renderer == null)
 				return;
 
+			var packageName = context.PackageName;
+			int openDrawerContentDescResId = context.Resources.GetIdentifier("mdp_open_a11y_name", "string", packageName);
+			int closeDrawerContentDescResId = context.Resources.GetIdentifier("mdp_close_a11y_name", "string", packageName);
+
 			_drawerLayout = renderer;
-			_drawerToggle = new ActionBarDrawerToggle((Activity)context, _drawerLayout, bar, global::Android.Resource.String.Ok, global::Android.Resource.String.Ok)
+			_drawerToggle = new ActionBarDrawerToggle((Activity)context, _drawerLayout, bar, openDrawerContentDescResId, closeDrawerContentDescResId)
 			{
 				ToolbarNavigationClickListener = new ClickListener(Element)
 			};

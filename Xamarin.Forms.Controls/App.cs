@@ -54,9 +54,14 @@ namespace Xamarin.Forms.Controls
 				Detail = CoreGallery.GetMainPage()
 			};
 
-			// Sets the accessibility settings for the master page's back button
-			master.SetAccessibilityName("Master Page");
-			master.SetAccessibilityHint("Tap to go back");
+			// Sets the accessibility settings for the master page's back button 
+			// IMPORTANT: Android will not respect these settings. You must add string 
+			// resources to set the accessibility name for the MasterDetailPage toggle.
+			// Example:
+			// 	<string name="mdp_open_a11y_name">Show Master Page</string>
+			//  <string name="mdp_close_a11y_name">Hide Master Page</string>
+			master.SetAccessibilityName("Master Page Toggle");
+			master.SetAccessibilityHint("Shows and hides the Master Page");
 
 			return master;
 		}
