@@ -73,10 +73,19 @@ namespace Xamarin.Forms.Platform.iOS
 					pageController.GetPreviousViewController = null;
 					pageController.GetNextViewController = null;
 				}
+
+				if (Element != null)
+				{
+					Element.SizeChanged -= Element_SizeChanged;
+					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+					    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+				}
 			}
 
 			if (e.NewElement != null)
 			{
+				Element.SizeChanged += Element_SizeChanged;
+
 				// Configure the control and subscribe to event handlers
 				if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
 					((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
@@ -87,7 +96,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-				InsertPage(Element.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+				InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
 			}
 
 			if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -96,27 +105,25 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		void Element_SizeChanged(object sender, EventArgs e)
+		{
+			var rect = this.Element.Bounds;
+			ElementWidth = rect.Width;
+			ElementHeight = rect.Height;
+			SetNativeView();
+			SetIndicators();
+			Element.PositionSelected?.Invoke(Element, Element.Position);
+		}
+
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
-
-			var rect = this.Element.Bounds;
 
 			switch (e.PropertyName)
 			{
 				case "Renderer":
 					// Fix for issues after recreating the control #86
 					prevPosition = Element.Position;
-					break;
-				case "Width":
-					ElementWidth = rect.Width;
-					break;
-				case "Height":
-					ElementWidth = rect.Width; //Content not getting rendered in iOS because ElementWidth is 0 (+ fix) #96
-					ElementHeight = rect.Height;
-					SetNativeView();
-					SetIndicators();
-					Element.PositionSelected?.Invoke(Element, Element.Position);
 					break;
 				case "Orientation":
 					SetNativeView();
@@ -229,13 +236,12 @@ namespace Xamarin.Forms.Platform.iOS
 			pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll,
 													  orientation, UIPageViewControllerSpineLocation.None, interPageSpacing);
 
+			pageController.View.ClipsToBounds = true;
+
 			Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
 
 			// BackgroundColor BP
 			pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
-
-			// IsSwipingEnabled BP
-			SetIsSwipingEnabled();
 
 			// INDICATORS
 			pageControl = new UIPageControl();
@@ -313,6 +319,9 @@ namespace Xamarin.Forms.Platform.iOS
 			};
 			#endregion
 
+			// IsSwipingEnabled BP
+			SetIsSwipingEnabled();
+
 			if (Source != null && Source?.Count > 0)
 			{
 				var firstViewController = CreateViewController(Element.Position);
@@ -368,7 +377,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void InsertPage(object item, int position)
 		{
-			if (pageController != null && Source != null)
+			if (Element != null && pageController != null && Source != null)
 			{
 				Source.Insert(position, item);
 
@@ -401,7 +410,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		async Task RemovePage(int position)
 		{
-			if (pageController != null && Source != null && Source?.Count > 0)
+			if (Element != null && pageController != null && Source != null && Source?.Count > 0)
 			{
 				// To remove latest page, rebuild pageController or the page wont disappear
 				if (Source.Count == 1)
@@ -462,7 +471,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void SetCurrentPage(int position)
 		{
-			if (pageController != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+			if (Element != null && pageController != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
 			{
 				// Transition direction based on prevPosition
 				var direction = position >= prevPosition ? UIPageViewControllerNavigationDirection.Forward : UIPageViewControllerNavigationDirection.Reverse;
@@ -544,6 +553,13 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					pageControl.Dispose();
 					pageControl = null;
+				}
+
+				if (Element != null)
+				{
+					Element.SizeChanged -= Element_SizeChanged;
+					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
 				}
 
 				Source = null;
