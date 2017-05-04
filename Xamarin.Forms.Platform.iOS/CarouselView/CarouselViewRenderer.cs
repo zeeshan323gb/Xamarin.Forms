@@ -227,6 +227,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void SetNativeView()
 		{
+			// Rotation bug(iOS) #115 Fix
+			if (pageController != null)
+				pageController.View.RemoveFromSuperview();
+			
 			var interPageSpacing = (float)Element.InterPageSpacing;
 
 			// Orientation BP
