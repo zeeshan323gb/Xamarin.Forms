@@ -1,5 +1,5 @@
 using Android.Content;
-using Android.OS;
+using Android.Support.V4.Widget;
 using Android.Widget;
 
 namespace Xamarin.Forms.Platform.Android
@@ -8,14 +8,7 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		public static void SetTextAppearanceCompat(this TextView textView, Context context, int resId)
 		{
-			if ((int)Build.VERSION.SdkInt < 23)
-			{
-#pragma warning disable 618 // Using older version of SetTextAppearance for compatibility with API 15-22
-				textView.SetTextAppearance(context, resId);
-#pragma warning restore 618
-			}
-			else
-				textView.SetTextAppearance(resId);
+			TextViewCompat.SetTextAppearance(textView, resId);
 		}
 	}
 }
