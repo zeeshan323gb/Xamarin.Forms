@@ -99,11 +99,14 @@ namespace Xamarin.Forms.Platform.Android
 
 		void Element_SizeChanged(object sender, EventArgs e)
 		{
-			//var rect = this.Element.Bounds;
-			//ElementWidth = rect.Width;
-			//ElementHeight = rect.Height;
-			SetNativeView();
-			Element.PositionSelected?.Invoke(Element, Element.Position);
+			if (Element != null)
+			{
+				//var rect = this.Element.Bounds;
+				//ElementWidth = rect.Width;
+				//ElementHeight = rect.Height;
+				SetNativeView();
+				Element.PositionSelected?.Invoke(Element, Element.Position);
+			}
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -113,8 +116,11 @@ namespace Xamarin.Forms.Platform.Android
 			switch (e.PropertyName)
 			{
 				case "Orientation":
-					SetNativeView();
-					Element.PositionSelected?.Invoke(Element, Element.Position);
+					if (Element != null)
+					{
+						SetNativeView();
+						Element.PositionSelected?.Invoke(Element, Element.Position);
+					}
 					break;
 				case "InterPageSpacing":
 					//var metrics = Resources.DisplayMetrics;
@@ -141,7 +147,7 @@ namespace Xamarin.Forms.Platform.Android
 					    indicators.Visibility = Element.ShowIndicators? AViews.ViewStates.Visible : AViews.ViewStates.Gone;
 					break;
 				case "ItemsSource":
-					if (viewPager != null)
+					if (Element != null && viewPager != null)
 					{
 						SetPosition();
 						viewPager.Adapter = new PageAdapter(Element);
@@ -153,7 +159,7 @@ namespace Xamarin.Forms.Platform.Android
 					}
 					break;
 				case "ItemTemplate":
-					if (viewPager != null)
+					if (Element != null && viewPager != null)
 					{
 						viewPager.Adapter = new PageAdapter(Element);
 						viewPager.SetCurrentItem(Element.Position, false);
@@ -162,7 +168,7 @@ namespace Xamarin.Forms.Platform.Android
 					}
 					break;
 				case "Position":
-					if (!isSwiping)
+					if (Element != null && !isSwiping)
 						SetCurrentPage(Element.Position);
 					break;
 			}
@@ -334,7 +340,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void SetCurrentPage(int position)
 		{
-			if (Element != null && viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+			if (viewPager != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
 			{
 
 				viewPager.SetCurrentItem(position, Element.AnimateTransition);
