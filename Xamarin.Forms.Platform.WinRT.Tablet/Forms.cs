@@ -138,7 +138,7 @@ namespace Xamarin.Forms
 			{
 				view.Layout(new Rectangle(0, 0, frameworkElement.ActualWidth, frameworkElement.ActualHeight));
 			};
-			
+
 			return frameworkElement;
 		}
 	}
