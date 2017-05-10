@@ -2,7 +2,7 @@
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public static class AccessibilityExtensions
+	public static class AutomationPropertiesExtensions
 	{
 		public static string SetContentDescription(this global::Android.Views.View Control, Element Element, string _defaultContentDescription = null)
 		{
@@ -12,7 +12,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (_defaultContentDescription == null)
 				_defaultContentDescription = Control.ContentDescription;
 
-			var elemValue = ConcatenateNameAndHint(Element);
+			var elemValue = ConcatenateNameAndHelpText(Element);
 
 			if (!string.IsNullOrWhiteSpace(elemValue))
 				Control.ContentDescription = elemValue;
@@ -30,7 +30,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (!_defaultFocusable.HasValue)
 				_defaultFocusable = Control.Focusable;
 
-			Control.Focusable = (bool)((bool?)Element.GetValue(Accessibility.IsInAccessibleTreeProperty) ?? _defaultFocusable);
+			Control.Focusable = (bool)((bool?)Element.GetValue(AutomationProperties.IsInAccessibleTreeProperty) ?? _defaultFocusable);
 
 			return _defaultFocusable;
 		}
@@ -43,7 +43,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (_defaultHint == null)
 				_defaultHint = Control.Hint;
 
-			var elemValue = ConcatenateNameAndHint(Element);
+			var elemValue = ConcatenateNameAndHelpText(Element);
 
 			if (!string.IsNullOrWhiteSpace(elemValue))
 				Control.Hint = elemValue;
@@ -58,7 +58,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (Element == null)
 				return;
 
-			var elemValue = (VisualElement)Element.GetValue(Accessibility.LabeledByProperty);
+			var elemValue = (VisualElement)Element.GetValue(AutomationProperties.LabeledByProperty);
 
 			if (elemValue != null)
 			{
@@ -89,7 +89,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (_defaultNavigationContentDescription == null)
 				_defaultNavigationContentDescription = Control.NavigationContentDescription;
 
-			var elemValue = ConcatenateNameAndHint(Element);
+			var elemValue = ConcatenateNameAndHelpText(Element);
 
 			if (!string.IsNullOrWhiteSpace(elemValue))
 				Control.NavigationContentDescription = elemValue;
@@ -111,7 +111,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (!string.IsNullOrWhiteSpace(Element.Text))
 				return;
 
-			var elemValue = ConcatenateNameAndHint(Element);
+			var elemValue = ConcatenateNameAndHelpText(Element);
 
 			if (!string.IsNullOrWhiteSpace(elemValue))
 				Control.SetTitle(elemValue);
@@ -119,19 +119,19 @@ namespace Xamarin.Forms.Platform.Android
 			return;
 		}
 
-		static string ConcatenateNameAndHint(Element Element)
+		static string ConcatenateNameAndHelpText(Element Element)
 		{
 			string separator;
 
-			var name = (string)Element.GetValue(Accessibility.NameProperty);
-			var hint = (string)Element.GetValue(Accessibility.HintProperty);
+			var name = (string)Element.GetValue(AutomationProperties.NameProperty);
+			var helpText = (string)Element.GetValue(AutomationProperties.HelpTextProperty);
 
-			if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(hint))
+			if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(helpText))
 				separator = "";
 			else
 				separator = ". ";
 
-			return string.Join(separator, name, hint);
+			return $"{name}{separator}{helpText}";
 		}
 	}
 }

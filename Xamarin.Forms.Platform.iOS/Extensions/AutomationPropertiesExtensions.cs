@@ -2,7 +2,7 @@
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public static class AccessibilityExtensions
+	public static class AutomationPropertiesExtensions
 	{
 		public static string SetAccessibilityHint(this UIView Control, Element Element, string _defaultAccessibilityHint = null)
 		{
@@ -12,7 +12,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_defaultAccessibilityHint == null)
 				_defaultAccessibilityHint = Control.AccessibilityHint;
 
-			Control.AccessibilityHint = (string)Element.GetValue(Accessibility.HintProperty) ?? _defaultAccessibilityHint;
+			Control.AccessibilityHint = (string)Element.GetValue(AutomationProperties.HelpTextProperty) ?? _defaultAccessibilityHint;
 
 			return _defaultAccessibilityHint;
 		}
@@ -25,7 +25,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_defaultAccessibilityLabel == null)
 				_defaultAccessibilityLabel = Control.AccessibilityLabel;
 
-			Control.AccessibilityLabel = (string)Element.GetValue(Accessibility.NameProperty) ?? _defaultAccessibilityLabel;
+			Control.AccessibilityLabel = (string)Element.GetValue(AutomationProperties.NameProperty) ?? _defaultAccessibilityLabel;
 
 			return _defaultAccessibilityLabel;
 		}
@@ -35,7 +35,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (Element == null)
 				return;
 
-			Control.AccessibilityHint = (string)Element.GetValue(Accessibility.HintProperty);
+			Control.AccessibilityHint = (string)Element.GetValue(AutomationProperties.HelpTextProperty);
 		}
 
 		public static void SetAccessibilityLabel(this UIBarItem Control, Element Element)
@@ -43,7 +43,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (Element == null)
 				return;
 
-			Control.AccessibilityLabel = (string)Element.GetValue(Accessibility.NameProperty);
+			Control.AccessibilityLabel = (string)Element.GetValue(AutomationProperties.NameProperty);
 		}
 
 		public static bool? SetIsAccessibilityElement(this UIView Control, Element Element, bool? _defaultIsAccessibilityElement = null)
@@ -54,7 +54,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (!_defaultIsAccessibilityElement.HasValue)
 				_defaultIsAccessibilityElement = Control.IsAccessibilityElement;
 
-			Control.IsAccessibilityElement = (bool)((bool?)Element.GetValue(Accessibility.IsInAccessibleTreeProperty) ?? _defaultIsAccessibilityElement);
+			Control.IsAccessibilityElement = (bool)((bool?)Element.GetValue(AutomationProperties.IsInAccessibleTreeProperty) ?? _defaultIsAccessibilityElement);
 
 			return _defaultIsAccessibilityElement;
 		}
