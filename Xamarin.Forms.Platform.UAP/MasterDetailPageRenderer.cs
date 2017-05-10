@@ -179,13 +179,13 @@ namespace Xamarin.Forms.Platform.UWP
 				UpdateMode();
 			else if (e.PropertyName == PlatformConfiguration.WindowsSpecific.Page.ToolbarPlacementProperty.PropertyName)
 				UpdateToolbarPlacement();
-			else if (e.PropertyName == Accessibility.NameProperty.PropertyName)
+			else if (e.PropertyName == AutomationProperties.NameProperty.PropertyName)
 				_defaultAutomationPropertiesName = Control.SetAutomationPropertiesName(Element, _defaultAutomationPropertiesName);
-			else if (e.PropertyName == Accessibility.HintProperty.PropertyName)
+			else if (e.PropertyName == AutomationProperties.HelpTextProperty.PropertyName)
 				_defaultAutomationPropertiesHelpText = Control.SetAutomationPropertiesHelpText(Element, _defaultAutomationPropertiesHelpText);
-			else if (e.PropertyName == Accessibility.LabeledByProperty.PropertyName)
+			else if (e.PropertyName == AutomationProperties.LabeledByProperty.PropertyName)
 				_defaultAutomationPropertiesLabeledBy = Control.SetAutomationPropertiesLabeledBy(Element, _defaultAutomationPropertiesLabeledBy);
-			else if (e.PropertyName == Accessibility.IsInAccessibleTreeProperty.PropertyName)
+			else if (e.PropertyName == AutomationProperties.IsInAccessibleTreeProperty.PropertyName)
 				_defaultAutomationPropertiesAccessibilityView = Control.SetAutomationPropertiesAccessibilityView(Element, _defaultAutomationPropertiesAccessibilityView);
 		}
 

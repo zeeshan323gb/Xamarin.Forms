@@ -286,9 +286,9 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 				UpdateToolbar();
 			else if (e.PropertyName == NavigationPage.BarTextColorProperty.PropertyName)
 				UpdateToolbar();
-			else if (e.PropertyName == Accessibility.NameProperty.PropertyName)
+			else if (e.PropertyName == AutomationProperties.NameProperty.PropertyName)
 				UpdateToolbar();
-			else if (e.PropertyName == Accessibility.HintProperty.PropertyName)
+			else if (e.PropertyName == AutomationProperties.HelpTextProperty.PropertyName)
 				UpdateToolbar();
 		}
 

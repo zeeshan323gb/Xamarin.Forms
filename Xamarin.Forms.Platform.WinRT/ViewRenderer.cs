@@ -1,5 +1,5 @@
 ﻿using Windows.UI.Xaml;
-using Windows.UI.Xaml.Automation;
+using WAutomationProperties = Windows.UI.Xaml.Automation.AutomationProperties;
 using Windows.UI.Xaml.Automation.Peers;
 
 #if WINDOWS_UWP
@@ -35,8 +35,8 @@ namespace Xamarin.Forms.Platform.WinRT
 			}
 			else
 			{
-				SetValue(AutomationProperties.AutomationIdProperty, $"{id}_Container");
-				Control.SetValue(AutomationProperties.AutomationIdProperty, id);
+				SetValue(WAutomationProperties.AutomationIdProperty, $"{id}_Container");
+				Control.SetValue(WAutomationProperties.AutomationIdProperty, id);
 			}
 		}
 		protected override void SetAutomationPropertiesName()

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Windows.Foundation;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Automation;
+using WAutomationProperties = Windows.UI.Xaml.Automation.AutomationProperties;
 using Windows.UI.Xaml.Automation.Peers;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
@@ -319,7 +319,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		protected virtual void SetAutomationId(string id)
 		{
-			SetValue(AutomationProperties.AutomationIdProperty, id);
+			SetValue(WAutomationProperties.AutomationIdProperty, id);
 		}
 
 		protected virtual void SetAutomationPropertiesName()

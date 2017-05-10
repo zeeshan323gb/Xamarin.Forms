@@ -66,9 +66,9 @@ namespace Xamarin.Forms.Platform.iOS
 							UpdateTextAndStyle();
 					}
 				}
-				else if (e.PropertyName == Accessibility.HintProperty.PropertyName)
+				else if (e.PropertyName == AutomationProperties.HelpTextProperty.PropertyName)
 					this.SetAccessibilityHint(_item);
-				else if (e.PropertyName == Accessibility.NameProperty.PropertyName)
+				else if (e.PropertyName == AutomationProperties.NameProperty.PropertyName)
 					this.SetAccessibilityLabel(_item);
 			}
 
@@ -129,9 +129,9 @@ namespace Xamarin.Forms.Platform.iOS
 					UpdateIcon();
 				else if (e.PropertyName == _item.IsEnabledPropertyName)
 					UpdateIsEnabled();
-				else if (e.PropertyName == Accessibility.HintProperty.PropertyName)
+				else if (e.PropertyName == AutomationProperties.HelpTextProperty.PropertyName)
 					this.SetAccessibilityHint(_item);
-				else if (e.PropertyName == Accessibility.NameProperty.PropertyName)
+				else if (e.PropertyName == AutomationProperties.NameProperty.PropertyName)
 					this.SetAccessibilityLabel(_item);
 			}
 
