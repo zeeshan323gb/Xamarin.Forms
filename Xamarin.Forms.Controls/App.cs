@@ -60,8 +60,8 @@ namespace Xamarin.Forms.Controls
 			// Example:
 			// 	<string name="mdp_open_a11y_name">Show Master Page</string>
 			//  <string name="mdp_close_a11y_name">Hide Master Page</string>
-			master.SetAccessibilityName("Master Page Toggle");
-			master.SetAccessibilityHint("Shows and hides the Master Page");
+			master.SetAutomationPropertiesName("Master Page Toggle");
+			master.SetAutomationPropertiesHelpText("Shows and hides the Master Page");
 
 			return master;
 		}

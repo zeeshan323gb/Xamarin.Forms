@@ -425,8 +425,8 @@ namespace Xamarin.Forms.Controls
 
 			Title = stringProvider.CoreGalleryTitle;
 
-			this.SetAccessibilityName("Gallery");
-			this.SetAccessibilityHint("Lists all gallery pages");
+			this.SetAutomationPropertiesName("Gallery");
+			this.SetAutomationPropertiesHelpText("Lists all gallery pages");
 
 			var corePageView = new CorePageView (rootPage, navigationBehavior);
 
