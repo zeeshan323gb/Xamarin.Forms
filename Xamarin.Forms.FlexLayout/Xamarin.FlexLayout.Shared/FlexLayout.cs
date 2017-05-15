@@ -81,7 +81,7 @@ namespace Xamarin.FlexLayout
 		{
 			_root = GetNewFlexNode();
 			SetNode(this, _root);
-			FlexLayoutExtensions.Bridges.Add(_root, this);
+			_root.Data = this;
 			UpdateRootNode();
 			return _root;
 		}
@@ -113,7 +113,7 @@ namespace Xamarin.FlexLayout
             {
                 node = GetNewFlexNode();
                 SetNode(view, node);
-                FlexLayoutExtensions.Bridges.Add(node, view);
+				node.Data = view;
             }
 
             var viewINPC = view as INotifyPropertyChanged;
@@ -128,7 +128,7 @@ namespace Xamarin.FlexLayout
 				throw new ArgumentNullException(nameof(view));
 			var node = GetNode(view);
 			SetNode(view, null);
-			FlexLayoutExtensions.Bridges.Remove(node);
+			node.Data = null;
 			var viewINPC = view as INotifyPropertyChanged;
 			if (viewINPC != null)
 				viewINPC.PropertyChanged -= ChildPropertyChanged;

@@ -46,5 +46,7 @@ namespace Xamarin.FlexLayout
 		void Insert(int i, IFlexNode subViewNode);
 		void SetMeasure(MeasureFunc measureView);
 		void MarkDirty();
+
+		object Data { get; set; }
 	}
 }

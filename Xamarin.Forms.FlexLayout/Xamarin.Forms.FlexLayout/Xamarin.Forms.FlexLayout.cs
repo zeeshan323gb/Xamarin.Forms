@@ -277,9 +277,7 @@ namespace Xamarin.Forms
 			var constrainedWidth = (widthMode == FlexMeasureMode.Undefined) ? float.MaxValue : width;
 			var constrainedHeight = (heightMode == FlexMeasureMode.Undefined) ? float.MaxValue : height;
 
-			View view = null;
-			if (FlexLayoutExtensions.Bridges.ContainsKey(node))
-				view = FlexLayoutExtensions.Bridges[node] as View;
+			View view = node.Data as View;
 
 			var sizeRequest = view.Measure(constrainedWidth, constrainedHeight);
 

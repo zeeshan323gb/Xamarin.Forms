@@ -10,8 +10,6 @@ namespace Xamarin.FlexLayout
 {
     internal static class FlexLayoutExtensions
     {
-        internal static Dictionary<IFlexNode, NativeView> Bridges = new Dictionary<IFlexNode, NativeView>();
-
         public static bool IsLeaf(this NativeView view)
         {
             if (view.IsEnabled)
