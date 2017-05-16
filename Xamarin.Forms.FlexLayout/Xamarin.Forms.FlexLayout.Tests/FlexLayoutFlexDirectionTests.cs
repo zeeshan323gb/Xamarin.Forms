@@ -14,6 +14,7 @@ namespace Xamarin.Forms.FlexLayoutTests
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
             layout.FlexDirection = Flex.FlexDirection.Column;
+            layout.AlignItems = Flex.Align.FlexStart;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };
@@ -27,14 +28,13 @@ namespace Xamarin.Forms.FlexLayoutTests
             layout.Children.Add(label2);
             layout.Children.Add(label3);
 
-
-            var measure = layout.Measure(100, double.PositiveInfinity);
-            layout.Layout(new Rectangle(0, 0, 100, double.PositiveInfinity));
+            var sizeRequest =  layout.Measure(100, double.PositiveInfinity);
+            layout.Layout(new Rectangle(0, 0, sizeRequest.Request.Width, sizeRequest.Request.Height));
 
             Assert.AreEqual(0f, layout.X);
             Assert.AreEqual(0f, layout.Y);
             Assert.AreEqual(100f, layout.Width);
-            //Assert.AreEqual(30f, layout.Height);
+            Assert.AreEqual(30f, layout.Height);
 
             Assert.AreEqual(0f, label1.X);
             Assert.AreEqual(0f, label1.Y);
@@ -95,12 +95,13 @@ namespace Xamarin.Forms.FlexLayoutTests
             layout.Children.Add(label2);
             layout.Children.Add(label3);
 
+
             var measure = layout.Measure(double.PositiveInfinity, 100);
-            layout.Layout(new Rectangle(0, 0, double.PositiveInfinity, 100));
+            layout.Layout(new Rectangle(0, 0, measure.Request.Width, measure.Request.Height));
 
             Assert.AreEqual(0f, layout.X);
             Assert.AreEqual(0f, layout.Y);
-            //	Assert.AreEqual(30f, layout.Width);
+            Assert.AreEqual(30f, layout.Width);
             Assert.AreEqual(100f, layout.Height);
 
             Assert.AreEqual(0f, label1.X);

@@ -221,7 +221,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			{
 				return new SizeRequest(new Size(-1, -1));
 			});
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row };
+            var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row, AlignItems = Flex.Align.FlexStart };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
@@ -238,16 +238,16 @@ namespace Xamarin.Forms.FlexLayoutTests
 
 			layout.Layout(new Rectangle(0, 0, layoutSize.Width, layoutSize.Height));
 
-			Assert.AreEqual(label2.Bounds.Left, Math.Max(label1.Bounds.Left, label1.Bounds.Right));
-			Assert.AreEqual(label3.Bounds.Left, Math.Max(label2.Bounds.Left, label2.Bounds.Right));
+			Assert.AreEqual(label2.Bounds.Left, Math.Max(label1.Bounds.Left, label1.Bounds.Right), 1);
+			Assert.AreEqual(label3.Bounds.Left, Math.Max(label2.Bounds.Left, label2.Bounds.Right), 1);
 
-			float totalWidth = 0;
+            double totalWidth = 0;
 			foreach (var view in layout.Children)
 			{
-				totalWidth += (float)view.Bounds.Width;
+				totalWidth += view.Bounds.Width;
 			}
 
-			Assert.AreEqual(layoutSize.Width, totalWidth);
+			Assert.AreEqual(layoutSize.Width, totalWidth, 2);
 		}
 
 		[Test]

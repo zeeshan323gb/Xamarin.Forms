@@ -183,6 +183,8 @@ namespace Xamarin.Forms
 
 		protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
 		{
+			UpdateRootNode();
+			AttachNodesFromViewHierachy(this);
 			var requestSize = CalculateLayoutWithSize((float)widthConstraint, (float)heightConstraint);
 			return new SizeRequest(requestSize);
 		}

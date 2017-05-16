@@ -142,11 +142,14 @@ namespace Xamarin.FlexLayout
 		{
 			var node = _root;
 
-			node.Width = width;
-			node.Height = height;
-			node.CalculateLayout();
-			return new Size { Width = node.LayoutWidth, Height = node.LayoutHeight };
+            if (!float.IsPositiveInfinity((width)))
+                node.Width = width;
+            
+            if (!float.IsPositiveInfinity((height)))
+			    node.Height = height;
 
+            node.CalculateLayout();
+            return new Size { Width = node.LayoutWidth, Height = node.LayoutHeight };
 		}
 
 		IFlexNode GetNewFlexNode()
