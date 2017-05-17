@@ -99,14 +99,53 @@ namespace Xamarin.Forms.Platform.UWP
 
 		async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			if (e.Action == NotifyCollectionChangedAction.Add)
-			{
-				InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
-			}
+			// NewItems contains the item that was added.
+			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+            }
 
-			if (e.Action == NotifyCollectionChangedAction.Remove)
+			// OldItems contains the item that was removed.
+			// If OldStartingIndex is not -1, then it contains the index where the old item was removed.
+            if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                await RemovePage(e.OldStartingIndex);
+            }
+
+			// OldItems contains the moved item.
+			// OldStartingIndex contains the index where the item was moved from.
+			// NewStartingIndex contains the index where the item was moved to.
+			if (e.Action == NotifyCollectionChangedAction.Move)
 			{
-				await RemovePage(e.OldStartingIndex);
+				if (Element != null && flipView != null && Source != null)
+				{
+                    var obj = Source[e.OldStartingIndex];
+					Source.RemoveAt(e.OldStartingIndex);
+					Source.Insert(e.NewStartingIndex, obj);
+				}
+            }
+
+			// NewItems contains the replacement item.
+			// NewStartingIndex and OldStartingIndex are equal, and if they are not -1,
+			// then they contain the index where the item was replaced.
+			if (e.Action == NotifyCollectionChangedAction.Replace)
+			{
+				if (Element != null && flipView != null && Source != null)
+				{
+					Source[e.OldStartingIndex] = CreateView(e.NewItems[e.NewStartingIndex]);
+				}
+            }
+
+			// No other properties are valid.
+			if (e.Action == NotifyCollectionChangedAction.Reset)
+			{
+				if (Element != null)
+				{
+					SetPosition();
+					SetNativeView();
+					Element.PositionSelected?.Invoke(Element, Element.Position);
+				}
 			}
 		}
 
