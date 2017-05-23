@@ -126,6 +126,8 @@ namespace Xamarin.Forms.Platform.iOS
 						Element.Position = e.NewStartingIndex;
 						isSwiping = false;
 						SetIndicators();
+
+                        CleanupChildViewControllers();
 					});
 				}
             }
@@ -143,6 +145,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 					pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 					{
+                        CleanupChildViewControllers();
 					});
 				}
             }
@@ -271,6 +274,8 @@ namespace Xamarin.Forms.Platform.iOS
 				isSwiping = false;
 				SetIndicators();
 				Element.PositionSelected?.Invoke(Element, position);
+
+                CleanupChildViewControllers();
 			}
 		}
 		#endregion
@@ -397,7 +402,9 @@ namespace Xamarin.Forms.Platform.iOS
 			if (Source != null && Source?.Count > 0)
 			{
 				var firstViewController = CreateViewController(Element.Position);
-				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s => { });
+				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s => {
+                    CleanupChildViewControllers();
+				});
 			}
 
 			SetNativeControl(pageController.View);
@@ -476,6 +483,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 					if (position <= prevPos)
 					    Element.PositionSelected?.Invoke(Element, Element.Position);
+
+                    CleanupChildViewControllers();
 				});
 			}
 		}
@@ -519,6 +528,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, Element.Position);
+
+                            CleanupChildViewControllers();
 						});
 					}
 					else
@@ -531,6 +542,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, Element.Position);
+
+                            CleanupChildViewControllers();
 						});
 					}
 				}
@@ -556,7 +569,25 @@ namespace Xamarin.Forms.Platform.iOS
 
 					// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 					Element.PositionSelected?.Invoke(Element, position);
+
+                    CleanupChildViewControllers();
 				});
+			}
+		}
+
+		// Significant Memory Leak for iOS when using custom layout for page content #125
+		// Thanks to johnnysbug for the help!
+		void CleanupChildViewControllers()
+		{
+			//Cleanup non adjacent controllers
+			var childControllers = pageController.ChildViewControllers;
+			foreach (var childController in childControllers)
+			{
+				var index = Element.ItemsSource.GetList().IndexOf(((ViewContainer)childController).Tag);
+				if (index < (Element.Position - 1) || index > (Element.Position + 1))
+				{
+					childController.Dispose();
+				}
 			}
 		}
 
