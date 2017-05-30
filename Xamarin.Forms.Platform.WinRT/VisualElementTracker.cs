@@ -478,16 +478,30 @@ namespace Xamarin.Forms.Platform.WinRT
 			}
 			else
 			{
-				frameworkElement.Projection = new PlaneProjection
+				if (frameworkElement is ListViewRenderer || frameworkElement is ScrollViewRenderer || frameworkElement is TableViewRenderer)
 				{
-					CenterOfRotationX = anchorX,
-					CenterOfRotationY = anchorY,
-					GlobalOffsetX = scale == 0 ? 0 : translationX / scale,
-					GlobalOffsetY = scale == 0 ? 0 : translationY / scale,
-					RotationX = -rotationX,
-					RotationY = -rotationY,
-					RotationZ = -rotation
-				};
+					frameworkElement.RenderTransform = new CompositeTransform
+					{
+						CenterX = anchorX,
+						CenterY = anchorY,
+						Rotation = rotation,
+						TranslateX = scale == 0 ? 0 : translationX / scale,
+						TranslateY = scale == 0 ? 0 : translationY / scale
+					};
+				}
+				else
+				{
+					frameworkElement.Projection = new PlaneProjection
+					{
+						CenterOfRotationX = anchorX,
+						CenterOfRotationY = anchorY,
+						GlobalOffsetX = scale == 0 ? 0 : translationX / scale,
+						GlobalOffsetY = scale == 0 ? 0 : translationY / scale,
+						RotationX = -rotationX,
+						RotationY = -rotationY,
+						RotationZ = -rotation
+					};
+				}
 			}
 		}
 
