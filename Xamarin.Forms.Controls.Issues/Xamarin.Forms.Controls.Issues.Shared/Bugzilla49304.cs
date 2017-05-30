@@ -30,17 +30,22 @@ namespace Xamarin.Forms.Controls.Issues
 			{
 				Children =
 				{
-					new Label { Text = "The ScrollView, ListView, and TableView below should be rotated 180 degrees, but still scrollable" },
+					new Label {
+						Text = "The ScrollView, ListView, and TableView below should be rotated 180 degrees, but only the latter two " +
+							   "should still be scrollable, as the ScrollView has non-zero (.000001/-.000001 RotationX/RotationY values."
+					},
 					new ScrollView
 					{
 						Content = stack,
 						Rotation = 180,
-						TranslationX = -20
+						RotationX = .000001,
+						RotationY = -.000001
 					},
 					new ListView
 					{
 						ItemsSource = items,
-						Rotation = 180
+						Rotation = 180,
+						TranslationX = -20
 					},
 					new TableView {
 						Rotation = 180,

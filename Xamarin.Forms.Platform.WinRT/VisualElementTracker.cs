@@ -478,7 +478,12 @@ namespace Xamarin.Forms.Platform.WinRT
 			}
 			else
 			{
-				if (frameworkElement is ListViewRenderer || frameworkElement is ScrollViewRenderer || frameworkElement is TableViewRenderer)
+				// PlaneProjection removes touch and scrollwheel functionality on scrollable views such
+				// as ScrollView, ListView, and TableView. If neither RotationX or RotationY are set
+				// (i.e. their absolute value is 0), a CompositeTransform is instead used to allow for
+				// rotation of the control on a 2D plane, and the other values are set. Otherwise, the
+				// rotation values are set, but the aforementioned functionality will be lost.
+				if (Math.Abs(view.RotationX) == 0 && Math.Abs(view.RotationY) == 0)
 				{
 					frameworkElement.RenderTransform = new CompositeTransform
 					{
