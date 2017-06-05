@@ -125,9 +125,9 @@ namespace Xamarin.Forms.Platform.iOS
 						isSwiping = true;
 						Element.Position = e.NewStartingIndex;
 						isSwiping = false;
-						SetIndicators();
+                        SetIndicatorsCurrentPage();
 
-                        CleanupChildViewControllers();
+                        //CleanupChildViewControllers();
 					});
 				}
             }
@@ -145,7 +145,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 					pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 					{
-                        CleanupChildViewControllers();
+                        //CleanupChildViewControllers();
 					});
 				}
             }
@@ -157,7 +157,6 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					SetPosition();
 					SetNativeView();
-					SetIndicators();
 					Element.PositionSelected?.Invoke(Element, Element.Position);
 				}
 			}
@@ -171,7 +170,6 @@ namespace Xamarin.Forms.Platform.iOS
 				ElementWidth = rect.Width;
 				ElementHeight = rect.Height;
 				SetNativeView();
-				SetIndicators();
 				Element.PositionSelected?.Invoke(Element, Element.Position);
 			}
 		}
@@ -191,7 +189,6 @@ namespace Xamarin.Forms.Platform.iOS
 					if (Element != null)
 					{
 						SetNativeView();
-						SetIndicators();
 						Element.PositionSelected?.Invoke(Element, Element.Position);
 					}
 					break;
@@ -208,24 +205,22 @@ namespace Xamarin.Forms.Platform.iOS
 					SetIsSwipingEnabled();
 					break;
 				case "IndicatorsTintColor":
-					SetIndicators();
+                    SetIndicatorsTintColor();
 					break;
 				case "CurrentPageIndicatorTintColor":
-					SetIndicators();
+                    SetCurrentPageIndicatorTintColor();
 					break;
 				case "IndicatorsShape":
-					SetIndicators();
+                    SetIndicatorsShape();
 					break;
 				case "ShowIndicators":
-					if (pageControl != null)
-						pageControl.Hidden = !Element.ShowIndicators;
+                    SetIndicators();
 					break;
 				case "ItemsSource":
 					if (Element != null)
 					{
 						SetPosition();
 						SetNativeView();
-						SetIndicators();
 						Element.PositionSelected?.Invoke(Element, Element.Position);
 						if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
 							((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
@@ -235,7 +230,6 @@ namespace Xamarin.Forms.Platform.iOS
 					if (Element != null)
 					{
 						SetNativeView();
-						SetIndicators();
 						Element.PositionSelected?.Invoke(Element, Element.Position);
 					}
 					break;
@@ -272,10 +266,10 @@ namespace Xamarin.Forms.Platform.iOS
 				Element.Position = position;
 				prevPosition = position;
 				isSwiping = false;
-				SetIndicators();
+                SetIndicatorsCurrentPage();
 				Element.PositionSelected?.Invoke(Element, position);
 
-                CleanupChildViewControllers();
+                //CleanupChildViewControllers();
 			}
 		}
 		#endregion
@@ -301,8 +295,7 @@ namespace Xamarin.Forms.Platform.iOS
 		void SetNativeView()
 		{
 			// Rotation bug(iOS) #115 Fix
-			if (pageController != null)
-				pageController.View.RemoveFromSuperview();
+			CleanUpPageController();
 			
 			var interPageSpacing = (float)Element.InterPageSpacing;
 
@@ -319,26 +312,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 			// BackgroundColor BP
 			pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
-
-			// INDICATORS
-			pageControl = new UIPageControl();
-			pageControl.TranslatesAutoresizingMaskIntoConstraints = false;
-			pageControl.Enabled = false;
-			pageController.View.AddSubview(pageControl);
-			var viewsDictionary = NSDictionary.FromObjectsAndKeys(new NSObject[] { pageControl }, new NSObject[] { new NSString("pageControl") });
-			if (Element.Orientation == CarouselViewOrientation.Horizontal)
-			{
-				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:|[pageControl]|", NSLayoutFormatOptions.AlignAllCenterX, new NSDictionary(), viewsDictionary));
-				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:[pageControl]|", 0, new NSDictionary(), viewsDictionary));
-			}
-			else
-			{
-				pageControl.Transform = CGAffineTransform.MakeRotation(3.14159265f / 2);
-
-				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("[pageControl(==36)]", 0, new NSDictionary(), viewsDictionary));
-				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:[pageControl]|", 0, new NSDictionary(), viewsDictionary));
-				pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:|[pageControl]|", NSLayoutFormatOptions.AlignAllTop, new NSDictionary(), viewsDictionary));
-			}
 
 			#region adapter
 			pageController.DidFinishAnimating += PageController_DidFinishAnimating;
@@ -403,27 +376,93 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				var firstViewController = CreateViewController(Element.Position);
 				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s => {
-                    CleanupChildViewControllers();
+                    //CleanupChildViewControllers();
 				});
 			}
 
 			SetNativeControl(pageController.View);
+
+			// INDICATORS
+			SetIndicators();
 		}
 
+#region indicators
+
 		void SetIndicators()
+		{
+			if (Element.ShowIndicators)
+			{
+				pageControl = new UIPageControl();
+				pageControl.TranslatesAutoresizingMaskIntoConstraints = false;
+				pageControl.Enabled = false;
+				pageController.View.AddSubview(pageControl);
+				var viewsDictionary = NSDictionary.FromObjectsAndKeys(new NSObject[] { pageControl }, new NSObject[] { new NSString("pageControl") });
+				if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				{
+					pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:|[pageControl]|", NSLayoutFormatOptions.AlignAllCenterX, new NSDictionary(), viewsDictionary));
+					pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:[pageControl]|", 0, new NSDictionary(), viewsDictionary));
+				}
+				else
+				{
+					pageControl.Transform = CGAffineTransform.MakeRotation(3.14159265f / 2);
+
+					pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("[pageControl(==36)]", 0, new NSDictionary(), viewsDictionary));
+					pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:[pageControl]|", 0, new NSDictionary(), viewsDictionary));
+					pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:|[pageControl]|", NSLayoutFormatOptions.AlignAllTop, new NSDictionary(), viewsDictionary));
+				}
+
+				pageControl.Pages = Count;
+				pageControl.PageIndicatorTintColor = Element.IndicatorsTintColor.ToUIColor();
+				pageControl.CurrentPageIndicatorTintColor = Element.CurrentPageIndicatorTintColor.ToUIColor();
+				pageControl.CurrentPage = Element.Position;
+				SetIndicatorsShape();
+			}
+			else
+			{
+				CleanUpPageControl();
+			}
+		}
+
+		void SetIndicatorsCount()
 		{
 			if (pageControl != null)
 			{
 				pageControl.Pages = Count;
-				pageControl.CurrentPage = Element.Position;
+				SetIndicatorsShape();
+			}
+		}
 
-				// IndicatorsTintColor BP
+		void SetIndicatorsTintColor()
+		{
+			if (pageControl != null)
+			{
 				pageControl.PageIndicatorTintColor = Element.IndicatorsTintColor.ToUIColor();
+				SetIndicatorsShape();
+			}
+		}
 
-				// CurrentPageIndicatorTintColor BP
+		void SetCurrentPageIndicatorTintColor()
+		{
+			if (pageControl != null)
+			{
 				pageControl.CurrentPageIndicatorTintColor = Element.CurrentPageIndicatorTintColor.ToUIColor();
+				SetIndicatorsShape();
+			}
+		}
 
-				// IndicatorsShape BP
+		void SetIndicatorsCurrentPage()
+		{
+			if (pageControl != null)
+			{
+				pageControl.CurrentPage = Element.Position;
+				SetIndicatorsShape();
+			}
+		}
+
+		void SetIndicatorsShape()
+		{
+			if (pageControl != null)
+			{
 				if (Element.IndicatorsShape == IndicatorsShape.Square)
 				{
 					foreach (var view in pageControl.Subviews)
@@ -448,11 +487,10 @@ namespace Xamarin.Forms.Platform.iOS
 						}
 					}
 				}
-
-				// ShowIndicators BP
-				pageControl.Hidden = !Element.ShowIndicators;
 			}
 		}
+
+#endregion
 
 		void InsertPage(object item, int position)
 		{
@@ -479,12 +517,12 @@ namespace Xamarin.Forms.Platform.iOS
 					}
 					isSwiping = false;
 
-					SetIndicators();
+                    SetIndicatorsCount();
 
 					if (position <= prevPos)
 					    Element.PositionSelected?.Invoke(Element, Element.Position);
 
-                    CleanupChildViewControllers();
+                    //CleanupChildViewControllers();
 				});
 			}
 		}
@@ -498,7 +536,6 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					Source.RemoveAt(position);
 					SetNativeView();
-					SetIndicators();
 				}
 				else
 				{
@@ -524,12 +561,12 @@ namespace Xamarin.Forms.Platform.iOS
 							Element.Position = newPos;
 							isSwiping = false;
 
-							SetIndicators();
+                            SetIndicatorsCount();
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, Element.Position);
 
-                            CleanupChildViewControllers();
+                            //CleanupChildViewControllers();
 						});
 					}
 					else
@@ -538,12 +575,12 @@ namespace Xamarin.Forms.Platform.iOS
 						var firstViewController = pageController.ViewControllers[0];
 						pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 						{
-							SetIndicators();
+                            SetIndicatorsCount();
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, Element.Position);
 
-                            CleanupChildViewControllers();
+                            //CleanupChildViewControllers();
 						});
 					}
 				}
@@ -565,19 +602,19 @@ namespace Xamarin.Forms.Platform.iOS
 				var firstViewController = CreateViewController(position);
 				pageController.SetViewControllers(new[] { firstViewController }, direction, Element.AnimateTransition, s =>
 				{
-					SetIndicators();
+                    SetIndicatorsCurrentPage();
 
 					// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 					Element.PositionSelected?.Invoke(Element, position);
 
-                    CleanupChildViewControllers();
+                    //CleanupChildViewControllers();
 				});
 			}
 		}
 
 		// Significant Memory Leak for iOS when using custom layout for page content #125
 		// Thanks to johnnysbug for the help!
-		void CleanupChildViewControllers()
+		/*void CleanupChildViewControllers()
 		{
 			//Cleanup non adjacent controllers
 			var childControllers = pageController.ChildViewControllers;
@@ -589,7 +626,7 @@ namespace Xamarin.Forms.Platform.iOS
 					childController.Dispose();
 				}
 			}
-		}
+		}*/
 
 		#region adapter
 		UIViewController CreateViewController(int index)
@@ -635,28 +672,45 @@ namespace Xamarin.Forms.Platform.iOS
 		}
 		#endregion
 
+		void CleanUpPageControl()
+		{
+			if (pageControl != null)
+			{
+				pageControl.RemoveFromSuperview();
+				pageControl.Dispose();
+				pageControl = null;
+			}
+		}
+
+		void CleanUpPageController()
+		{
+			CleanUpPageControl();
+
+			if (pageController != null)
+			{
+				pageController.DidFinishAnimating -= PageController_DidFinishAnimating;
+				pageController.GetPreviousViewController = null;
+				pageController.GetNextViewController = null;
+
+				foreach (var child in pageController.ChildViewControllers)
+					child.Dispose();
+
+				foreach (var child in pageController.ViewControllers)
+					child.Dispose();
+
+				pageController.View.RemoveFromSuperview();
+				pageController.View.Dispose();
+
+				pageController.Dispose();
+				pageController = null;
+			}
+		}
+
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing && !_disposed)
 			{
-				if (pageController != null)
-				{
-					pageController.DidFinishAnimating -= PageController_DidFinishAnimating;
-					pageController.GetPreviousViewController = null;
-					pageController.GetNextViewController = null;
-
-					foreach (var child in pageController.ViewControllers)
-						child.Dispose();
-
-					pageController.Dispose();
-					pageController = null;
-				}
-
-				if (pageControl != null)
-				{
-					pageControl.Dispose();
-					pageControl = null;
-				}
+                CleanUpPageController();
 
 				if (Element != null)
 				{

@@ -24,6 +24,7 @@ namespace Xamarin.Forms.Controls
 				Command = new Command(() =>
 				{
 					((CarouselViewModel)BindingContext).Source = new ObservableCollection<int>();
+					//myCarousel.ShowIndicators = !myCarousel.ShowIndicators;
 				})
 			});
 
