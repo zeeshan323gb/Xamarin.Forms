@@ -29,7 +29,7 @@ namespace Xamarin.Forms.Platform.iOS
         // To hold binding context
 		public object Tag { get; set; }
 
-		protected override void Dispose(bool disposing)
+		/*protected override void Dispose(bool disposing)
 		{
 			// because this runs in the finalizer thread and disposing is equal false
 			InvokeOnMainThread( () => {
@@ -50,7 +50,7 @@ namespace Xamarin.Forms.Platform.iOS
 			});
 
 			base.Dispose(disposing);
-		}
+		}*/
 	}
 }
 
