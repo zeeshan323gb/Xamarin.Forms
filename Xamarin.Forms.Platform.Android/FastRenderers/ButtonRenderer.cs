@@ -206,7 +206,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		protected virtual void OnElementChanged(ElementChangedEventArgs<Button> e)
 		{
-			if (e.NewElement != null)
+			if (e.NewElement != null && !_isDisposed)
 			{
                 UpdateFont();
                 UpdateText();
