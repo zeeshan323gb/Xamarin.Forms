@@ -29,6 +29,26 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
+/*
+ * Significant Memory Leak for iOS when using custom layout for page content #125
+ * 
+ * The problem:
+ * 
+ * To facilitate smooth swiping, UIPageViewController keeps a ghost copy of the pages in a collection named
+ * ChildViewControllers.
+ * This collection is handled internally by UIPageViewController to keep a maximun of 3 items, but
+ * when a custom view is used from Xamarin.Forms side, the views hang in memory and are not collected no matter if
+ * internally the UIViewController is disposed by UIPageViewController.
+ * 
+ * Fix explained:
+ * 
+ * Some code has been added to GetPreviousViewController and GetNextViewController to return
+ * a child controller of exists in ChildViewController.
+ * Also Dispose has been implemented in ViewContainer to release the custom views.
+ * Dispose is called in the finalizer thread (UI) so the code to release the views from memory has been
+ * wrapped in InvokeOnMainThread.
+ */
+
 namespace Xamarin.Forms.Platform.iOS
 {
 	/// <summary>
@@ -126,8 +146,6 @@ namespace Xamarin.Forms.Platform.iOS
 						Element.Position = e.NewStartingIndex;
 						isSwiping = false;
                         SetIndicatorsCurrentPage();
-
-                        //CleanupChildViewControllers();
 					});
 				}
             }
@@ -145,7 +163,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 					pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 					{
-                        //CleanupChildViewControllers();
 					});
 				}
             }
@@ -258,7 +275,7 @@ namespace Xamarin.Forms.Platform.iOS
 		#region adapter callbacks
 		void PageController_DidFinishAnimating(object sender, UIPageViewFinishedAnimationEventArgs e)
 		{
-			if (e.Finished)
+            if (e.Completed)
 			{
 				var controller = (ViewContainer)pageController.ViewControllers[0];
 				var position = Source.IndexOf(controller.Tag);
@@ -268,8 +285,6 @@ namespace Xamarin.Forms.Platform.iOS
 				isSwiping = false;
                 SetIndicatorsCurrentPage();
 				Element.PositionSelected?.Invoke(Element, position);
-
-                //CleanupChildViewControllers();
 			}
 		}
 		#endregion
@@ -333,6 +348,15 @@ namespace Xamarin.Forms.Platform.iOS
 					else
 					{
 						int previousPageIndex = position - 1;
+
+						// Significant Memory Leak for iOS when using custom layout for page content #125
+						var newTag = Source[previousPageIndex];
+						foreach (ViewContainer child in pageController.ChildViewControllers)
+						{
+							if (child.Tag == newTag)
+								return child;
+						}
+
 						return CreateViewController(previousPageIndex);
 					}
 				}
@@ -359,6 +383,15 @@ namespace Xamarin.Forms.Platform.iOS
 					else
 					{
 						int nextPageIndex = position + 1;
+
+						// Significant Memory Leak for iOS when using custom layout for page content #125
+						var newTag = Source[nextPageIndex];
+						foreach (ViewContainer child in pageController.ChildViewControllers)
+						{
+							if (child.Tag == newTag)
+								return child;
+						}
+
 						return CreateViewController(nextPageIndex);
 					}
 				}
@@ -376,7 +409,6 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				var firstViewController = CreateViewController(Element.Position);
 				pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s => {
-                    //CleanupChildViewControllers();
 				});
 			}
 
@@ -521,8 +553,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 					if (position <= prevPos)
 					    Element.PositionSelected?.Invoke(Element, Element.Position);
-
-                    //CleanupChildViewControllers();
 				});
 			}
 		}
@@ -565,8 +595,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, Element.Position);
-
-                            //CleanupChildViewControllers();
 						});
 					}
 					else
@@ -579,8 +607,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 							// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 							Element.PositionSelected?.Invoke(Element, Element.Position);
-
-                            //CleanupChildViewControllers();
 						});
 					}
 				}
@@ -606,27 +632,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 					// Invoke PositionSelected as DidFinishAnimating is only called when touch to swipe
 					Element.PositionSelected?.Invoke(Element, position);
-
-                    //CleanupChildViewControllers();
 				});
 			}
 		}
-
-		// Significant Memory Leak for iOS when using custom layout for page content #125
-		// Thanks to johnnysbug for the help!
-		/*void CleanupChildViewControllers()
-		{
-			//Cleanup non adjacent controllers
-			var childControllers = pageController.ChildViewControllers;
-			foreach (var childController in childControllers)
-			{
-				var index = Element.ItemsSource.GetList().IndexOf(((ViewContainer)childController).Tag);
-				if (index < (Element.Position - 1) || index > (Element.Position + 1))
-				{
-					childController.Dispose();
-				}
-			}
-		}*/
 
 		#region adapter
 		UIViewController CreateViewController(int index)

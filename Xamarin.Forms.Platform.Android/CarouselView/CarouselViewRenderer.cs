@@ -31,6 +31,20 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
+/*
+ * Save state in Android:
+ * 
+ * It is not possible in Xamarin.Forms.
+ * Everytime you create a view in Forms, its Id and each widget Id is generated when the native view is rendered,
+ * so its not possible to restore state from a SparseArray.
+ * 
+ * Workaround:
+ * 
+ * Use two way bindings to your ViewModel, so for example when a value is entered in a Text field,
+ * it will be saved to ViewModel and when the view is destroyed and recreated by ViewPager, its state will be restored.
+ * 
+ */
+
 namespace Xamarin.Forms.Platform.Android
 {
 	/// <summary>
@@ -475,10 +489,10 @@ namespace Xamarin.Forms.Platform.Android
 				var nativeConverted = formsView.ToAndroid(new Rectangle(0, 0, Element.Width, Element.Height));
 				nativeConverted.Tag = new Tag() { BindingContext = bindingContext }; //position;
 
-				var pager = (ViewPager)container;
-
+				//nativeConverted.SaveEnabled = true;
 				//nativeConverted.RestoreHierarchyState(mViewStates);
 
+				var pager = (ViewPager)container;
 				pager.AddView(nativeConverted);
 
 				return nativeConverted;
@@ -488,6 +502,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				var pager = (ViewPager)container;
 				var view = (AViews.ViewGroup)objectValue;
+				//view.SaveEnabled = true;
 				//view.SaveHierarchyState(mViewStates);
 				pager.RemoveView(view);
 			}
