@@ -40,7 +40,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			_effectControlProvider = new EffectControlProvider(this);
             _textColorSwitcher = new Lazy<TextColorSwitcher>(() => new TextColorSwitcher(TextColors));
 
-            Initialize();
+			Initialize();
 		}
 
 		public VisualElement Element => Button;
@@ -208,13 +208,16 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		{
 			if (e.NewElement != null && !_isDisposed)
 			{
-                UpdateFont();
-                UpdateText();
-                UpdateBitmap();
-                UpdateTextColor();
-                UpdateIsEnabled();
-			    UpdateInputTransparent();
-                UpdateBackgroundColor();
+
+				this.EnsureId();
+
+				UpdateFont();
+				UpdateText();
+				UpdateBitmap();
+				UpdateTextColor();
+				UpdateIsEnabled();
+				UpdateInputTransparent();
+				UpdateBackgroundColor();
 			}
 
 			ElementChanged?.Invoke(this, new VisualElementChangedEventArgs(e.OldElement, e.NewElement));
