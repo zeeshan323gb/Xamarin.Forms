@@ -42,8 +42,8 @@ IN THE SOFTWARE.
  * 
  * Fix explained:
  * 
- * Some code has been added to GetPreviousViewController and GetNextViewController to return
- * a child controller of exists in ChildViewController.
+ * Some code has been added to CreateViewController to return
+ * a child controller if exists in ChildViewController.
  * Also Dispose has been implemented in ViewContainer to release the custom views.
  * Dispose is called in the finalizer thread (UI) so the code to release the views from memory has been
  * wrapped in InvokeOnMainThread.
@@ -62,6 +62,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		// A local copy of ItemsSource so we can use CollectionChanged events
 		List<object> Source;
+
+		// Used only when ItemsSource is a List<View>
+		List<ViewContainer> ChildViewControllers;
 
 		int Count
 		{
@@ -146,6 +149,8 @@ namespace Xamarin.Forms.Platform.iOS
 						Element.Position = e.NewStartingIndex;
 						isSwiping = false;
                         SetIndicatorsCurrentPage();
+
+                        Element.PositionSelected?.Invoke(Element, Element.Position);
 					});
 				}
             }
@@ -157,6 +162,10 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (Element != null && pageController != null && Source != null)
 				{
+					// Remove controller from ChildViewControllers
+					if (ChildViewControllers != null)
+						ChildViewControllers.RemoveAll(c => c.Tag == Source[e.OldStartingIndex]);
+                    
 					Source[e.OldStartingIndex] = e.NewItems[e.NewStartingIndex];
 
 					var firstViewController = CreateViewController(Element.Position);
@@ -184,10 +193,14 @@ namespace Xamarin.Forms.Platform.iOS
 			if (Element != null)
 			{
 				var rect = this.Element.Bounds;
-				ElementWidth = rect.Width;
-				ElementHeight = rect.Height;
-				SetNativeView();
-				Element.PositionSelected?.Invoke(Element, Element.Position);
+				// To avoid extra DataTemplate instantiations #158
+				if (rect.Height > 0)
+				{
+					ElementWidth = rect.Width;
+					ElementHeight = rect.Height;
+					SetNativeView();
+					Element.PositionSelected?.Invoke(Element, Element.Position);
+				}
 			}
 		}
 
@@ -348,15 +361,6 @@ namespace Xamarin.Forms.Platform.iOS
 					else
 					{
 						int previousPageIndex = position - 1;
-
-						// Significant Memory Leak for iOS when using custom layout for page content #125
-						var newTag = Source[previousPageIndex];
-						foreach (ViewContainer child in pageController.ChildViewControllers)
-						{
-							if (child.Tag == newTag)
-								return child;
-						}
-
 						return CreateViewController(previousPageIndex);
 					}
 				}
@@ -383,15 +387,6 @@ namespace Xamarin.Forms.Platform.iOS
 					else
 					{
 						int nextPageIndex = position + 1;
-
-						// Significant Memory Leak for iOS when using custom layout for page content #125
-						var newTag = Source[nextPageIndex];
-						foreach (ViewContainer child in pageController.ChildViewControllers)
-						{
-							if (child.Tag == newTag)
-								return child;
-						}
-
 						return CreateViewController(nextPageIndex);
 					}
 				}
@@ -530,6 +525,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				Source.Insert(position, item);
 
+				// Because we maybe inserting into an empty PageController
 				UIViewController firstViewController;
 				if (pageController.ViewControllers.Count() > 0)
                     firstViewController = pageController.ViewControllers[0];
@@ -569,7 +565,10 @@ namespace Xamarin.Forms.Platform.iOS
 				}
 				else
 				{
-
+					// Remove controller from ChildViewControllers
+					if (ChildViewControllers != null)
+						ChildViewControllers.RemoveAll(c => c.Tag == Source[position]);
+                    
 					Source.RemoveAt(position);
 
 					// To remove current page
@@ -639,6 +638,14 @@ namespace Xamarin.Forms.Platform.iOS
 		#region adapter
 		UIViewController CreateViewController(int index)
 		{
+			// Significant Memory Leak for iOS when using custom layout for page content #125
+			var newTag = Source[index];
+			foreach (ViewContainer child in pageController.ChildViewControllers)
+			{
+				if (child.Tag == newTag)
+					return child;
+			}
+
 			View formsView = null;
 
 			object bindingContext = null;
@@ -655,14 +662,35 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 			else
 			{
+				// Support for List<View> as ItemsSource
+				var view = bindingContext as View;
 
-				var selector = Element.ItemTemplate as DataTemplateSelector;
-				if (selector != null)
-					formsView = (View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+				if (view != null)
+				{
+					if (ChildViewControllers == null)
+						ChildViewControllers = new List<ViewContainer>();
+
+					// Return from the local copy of controllers
+					foreach (ViewContainer controller in ChildViewControllers)
+					{
+						if (controller.Tag == view)
+						{
+							return controller;
+						}
+					}
+
+					formsView = view;
+				}
 				else
-					formsView = (View)Element.ItemTemplate.CreateContent();
+				{
+					var selector = Element.ItemTemplate as DataTemplateSelector;
+					if (selector != null)
+						formsView = (View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+					else
+						formsView = (View)Element.ItemTemplate.CreateContent();
 
-				formsView.BindingContext = bindingContext;
+					formsView.BindingContext = bindingContext;
+				}
 			}
 
 			// HeightRequest fix
@@ -675,6 +703,10 @@ namespace Xamarin.Forms.Platform.iOS
 			var viewController = new ViewContainer();
 			viewController.Tag = bindingContext;
 			viewController.View = nativeConverted;
+
+			// Only happens when ItemsSource is List<View>
+			if (ChildViewControllers != null)
+				ChildViewControllers.Add(viewController);
 
 			return viewController;
 		}
@@ -705,6 +737,17 @@ namespace Xamarin.Forms.Platform.iOS
 
 				foreach (var child in pageController.ViewControllers)
 					child.Dispose();
+
+				// Cleanup ChildViewControllers
+				if (ChildViewControllers != null)
+				{
+					foreach (var child in ChildViewControllers)
+					{
+						child.Dispose();
+					}
+
+					ChildViewControllers = null;
+				}
 
 				pageController.View.RemoveFromSuperview();
 				pageController.View.Dispose();

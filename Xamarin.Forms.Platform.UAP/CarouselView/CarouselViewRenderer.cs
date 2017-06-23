@@ -12,6 +12,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 using Xamarin.Forms.Platform.UAP;
 
+using Xamarin.Forms;
+
 /*
 The MIT License(MIT)
 
@@ -123,6 +125,8 @@ namespace Xamarin.Forms.Platform.UWP
                     var obj = Source[e.OldStartingIndex];
 					Source.RemoveAt(e.OldStartingIndex);
 					Source.Insert(e.NewStartingIndex, obj);
+
+                    SetCurrentPage(Element.Position);
 				}
             }
 
@@ -498,14 +502,22 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 			else
 			{
+				var view = bindingContext as View;
 
-				var selector = Element.ItemTemplate as Xamarin.Forms.DataTemplateSelector;
-				if (selector != null)
-					formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+				if (view != null)
+				{
+					formsView = view;
+				}
 				else
-					formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
+				{
+					var selector = Element.ItemTemplate as Xamarin.Forms.DataTemplateSelector;
+					if (selector != null)
+						formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+					else
+						formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
 
-				formsView.BindingContext = bindingContext;
+					formsView.BindingContext = bindingContext;
+				}
 			}
 
 			formsView.Parent = this.Element;

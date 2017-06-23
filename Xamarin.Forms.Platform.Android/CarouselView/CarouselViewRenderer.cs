@@ -57,7 +57,7 @@ namespace Xamarin.Forms.Platform.Android
         CirclePageIndicator indicators;
 		bool _disposed;
 
-		//double ElementWidth;
+		double ElementWidth;
 		//double ElementHeight;
 
 		protected override void OnElementChanged(ElementChangedEventArgs<CarouselView> e)
@@ -126,6 +126,8 @@ namespace Xamarin.Forms.Platform.Android
 					Source.RemoveAt(e.OldStartingIndex);
 					Source.Insert(e.NewStartingIndex, e.OldItems[e.OldStartingIndex]);
 					viewPager.Adapter?.NotifyDataSetChanged();
+
+                    Element.PositionSelected?.Invoke(Element, Element.Position);
 				}
             }
 
@@ -161,8 +163,11 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (Element != null)
 			{
-				//var rect = this.Element.Bounds;
-				//ElementWidth = rect.Width;
+				var rect = this.Element.Bounds;
+				// To avoid page recreation caused by entry focus #136 (fix)
+				if (ElementWidth.Equals(rect.Width))
+                    return;
+				ElementWidth = rect.Width;
 				//ElementHeight = rect.Height;
 				SetNativeView();
 				Element.PositionSelected?.Invoke(Element, Element.Position);
@@ -473,14 +478,22 @@ namespace Xamarin.Forms.Platform.Android
 				}
 				else
 				{
+					var view = bindingContext as View;
 
-					var selector = Element.ItemTemplate as DataTemplateSelector;
-					if (selector != null)
-						formsView = (View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+					if (view != null)
+					{
+						formsView = view;
+					}
 					else
-						formsView = (View)Element.ItemTemplate.CreateContent();
+					{
+						var selector = Element.ItemTemplate as DataTemplateSelector;
+						if (selector != null)
+							formsView = (View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+						else
+							formsView = (View)Element.ItemTemplate.CreateContent();
 
-					formsView.BindingContext = bindingContext;
+						formsView.BindingContext = bindingContext;
+					}
 				}
 
 				// HeightRequest fix

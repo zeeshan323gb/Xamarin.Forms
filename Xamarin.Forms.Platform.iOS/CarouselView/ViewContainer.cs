@@ -34,6 +34,8 @@ namespace Xamarin.Forms.Platform.iOS
 			// because this runs in the finalizer thread and disposing is equal false
 			InvokeOnMainThread(() =>
 			{
+                WillMoveToParentViewController(null);
+
 				// Significant Memory Leak for iOS when using custom layout for page content #125
 				foreach (var view in View.Subviews)
 				{
@@ -44,6 +46,8 @@ namespace Xamarin.Forms.Platform.iOS
 				View.RemoveFromSuperview();
 				View.Dispose();
 				View = null;
+
+                RemoveFromParentViewController();
 			});
 
 			base.Dispose(disposing);
