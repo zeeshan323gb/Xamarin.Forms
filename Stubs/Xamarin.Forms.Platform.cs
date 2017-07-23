@@ -31,8 +31,12 @@ namespace Xamarin.Forms.Platform
 
 	[RenderWith(typeof(EntryRenderer))]
 	internal class _EntryRenderer { }
-
-	[RenderWith (typeof (EditorRenderer))]
+	
+#if __ANDROID__
+	[RenderWith(typeof(Xamarin.Forms.Platform.Android.FastRenderers.EditorRenderer))]
+#else
+	[RenderWith(typeof(EditorRenderer))]
+#endif
 	internal class _EditorRenderer { }
 #if __ANDROID__
 	[RenderWith (typeof (Xamarin.Forms.Platform.Android.FastRenderers.LabelRenderer))]
