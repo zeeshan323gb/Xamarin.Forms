@@ -23,7 +23,9 @@ namespace Xamarin.Forms.Platform.Android
 
 			imageController?.SetIsLoading(true);
 
-			(imageView as IImageRendererController)?.SkipInvalidate();
+			var formsImageView = imageView as FormsImageView;
+			if (formsImageView != null)
+				formsImageView.SkipInvalidate();
 
 			imageView.SetImageResource(global::Android.Resource.Color.Transparent);
 
@@ -31,7 +33,7 @@ namespace Xamarin.Forms.Platform.Android
 			Bitmap bitmap = null;
 			IImageSourceHandler handler;
 
-			if (source != null && (handler = Internals.Registrar.Registered.GetHandler<IImageSourceHandler>(source.GetType())) != null)
+			if (source != null && (handler = Registrar.Registered.GetHandler<IImageSourceHandler>(source.GetType())) != null)
 			{
 				try
 				{
