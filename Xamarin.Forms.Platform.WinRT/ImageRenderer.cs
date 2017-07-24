@@ -163,7 +163,7 @@ namespace Xamarin.Forms.Platform.WinRT
 				return;
 			}
 
-			Element.SetIsLoading(true);
+			((IImageController)Element)?.SetIsLoading(true);
 			ImageSource source = Element.Source;
 			IImageSourceHandler handler;
 			if (source != null && (handler = Registrar.Registered.GetHandler<IImageSourceHandler>(source.GetType())) != null)
@@ -191,7 +191,7 @@ namespace Xamarin.Forms.Platform.WinRT
 			else
 			{
 				Control.Source = null;
-				Element.SetIsLoading(false);
+				((IImageController)Element)?.SetIsLoading(false);
 			}
 		}
 	}
