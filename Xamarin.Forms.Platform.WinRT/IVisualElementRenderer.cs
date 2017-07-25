@@ -44,7 +44,7 @@ namespace Xamarin.Forms.Platform.WinRT
 		public event EventHandler<VisualElementChangedEventArgs> ElementChanged;
 
 		public FrameworkElement ContainerElement
-			=> null;
+			=> ((IVisualElementRenderer)_platformRenderer).ContainerElement;
 
 		public void SetElement(VisualElement element)
 			=> _platformRenderer.SetElement(element);
