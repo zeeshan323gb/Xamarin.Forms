@@ -36,6 +36,8 @@ namespace Xamarin.Forms
 		object Control { get; }
 
 		event EventHandler<ElementChangedEventArgs> ElementChanged;
+
+		object _ContainerElement { get; }
 	}
 
 	public interface IPlatformRenderer<out T> : IPlatformRenderer

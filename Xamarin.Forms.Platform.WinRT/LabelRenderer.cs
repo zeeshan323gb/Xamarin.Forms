@@ -258,37 +258,41 @@ namespace Xamarin.Forms.Platform.WinRT
 		}
 	}
 
-	public class PR_LabelRenderer : LabelRenderer, IPlatformRenderer<TextBlock>
+	public class PR_LabelRenderer : 
+		IPlatformRenderer<TextBlock>
 	{
 		private LabelRenderer _renderer;
 
 		public PR_LabelRenderer()
 		{
-			_renderer = this;
+			_renderer = new LabelRenderer();
 			_renderer.ElementChanged += OnElementChanged;
 		}
 
 		private void OnElementChanged(object sender, ElementChangedEventArgs<Label> e)
 			=> ElementChanged?.Invoke(sender, new ElementChangedEventArgs(e.NewElement, e.OldElement));
 
-		public new event EventHandler<ElementChangedEventArgs> ElementChanged;
+		public event EventHandler<ElementChangedEventArgs> ElementChanged;
 
-		//public TextBlock Control
-		//	=> _renderer.Control;
+		public TextBlock Control
+			=> _renderer.Control;
 
 		object IPlatformRenderer.Control
 			=> Control;
 
-		public new VisualElement Element
+		public VisualElement Element
 			=> _renderer.Element;
+
+		public object _ContainerElement
+			=> _renderer.ContainerElement;
 
 		public SizeRequest Measure(double widthConstraint, double heightConstraint)
 			=> _renderer.GetDesiredSize(widthConstraint, heightConstraint);
 
-		//public void SetElement(VisualElement element)
-		//	=> _renderer.SetElement(element);
+		public void SetElement(VisualElement element)
+			=> _renderer.SetElement(element);
 
-		//public void Dispose() 
-		//	=> _renderer.ElementChanged -= OnElementChanged;
+		public void Dispose()
+			=> _renderer.ElementChanged -= OnElementChanged;
 	}
 }
