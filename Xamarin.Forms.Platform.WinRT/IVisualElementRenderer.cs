@@ -44,7 +44,7 @@ namespace Xamarin.Forms.Platform.WinRT
 		public event EventHandler<VisualElementChangedEventArgs> ElementChanged;
 
 		public FrameworkElement ContainerElement
-			=> (FrameworkElement)_platformRenderer._ContainerElement;
+			=> _platformRenderer.ContainerElement;
 
 		public void SetElement(VisualElement element)
 			=> _platformRenderer.SetElement(element);
@@ -53,7 +53,7 @@ namespace Xamarin.Forms.Platform.WinRT
 			=> _platformRenderer.Element;
 
 		public UIElement GetNativeElement()
-			=> (UIElement)_platformRenderer.Control;
+			=> _platformRenderer.Control;
 
 		public SizeRequest GetDesiredSize(double widthConstraint, double heightConstraint)
 			=> _platformRenderer.Measure(widthConstraint, heightConstraint);

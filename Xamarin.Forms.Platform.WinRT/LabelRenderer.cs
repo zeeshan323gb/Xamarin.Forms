@@ -13,6 +13,11 @@ namespace Xamarin.Forms.Platform.UWP
 namespace Xamarin.Forms.Platform.WinRT
 #endif
 {
+	public interface IPlatformRenderer : IPlatformRenderer<FrameworkElement>
+	{
+		FrameworkElement ContainerElement { get; }
+	}
+
 	public static class FormattedStringExtensions
 	{
 		public static Run ToRun(this Span span)
@@ -259,7 +264,7 @@ namespace Xamarin.Forms.Platform.WinRT
 	}
 
 	public class PR_LabelRenderer : 
-		IPlatformRenderer<TextBlock>
+		IPlatformRenderer
 	{
 		private LabelRenderer _renderer;
 
@@ -274,16 +279,13 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		public event EventHandler<ElementChangedEventArgs> ElementChanged;
 
-		public TextBlock Control
+		public FrameworkElement Control
 			=> _renderer.Control;
-
-		object IPlatformRenderer.Control
-			=> Control;
 
 		public VisualElement Element
 			=> _renderer.Element;
 
-		public object _ContainerElement
+		public FrameworkElement ContainerElement
 			=> _renderer.ContainerElement;
 
 		public SizeRequest Measure(double widthConstraint, double heightConstraint)

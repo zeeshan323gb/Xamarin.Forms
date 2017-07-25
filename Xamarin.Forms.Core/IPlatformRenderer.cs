@@ -6,10 +6,6 @@ using System.Threading.Tasks;
 
 namespace Xamarin.Forms
 {
-	// IPR page
-	// IVER custom layout
-	// IVER button
-
 	public sealed class VisualElementAttribute : Attribute { }
 
 	public class ElementChangedEventArgs : EventArgs
@@ -25,7 +21,7 @@ namespace Xamarin.Forms
 		public Element OldElement { get; private set; }
 	}
 
-	public interface IPlatformRenderer : IDisposable
+	public interface IPlatformRenderer<out T> : IDisposable
 	{
 		VisualElement Element { get; }
 
@@ -33,15 +29,8 @@ namespace Xamarin.Forms
 
 		SizeRequest Measure(double widthConstraint, double heightConstraint);
 
-		object Control { get; }
+		T Control { get; }
 
 		event EventHandler<ElementChangedEventArgs> ElementChanged;
-
-		object _ContainerElement { get; }
-	}
-
-	public interface IPlatformRenderer<out T> : IPlatformRenderer
-	{
-		new T Control { get; }
 	}
 }

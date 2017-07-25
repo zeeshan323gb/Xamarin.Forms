@@ -14,11 +14,23 @@ namespace Xamarin.Forms.Controls.Issues
 	{
 		protected override void Init()
 		{
-			Content = new PR_Label
+			var layout = new StackLayout();
+
+			var pr_label = new PR_Label
+			{
+				AutomationId = "PR_Label",
+				Text = "PR_Label"
+			};
+			layout.Children.Add(pr_label);
+
+			var label = new Label
 			{
 				AutomationId = "Label",
-				Text = "Text"
+				Text = "Label"
 			};
+			layout.Children.Add(label);
+
+			Content = layout;
 		}
 
 #if UITEST
