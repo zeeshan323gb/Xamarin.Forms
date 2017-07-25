@@ -485,17 +485,6 @@ namespace Xamarin.Forms.Platform.WinRT
 				// rotation values are set, but the aforementioned functionality will be lost.
 				if (Math.Abs(view.RotationX) == 0 && Math.Abs(view.RotationY) == 0)
 				{
-					frameworkElement.RenderTransform = new CompositeTransform
-					{
-						CenterX = anchorX,
-						CenterY = anchorY,
-						Rotation = rotation,
-						TranslateX = scale == 0 ? 0 : translationX / scale,
-						TranslateY = scale == 0 ? 0 : translationY / scale
-					};
-				}
-				else
-				{
 					frameworkElement.Projection = new PlaneProjection
 					{
 						CenterOfRotationX = anchorX,
@@ -505,6 +494,17 @@ namespace Xamarin.Forms.Platform.WinRT
 						RotationX = -rotationX,
 						RotationY = -rotationY,
 						RotationZ = -rotation
+					};
+				}
+				else
+				{
+					frameworkElement.RenderTransform = new CompositeTransform
+					{
+						CenterX = anchorX,
+						CenterY = anchorY,
+						Rotation = rotation,
+						TranslateX = scale == 0 ? 0 : translationX / scale,
+						TranslateY = scale == 0 ? 0 : translationY / scale
 					};
 				}
 			}
