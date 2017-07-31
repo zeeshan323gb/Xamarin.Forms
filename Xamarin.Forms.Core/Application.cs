@@ -24,7 +24,7 @@ namespace Xamarin.Forms
 
 		ResourceDictionary _resources;
 		bool _saveAgain;
-		private static SemaphoreSlim SaveSemaphore = new SemaphoreSlim(1, 1);
+		static SemaphoreSlim SaveSemaphore = new SemaphoreSlim(1, 1);
 
 		protected Application()
 		{
