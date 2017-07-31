@@ -24,7 +24,7 @@ namespace Xamarin.Forms
 
 		ResourceDictionary _resources;
 		bool _saveAgain;
-		private static SemaphoreSlim syncSemaphore = new SemaphoreSlim(1, 1);
+		private static SemaphoreSlim SaveSemaphore = new SemaphoreSlim(1, 1);
 
 		protected Application()
 		{
@@ -306,7 +306,7 @@ namespace Xamarin.Forms
 
 		async Task SetPropertiesAsync()
 		{
-			await syncSemaphore.WaitAsync();
+			await SaveSemaphore.WaitAsync();
 			if (_isSaving)
 			{
 				_saveAgain = true;
@@ -317,7 +317,7 @@ namespace Xamarin.Forms
 			if (_saveAgain)
 				await DependencyService.Get<IDeserializer>().SerializePropertiesAsync(Properties);
 			_isSaving = _saveAgain = false;
-			syncSemaphore.Release();
+			SaveSemaphore.Release();
 		}
 
 		class NavigationImpl : NavigationProxy
