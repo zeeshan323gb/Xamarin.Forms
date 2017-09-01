@@ -20,11 +20,11 @@ using NUnit.Framework;
 // Tap "Goto Test Cases"
 // Tap the first bug "B10000052487"
 // App should load and display 3 ListViews
-// Set a breakpoint at line 199 on "if (data % DataTemplateModulous == 0)"
+// Set a breakpoint anywhere in OnSelectTemplate around line 206
 // Scroll the middle list view to hit breakpoint
-// Select 3ed stackframe: 
-//	0xF4 in Xamarin.Forms.Platform.Android.ListViewAdapter.GetItemViewType at
-//		C:\Users\Public\Documents\git\forms\Xamarin.Forms.Platform.Android\Renderers\SliderRenderer.cs:41,3	C#
+// Select first stack frame in "Xamarin.Forms.Platform.Android": 
+// >	0x66 in Xamarin.Forms.Platform.Android.ListViewAdapter.GetCellsFromPosition at 
+//			C:\Users\Public\Documents\git\forms\Xamarin.Forms.Platform.Android\Renderers\StepperRenderer.cs:34,5	C#
 // Note that the frame is "GetItemViewType" but the source is unexpectedly in OnStopTrackingTouch
 
 namespace Xamarin.Forms.Controls.Issues
@@ -32,7 +32,7 @@ namespace Xamarin.Forms.Controls.Issues
 	[Preserve(AllMembers = true)]
 	[Issue(
 		IssueTracker.Bugzilla,
-		1000052487,
+		1100052487,
 		"ListView with Recycle + HasUnevenRows generates lots (and lots!) of content view",
 		// https://bugzilla.xamarin.com/show_bug.cgi?id=52487
 		PlatformAffected.iOS
