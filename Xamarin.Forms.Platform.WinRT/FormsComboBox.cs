@@ -20,9 +20,9 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		internal bool IsOpeningAnimated { get; private set; }
 
-		internal Popup Popup { get; private set; }
-
 		internal bool IsPopupOpen { get; private set; }
+
+		Popup Popup { get; set; }
 
 		protected override void OnApplyTemplate()
 		{
