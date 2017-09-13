@@ -45,6 +45,9 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			get
 			{
+#if WINDOWS_UWP
+				return DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+#else
 				ResolutionScale scale = _information.ResolutionScale;
 				switch (scale)
 				{
@@ -64,6 +67,7 @@ namespace Xamarin.Forms.Platform.UWP
 					default:
 						return 1;
 				}
+#endif
 			}
 		}
 
