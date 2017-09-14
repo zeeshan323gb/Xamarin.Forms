@@ -595,6 +595,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla39407.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ButtonFastRendererTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla58779.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59220.xaml.cs" >
+      <DependentUpon>Bugzilla59220.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Bugzilla22229.xaml">
@@ -743,6 +746,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Bugzilla51642.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Bugzilla59220.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
