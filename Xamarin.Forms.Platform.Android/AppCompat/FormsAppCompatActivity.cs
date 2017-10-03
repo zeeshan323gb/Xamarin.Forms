@@ -125,6 +125,7 @@ namespace Xamarin.Forms.Platform.Android
 					RegisterHandlerForDefaultRenderer(typeof(Button), typeof(FastRenderers.ButtonRenderer), typeof(ButtonRenderer));
 					RegisterHandlerForDefaultRenderer(typeof(Label), typeof(FastRenderers.LabelRenderer), typeof(LabelRenderer));
 					RegisterHandlerForDefaultRenderer(typeof(Image), typeof(FastRenderers.ImageRenderer), typeof(ImageRenderer));
+					//RegisterHandlerForDefaultRenderer(typeof(Image), typeof(FastRenderers.EntryRenderer), typeof(ImageRenderer));
 					RegisterHandlerForDefaultRenderer(typeof(Frame), typeof(FastRenderers.FrameRenderer), typeof(FrameRenderer));
 				}
 				else
