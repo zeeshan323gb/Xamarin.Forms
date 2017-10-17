@@ -26,7 +26,7 @@ namespace Xamarin.Forms.Controls.Issues
 							Margin = 20,
 							Children =
 							{
-								new Label {  Text = "I should be indended" },
+								new Label {  Text = "I should be indented" },
 								new Button { Margin = 5, Text = "I should be further indented" }
 							}
 						}
