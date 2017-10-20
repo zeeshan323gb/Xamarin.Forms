@@ -64,7 +64,8 @@ namespace Xamarin.FlexLayoutEngine.Flex
 
 		void IFlexNode.CalculateLayout()
 		{
-			Layout();
+			if(_measure == null)
+				Layout();
 		}
 
 		void IFlexNode.Clear()
@@ -91,11 +92,22 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		void IFlexNode.SetMeasure(MeasureFunc measureView)
 		{
 			_measure = measureView;
-			this.SelfSizing = HandleSelfSizingDelegate;
+			if(_measure != null)
+				this.SelfSizing = HandleSelfSizingDelegate;
 
 		}
 
-		void HandleSelfSizingDelegate(Xamarin.Flex.Item item, ref float width, ref float height) => _measure?.Invoke(item as IFlexNode, width, FlexMeasureMode.AtMost, height, FlexMeasureMode.AtMost);
+		void HandleSelfSizingDelegate(Xamarin.Flex.Item item, ref float width, ref float height) 
+		{
+			var widthMode = FlexMeasureMode.Undefined;
+			var heightMode = FlexMeasureMode.Undefined;
+
+			var availableWidth = item.Parent.Width;
+			var availableHeight = item.Parent.Height;
+			var size = _measure?.Invoke(item as IFlexNode, availableWidth, widthMode, availableHeight, heightMode);
+			width = (float)size.Value.Width;
+			height = (float)size.Value.Height;
+		}
 
 	}
 

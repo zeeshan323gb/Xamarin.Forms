@@ -183,6 +183,10 @@
       <Project>{67F9D3A8-F71E-4428-913F-C37AE82CDB24}</Project>
       <Name>Xamarin.Forms.FlexLayout</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout.Engine\Xamarin.Forms.FlexLayout.Engine.Yoga\Xamarin.FlexLayoutEngine.Yoga.csproj">
+      <Project>{BEE8E0B8-BD65-4A0C-86B2-7F964EB7460A}</Project>
+      <Name>Xamarin.FlexLayoutEngine.Yoga</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Import Project="..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.targets" Condition="Exists('..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.targets')" />
