@@ -12,7 +12,7 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		object _data;
 		Justify _justify;
 		Overflow _overflow;
-		float _flex;
+	
 		public FlexEngine()
 		{
 		}
@@ -27,12 +27,11 @@ namespace Xamarin.FlexLayoutEngine.Flex
 
 		float IFlexNode.LayoutWidth => FrameWidth;
 
-		float IFlexNode.Top { get => Top; set => Top = value; }
-		float IFlexNode.Left { get => Left; set => Left = value; }
-		float IFlexNode.Height { get => Height; set => Height = value; }
-		float IFlexNode.Width { get => this.Width; set => Width = value; }
-		float IFlexNode.Flex { get => _flex; set => _flex = value; }
-
+		//float IFlexNode.Top { get => Top; set => Top = value; }
+		//float IFlexNode.Left { get => Left; set => Left = value; }
+		//float IFlexNode.Height { get => Height; set => Height = value; }
+		//float IFlexNode.Width { get => this.Width; set => Width = value; }
+	
 		float IFlexNode.FlexGrow { get => Grow; set => Grow = (int)value; }
 		float IFlexNode.FlexShrink { get => Shrink; set => Shrink = (int)value; }
 		float IFlexNode.FlexBasis { get => Basis; set => Basis = value; }

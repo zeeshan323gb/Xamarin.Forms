@@ -59,18 +59,6 @@ namespace Xamarin.FlexLayoutEngine.Yoga
 			}
 		}
 
-		float IFlexNode.Flex
-		{
-			get
-			{
-                throw new NotImplementedException();
-			}
-			set
-			{
-                Flex = value;
-            }
-		}
-
 		float IFlexNode.FlexBasis
 		{
 			get

@@ -13,8 +13,6 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty OrderProperty = BindableProperty.CreateAttached(_FlexOrderPropertyName, typeof(int), typeof(FlexLayout), 0);
 
-		public static readonly BindableProperty FlexProperty = BindableProperty.CreateAttached(_FlexPropertyName, typeof(double), typeof(FlexLayout), 0.0, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).Flex = (float)n; });
-
 		public static readonly BindableProperty GrowProperty = BindableProperty.CreateAttached(_FlexGrowPropertyName, typeof(double), typeof(FlexLayout), 0.0, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexGrow = (float)n; });
 
 		public static readonly BindableProperty ShrinkProperty = BindableProperty.CreateAttached(_FlexShrinkPropertyName, typeof(double), typeof(FlexLayout), 0.0, propertyChanging: (s, o, n) => { if (GetNode((View)s) == null) return; GetNode((View)s).FlexShrink = float.Parse(n.ToString()); });
@@ -90,16 +88,6 @@ namespace Xamarin.Forms
 		public static double GetBasis(BindableObject bindable)
 		{
 			return (double)bindable.GetValue(BasisProperty);
-		}
-
-		public static void SetFlex(BindableObject bindable, double value)
-		{
-			bindable.SetValue(FlexProperty, value);
-		}
-
-		public static double GetFlex(BindableObject bindable)
-		{
-			return (double)bindable.GetValue(FlexProperty);
 		}
 
 		public static void SetAlignSelf(BindableObject bindable, Align value)
@@ -264,7 +252,6 @@ namespace Xamarin.Forms
 					subViewNode.FlexBasis = (float)GetBasis(subView);
 					subViewNode.FlexShrink = (float)GetShrink(subView);
 					subViewNode.AlignSelf = GetAlignSelf(subView);
-					subViewNode.Flex = (float)GetFlex(subView);
 					node.Insert(i, subViewNode);
 				}
 			}
