@@ -24,7 +24,9 @@ namespace FormsFlexLayoutDemo.iOS
 		{
 			global::Xamarin.Forms.Forms.Init ();
 
-            global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Yoga.YogaEngine));
+            //global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Yoga.YogaEngine));
+
+			global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Flex.FlexEngine));
 
             LoadApplication (new FormsFlexLayoutDemo.App ());
 

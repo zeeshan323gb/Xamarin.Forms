@@ -1,6 +1,7 @@
 ﻿using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
-
+[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace FormsFlexLayoutDemo
 {
     public class App : Application
