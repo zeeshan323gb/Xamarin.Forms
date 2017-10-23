@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 #if FORMS
-using Xamarin.Forms.Flex;
 namespace Xamarin.Forms
 #else
 namespace Xamarin.FlexLayout

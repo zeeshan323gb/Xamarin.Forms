@@ -11,7 +11,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform((view, width, height) => { return new SizeRequest(new Size(0, 0)); });
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.Platform = platform;
 
 			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
@@ -66,7 +66,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 
 			var platform = new UnitPlatform((view, width, height) => { return new SizeRequest(new Size(0, 0)); });
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Row;
+			layout.FlexDirection = FlexDirection.Row;
 			layout.Platform = platform;
 
 			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
@@ -122,7 +122,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform((view, width, height) => { return new SizeRequest(new Size(0, 0)); });
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.Platform = platform;
 
 			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
@@ -176,7 +176,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform((view, width, height) => { return new SizeRequest(new Size(width, height)); });
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Row;
+			layout.FlexDirection = FlexDirection.Row;
 			layout.Platform = platform;
 
 			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
@@ -230,7 +230,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.Platform = platform;
 
 			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
@@ -301,7 +301,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.Platform = platform;
 
 			var view1 = new View { IsPlatformEnabled = true, Platform = platform };
@@ -374,12 +374,12 @@ namespace Xamarin.Forms.FlexLayoutTests
 		public void TestFlexGrowShrinkAtMost()
 		{
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
 			var layout2 = new FlexLayout();
-			layout2.FlexDirection = Flex.FlexDirection.Column;
+			layout2.FlexDirection = FlexDirection.Column;
 			layout2.Platform = new UnitPlatform((visual, width, height) =>
 			{
 				return new SizeRequest(new Size(0, 0));

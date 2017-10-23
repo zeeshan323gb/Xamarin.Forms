@@ -166,6 +166,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Embedding.iOS", "EmbeddingT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Embedding.UWP", "EmbeddingTestBeds\Embedding.UWP\Embedding.UWP.csproj", "{73A22D45-2350-457D-A191-F888148E4280}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Xamarin.FlexLayout.Shared", "Xamarin.Forms.FlexLayout\Xamarin.FlexLayout.Shared\Xamarin.FlexLayout.Shared.shproj", "{A04E0AD6-3009-4CE7-B62E-EFCB0DC91C73}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Xamarin.Forms.Controls.Issues\Xamarin.Forms.Controls.Issues.Shared\Xamarin.Forms.Controls.Issues.Shared.projitems*{0a39a74b-6f7a-4d41-84f2-b0ccdce899df}*SharedItemsImports = 4
@@ -3460,5 +3462,6 @@ Global
 		{9DB0CABB-24CC-4538-88EC-6E0A0FE40248} = {D4D57221-71D6-4031-A6F4-EC66AF0929D9}
 		{29DDE791-5608-4072-8E1C-D37D72992A83} = {406DE4B0-F541-4092-B0EE-F0A20E9A89F5}
 		{73A22D45-2350-457D-A191-F888148E4280} = {406DE4B0-F541-4092-B0EE-F0A20E9A89F5}
+		{A04E0AD6-3009-4CE7-B62E-EFCB0DC91C73} = {9AD757F5-E57A-459D-A0A7-E0675E045B84}
 	EndGlobalSection
 EndGlobal

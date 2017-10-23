@@ -96,7 +96,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		public void TestAttachingViews()
 		{
 			var platform = new UnitPlatform();
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Column };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Column };
 			layout.Platform = platform;
 			layout.IsPlatformEnabled = true;
 
@@ -190,7 +190,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		public void TestIsLeafWithNestedFlexLayouts()
 		{
 			var platform = new UnitPlatform();
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Column };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Column };
 			layout.WidthRequest = 300;
 			layout.HeightRequest = 50;
 			layout.Platform = platform;
@@ -221,7 +221,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			{
 				return new SizeRequest(new Size(-1, -1));
 			});
-            var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row, AlignItems = Flex.Align.FlexStart };
+            var layout = new FlexLayout { FlexDirection = FlexDirection.Row, AlignItems = Align.FlexStart };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
@@ -259,7 +259,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			{
 				return new SizeRequest(new Size(-1, -1));
 			});
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Row };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
@@ -293,7 +293,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var layoutSize = new Size(300, 50);
 			var platform = new UnitPlatform();
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Row };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
@@ -329,7 +329,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 
 			var platform = new UnitPlatform();
 
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Row };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
@@ -369,7 +369,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 
 			var platform = new UnitPlatform(useRealisticLabelMeasure: true);
 
-			var layout = new FlexLayout { FlexDirection = Flex.FlexDirection.Row, AlignItems = Flex.Align.FlexStart };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Row, AlignItems = Align.FlexStart };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Xamarin.Forms;
 using System.Linq;
 using System.Collections;
-using Xamarin.Forms.Flex;
 
 namespace Xamarin.FlexLayoutEngine.Yoga
 {

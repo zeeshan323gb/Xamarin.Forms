@@ -93,7 +93,7 @@
       <Name>Xamarin.FlexLayoutEngine.Yoga</Name>
     </ProjectReference>
 		 <ProjectReference Include="..\Xamarin.Forms.FlexLayout.Engine\Xamarin.Forms.FlexLayout.Engine.Flex\Xamarin.FlexLayoutEngine.Flex.csproj">
-      <Project>{DF68B879-AF20-4BAC-92A8-87E1B5DF44A4}</Project>
+      <Project>{55DC5E6B-369B-4A15-ADD1-3C58FCF2C76E}</Project>
       <Name>Xamarin.FlexLayoutEngine.Flex</Name>
     </ProjectReference>
     <ProjectReference Include="..\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout.csproj">

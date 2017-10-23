@@ -13,8 +13,8 @@ namespace Xamarin.Forms.FlexLayoutTests
         {
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
-            layout.FlexDirection = Flex.FlexDirection.Column;
-            layout.AlignItems = Flex.Align.FlexStart;
+            layout.FlexDirection = FlexDirection.Column;
+            layout.AlignItems = Align.FlexStart;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };
@@ -81,7 +81,7 @@ namespace Xamarin.Forms.FlexLayoutTests
         {
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
-            layout.FlexDirection = Flex.FlexDirection.Row;
+            layout.FlexDirection = FlexDirection.Row;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };
@@ -144,7 +144,7 @@ namespace Xamarin.Forms.FlexLayoutTests
         {
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
-            layout.FlexDirection = Flex.FlexDirection.Column;
+            layout.FlexDirection = FlexDirection.Column;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };
@@ -211,7 +211,7 @@ namespace Xamarin.Forms.FlexLayoutTests
         {
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
-            layout.FlexDirection = Flex.FlexDirection.Row;
+            layout.FlexDirection = FlexDirection.Row;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };
@@ -277,7 +277,7 @@ namespace Xamarin.Forms.FlexLayoutTests
         {
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
-            layout.FlexDirection = Flex.FlexDirection.ColumnReverse;
+            layout.FlexDirection = FlexDirection.ColumnReverse;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };
@@ -343,7 +343,7 @@ namespace Xamarin.Forms.FlexLayoutTests
         {
             var platform = new UnitPlatform();
             var layout = new FlexLayout();
-            layout.FlexDirection = Flex.FlexDirection.RowReverse;
+            layout.FlexDirection = FlexDirection.RowReverse;
             layout.Platform = platform;
 
             var label1 = new View { Platform = platform, IsPlatformEnabled = true };

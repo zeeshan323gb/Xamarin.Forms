@@ -19,7 +19,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -45,9 +45,9 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.Platform = platform;
-			layout.AlignItems = Flex.Align.Center;
+			layout.AlignItems = Align.Center;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -76,8 +76,8 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
-			layout.FlexDirection = Flex.FlexDirection.Column;
-			layout.AlignItems = Flex.Align.FlexStart;
+			layout.FlexDirection = FlexDirection.Column;
+			layout.AlignItems = Align.FlexStart;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -104,9 +104,9 @@ namespace Xamarin.Forms.FlexLayoutTests
 		{
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
-			layout.FlexDirection = Flex.FlexDirection.Column;
+			layout.FlexDirection = FlexDirection.Column;
 			layout.Platform = platform;
-			layout.AlignItems = Flex.Align.FlexEnd;
+			layout.AlignItems = Align.FlexEnd;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -134,7 +134,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
-			layout.AlignItems = Flex.Align.Baseline;
+			layout.AlignItems = Align.Baseline;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -172,8 +172,8 @@ namespace Xamarin.Forms.FlexLayoutTests
 			var platform = new UnitPlatform();
 			var layout = new FlexLayout();
 			layout.Platform = platform;
-			layout.FlexDirection = Flex.FlexDirection.Row;
-			layout.AlignItems = Flex.Align.Baseline;
+			layout.FlexDirection = FlexDirection.Row;
+			layout.AlignItems = Align.Baseline;
 			layout.WidthRequest = 100;
 			layout.HeightRequest = 100;
 
@@ -183,7 +183,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			layout.Children.Add(view0);
 
 			var view1 = new FlexLayout { IsPlatformEnabled = true };
-			view1.FlexDirection = Flex.FlexDirection.Column;
+			view1.FlexDirection = FlexDirection.Column;
 			view1.WidthRequest = 50;
 			view1.HeightRequest = 20;
 			layout.Children.Add(view1);
@@ -223,8 +223,8 @@ namespace Xamarin.Forms.FlexLayoutTests
 		//	var platform = new UnitPlatform();
 		//	var layout = new FlexLayout();
 		//	layout.Platform = platform;
-		//	layout.FlexDirection = Flex.FlexDirection.Row;
-		//	layout.AlignItems = Flex.Align.Baseline;
+		//	layout.FlexDirection = FlexDirection.Row;
+		//	layout.AlignItems = Align.Baseline;
 		//	layout.WidthRequest = 100;
 		//	layout.HeightRequest = 100;
 
@@ -234,8 +234,8 @@ namespace Xamarin.Forms.FlexLayoutTests
 		//	layout.Children.Add(view0);
 
 		//	var view1 = new FlexLayout { IsPlatformEnabled = true };
-		//	view1.FlexDirection = Flex.FlexDirection.Row;
-		//	view1.Wrap = Flex.Wrap.Wrap;
+		//	view1.FlexDirection = FlexDirection.Row;
+		//	view1.Wrap = Wrap.Wrap;
 		//	view1.WidthRequest = 50;
 		//	view1.HeightRequest = 25;
 		//	layout.Children.Add(view1);

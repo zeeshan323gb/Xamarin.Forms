@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Xamarin.Forms;
-using Xamarin.Forms.Flex;
 
 namespace Xamarin.FlexLayoutEngine.Flex
 {
@@ -17,7 +16,6 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		public FlexEngine()
 		{
 		}
-
 
 		float IFlexNode.LayoutTop => FrameY;
 
@@ -134,12 +132,12 @@ namespace Xamarin.FlexLayoutEngine.Flex
 				str = "End";
 			}
 
-			if (str == "Start" && typeof(T) == typeof(Xamarin.Forms.Flex.Align))
+			if (str == "Start" && typeof(T) == typeof(Align))
 			{
 				str = "FlexStart";
 			}
 
-			if (str == "End" && typeof(T) == typeof(Xamarin.Forms.Flex.Align))
+			if (str == "End" && typeof(T) == typeof(Align))
 			{
 				str = "FlexEnd";
 			}
