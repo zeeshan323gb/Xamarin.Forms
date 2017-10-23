@@ -18,7 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MeasureFunc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeasureMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Overflow.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Position.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FlexPosition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Wrap.cs" />
   </ItemGroup>
 </Project>

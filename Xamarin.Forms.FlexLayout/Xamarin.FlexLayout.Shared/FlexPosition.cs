@@ -4,7 +4,7 @@ namespace Xamarin.Forms
 namespace Xamarin.FlexLayout
 #endif
 {
-    public enum Position
+    public enum FlexPosition
     {
         Relative,
         Absolute

@@ -112,11 +112,11 @@ namespace Xamarin.FlexLayoutEngine.Yoga
 			}
 		}
 
-		Position IFlexNode.PositionType
+		FlexPosition IFlexNode.PositionType
 		{
 			get
 			{
-				return PositionType.ConvertTo<Position>();
+				return PositionType.ConvertTo<FlexPosition>();
 			}
 
 			set

@@ -25,7 +25,7 @@ namespace FormsFlexLayoutDemo
 
 		public object JustifyOptions => Enum.GetValues(typeof(Justify));
 
-		public object PositionOptions => Enum.GetValues(typeof(Position));
+		public object PositionOptions => Enum.GetValues(typeof(FlexPosition));
 
 		public object OverflowOptions => Enum.GetValues(typeof(Overflow));
 
@@ -107,8 +107,8 @@ namespace FormsFlexLayoutDemo
 			}
 		}
 
-		Position _selectedPositionType;
-		public Position SelectedPositionType
+		FlexPosition _selectedPositionType;
+		public FlexPosition SelectedPositionType
 		{
 			get { return _selectedPositionType; }
 			set

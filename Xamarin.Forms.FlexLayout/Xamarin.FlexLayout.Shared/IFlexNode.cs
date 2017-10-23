@@ -24,7 +24,7 @@ namespace Xamarin.FlexLayout
 		float FlexGrow { get; set; }
 		float FlexShrink { get; set; }
 		float FlexBasis { get; set; }
-		Position PositionType { get; set; }
+		FlexPosition PositionType { get; set; }
 		Align AlignItems { get; set; }
 		Align AlignSelf { get; set; }
 		Align AlignContent { get; set; }

@@ -29,7 +29,7 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		float IFlexNode.FlexGrow { get => Grow; set => Grow = (int)value; }
 		float IFlexNode.FlexShrink { get => Shrink; set => Shrink = (int)value; }
 		float IFlexNode.FlexBasis { get => Basis; set => Basis = value; }
-		Position IFlexNode.PositionType { get => Position.ConvertTo<Position>(); set => Position = value.ConvertTo<Xamarin.Flex.Position>(); }
+		FlexPosition IFlexNode.PositionType { get => Position.ConvertTo<FlexPosition>(); set => Position = value.ConvertTo<Xamarin.Flex.Position>(); }
 		Align IFlexNode.AlignItems { get => AlignItems.ConvertTo<Align>(); set => AlignItems = value.ConvertTo<Xamarin.Flex.Align>(); }
 		Align IFlexNode.AlignSelf { get => AlignSelf.ConvertTo<Align>(); set => AlignSelf = value.ConvertTo<Xamarin.Flex.Align>(); }
 		Align IFlexNode.AlignContent

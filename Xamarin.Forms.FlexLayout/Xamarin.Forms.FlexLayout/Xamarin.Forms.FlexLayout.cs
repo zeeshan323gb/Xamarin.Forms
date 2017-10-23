@@ -43,7 +43,7 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty AlignItemsProperty = BindableProperty.Create(nameof(AlignItems), typeof(Align), typeof(FlexLayout), Align.Stretch, propertyChanged: (s, o, n) => { (s as FlexLayout).InvalidateLayout(); }, propertyChanging: (s, o, n) => { GetNode((View)s).AlignItems = (Align)n; });
 
-		public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(Position), typeof(FlexLayout), Position.Relative, propertyChanged: (s, o, n) => { (s as FlexLayout).InvalidateLayout(); }, propertyChanging: (s, o, n) => { GetNode((View)s).PositionType = (Position)n; });
+		public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(FlexPosition), typeof(FlexLayout), FlexPosition.Relative, propertyChanged: (s, o, n) => { (s as FlexLayout).InvalidateLayout(); }, propertyChanging: (s, o, n) => { GetNode((View)s).PositionType = (FlexPosition)n; });
 
 		public static readonly BindableProperty OverflowProperty = BindableProperty.Create(nameof(Overflow), typeof(Overflow), typeof(FlexLayout), Overflow.Visible, propertyChanged: (s, o, n) => { (s as FlexLayout).InvalidateLayout(); }, propertyChanging: (s, o, n) => { GetNode((View)s).Overflow = (Overflow)n; });
 
@@ -133,9 +133,9 @@ namespace Xamarin.Forms
 			set { SetValue(AlignItemsProperty, value); }
 		}
 
-		public Position Position
+		public FlexPosition Position
 		{
-			get { return (Position)GetValue(PositionProperty); }
+			get { return (FlexPosition)GetValue(PositionProperty); }
 			set { SetValue(PositionProperty, value); }
 		}
 
