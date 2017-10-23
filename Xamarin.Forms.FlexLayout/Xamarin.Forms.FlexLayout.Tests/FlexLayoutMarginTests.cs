@@ -233,7 +233,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 		[Test]
 		public void TestMarginWithSiblingRow()
 		{
-			var platform = new UnitPlatform((visual,width,height) => new SizeRequest(new Size(0,0)));
+			var platform = new UnitPlatform((visual, width, height) => new SizeRequest(new Size(0, 0)));
 			var layout = new FlexLayout();
 			layout.FlexDirection = FlexDirection.Row;
 			layout.Platform = platform;

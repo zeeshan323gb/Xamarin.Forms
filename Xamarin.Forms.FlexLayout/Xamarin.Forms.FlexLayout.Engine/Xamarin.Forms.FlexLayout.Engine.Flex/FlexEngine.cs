@@ -12,7 +12,7 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		Justify _justify;
 		Overflow _overflow;
 		bool _isDirty;
-	
+
 		public FlexEngine()
 		{
 		}
@@ -25,7 +25,7 @@ namespace Xamarin.FlexLayoutEngine.Flex
 
 		float IFlexNode.LayoutWidth => FrameWidth;
 
-	
+
 		float IFlexNode.FlexGrow { get => Grow; set => Grow = (int)value; }
 		float IFlexNode.FlexShrink { get => Shrink; set => Shrink = (int)value; }
 		float IFlexNode.FlexBasis { get => Basis; set => Basis = value; }
@@ -48,7 +48,7 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		Overflow IFlexNode.Overflow { get => _overflow; set => _overflow = value; }
 		Justify IFlexNode.JustifyContent { get => _justify; set => _justify = value; }
 		FlexDirection IFlexNode.FlexDirection { get => Direction.ConvertTo<FlexDirection>(); set => Direction = value.ConvertTo<Xamarin.Flex.Direction>(); }
-		float IFlexNode.MarginLeft { get => MarginLeft; set =>  MarginLeft = value; }
+		float IFlexNode.MarginLeft { get => MarginLeft; set => MarginLeft = value; }
 		float IFlexNode.MarginTop { get => MarginTop; set => MarginTop = value; }
 		float IFlexNode.MarginRight { get => MarginRight; set => MarginRight = value; }
 		float IFlexNode.MarginBottom { get => MarginBottom; set => MarginBottom = value; }
@@ -58,12 +58,12 @@ namespace Xamarin.FlexLayoutEngine.Flex
 
 		void IFlexNode.CalculateLayout()
 		{
-			if(_measure == null)
+			if (_measure == null)
 			{
 				Layout();
 				_isDirty = false;
 			}
-				
+
 		}
 
 		void IFlexNode.Clear()
@@ -93,12 +93,12 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		void IFlexNode.SetMeasure(MeasureFunc measureView)
 		{
 			_measure = measureView;
-			if(_measure != null)
+			if (_measure != null)
 				this.SelfSizing = HandleSelfSizingDelegate;
 
 		}
 
-		void HandleSelfSizingDelegate(Xamarin.Flex.Item item, ref float width, ref float height) 
+		void HandleSelfSizingDelegate(Xamarin.Flex.Item item, ref float width, ref float height)
 		{
 			var widthMode = FlexMeasureMode.Undefined;
 			var heightMode = FlexMeasureMode.Undefined;

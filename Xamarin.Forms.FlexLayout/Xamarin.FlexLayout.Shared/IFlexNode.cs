@@ -17,7 +17,7 @@ namespace Xamarin.FlexLayout
 		float LayoutHeight { get; }
 		float LayoutWidth { get; }
 
-        float Top { get; set; }
+		float Top { get; set; }
 		float Height { get; set; }
 		float Left { get; set; }
 		float Width { get; set; }

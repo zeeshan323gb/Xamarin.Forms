@@ -4,9 +4,9 @@ namespace Xamarin.Forms
 namespace Xamarin.FlexLayout
 #endif
 {
-    public enum Wrap
-    {
-        NoWrap,
-        Wrap
-    }
+	public enum Wrap
+	{
+		NoWrap,
+		Wrap
+	}
 }

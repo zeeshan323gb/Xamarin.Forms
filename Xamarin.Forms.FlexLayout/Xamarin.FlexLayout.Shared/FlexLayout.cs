@@ -86,37 +86,37 @@ namespace Xamarin.FlexLayout
 			return _root;
 		}
 
-        void ApplyLayoutToViewHierarchy(NativeView view)
-        {
-            if (!GetIsIncluded(view))
-                return;
+		void ApplyLayoutToViewHierarchy(NativeView view)
+		{
+			if (!GetIsIncluded(view))
+				return;
 
-            var node = GetNode(view);
+			var node = GetNode(view);
 
-            if (view != this && node != null)
-                ApplyLayoutToNativeView(view, node);
+			if (view != this && node != null)
+				ApplyLayoutToNativeView(view, node);
 
-            if (view.IsLeaf())
-                return;
+			if (view.IsLeaf())
+				return;
 
-            foreach (var subView in FlexLayoutExtensions.GetChildren(view))
-                ApplyLayoutToViewHierarchy(subView);
-        }
+			foreach (var subView in FlexLayoutExtensions.GetChildren(view))
+				ApplyLayoutToViewHierarchy(subView);
+		}
 
-        void RegisterChild(NativeView view)
+		void RegisterChild(NativeView view)
 		{
 			if (view == null)
 				throw new ArgumentNullException(nameof(view));
-            IFlexNode node = GetNode(view);
+			IFlexNode node = GetNode(view);
 
-            if (node == null)
-            {
-                node = GetNewFlexNode();
-                SetNode(view, node);
+			if (node == null)
+			{
+				node = GetNewFlexNode();
+				SetNode(view, node);
 				node.Data = view;
-            }
+			}
 
-            var viewINPC = view as INotifyPropertyChanged;
+			var viewINPC = view as INotifyPropertyChanged;
 			if (viewINPC != null)
 				viewINPC.PropertyChanged += ChildPropertyChanged;
 
@@ -142,14 +142,14 @@ namespace Xamarin.FlexLayout
 		{
 			var node = _root;
 
-            if (!float.IsPositiveInfinity((width)))
-                node.Width = width;
-            
-            if (!float.IsPositiveInfinity((height)))
-			    node.Height = height;
+			if (!float.IsPositiveInfinity((width)))
+				node.Width = width;
 
-            node.CalculateLayout();
-            return new Size { Width = node.LayoutWidth, Height = node.LayoutHeight };
+			if (!float.IsPositiveInfinity((height)))
+				node.Height = height;
+
+			node.CalculateLayout();
+			return new Size { Width = node.LayoutWidth, Height = node.LayoutHeight };
 		}
 
 		IFlexNode GetNewFlexNode()

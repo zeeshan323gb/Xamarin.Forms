@@ -4,12 +4,12 @@ namespace Xamarin.Forms
 namespace Xamarin.FlexLayout
 #endif
 {
-    public enum Justify
-    {
-        FlexStart,
-        Center,
-        FlexEnd,
-        SpaceBetween,
-        SpaceAround
-    }
+	public enum Justify
+	{
+		FlexStart,
+		Center,
+		FlexEnd,
+		SpaceBetween,
+		SpaceAround
+	}
 }

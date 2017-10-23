@@ -4,7 +4,7 @@ namespace Xamarin.Forms
 namespace Xamarin.FlexLayout
 #endif
 {
-    public enum Align
+	public enum Align
 	{
 		Auto,
 		FlexStart,

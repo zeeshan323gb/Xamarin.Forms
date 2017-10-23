@@ -10,10 +10,10 @@ namespace Xamarin.FlexLayoutEngine.Yoga
 	public partial class YogaEngine : YogaNode, IFlexNode
 	{
 
-        public YogaEngine() : base(new YogaConfig { })
-        {
+		public YogaEngine() : base(new YogaConfig { })
+		{
 
-        }
+		}
 		MeasureFunc _internalMeasure;
 
 		float IFlexNode.LayoutLeft => LayoutX;

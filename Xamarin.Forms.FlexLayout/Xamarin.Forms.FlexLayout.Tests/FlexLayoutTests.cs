@@ -8,8 +8,8 @@ namespace Xamarin.Forms.FlexLayoutTests
 {
 	[TestFixture]
 	public class FlexLayoutTests : FlexLayoutBaseTestFixture
-    {
-	
+	{
+
 		[Test]
 		public void ThrowsOnNullAdd()
 		{
@@ -221,7 +221,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			{
 				return new SizeRequest(new Size(-1, -1));
 			});
-            var layout = new FlexLayout { FlexDirection = FlexDirection.Row, AlignItems = Align.FlexStart };
+			var layout = new FlexLayout { FlexDirection = FlexDirection.Row, AlignItems = Align.FlexStart };
 			layout.Platform = platform;
 
 			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
@@ -241,7 +241,7 @@ namespace Xamarin.Forms.FlexLayoutTests
 			Assert.AreEqual(label2.Bounds.Left, Math.Max(label1.Bounds.Left, label1.Bounds.Right), 1);
 			Assert.AreEqual(label3.Bounds.Left, Math.Max(label2.Bounds.Left, label2.Bounds.Right), 1);
 
-            double totalWidth = 0;
+			double totalWidth = 0;
 			foreach (var view in layout.Children)
 			{
 				totalWidth += view.Bounds.Width;

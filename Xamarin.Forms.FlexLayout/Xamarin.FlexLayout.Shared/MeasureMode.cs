@@ -1,9 +1,9 @@
 ﻿namespace Xamarin.Forms
 {
-    public enum FlexMeasureMode
-    {
+	public enum FlexMeasureMode
+	{
 		Undefined,
-        Exactly,
-        AtMost,
-    }
+		Exactly,
+		AtMost,
+	}
 }

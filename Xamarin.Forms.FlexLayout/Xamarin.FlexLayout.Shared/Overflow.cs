@@ -4,10 +4,10 @@ namespace Xamarin.Forms
 namespace Xamarin.FlexLayout
 #endif
 {
-    public enum Overflow
-    {
-        Visible,
-        Hidden,
-        Scroll
-    }
+	public enum Overflow
+	{
+		Visible,
+		Hidden,
+		Scroll
+	}
 }
