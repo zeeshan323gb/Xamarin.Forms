@@ -16,8 +16,9 @@ namespace Xamarin.Forms.FlexLayoutTests
         public override void Setup()
         {
             base.Setup();
-            global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Yoga.YogaEngine));
-            Device.PlatformServices = new MockPlatformServices();
+           // global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Yoga.YogaEngine));
+			global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Flex.FlexEngine));
+			Device.PlatformServices = new MockPlatformServices();
         }
 
         [TearDown]
