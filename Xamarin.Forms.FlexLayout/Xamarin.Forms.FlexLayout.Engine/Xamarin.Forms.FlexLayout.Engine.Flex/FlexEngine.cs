@@ -12,12 +12,12 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		object _data;
 		Justify _justify;
 		Overflow _overflow;
+		bool _isDirty;
 	
 		public FlexEngine()
 		{
 		}
 
-		bool IFlexNode.IsDirty => throw new NotImplementedException();
 
 		float IFlexNode.LayoutTop => FrameY;
 
@@ -27,10 +27,6 @@ namespace Xamarin.FlexLayoutEngine.Flex
 
 		float IFlexNode.LayoutWidth => FrameWidth;
 
-		//float IFlexNode.Top { get => Top; set => Top = value; }
-		//float IFlexNode.Left { get => Left; set => Left = value; }
-		//float IFlexNode.Height { get => Height; set => Height = value; }
-		//float IFlexNode.Width { get => this.Width; set => Width = value; }
 	
 		float IFlexNode.FlexGrow { get => Grow; set => Grow = (int)value; }
 		float IFlexNode.FlexShrink { get => Shrink; set => Shrink = (int)value; }
@@ -65,7 +61,11 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		void IFlexNode.CalculateLayout()
 		{
 			if(_measure == null)
+			{
 				Layout();
+				_isDirty = false;
+			}
+				
 		}
 
 		void IFlexNode.Clear()
@@ -83,9 +83,12 @@ namespace Xamarin.FlexLayoutEngine.Flex
 			InsertAt(i, subViewNode as Xamarin.Flex.Item);
 		}
 
+		bool IFlexNode.IsDirty => _isDirty;
+
+
 		void IFlexNode.MarkDirty()
 		{
-			throw new NotImplementedException();
+			_isDirty = true;
 		}
 
 		MeasureFunc _measure;
@@ -120,6 +123,28 @@ namespace Xamarin.FlexLayoutEngine.Flex
 			{
 				str = "Nowrap";
 			}
+
+			if (str == "FlexStart" && typeof(T) == typeof(Xamarin.Flex.Align))
+			{
+				str = "Start";
+			}
+
+			if (str == "FlexEnd" && typeof(T) == typeof(Xamarin.Flex.Align))
+			{
+				str = "End";
+			}
+
+			if (str == "Start" && typeof(T) == typeof(Xamarin.Forms.Flex.Align))
+			{
+				str = "FlexStart";
+			}
+
+			if (str == "End" && typeof(T) == typeof(Xamarin.Forms.Flex.Align))
+			{
+				str = "FlexEnd";
+			}
+
+
 			return (T)Enum.Parse(typeof(T), str);
 		}
 
