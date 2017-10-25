@@ -167,7 +167,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Xamarin.Flex">
-      <HintPath>..\..\..\packages\Xamarin.Flex.0.3\lib\XamariniOS\Xamarin.Flex.dll</HintPath>
+      <HintPath>..\..\..\packages\Xamarin.Flex.0.3.1\lib\XamariniOS\Xamarin.Flex.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -190,5 +190,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Import Project="..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.targets" Condition="Exists('..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.targets')" />
-  <Import Project="..\..\..\packages\Xamarin.Flex.0.3\build\XamariniOS\Xamarin.Flex.targets" Condition="Exists('..\..\..\packages\Xamarin.Flex.0.3\build\XamariniOS\Xamarin.Flex.targets')" />
+  <Import Project="..\..\..\packages\Xamarin.Flex.0.3.1\build\XamariniOS\Xamarin.Flex.targets" Condition="Exists('..\..\..\packages\Xamarin.Flex.0.3.1\build\XamariniOS\Xamarin.Flex.targets')" />
 </Project>

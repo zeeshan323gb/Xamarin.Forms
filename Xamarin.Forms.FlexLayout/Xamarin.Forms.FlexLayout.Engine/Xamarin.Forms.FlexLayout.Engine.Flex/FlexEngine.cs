@@ -117,10 +117,6 @@ namespace Xamarin.FlexLayoutEngine.Flex
 		public static T ConvertTo<T>(this Enum value)
 		{
 			var str = value.ToString();
-			if (str == "NoWrap")
-			{
-				str = "Nowrap";
-			}
 
 			if (str == "FlexStart" && typeof(T) == typeof(Xamarin.Flex.Align))
 			{
