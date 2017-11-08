@@ -333,6 +333,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla27731.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59097.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla58875.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59718.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59896.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla56771.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla60382.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)_Template.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla42620.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1028.cs" />
@@ -610,6 +614,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DesktopSupportTestPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla58779.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla51825.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bugzilla31688.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Bugzilla22229.xaml">
