@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-#if FORMS
+
 namespace Xamarin.Forms
 {
 	public partial class FlexLayout : Layout<View>
@@ -320,4 +320,3 @@ namespace Xamarin.Forms
 		}
 	}
 }
-#endif
