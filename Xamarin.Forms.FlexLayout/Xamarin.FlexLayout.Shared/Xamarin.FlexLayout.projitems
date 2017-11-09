@@ -20,5 +20,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Overflow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlexPosition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Wrap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Xamarin.Forms.FlexLayout.cs" />
   </ItemGroup>
 </Project>

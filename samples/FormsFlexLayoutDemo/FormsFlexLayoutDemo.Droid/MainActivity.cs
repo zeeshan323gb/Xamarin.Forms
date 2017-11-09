@@ -24,7 +24,7 @@ namespace FormsFlexLayoutDemo.Droid
             base.OnCreate(bundle);
 
 			global::Xamarin.Forms.Forms.Init(this, bundle);
-            global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Yoga.YogaEngine));
+			global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Flex.FlexEngine));
             LoadApplication(new FormsFlexLayoutDemo.App());
 		}
 	}

@@ -475,9 +475,6 @@
     <Compile Include="PlatformConfiguration\macOSSpecific\NavigationPage.cs" />
     <Compile Include="PlatformConfiguration\macOSSpecific\NavigationTransitionStyle.cs" />
     <Compile Include="Xaml\XamlResourceIdAttribute.cs" />
-    <Compile Include="..\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout.cs">
-      <Link>Xamarin.Forms.FlexLayout.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="..\Xamarin.Forms.FlexLayout\Xamarin.FlexLayout.Shared\Xamarin.FlexLayout.projitems" Label="Shared" Condition="Exists('..\Xamarin.Forms.FlexLayout\Xamarin.FlexLayout.Shared\Xamarin.FlexLayout.projitems')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

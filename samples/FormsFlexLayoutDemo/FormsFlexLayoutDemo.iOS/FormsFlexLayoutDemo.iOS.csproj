@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.props" Condition="Exists('..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
@@ -147,27 +146,8 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
-    <Reference Include="Facebook.Yoga">
-      <HintPath>..\..\..\packages\Facebook.Yoga.1.5.0-pre1\lib\Xamarin.iOS10\Facebook.Yoga.dll</HintPath>
-    </Reference>
-    <Reference Include="Xamarin.Forms.Core">
-      <HintPath>..\..\..\packages\Xamarin.Forms.2.4.0.18342\lib\Xamarin.iOS10\Xamarin.Forms.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Xamarin.Forms.Platform">
-      <HintPath>..\..\..\packages\Xamarin.Forms.2.4.0.18342\lib\Xamarin.iOS10\Xamarin.Forms.Platform.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Xamarin.Forms.Platform.iOS">
-      <HintPath>..\..\..\packages\Xamarin.Forms.2.4.0.18342\lib\Xamarin.iOS10\Xamarin.Forms.Platform.iOS.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Xamarin.Forms.Xaml">
-      <HintPath>..\..\..\packages\Xamarin.Forms.2.4.0.18342\lib\Xamarin.iOS10\Xamarin.Forms.Xaml.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Xamarin.Flex">
-      <HintPath>..\..\..\packages\Xamarin.Flex.0.3.1\lib\XamariniOS\Xamarin.Flex.dll</HintPath>
+      <HintPath>..\..\..\packages\Xamarin.Flex.0.1.236\lib\netstandard2.0\Xamarin.Flex.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -176,19 +156,22 @@
       <Name>FormsFlexLayoutDemo</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout.Engine\Xamarin.Forms.FlexLayout.Engine.Flex\Xamarin.FlexLayoutEngine.Flex.csproj">
-      <Project>{55DC5E6B-369B-4A15-ADD1-3C58FCF2C76E}</Project>
+      <Project>{302A0761-E950-4E52-BA7F-A4A3EA3C1340}</Project>
       <Name>Xamarin.FlexLayoutEngine.Flex</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout.csproj">
+    <ProjectReference Include="..\..\..\Xamarin.Forms.Platform\Xamarin.Forms.Platform.csproj">
       <Project>{67F9D3A8-F71E-4428-913F-C37AE82CDB24}</Project>
-      <Name>Xamarin.Forms.FlexLayout</Name>
+      <Name>Xamarin.Forms.Platform</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Xamarin.Forms.FlexLayout\Xamarin.Forms.FlexLayout.Engine\Xamarin.Forms.FlexLayout.Engine.Yoga\Xamarin.FlexLayoutEngine.Yoga.csproj">
-      <Project>{BEE8E0B8-BD65-4A0C-86B2-7F964EB7460A}</Project>
-      <Name>Xamarin.FlexLayoutEngine.Yoga</Name>
+    <ProjectReference Include="..\..\..\Xamarin.Forms.Core\Xamarin.Forms.Core.csproj">
+      <Project>{57B8B73D-C3B5-4C42-869E-7B2F17D354AC}</Project>
+      <Name>Xamarin.Forms.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Xamarin.Forms.Platform.iOS\Xamarin.Forms.Platform.iOS.csproj">
+      <Project>{271193C1-6E7C-429C-A36D-3F1BE5267231}</Project>
+      <Name>Xamarin.Forms.Platform.iOS</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
-  <Import Project="..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.targets" Condition="Exists('..\..\..\packages\Xamarin.Forms.2.4.0.18342\build\netstandard1.0\Xamarin.Forms.targets')" />
-  <Import Project="..\..\..\packages\Xamarin.Flex.0.3.1\build\XamariniOS\Xamarin.Flex.targets" Condition="Exists('..\..\..\packages\Xamarin.Flex.0.3.1\build\XamariniOS\Xamarin.Flex.targets')" />
+  <Import Project="..\..\..\packages\Xamarin.Flex.0.1.236\build\XamariniOS\Xamarin.Flex.targets" Condition="Exists('..\..\..\packages\Xamarin.Flex.0.1.236\build\XamariniOS\Xamarin.Flex.targets')" />
 </Project>

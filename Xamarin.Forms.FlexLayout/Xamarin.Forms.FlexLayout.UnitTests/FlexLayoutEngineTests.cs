@@ -34,7 +34,7 @@ namespace Xamarin.Forms.FlexLayoutTests
         [Test]
         public void OnInitWithEngine()
         {
-            global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Yoga.YogaEngine));
+			global::Xamarin.Forms.FlexLayout.RegisterEngine(typeof(Xamarin.FlexLayoutEngine.Flex.FlexEngine));
             Assert.DoesNotThrow(() => new FlexLayout());
         }
 

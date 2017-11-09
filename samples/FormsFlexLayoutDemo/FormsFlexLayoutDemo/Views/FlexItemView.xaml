@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="FormsFlexLayoutDemo.FlexItemView" xmlns:flex="clr-namespace:Xamarin.Forms;assembly=Xamarin.Forms.FlexLayout" 
-             flex:FlexLayout.AlignSelf="{Binding SelectedAlignSelf}" flex:FlexLayout.Grow="{Binding FlexGrow}" flex:FlexLayout.Shrink="{Binding FlexShrink}" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="FormsFlexLayoutDemo.FlexItemView"
+             FlexLayout.AlignSelf="{Binding SelectedAlignSelf}" FlexLayout.Grow="{Binding FlexGrow}" FlexLayout.Shrink="{Binding FlexShrink}" >
   <!--flex:FlexibleBox.Order="{Binding Order}"-->
   <Grid>
     <Grid.ColumnDefinitions>

@@ -23,6 +23,7 @@ namespace Xamarin.FlexLayout
 		static Type s_engineType;
 
 		IFlexNode _root;
+
 		public FlexLayout()
 		{
 			InitNode();
@@ -37,6 +38,7 @@ namespace Xamarin.FlexLayout
 			CalculateLayoutWithSize((float)width, (float)height);
 			ApplyLayoutToViewHierarchy(this);
 		}
+
 		public static void RegisterEngine(Type engineType)
 		{
 			s_engineType = engineType;
