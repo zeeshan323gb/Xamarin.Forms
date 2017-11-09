@@ -281,10 +281,10 @@ namespace Xamarin.FlexLayoutEngine.Yoga
 
 		YogaSize MeasureView(YogaNode node, float width, YogaMeasureMode widthMode, float height, YogaMeasureMode heightMode)
 		{
-			var flexWidthMode = widthMode.ConvertTo<FlexMeasureMode>();
-			var flexheightMode = heightMode.ConvertTo<FlexMeasureMode>();
+			//var flexWidthMode = widthMode.ConvertTo<FlexMeasureMode>();
+			//var flexheightMode = heightMode.ConvertTo<FlexMeasureMode>();
 
-			Size size = _internalMeasure(this, width, flexWidthMode, height, flexheightMode);
+			Size size = _internalMeasure(this, width, height);
 
 			return MeasureOutput.Make((float)size.Width, (float)size.Height);
 		}

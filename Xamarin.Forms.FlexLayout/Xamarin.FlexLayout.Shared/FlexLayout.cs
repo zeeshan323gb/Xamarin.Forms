@@ -44,25 +44,6 @@ namespace Xamarin.FlexLayout
 			s_engineType = engineType;
 		}
 
-		static float SanitizeMeasurement(float constrainedSize, float measuredSize, FlexMeasureMode measureMode)
-		{
-			float result;
-			if (measureMode == FlexMeasureMode.Exactly)
-			{
-				result = constrainedSize;
-			}
-			else if (measureMode == FlexMeasureMode.AtMost)
-			{
-				result = Math.Min(constrainedSize, measuredSize);
-			}
-			else
-			{
-				result = measuredSize;
-			}
-
-			return result;
-		}
-
 		static bool NodeHasExactSameChildren(IFlexNode node, NativeView[] subviews)
 		{
 			if (node.Count() != subviews.Length)

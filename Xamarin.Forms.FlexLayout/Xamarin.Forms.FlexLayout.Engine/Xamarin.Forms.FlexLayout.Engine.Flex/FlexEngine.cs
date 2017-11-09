@@ -100,12 +100,9 @@ namespace Xamarin.FlexLayoutEngine.Flex
 
 		void HandleSelfSizingDelegate(Xamarin.Flex.Item item, ref float width, ref float height)
 		{
-			var widthMode = FlexMeasureMode.Undefined;
-			var heightMode = FlexMeasureMode.Undefined;
-
 			var availableWidth = item.Parent.Width;
 			var availableHeight = item.Parent.Height;
-			var size = _measure?.Invoke(item as IFlexNode, availableWidth, widthMode, availableHeight, heightMode);
+			var size = _measure?.Invoke(item as IFlexNode, availableWidth, availableHeight);
 			width = (float)size.Value.Width;
 			height = (float)size.Value.Height;
 		}

@@ -1,12 +1,4 @@
-﻿#if FORMS
-namespace Xamarin.Forms
+﻿namespace Xamarin.Forms
 {
-	public delegate Size MeasureFunc(IFlexNode node, float width, FlexMeasureMode widthMode, float height, FlexMeasureMode heightMode);
+	public delegate Size MeasureFunc(IFlexNode node, float width, float height);
 }
-#else
-namespace Xamarin.FlexLayout
-{
-	public delegate object MeasureFunc(IFlexNode node, float width, FlexMeasureMode widthMode, float height, FlexMeasureMode heightMode);
-}
-
-#endif

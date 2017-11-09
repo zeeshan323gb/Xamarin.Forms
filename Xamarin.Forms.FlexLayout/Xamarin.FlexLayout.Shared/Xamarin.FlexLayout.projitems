@@ -16,7 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IFlexNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Justify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeasureFunc.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeasureMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Overflow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FlexPosition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Wrap.cs" />

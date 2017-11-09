@@ -260,22 +260,13 @@ namespace Xamarin.Forms
 
 		}
 
-		Size MeasureView(IFlexNode node, float width, FlexMeasureMode widthMode, float height, FlexMeasureMode heightMode)
+		Size MeasureView(IFlexNode node, float width, float height)
 		{
-			var constrainedWidth = (widthMode == FlexMeasureMode.Undefined) ? float.MaxValue : width;
-			var constrainedHeight = (heightMode == FlexMeasureMode.Undefined) ? float.MaxValue : height;
-
 			View view = node.Data as View;
 
-			var sizeRequest = view.Measure(constrainedWidth, constrainedHeight);
+			var sizeRequest = view.Measure(width, height);
 
-			var sizeThatFitsWidth = (float)sizeRequest.Request.Width;
-			var sizeThatFitsHeight = (float)sizeRequest.Request.Height;
-
-			var finalWidth = SanitizeMeasurement(constrainedWidth, sizeThatFitsWidth, widthMode);
-			var finalHeight = SanitizeMeasurement(constrainedHeight, sizeThatFitsHeight, heightMode);
-
-			return new Size(finalWidth, finalHeight);
+			return sizeRequest.Request;
 		}
 
 		static void UpdateNode(FlexLayout parent, object element, string propertyName)

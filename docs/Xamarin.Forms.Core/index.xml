@@ -227,7 +227,6 @@
       <Type Name="FileImageSourceConverter" Kind="Class" />
       <Type Name="FlexDirection" Kind="Enumeration" />
       <Type Name="FlexLayout" Kind="Class" />
-      <Type Name="FlexMeasureMode" Kind="Enumeration" />
       <Type Name="FlexPosition" Kind="Enumeration" />
       <Type Name="FlowDirection" Kind="Enumeration" />
       <Type Name="FocusEventArgs" Kind="Class" />
