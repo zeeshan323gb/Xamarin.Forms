@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Xamarin.Forms.Pages$IdAppend$</id>
+    <version>$version$</version>
+    <authors>Xamarin, Inc.</authors>
+    <owners>Xamarin, Inc.</owners>
+    <licenseUrl>http://aka.ms/xamarin-forms-license</licenseUrl>
+    <iconUrl>http://xamarin.com/content/images/nuget/xamarin.png</iconUrl>
+    <projectUrl>http://xamarin.com/forms</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>UWP Like aliases for Xamarin.Forms types</description>
+    <copyright>Copyright 2013-2017</copyright>
+    <dependencies>
+      <group>
+        <dependency id="Xamarin.Forms$IdAppend$" version="$version$"/>
+      </group>
+    </dependencies>
+    <references>
+			<group targetFramework="portable-win+net45+wp80+win81+wpa81">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="netstandard1.0">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="Xamarin.iOS10">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="MonoAndroid10">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="win81">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="wpa81">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="uap10.0">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="WP80">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+			<group targetFramework="Xamarin.Mac">
+				<reference file="Xamarin.Forms.Alias.dll" />
+			</group>
+    </references>
+  </metadata>
+	<files>
+		<!--PCL-->
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.dll" target="lib\portable-win+net45+wp80+win81+wpa81" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*pdb" target="lib\portable-win+net45+wp80+win81+wpa81" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*mdb" target="lib\portable-win+net45+wp80+win81+wpa81" />
+
+		<!--netstandard-->
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.dll" target="lib\netstandard1.0" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*pdb" target="lib\netstandard1.0" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*mdb" target="lib\netstandard1.0" />
+
+		<!--Android-->
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.dll" target="lib\MonoAndroid10" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*pdb" target="lib\MonoAndroid10" />
+
+		<!--iPhone Unified-->
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.dll" target="lib\Xamarin.iOS10" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*pdb" target="lib\Xamarin.iOS10" />
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.*mdb" target="lib\Xamarin.iOS10" />
+
+		<!--Mac-->
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.dll" target="lib\Xamarin.Mac" />
+
+		<!--UWP-->
+		<file src="..\Xamarin.Forms.Alias\bin\$Configuration$\Xamarin.Forms.Alias.dll" target="lib\uap10.0" />
+
+	</files>
+</package>
