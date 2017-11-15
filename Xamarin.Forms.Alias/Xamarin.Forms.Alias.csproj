@@ -45,6 +45,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alias.cs" />
     <Compile Include="Border.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="ComboBox.cs" />
