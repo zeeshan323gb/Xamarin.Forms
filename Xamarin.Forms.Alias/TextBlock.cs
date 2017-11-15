@@ -1,3 +1,5 @@
+using System;
+
 namespace Xamarin.Forms.Alias
 {
 	public class TextBlock : Label
@@ -10,12 +12,17 @@ namespace Xamarin.Forms.Alias
 			set { TextColor = value; }
 		}
 
-		public static readonly BindableProperty TextWrappingProperty = BindableProperty.Create(nameof(TextWrapping), typeof(TextWrapping), typeof(TextBlock), TextWrapping.NoWrap);
+		public static readonly BindableProperty TextWrappingProperty = BindableProperty.Create(nameof(TextWrapping), typeof(TextWrapping), typeof(TextBlock), TextWrapping.NoWrap, propertyChanged: TextWrappingChanged);
+
+		static void TextWrappingChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			((TextBlock)bindable).LineBreakMode = ((TextWrapping)newValue).ToLineBreakMode();
+		}
 
 		public TextWrapping TextWrapping
 		{
-			get { return LineBreakMode.ToTextWrapping(); }
-			set { LineBreakMode = value.ToLineBreakMode(); }
+			get { return (TextWrapping)GetValue(TextWrappingProperty); }
+			set { SetValue(TextWrappingProperty, value); }
 		}
 	}
 }
