@@ -10,7 +10,7 @@ namespace Xamarin.Forms.Alias
 			set { TextColor = value; }
 		}
 
-		public static readonly BindableProperty TextWrappingProperty = BindableProperty.Create(nameof(TextWrapping), typeof(TextWrapping), typeof(TextBlock), Alias.TextWrapping.NoWrap);
+		public static readonly BindableProperty TextWrappingProperty = BindableProperty.Create(nameof(TextWrapping), typeof(TextWrapping), typeof(TextBlock), TextWrapping.NoWrap);
 
 		public TextWrapping TextWrapping
 		{
