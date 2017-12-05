@@ -649,8 +649,13 @@ namespace Xamarin.Forms.ControlGallery.Android
 	}
 #pragma warning restore CS0618 // Type or member is obsolete
 
-	public class Bugzilla47430ButtonRenderer : Xamarin.Forms.Platform.Android.AppCompat.ButtonRenderer
+	public class Bugzilla47430ButtonRenderer : Platform.Android.AppCompat.ButtonRenderer
 	{
+
+		public Bugzilla47430ButtonRenderer(Context context) : base(context)
+		{
+		}
+
 		protected override void OnElementChanged(ElementChangedEventArgs<Button> e)
 		{
 			base.OnElementChanged(e);
