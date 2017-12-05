@@ -369,7 +369,7 @@ namespace Xamarin.Forms
 			if (Platform != null)
 				child.Platform = Platform;
 
-			child.ApplyBindings();
+			child.ApplyBindings(skipBindingContext: false, fromBindingContextChanged:true);
 
 			if (ChildAdded != null)
 				ChildAdded(this, new ElementEventArgs(child));
@@ -502,6 +502,27 @@ namespace Xamarin.Forms
 		}
 
 		internal event EventHandler ParentSet;
+
+		internal static void SetFlowDirectionFromParent(Element child)
+		{
+			IFlowDirectionController controller = child as IFlowDirectionController;
+			if (controller == null)
+				return;
+
+			if (controller.EffectiveFlowDirection.IsImplicit())
+			{
+				var parentView = child.Parent as IFlowDirectionController;
+				if (parentView == null)
+					return;
+
+				var flowDirection = parentView.EffectiveFlowDirection.ToFlowDirection();
+
+				if (flowDirection != controller.EffectiveFlowDirection.ToFlowDirection())
+				{
+					controller.EffectiveFlowDirection = flowDirection.ToEffectiveFlowDirection();
+				}
+			}
+		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public event EventHandler PlatformSet;

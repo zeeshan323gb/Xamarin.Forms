@@ -12,8 +12,10 @@ namespace Xamarin.Forms.Core.XamlC
 {
 	class BindablePropertyConverter : ICompiledTypeConverter
 	{
-		public IEnumerable<Instruction> ConvertFromString(string value, ModuleDefinition module, BaseNode node)
+		public IEnumerable<Instruction> ConvertFromString(string value, ILContext context, BaseNode node)
 		{
+			var module = context.Body.Method.Module;
+
 			if (IsNullOrEmpty(value)) {
 				yield return Instruction.Create(OpCodes.Ldnull);
 				yield break;
@@ -29,7 +31,7 @@ namespace Xamarin.Forms.Core.XamlC
 
 			var parts = value.Split('.');
 			if (parts.Length == 1) {
-				var parent = node.Parent?.Parent as IElementNode;
+				var parent = node.Parent?.Parent as IElementNode ?? (node.Parent?.Parent as IListNode)?.Parent as IElementNode;
 				if ((node.Parent as ElementNode)?.XmlType.NamespaceUri == XamlParser.XFUri &&
 				    ((node.Parent as ElementNode)?.XmlType.Name == "Setter" || (node.Parent as ElementNode)?.XmlType.Name == "PropertyCondition")) {
 					if (parent.XmlType.NamespaceUri == XamlParser.XFUri &&
