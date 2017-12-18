@@ -21,8 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 		string _defaultContentDescription;
 		bool? _defaultFocusable;
 		string _defaultHint;
-		int? _defaultLabelFor;
-		
+
 		VisualElementPackager _packager;
 		PropertyChangedEventHandler _propertyChangeHandler;
 
