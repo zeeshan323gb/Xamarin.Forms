@@ -191,6 +191,7 @@
     <file src="..\Libs\flex\native\android\armeabi\libflex.so" target="native\android\armeabi" />
     <file src="..\Libs\flex\native\android\arm64-v8a\libflex.so" target="native\android\arm64-v8a" />
     <file src="..\Libs\flex\native\ios\libflex.a" target="native\ios" />
+    <file src="..\Libs\flex\native\ios\flex.framework.zip" target="native\ios" />
 
     <file src="..\Libs\flex\runtimes\osx\native\libflex.dylib" target="runtimes\osx\native" />
     <file src="..\Libs\flex\runtimes\win10-arm\native\flex.dll" target="runtimes\win10-arm\native" />
