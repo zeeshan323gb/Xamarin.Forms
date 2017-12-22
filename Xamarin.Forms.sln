@@ -171,13 +171,21 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "flex", "flex", "{69EC5282-3492-4A41-97AE-259013786CCC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{2601FA91-9FDD-4B44-AF30-26FB4D5C1D86}"
+	ProjectSection(SolutionItems) = preProject
+		Libs\flex\build\netstandard2.0\Xamarin.Flex.targets = Libs\flex\build\netstandard2.0\Xamarin.Flex.targets
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "XamariniOS", "XamariniOS", "{D28E753A-64B2-455B-ADDA-A26E4D21BB84}"
 	ProjectSection(SolutionItems) = preProject
 		Libs\flex\build\XamariniOS\Xamarin.Flex.dll.config = Libs\flex\build\XamariniOS\Xamarin.Flex.dll.config
 		Libs\flex\build\XamariniOS\Xamarin.Flex.targets = Libs\flex\build\XamariniOS\Xamarin.Flex.targets
 	EndProjectSection
-EndProject	
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netstandard2.0", "netstandard2.0", "{B255CD9F-1DAC-4BCF-BAA5-4D6F8A88A044}"
+	ProjectSection(SolutionItems) = preProject
+		Libs\flex\build\netstandard2.0\Xamarin.Flex.targets = Libs\flex\build\netstandard2.0\Xamarin.Flex.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Xamarin.Forms.Controls.Issues\Xamarin.Forms.Controls.Issues.Shared\Xamarin.Forms.Controls.Issues.Shared.projitems*{0a39a74b-6f7a-4d41-84f2-b0ccdce899df}*SharedItemsImports = 4
