@@ -9,12 +9,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
     </Content>
-    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-x64\native\*">
-      <Link>%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </Content>
-  </ItemGroup>
+   </ItemGroup>
   <ItemGroup Condition="'$(PlatformTarget)' == 'x86' and '$(OS)' == 'Windows_NT'">
     <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-x86\native\*">
       <Link>%(Filename)%(Extension)</Link>
