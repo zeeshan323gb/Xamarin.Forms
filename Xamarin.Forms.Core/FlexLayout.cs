@@ -289,7 +289,7 @@ namespace Xamarin.Forms
 				};
 			}
 
-			_root.InsertAt(Children.IndexOf(view), item);
+			_root.InsertAt((uint)Children.IndexOf(view), item);
 			SetFlexItem(view, item);
 		}
 
@@ -416,7 +416,7 @@ namespace Xamarin.Forms
 			var index = parent.IndexOf(child);
 			if (index < 0)
 				return;
-			parent.RemoveAt(index);
+			parent.RemoveAt((uint)index);
 		}
 
 		public static Rectangle GetFrame(this Flex.Item item)
