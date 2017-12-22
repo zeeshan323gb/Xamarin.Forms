@@ -1083,10 +1083,9 @@ namespace Xamarin.Forms.Platform.iOS
 				//we are being removed from the UINavigationPage
 				if (parent == null)
 				{
-					System.Diagnostics.Debug.WriteLine("being removed");
-					NavigationRenderer n;
-					if (_navigation.TryGetTarget(out n))
-						await n.UpdateFormsInnerNavigation(Child);
+					NavigationRenderer navRenderer;
+					if (_navigation.TryGetTarget(out navRenderer))
+						await navRenderer.UpdateFormsInnerNavigation(Child);
 				}
 				base.DidMoveToParentViewController(parent);
 			}
