@@ -15,16 +15,14 @@ namespace Xamarin.Forms.Controls.Issues
 	{
 		protected override void Init()
 		{
-			Children.Add(new NavigationPage(new HomePage()) { Title = "Home" });
-			Children.Add(new NavigationPage(new ContentPage { Title = "Fixes", Content = new Label() { Text = "coffee.png" } }) { Title = "Fixes" });
-			CurrentPage = Children.Where(x => x.Title == "Home").FirstOrDefault();
-
+			Children.Add(new NavigationPage(new HomePage()) { Title = "Home", BarBackgroundColor = Color.Red }) ;
 		}
 
 		class HomePage : ContentPage
 		{
 			public HomePage()
 			{
+				Title = "Home";
 				var grd = new Grid { BackgroundColor = Color.Brown };
 				grd.RowDefinitions.Add(new RowDefinition());
 				grd.RowDefinitions.Add(new RowDefinition());
@@ -46,8 +44,8 @@ namespace Xamarin.Forms.Controls.Issues
 							Content = btnPop,
 							BackgroundColor = Color.Yellow
 						};
-						NavigationPage.SetHasNavigationBar(page, false); //This breaks layout when you pop!
-
+						//This breaks layout when you pop!
+						NavigationPage.SetHasNavigationBar(page, false); 
 						await Navigation.PushAsync(page);
 					})
 				};
