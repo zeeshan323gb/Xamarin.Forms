@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace Xamarin.Forms.Controls.Issues
 {
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Bugzilla, 99991426, "SetHasNavigationBar screen height wrong", PlatformAffected.iOS)]
+	[Issue(IssueTracker.Github, 1426, "SetHasNavigationBar screen height wrong", PlatformAffected.iOS)]
 	public class Issue1426 : TestTabbedPage
 	{
 		protected override void Init()
