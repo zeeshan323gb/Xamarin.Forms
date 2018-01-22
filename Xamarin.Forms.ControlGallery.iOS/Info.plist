@@ -26,7 +26,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>XamControl</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.xamarin.quickui.controlgallery</string>
+	<string>com.slbdev.quickui.controlgallery</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>CFBundleIconFiles</key>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage x:Class="Xamarin.Forms.Controls.CarouselViewGalleryPage"
+             xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Grid RowSpacing="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="56" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <CarouselView x:Name="myCarousel"
+                      Grid.Row="0"
+                      Grid.Column="0"
+                      HorizontalOptions="FillAndExpand"
+                      VerticalOptions="FillAndExpand"
+                      AnimateTransition="true"
+                      InterPageSpacing="5"
+                      BackgroundColor="Silver"
+                      ItemsSource="{Binding Source}"
+                      Orientation="Horizontal"
+                      ShowIndicators="true"
+		              IndicatorsShape="Circle"/>
+
+        <Grid Grid.Row="1"
+              Grid.Column="0"
+              BackgroundColor="Gray"
+              Padding="12,0,12,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="80" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="prevBtn"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalOptions="Start"
+                    Text="PREV" />
+            <Button x:Name="nextBtn"
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    HorizontalOptions="End"
+                    Text="NEXT" />
+        </Grid>
+    </Grid>
+
+</ContentPage>
