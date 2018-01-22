@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Windows.UI.Xaml;
 
 namespace Xamarin.Forms.Platform.UWP
 {
@@ -19,17 +20,13 @@ namespace Xamarin.Forms.Platform.UWP
 
         public static FrameworkElement ToWindows(this Xamarin.Forms.View view, Rectangle size)
         {
-            //var vRenderer = RendererFactory.GetRenderer (view);
-
             if (Platform.GetRenderer(view) == null)
                 Platform.SetRenderer(view, Platform.CreateRenderer(view));
 
             var vRenderer = Platform.GetRenderer(view);
 
             view.Layout(new Rectangle(0, 0, size.Width, size.Height));
-
-            //vRenderer.ContainerElement.Arrange(new Rect(0, 0, size.Width, size.Height));
-
+			
             return vRenderer.ContainerElement;
         }
 	}
