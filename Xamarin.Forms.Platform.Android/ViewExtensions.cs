@@ -39,7 +39,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				view.Background = drawable;
 			}
-			
+
 		}
 
 		public static void SetWindowBackground(this AView view)
@@ -77,14 +77,14 @@ namespace Xamarin.Forms.Platform.Android
 				view.Id = Platform.GenerateViewId();
 			}
 		}
-		
-		public static ViewGroup ToAndroid(this Xamarin.Forms.View view, Rectangle size)
+
+		public static AView ToAndroid(this Xamarin.Forms.View view, Rectangle size, Context context)
 		{
 			if (Platform.GetRenderer(view) == null)
-				Platform.SetRenderer(view, Platform.CreateRenderer(view));
+				Platform.SetRenderer(view, Platform.CreateRendererWithContext(view, context));
 			var vRenderer = Platform.GetRenderer(view);
 
-			var viewGroup = vRenderer.ViewGroup;
+			var viewGroup = vRenderer.View;
 			vRenderer.Tracker.UpdateLayout();
 			var layoutParams = new ViewGroup.LayoutParams((int)size.Width, (int)size.Height);
 			viewGroup.LayoutParameters = layoutParams;

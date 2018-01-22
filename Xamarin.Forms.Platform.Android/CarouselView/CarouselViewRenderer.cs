@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using System.Collections.Generic;
 using Com.Android.DeskClock;
 using Com.ViewPagerIndicator;
+using Android.Content;
 
 /*
 The MIT License(MIT)
@@ -54,11 +55,16 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		AViews.View nativeView;
 		ViewPager viewPager;
-        CirclePageIndicator indicators;
+		CirclePageIndicator indicators;
 		bool _disposed;
-
+		Context _context;
 		double ElementWidth;
 		//double ElementHeight;
+
+		public CarouselViewRenderer(Context context) : base(context)
+		{
+			_context = context;
+		}
 
 		protected override void OnElementChanged(ElementChangedEventArgs<CarouselView> e)
 		{
@@ -84,7 +90,7 @@ namespace Xamarin.Forms.Platform.Android
 				{
 					Element.SizeChanged -= Element_SizeChanged;
 					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-					    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
 				}
 			}
 
@@ -104,7 +110,7 @@ namespace Xamarin.Forms.Platform.Android
 			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-                InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+				InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
 			}
 
 			// OldItems contains the item that was removed.
@@ -115,11 +121,11 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			// OldItems contains the moved item.
-            // OldStartingIndex contains the index where the item was moved from.
+			// OldStartingIndex contains the index where the item was moved from.
 			// NewStartingIndex contains the index where the item was moved to.
 			if (e.Action == NotifyCollectionChangedAction.Move)
 			{
-                var Source = ((PageAdapter)viewPager?.Adapter).Source;
+				var Source = ((PageAdapter)viewPager?.Adapter).Source;
 
 				if (Element != null && viewPager != null && Source != null)
 				{
@@ -127,23 +133,23 @@ namespace Xamarin.Forms.Platform.Android
 					Source.Insert(e.NewStartingIndex, e.OldItems[e.OldStartingIndex]);
 					viewPager.Adapter?.NotifyDataSetChanged();
 
-                    Element.PositionSelected?.Invoke(Element, Element.Position);
+					Element.PositionSelected?.Invoke(Element, Element.Position);
 				}
-            }
+			}
 
 			// NewItems contains the replacement item.
 			// NewStartingIndex and OldStartingIndex are equal, and if they are not -1,
 			// then they contain the index where the item was replaced.
 			if (e.Action == NotifyCollectionChangedAction.Replace)
 			{
-                var Source = ((PageAdapter)viewPager?.Adapter).Source;
+				var Source = ((PageAdapter)viewPager?.Adapter).Source;
 
 				if (Element != null && viewPager != null && Source != null)
 				{
 					Source[e.OldStartingIndex] = e.NewItems[e.NewStartingIndex];
 					viewPager.Adapter?.NotifyDataSetChanged();
 				}
-            }
+			}
 
 			// No other properties are valid.
 			if (e.Action == NotifyCollectionChangedAction.Reset)
@@ -151,7 +157,7 @@ namespace Xamarin.Forms.Platform.Android
 				if (Element != null && viewPager != null)
 				{
 					SetPosition();
-					viewPager.Adapter = new PageAdapter(Element);
+					viewPager.Adapter = new PageAdapter(Element, _context);
 					viewPager.SetCurrentItem(Element.Position, false);
 					indicators?.SetViewPager(viewPager);
 					Element.PositionSelected?.Invoke(Element, Element.Position);
@@ -166,7 +172,7 @@ namespace Xamarin.Forms.Platform.Android
 				var rect = this.Element.Bounds;
 				// To avoid page recreation caused by entry focus #136 (fix)
 				if (ElementWidth.Equals(rect.Width))
-                    return;
+					return;
 				ElementWidth = rect.Width;
 				//ElementHeight = rect.Height;
 				SetNativeView();
@@ -208,13 +214,13 @@ namespace Xamarin.Forms.Platform.Android
 					indicators?.SetStyle((Com.ViewPagerIndicator.IndicatorsShape)Element.IndicatorsShape);
 					break;
 				case "ShowIndicators":
-                    SetIndicators();
+					SetIndicators();
 					break;
 				case "ItemsSource":
 					if (Element != null && viewPager != null)
 					{
 						SetPosition();
-						viewPager.Adapter = new PageAdapter(Element);
+						viewPager.Adapter = new PageAdapter(Element, _context);
 						viewPager.SetCurrentItem(Element.Position, false);
 						indicators?.SetViewPager(viewPager);
 						Element.PositionSelected?.Invoke(Element, Element.Position);
@@ -225,7 +231,7 @@ namespace Xamarin.Forms.Platform.Android
 				case "ItemTemplate":
 					if (Element != null && viewPager != null)
 					{
-						viewPager.Adapter = new PageAdapter(Element);
+						viewPager.Adapter = new PageAdapter(Element, _context);
 						viewPager.SetCurrentItem(Element.Position, false);
 						indicators?.SetViewPager(viewPager);
 						Element.PositionSelected?.Invoke(Element, Element.Position);
@@ -295,9 +301,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		void SetNativeView()
 		{
-            CleanUpViewPager();
+			CleanUpViewPager();
 
-			var inflater = AViews.LayoutInflater.From(Forms.Context);
+			var inflater = AViews.LayoutInflater.From(_context);
 
 			// Orientation BP
 			if (Element.Orientation == CarouselViewOrientation.Horizontal)
@@ -307,7 +313,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			viewPager = nativeView.FindViewById<ViewPager>(Resource.Id.pager);
 
-			viewPager.Adapter = new PageAdapter(Element);
+			viewPager.Adapter = new PageAdapter(Element,_context);
 			viewPager.SetCurrentItem(Element.Position, false);
 
 			// InterPageSpacing BP
@@ -315,7 +321,7 @@ namespace Xamarin.Forms.Platform.Android
 			var interPageSpacing = Element.InterPageSpacing * metrics.Density;
 			viewPager.PageMargin = (int)interPageSpacing;
 
-            // BackgroundColor BP
+			// BackgroundColor BP
 			viewPager.SetBackgroundColor(Element.BackgroundColor.ToAndroid());
 
 			viewPager.PageSelected += ViewPager_PageSelected;
@@ -360,7 +366,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void InsertPage(object item, int position)
 		{
-            var Source = ((PageAdapter)viewPager?.Adapter).Source;
+			var Source = ((PageAdapter)viewPager?.Adapter).Source;
 
 			if (Element != null && viewPager != null && Source != null)
 			{
@@ -368,10 +374,10 @@ namespace Xamarin.Forms.Platform.Android
 
 				var prevPos = Element.Position;
 
-                viewPager.Adapter.NotifyDataSetChanged();
+				viewPager.Adapter.NotifyDataSetChanged();
 
 				if (position <= prevPos)
-				    Element.PositionSelected?.Invoke(Element, Element.Position);
+					Element.PositionSelected?.Invoke(Element, Element.Position);
 			}
 		}
 
@@ -433,7 +439,7 @@ namespace Xamarin.Forms.Platform.Android
 		class PageAdapter : PagerAdapter
 		{
 			CarouselView Element;
-
+			Context _context;
 			// A local copy of ItemsSource so we can use CollectionChanged events
 			public List<object> Source;
 
@@ -441,8 +447,9 @@ namespace Xamarin.Forms.Platform.Android
 			//SparseArray<Parcelable> mViewStates = new SparseArray<Parcelable>();
 			//ViewPager mViewPager;
 
-			public PageAdapter(CarouselView element)
+			public PageAdapter(CarouselView element, Context context)
 			{
+				_context = context;
 				Element = element;
 				Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
 			}
@@ -499,7 +506,7 @@ namespace Xamarin.Forms.Platform.Android
 				// HeightRequest fix
 				formsView.Parent = this.Element;
 
-				var nativeConverted = formsView.ToAndroid(new Rectangle(0, 0, Element.Width, Element.Height));
+				var nativeConverted = formsView.ToAndroid(new Rectangle(0, 0, Element.Width, Element.Height), _context);
 				nativeConverted.Tag = new Tag() { BindingContext = bindingContext }; //position;
 
 				//nativeConverted.SaveEnabled = true;
@@ -581,13 +588,13 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (disposing && !_disposed)
 			{
-                CleanUpViewPager();
+				CleanUpViewPager();
 
 				if (Element != null)
 				{
 					Element.SizeChanged -= Element_SizeChanged;
 					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-					    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
 				}
 
 				_disposed = true;

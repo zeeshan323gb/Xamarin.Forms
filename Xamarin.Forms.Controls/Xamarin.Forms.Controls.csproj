@@ -61,15 +61,15 @@
     <EmbeddedResource Update="GalleryPages\StyleXamlGallery.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Include="GalleryPages\CarouselView\MyView.xaml">
+    <EmbeddedResource Update="GalleryPages\CarouselView\MyView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Include="GalleryPages\CarouselViewGalleryPage.xaml">
+    <EmbeddedResource Update="GalleryPages\CarouselViewGalleryPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ControlGalleryPages\LayoutAddPerformance.xaml">
+    <EmbeddedResource Update="ControlGalleryPages\LayoutAddPerformance.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="GalleryPages\XamlNativeViews.xaml">
