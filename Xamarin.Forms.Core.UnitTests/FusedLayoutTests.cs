@@ -13,29 +13,6 @@ namespace Xamarin.Forms.Core.UnitTests
 	public class FusedLayoutTests : BaseTestFixture
 	{
 
-		[Test]
-		public void AddingFusesTest()
-		{
-			FusedLayout fusedLayout = new FusedLayout();
-			Button basicButton1 = new Button();
-			var fuse1 = new Fuse();
-			fusedLayout.Children.Add(basicButton1, fuse1);
-
-			Button basicButton2 = new Button();
-			var fuses = FusedLayout.GetFuses(basicButton2);
-
-			var fuse2 = new Fuse() { SourceElement = new Button() };
-			fusedLayout.Children.Add(basicButton2, fuse2);
-
-
-			Assert.AreEqual(fuse1, FusedLayout.GetFuses(basicButton1).Single());
-			Assert.AreEqual(fuse2, FusedLayout.GetFuses(basicButton2).Single());
-			
-
-		}
-
-
-
 
 		[Test]
 		public void AlignCenterTest()
@@ -55,22 +32,16 @@ namespace Xamarin.Forms.Core.UnitTests
 				WidthRequest = 20
 			};
 
-			var fuse1 = new Fuse()
-			{
-				Operator = FuseOperator.None,
-				SourceElement = fusedLayout,
-				SourceProperty = FuseProperty.Center,
-				TargetProperty = FuseProperty.Center
-			};
+			var fuse1 = new Fusion(fusedLayout).Center.Add(new Point(3,-3));
 
-			fusedLayout.Children.Add(view1, fuse1);
+			fusedLayout.Children.Add(view1, FuseProperty.Center, fuse1);
 			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
 
 
 			Assert.AreEqual(20, view1.Height);
 			Assert.AreEqual(20, view1.Width);
-			Assert.AreEqual(40, view1.X);
-			Assert.AreEqual(40, view1.Y);
+			Assert.AreEqual(43, view1.X);
+			Assert.AreEqual(37, view1.Y);
 		}
 
 
@@ -90,14 +61,7 @@ namespace Xamarin.Forms.Core.UnitTests
 				AutomationId = "view1"
 			};
 
-			var fuse1 = new Fuse()
-			{
-				 Operator = FuseOperator.Plus,				 
-				 Constant = 20,
-				 SourceElement = fusedLayout,
-				 SourceProperty = FuseProperty.X,
-				 TargetProperty = FuseProperty.X
-			};
+			var fuse1 = new Fusion(fusedLayout).X.Add(20);
 
 			View view2 = new View()
 			{
@@ -105,21 +69,16 @@ namespace Xamarin.Forms.Core.UnitTests
 				AutomationId = "view2"
 			};
 
-			var fuse2 = new Fuse()
-			{
-				Operator = FuseOperator.Plus,
-				Constant = 13,
-				SourceElement = view1,
-				TargetProperty = FuseProperty.X,
-				SourceProperty = FuseProperty.X
-			};
+			var fuse2 = new Fusion(view1).X.Add(13);
 
-
-			FusedLayout.AddFusion(view2, fuse2);
-
-			// add the dependent fuse first
-			fusedLayout.Children.Add(view1, fuse1);
+			// view 2 add
+			FusedLayout.AddFusion(view2, FuseProperty.X, fuse2);
 			fusedLayout.Children.Add(view2);
+
+
+			// view 1 add
+			fusedLayout.Children.Add(view1, FuseProperty.X, fuse1);
+
 
 			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
 

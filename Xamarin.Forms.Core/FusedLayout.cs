@@ -56,18 +56,26 @@ namespace Xamarin.Forms.Core
 		}
 
 
-		public static void AddFusion(View targetView, FuseBase fuse)
+		public static void AddFusion(View targetView, FuseProperty targetProperty, FusionBase fuse)
 		{
 			var currentFuses = GetFuses(targetView) ?? new FuseCollection();
-			currentFuses.Add(fuse);
+			currentFuses.Add(new TargetWrapper(fuse, targetProperty, targetView));
 			SetFuses(targetView, currentFuses);
 		}
 
 
-		public static void RemoveFusion(View targetView, FuseBase fuse)
+		public static void RemoveFusion(View targetView, FuseProperty targetProperty, FusionBase removeFuse)
 		{
 			var currentFuses = GetFuses(targetView);
-			currentFuses.Remove(fuse);
+
+			foreach(var fuse in currentFuses.ToArray())
+			{
+				if(fuse.TargetProperty == targetProperty && fuse.Fuse == removeFuse)
+				{
+					currentFuses.Remove(fuse);
+				}
+			}
+
 			SetFuses(targetView, currentFuses);
 		}
 
@@ -91,7 +99,7 @@ namespace Xamarin.Forms.Core
 			{
 				var fusesToSolveView = GetFuses(view);
 				SolveNodeList viewNodes = new SolveNodeList();
-				SolveView solveView = new SolveView(view);
+				SolveView solveView = new SolveView(view, null);
 				unSolvedNodeList.AddRange(solveView.Nodes);
 				SetSolveView(view, solveView);
 				unSolvedViews.Add(solveView);
@@ -100,7 +108,7 @@ namespace Xamarin.Forms.Core
 			// in theory after the first run through this contains the order
 			SolveNodeList solved = new SolveNodeList();
 
-			var layoutSolveView = new SolveView(this);
+			var layoutSolveView = new SolveView(this, new Size(width, height));
 			SetSolveView(this, layoutSolveView);
 
 			bool iSolvedSomething = true;
@@ -129,7 +137,7 @@ namespace Xamarin.Forms.Core
 		}
 		public interface IFusedLayoutList<T> : IList<T> where T : View
 		{
-			void Add(T view, FuseBase fuse);
+			void Add(T view, FuseProperty targetProperty, FusionBase fuse);
 		}
 
 		class FusedElementCollection : ElementCollection<View>, IFusedLayoutList<View>
@@ -140,95 +148,30 @@ namespace Xamarin.Forms.Core
 			}
 			internal FusedLayout Parent { get; set; }
 
-			public void Add(View view, FuseBase fuse)
+			public void Add(View view, FuseProperty targetProperty, FusionBase fuse)
 			{
-				AddFusion(view, fuse);
+				AddFusion(view, targetProperty, fuse);
 				base.Add(view);
 			}
 		}
 
 
-
-		/// <summary>
-		/// Quick naive dependency tree
-		/// </summary>
-		/// <param name="viewProperty">x,y,height,width</param>
-		/// <param name="specialProperty"></param>
-		/// <returns></returns>
-		internal static bool DoesViewPropertyDependOnProperty(FuseProperty viewProperty, FuseProperty specialProperty)
-		{
-			switch (viewProperty)
-			{
-				case FuseProperty.X:
-					switch (specialProperty)
-					{
-						case FuseProperty.X:
-						case FuseProperty.Center:
-							return true;
-						case FuseProperty.Y:
-							return false;
-						default:
-							throw new ArgumentException($"{viewProperty}-{specialProperty}");
-
-					}
-				case FuseProperty.Y:
-					switch (specialProperty)
-					{
-						case FuseProperty.Y:
-						case FuseProperty.Center:
-							return true;
-						case FuseProperty.X:
-							return false;
-						default:
-							throw new ArgumentException($"{viewProperty}-{specialProperty}");
-
-					}
-				case FuseProperty.Height:
-					switch (specialProperty)
-					{
-						case FuseProperty.Height:
-							return true;
-						case FuseProperty.Width:
-						case FuseProperty.X:
-						case FuseProperty.Center:
-							return false;
-						default:
-							throw new ArgumentException($"{viewProperty}-{specialProperty}");
-
-					}
-				case FuseProperty.Width:
-					switch (specialProperty)
-					{
-						case FuseProperty.Height:
-							return true;
-						case FuseProperty.Width:
-						case FuseProperty.X:
-						case FuseProperty.Center:
-							return false;
-						default:
-							throw new ArgumentException($"{viewProperty}-{specialProperty}");
-
-					}
-				default:
-					throw new ArgumentException($"{viewProperty}-{specialProperty}");
-			}
-		}
-
+		 
 		public class SolveNode
 		{
 			public SolveNode(
 				View targetView,
-				FuseProperty fuseProperty,
+				FuseProperty fusePropertyXYHW,
 				FuseCollection viewFuses)
 			{
 				TargetView = targetView;
-				Property = fuseProperty;
+				PropertyXYHW = fusePropertyXYHW;
 				Fuses = new FuseCollection();
 				if (viewFuses != null)
 				{
 					foreach (var fuseToSolveView in viewFuses)
 					{
-						if (DoesViewPropertyDependOnProperty(fuseProperty, fuseToSolveView.SourceProperty))
+						if(fuseToSolveView.Influences(fusePropertyXYHW)) 
 						{
 							Fuses.Add(fuseToSolveView);
 						}
@@ -242,7 +185,7 @@ namespace Xamarin.Forms.Core
 
 			// Fuses relevant to this Property
 			public FuseCollection Fuses { get; }
-			public FuseProperty Property { get; }
+			public FuseProperty PropertyXYHW { get; }
 
 			public double? Value { get; set; }
 
@@ -262,7 +205,8 @@ namespace Xamarin.Forms.Core
 				double returnValue = 0;
 				foreach (var fuse in Fuses)
 				{
-					var result = fuse.Calculate(TargetView, Property);
+					var result = fuse.Calculate(PropertyXYHW);
+					
 					if (!result.HasValue)
 					{
 						return false;
@@ -270,7 +214,7 @@ namespace Xamarin.Forms.Core
 					returnValue += result.Value;
 				}
 
-				// naive averaged bais of values
+				// naive averaged bias of values
 				SetValue(returnValue / (Fuses.Count));
 				return true;
 			}
@@ -282,7 +226,7 @@ namespace Xamarin.Forms.Core
 			public FuseCollection Fuses { get; private set; }
 			public SolveNodeList Nodes { get; private set; }
 
-			public SolveView(View target)
+			public SolveView(View target, Size? measureRequest)
 			{
 				TargetElement = target;
 				Fuses = GetFuses(target);
@@ -292,31 +236,27 @@ namespace Xamarin.Forms.Core
 				Height = new SolveNode(target, FuseProperty.Height, Fuses);
 				Width = new SolveNode(target, FuseProperty.Width, Fuses);
 
-				// just setup defaults for the solve if no fuse is specified
+				// just measure here? or create a Measure Fusion to put in here
 				if(Height.Fuses.Count == 0)
 				{
-					if(TargetElement.HeightRequest == -1)
-						Height.SetValue(TargetElement.Height);
-					else
-						Height.SetValue(TargetElement.HeightRequest);
+					measureRequest = measureRequest ?? TargetElement.Measure(Double.PositiveInfinity, Double.PositiveInfinity).Request;
+					Height.SetValue(measureRequest.Value.Height);
 				}
-
-				if(Width.Fuses.Count == 0)
+				
+				if (Width.Fuses.Count == 0)
 				{
-					if (TargetElement.WidthRequest == -1)
-						Width.SetValue(TargetElement.Width);
-					else
-						Width.SetValue(TargetElement.WidthRequest);
+					measureRequest = measureRequest ?? TargetElement.Measure(Double.PositiveInfinity, Double.PositiveInfinity).Request;
+					Width.SetValue(measureRequest.Value.Width);
 				}
 
 				if (X.Fuses.Count == 0)
 				{
-					X.SetValue(TargetElement.X);
+					X.SetValue(0);
 				}
 
 				if (Y.Fuses.Count == 0)
 				{
-					Y.SetValue(TargetElement.Y);
+					Y.SetValue(0);
 				}
 
 				Nodes = new SolveNodeList();
@@ -360,7 +300,7 @@ namespace Xamarin.Forms.Core
 
 				foreach (var item in this)
 				{
-					if (item.Property == fuseProperty)
+					if (item.PropertyXYHW == fuseProperty)
 					{
 						properties.Add(item);
 					}
@@ -375,107 +315,17 @@ namespace Xamarin.Forms.Core
 
 
 
-	public class FuseCollection : List<FuseBase> // DefinitionCollection<FuseBase> or other base
+	public class FuseCollection : List<TargetWrapper> 
 	{
 
 	}
 
-	public abstract class FuseBase : BindableObject
-	{
-		public VisualElement SourceElement { get; set; } // BP 
-
-		public FuseProperty SourceProperty { get; set; } // BP 
-
-		public abstract double? Calculate(VisualElement targetView, FuseProperty property);
-	}
-
-	public class Fuse : FuseBase
-	{
-		public FuseProperty TargetProperty { get; set; } // BP 
-
-		public FuseOperator Operator { get; set; } // BP 
-
-		public double Constant { get; set; } // BP 
-
-
-		public override double? Calculate(VisualElement targetView, FuseProperty property)
-		{
-			var dependentSourceSolve = FusedLayout.GetSolveView(SourceElement);
-			var mySourceSolve = FusedLayout.GetSolveView(targetView);
-
-			double? returnValue = null;
-
-			switch (SourceProperty)
-			{
-				case FuseProperty.X:
-					{
-						returnValue = dependentSourceSolve.X.Value;
-						break;
-					}
-				case FuseProperty.Center:
-					{
-						switch (property)
-						{
-							case FuseProperty.X:
-								if (dependentSourceSolve.X.IsSolved && 
-									dependentSourceSolve.Width.IsSolved && 
-									mySourceSolve.Width.IsSolved)
-								{
-									returnValue =
-										((dependentSourceSolve.X.Value + dependentSourceSolve.Width.Value) / 2) -
-										(mySourceSolve.Width.Value / 2);
-								}
-								break;
-							case FuseProperty.Y:
-								if (dependentSourceSolve.Y.IsSolved && 
-									dependentSourceSolve.Height.IsSolved &&
-									mySourceSolve.Height.IsSolved)
-								{
-
-									returnValue =
-										((dependentSourceSolve.Y.Value + dependentSourceSolve.Height.Value) / 2) -
-										(mySourceSolve.Height.Value / 2);
-								}
-								break;
-						}
-						break;
-					}
-				default:
-					throw new ArgumentException($"Invalid SourceProperty: {SourceProperty}");
-			}
-
-			if (returnValue == null )
-			{
-				return null;
-			}
-			 
-			if (returnValue.HasValue)
-			{
-				switch (Operator)
-				{
-					case FuseOperator.Minus:
-						returnValue -= Constant;
-						break;
-					case FuseOperator.Plus:
-						returnValue += Constant;
-						break;
-					case FuseOperator.None:
-						break;
-					default:
-						throw new ArgumentException($"Invalid SourceProperty: {SourceProperty}");
-
-				}
-			}
-
-			return returnValue;
-		}
-	}
 
 	public enum FuseOperator
 	{
 		None = 0,
-		Plus = 1,
-		Minus = 2
+		Add = 1,
+		Subtract = 2
 	}
 
 	public enum FuseProperty
