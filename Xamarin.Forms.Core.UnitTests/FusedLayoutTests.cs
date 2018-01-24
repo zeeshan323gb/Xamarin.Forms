@@ -26,7 +26,7 @@ namespace Xamarin.Forms.Core.UnitTests
 				IsPlatformEnabled = true,
 				AutomationId = "view1",
 				HeightRequest = 20,
-				WidthRequest = 20 
+				WidthRequest = 20
 			};
 
 
@@ -34,7 +34,7 @@ namespace Xamarin.Forms.Core.UnitTests
 			{
 				IsPlatformEnabled = true,
 				AutomationId = "view2",
-				HeightRequest = 12, 
+				HeightRequest = 12,
 				WidthRequest = 12
 			};
 
@@ -117,7 +117,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void BasicFuseTest()
 		{
 			FusedLayout fusedLayout = new FusedLayout()
-			{ 
+			{
 				Platform = new UnitPlatform(),
 				IsPlatformEnabled = true
 			};
@@ -274,6 +274,50 @@ namespace Xamarin.Forms.Core.UnitTests
 			//new FusedLayout(view2);
 
 
+		}
+
+
+		[Test]
+		public void CenterTestAgainstRightAlignedElement()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+			View view2 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view2",
+				HeightRequest = 6,
+				WidthRequest = 6
+			};
+
+			// place 20x20 view in bottom right of fused layout
+			FusedLayout.AddFusion(view1, FuseProperty.Right, new Fusion(fusedLayout).Right);
+			FusedLayout.AddFusion(view1, FuseProperty.Top, new Fusion(fusedLayout).Top);
+			FusedLayout.AddFusion(view2, FuseProperty.Center, new Fusion(view1).Center);
+
+			fusedLayout.Children.Add(view1);
+			fusedLayout.Children.Add(view2);
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
+
+			Assert.AreEqual(80, view1.X);
+			Assert.AreEqual(80, view1.Y);
+
+
+			Assert.AreEqual(87, view2.X);
+			Assert.AreEqual(87, view2.Y);
 		}
 	}
 }

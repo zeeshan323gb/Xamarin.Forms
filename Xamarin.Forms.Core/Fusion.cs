@@ -214,6 +214,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 		public CenterFusion Center  => new CenterFusion(this);
 		public ScalarPropertyFusion Right => new ScalarPropertyFusion(this, FuseProperty.Right);
+		public ScalarPropertyFusion Top => new ScalarPropertyFusion(this, FuseProperty.Top);
 
 		public ScalarPropertyFusion X => new ScalarPropertyFusion(this, FuseProperty.X);
 		public ScalarPropertyFusion Y => new ScalarPropertyFusion(this, FuseProperty.Y);
