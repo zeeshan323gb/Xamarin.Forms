@@ -25,24 +25,92 @@ namespace Xamarin.Forms.Core.UnitTests
 			{
 				IsPlatformEnabled = true,
 				AutomationId = "view1",
-				// HeightRequest = 20, allowed?
-				// WidthRequest = 20 allowed?
+				HeightRequest = 20,
+				WidthRequest = 20 
 			};
 
-			var fuse1 = new Fusion(fusedLayout).Center.Add(new Point(3,-3));
 
-			FusedLayout.AddFusion(view1, FuseProperty.Height, 20);
-			FusedLayout.AddFusion(view1, FuseProperty.Width, 20);
+			View view2 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view2",
+				HeightRequest = 12, 
+				WidthRequest = 12
+			};
 
-			fusedLayout.Children.Add(view1, FuseProperty.Center, fuse1);
+			var fuse1 = new Fusion(fusedLayout).Center;
+			fusedLayout.Children.Add(view1, FuseProperty.Center, fuse1.Add(new Point(3, -3)));
+
+
+			FusedLayout.AddFusion(view2, FuseProperty.Center, new Fusion(view1).Center);
+			fusedLayout.Children.Add(view2);
+
 			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
 
 			Assert.AreEqual(20, view1.Height);
 			Assert.AreEqual(20, view1.Width);
 			Assert.AreEqual(43, view1.X);
 			Assert.AreEqual(37, view1.Y);
+
+			Assert.AreEqual(12, view2.Height);
+			Assert.AreEqual(12, view2.Width);
+			Assert.AreEqual(47, view2.X);
+			Assert.AreEqual(41, view2.Y);
 		}
 
+		[Test]
+		public void VerifySolves()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1"
+			};
+
+			Fusion fusion = new Fusion(fusedLayout);
+			FusedLayout.AddFusion(view1, FuseProperty.X, fusion);
+			FusedLayout.AddFusion(view1, FuseProperty.Y, fusion);
+			FusedLayout.AddFusion(view1, FuseProperty.Height, fusion);
+			FusedLayout.AddFusion(view1, FuseProperty.Width, fusion);
+
+			fusedLayout.Children.Add(view1);
+			fusedLayout.Layout(new Rectangle(0, 0, 50, 100));
+
+			var solveView = FusedLayout.GetSolveView(view1);
+
+			Assert.AreEqual(0, solveView.X);
+			Assert.AreEqual(0, solveView.Y);
+			Assert.AreEqual(50, solveView.Width);
+			Assert.AreEqual(100, solveView.Height);
+			Assert.AreEqual(0, solveView.Left);
+			Assert.AreEqual(100, solveView.Top);
+			Assert.AreEqual(50, solveView.Right);
+			Assert.AreEqual(0, solveView.Bottom);
+			Assert.AreEqual(new Point(25, 50), solveView.Center);
+			Assert.AreEqual(25, solveView.CenterX);
+			Assert.AreEqual(50, solveView.CenterY);
+			Assert.AreEqual(new Size(50, 100), solveView.Size);
+
+			//	None = 0,
+			//X,
+			//Y,
+			//Width,
+			//Height,
+			//Left,
+			//Top,
+			//Right,
+			//Bottom,
+			//Center,
+			//CenterX,
+			//CenterY,
+			//Size
+		}
 
 
 		[Test]
@@ -148,8 +216,6 @@ namespace Xamarin.Forms.Core.UnitTests
 
 
 			//new FusedLayout(view2);
-
-
 		}
 
 
