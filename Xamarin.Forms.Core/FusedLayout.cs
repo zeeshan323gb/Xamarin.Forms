@@ -218,27 +218,13 @@ namespace Xamarin.Forms.Core
 			{
 				for (int i = 0; i < Fuses.Count; i++)
 				{
-					// This check for a Fuse that just directly correlates
-					// the property to the result of a different fuse
-					// so nothing to calculate
 					if (targetProperty == Fuses[i].TargetProperty)
 					{
-						var propertySolve = (T)Fuses[i].Fuse.GetPropertySolve();
+						var propertySolve = (T)Fuses[i].Fuse.GetPropertySolve(targetProperty);
 						if(!isNull(propertySolve))
 						{
 							setValue(propertySolve);
 							return true;
-						}
-
-						// temporary hack
-						if (typeof(T) == typeof(double))
-						{
-							var result = (T)Fuses[i].Calculate(targetProperty);
-							if (!isNull(result))
-							{
-								setValue(result);
-								return true;
-							}
 						}
 					}
 				}

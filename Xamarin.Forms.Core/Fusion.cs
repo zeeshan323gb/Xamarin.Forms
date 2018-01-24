@@ -33,38 +33,6 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		}
 	}
 
-	public class RightFusion : FusionBase
-	{
-		public RightFusion(FusionBase parent) : base(parent)
-		{
-			SourceElement = parent.SourceElement;
-			SourceProperty = FuseProperty.Right;
-		}
-
-		public override object Calculate(FuseProperty propertyXYWH)
-		{
-			switch (propertyXYWH)
-			{
-				case FuseProperty.X:
-					var parentX = (double)ParentFusion.Calculate(FuseProperty.X);
-					if (double.IsNaN(parentX)) { return double.NaN; }
-
-					var parentWidth = (double)ParentFusion.Calculate(FuseProperty.Width);
-					if (double.IsNaN(parentWidth)) { return double.NaN; }
-
-					return (parentX + parentWidth);
-				default:
-					return double.NaN;
-			}
-		}
-
-		public override object GetPropertySolve()
-		{
-			var sourceSolveView = FusedLayout.GetSolveView(SourceElement);
-			return sourceSolveView.Right;
-		}
-	}
-
 	public class PointFusion : PointFusionBase
 	{
 		public PointFusion(Point addMe, FusionBase parent) : base(parent)
@@ -79,34 +47,14 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			get;
 		}
 
-		public override object GetPropertySolve()
+		public override object GetPropertySolve(FuseProperty targetPropertySolving)
 		{
-			var parentSolve = (Point)ParentFusion.GetPropertySolve();
+			var parentSolve = (Point)ParentFusion.GetPropertySolve(targetPropertySolving);
 
 			if (parentSolve == FusedLayout.SolveView.NullPoint)
 				return parentSolve;
 
 			return new Point(parentSolve.X + Addition.X, parentSolve.Y + Addition.Y);
-		}
-
-		public override object Calculate(FuseProperty propertyXYWH)
-		{
-			var calculatedSize = (double)ParentFusion.Calculate(propertyXYWH);
-			if (double.IsNaN(calculatedSize)) { return double.NaN; }
-			switch (propertyXYWH)
-			{
-				case FuseProperty.X:
-					calculatedSize += Addition.X;
-					break;
-				case FuseProperty.Y:
-					calculatedSize += Addition.Y;
-					break;
-				default:
-					throw new ArgumentException($"{propertyXYWH}");
-			}
-
-			return calculatedSize;
-
 		}
 	}
 
@@ -117,37 +65,9 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			SourceElement = parent.SourceElement;
 		} 
 
-		public override object GetPropertySolve()
+		public override object GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			return FusedLayout.GetSolveView(SourceElement).Center;
-		}
-
-		public override object Calculate(FuseProperty propertyXYWH)
-		{
-			switch (propertyXYWH)
-			{
-				case FuseProperty.X:
-					var parentX = (double)ParentFusion.Calculate(FuseProperty.X);
-					if (double.IsNaN(parentX)) { return double.NaN; }
-
-					var parentWidth = (double)ParentFusion.Calculate(FuseProperty.Width);
-					if (double.IsNaN(parentWidth)) { return double.NaN; }
-
-					return ((parentX + parentWidth) / 2);
-
-
-				case FuseProperty.Y:
-					var parentY = (double)ParentFusion.Calculate(FuseProperty.Y);
-					if (double.IsNaN(parentY)) { return double.NaN; }
-
-					var parentHeight = (double)ParentFusion.Calculate(FuseProperty.Height);
-					if (double.IsNaN(parentHeight)) { return double.NaN; }
-
-					return ((parentY + parentHeight) / 2);
-
-				default:
-					return double.NaN;
-			}
 		}
 	}
 	 
@@ -169,17 +89,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 		public FuseProperty SourceProperty { get; set; } // BP 
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="targetView"></param>
-		/// <param name="propertyXYWH">Needs a better name. This basically indicates this property is only going to be XYWH		
-		/// </param>
-		/// <returns></returns>
-		public abstract object Calculate(FuseProperty propertyXYWH);
-
-
-		public abstract object GetPropertySolve();
+		public abstract object GetPropertySolve(FuseProperty targetPropertySolving);
 	}
 
 
@@ -201,52 +111,6 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			return $"{targetViewPropertyXYWH} - {TargetProperty}";
 		}
 
-		internal object Calculate(FuseProperty targetViewPropertyXYWHCalculating)
-		{	
-			double sourceResult = (double)Fuse.Calculate(targetViewPropertyXYWHCalculating);
-			if (double.IsNaN(sourceResult)) { return double.NaN; }
-			var targetSolve = FusedLayout.GetSolveView(TargetView);
-
-			switch (TargetProperty)
-			{
-				case FuseProperty.X:
-					return sourceResult;
-				case FuseProperty.Center:
-					switch(targetViewPropertyXYWHCalculating)
-					{
-						case FuseProperty.X:
-							if (double.IsNaN(targetSolve.Width)) { return double.NaN; }
-							return sourceResult - targetSolve.Width / 2;
-
-						case FuseProperty.Y:
-							if (double.IsNaN(targetSolve.Height)) { return double.NaN; }
-							return sourceResult - targetSolve.Height / 2;
-
-						default:
-							throw new ArgumentException(getErrorString(targetViewPropertyXYWHCalculating));
-
-					}
-				case FuseProperty.Width:
-					switch (targetViewPropertyXYWHCalculating)
-					{
-						case FuseProperty.Width:
-							return sourceResult;
-						default:
-							throw new ArgumentException(getErrorString(targetViewPropertyXYWHCalculating));
-
-					}
-				default:
-					if(targetViewPropertyXYWHCalculating == TargetProperty)
-					{
-						return sourceResult;
-					}
-
-					return double.NaN;
-
-			}
-
-			throw new ArgumentException(getErrorString(targetViewPropertyXYWHCalculating));
-		}
 
 		public FuseProperty TargetProperty { get; set; } // BP 
 		public FusionBase Fuse { get; set; }
@@ -267,12 +131,13 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			_value = value;
 		}
 
-		public override object Calculate(FuseProperty propertyXYWH)
-		{
-			var returnValue = (double)ParentFusion.Calculate(propertyXYWH);
-			if (double.IsNaN(returnValue) ) { return double.NaN; }
 
-			switch(_operation)
+		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		{
+			var returnValue = (double)ParentFusion.GetPropertySolve(targetPropertySolving);
+			if (double.IsNaN(returnValue)) { return double.NaN; }
+
+			switch (_operation)
 			{
 				case FuseOperator.Add:
 					returnValue += _value;
@@ -284,16 +149,11 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 				case FuseOperator.None:
 					break;
 				default:
-					throw new ArgumentException($"{propertyXYWH}");
+					throw new ArgumentException($"{targetPropertySolving}");
 
 			}
 
 			return returnValue;
-		}
-
-		public override object GetPropertySolve()
-		{
-			return Calculate(SourceProperty);
 		}
 	}
 
@@ -314,18 +174,9 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			return new ScalarOperationFusion(this, FuseOperator.Add, value);
 		}
 
-
-		public override object Calculate(FuseProperty propertyXYWH)
+		public override object GetPropertySolve(FuseProperty targetPropertySolving)
 		{
-			if (propertyXYWH != SourceProperty)
-				return double.NaN;
-
 			return Value;
-		}
-
-		public override object GetPropertySolve()
-		{
-			return Calculate(SourceProperty);
 		}
 	}
 
@@ -345,13 +196,34 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		}
 
 
-		public override object Calculate(FuseProperty propertyXYWH)
+		public override object GetPropertySolve(FuseProperty targetPropertySolving)
 		{
-			if (propertyXYWH != SourceProperty)
-				return Double.NaN;
 
-			var dependentSourceSolve = FusedLayout.GetSolveView(SourceElement);
-			switch (SourceProperty)
+			return Fusion.GetViewProperty(SourceElement, SourceProperty);
+		}
+	}
+
+
+
+	public class Fusion : FusionBase
+	{
+		public Fusion(VisualElement sourceElement) : base(null)
+		{
+			SourceElement = sourceElement;
+		}
+
+		public CenterFusion Center  => new CenterFusion(this);
+		public ScalarPropertyFusion Right => new ScalarPropertyFusion(this, FuseProperty.Right);
+
+		public ScalarPropertyFusion X => new ScalarPropertyFusion(this, FuseProperty.X);
+		public ScalarPropertyFusion Y => new ScalarPropertyFusion(this, FuseProperty.Y);
+		public ScalarPropertyFusion Height => new ScalarPropertyFusion(this, FuseProperty.Height);
+		public ScalarPropertyFusion Width => new ScalarPropertyFusion(this, FuseProperty.Width);
+
+		public static object GetViewProperty(VisualElement sourceElement, FuseProperty property)
+		{
+			var dependentSourceSolve = FusedLayout.GetSolveView(sourceElement);
+			switch (property)
 			{
 				case FuseProperty.X:
 					{
@@ -373,132 +245,43 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 					{
 						return dependentSourceSolve.Right;
 					}
-			}
-
-			throw new ArgumentException($"Invalid SourceProperty: {SourceProperty}");
-		}
-
-		public override object GetPropertySolve()
-		{
-			return Calculate(SourceProperty);
-		}
-	}
-
-
-
-	public class Fusion : FusionBase
-	{
-		public Fusion(VisualElement sourceElement) : base(null)
-		{
-			SourceElement = sourceElement;
-		}
-
-		public CenterFusion Center  => new CenterFusion(this);
-		public RightFusion Right => new RightFusion(this);
-
-		public ScalarPropertyFusion X => new ScalarPropertyFusion(this, FuseProperty.X);
-		public ScalarPropertyFusion Y => new ScalarPropertyFusion(this, FuseProperty.Y);
-		public ScalarPropertyFusion Height => new ScalarPropertyFusion(this, FuseProperty.Height);
-		public ScalarPropertyFusion Width => new ScalarPropertyFusion(this, FuseProperty.Width);
-
-		public override object Calculate(FuseProperty propertyXYWH)
-		{
-			var dependentSourceSolve = FusedLayout.GetSolveView(SourceElement);
-			switch (propertyXYWH)
-			{
-				case FuseProperty.X:
+				case FuseProperty.Bottom:
 					{
-						return dependentSourceSolve.X;
+						return dependentSourceSolve.Bottom;
 					}
-				case FuseProperty.Y:
+				case FuseProperty.CenterX:
 					{
-						return dependentSourceSolve.Y;
+						return dependentSourceSolve.CenterX;
 					}
-				case FuseProperty.Height:
+				case FuseProperty.CenterY:
 					{
-						return dependentSourceSolve.Height;
+						return dependentSourceSolve.CenterY;
 					}
-				case FuseProperty.Width:
+				case FuseProperty.Left:
 					{
-						return dependentSourceSolve.Width;
+						return dependentSourceSolve.Left;
+					}
+				case FuseProperty.Top:
+					{
+						return dependentSourceSolve.Top;
+					}
+				case FuseProperty.Center:
+					{
+						return dependentSourceSolve.Center;
+					}
+				case FuseProperty.Size:
+					{
+						return dependentSourceSolve.Size;
 					}
 			}
 
-			throw new ArgumentException($"Invalid SourceProperty: {SourceProperty}");
+			throw new ArgumentException($"Invalid SourceProperty: {property}");
 		}
 
-		public override object GetPropertySolve()
+		public override object GetPropertySolve(FuseProperty targetPropertySolving)
 		{
-			return double.NaN;
+			return GetViewProperty(SourceElement, targetPropertySolving);
 		}
 	}
 
 }
-
-
-
-
-
-//public bool Influences(FuseProperty targetViewPropertyXYWH)
-//{
-//	switch (targetViewPropertyXYWH)
-//	{
-//		case FuseProperty.X:
-//			switch (TargetProperty)
-//			{
-//				case FuseProperty.X:
-//				case FuseProperty.Center:
-//				case FuseProperty.Right:
-//					return true;
-//				case FuseProperty.Y:
-//				case FuseProperty.Width:
-//					return false;
-//				default:
-//					throw new ArgumentException(getErrorString(targetViewPropertyXYWH));
-//			}
-//		case FuseProperty.Y:
-//			switch (TargetProperty)
-//			{
-//				case FuseProperty.Y:
-//				case FuseProperty.Center:
-//					return true;
-//				case FuseProperty.X:
-//				case FuseProperty.Right:
-//				case FuseProperty.Width:
-//					return false;
-//				default:
-//					throw new ArgumentException(getErrorString(targetViewPropertyXYWH));
-
-//			}
-//		case FuseProperty.Height:
-//			switch (TargetProperty)
-//			{
-//				case FuseProperty.Height:
-//					return true;
-//				case FuseProperty.Width:
-//				case FuseProperty.X:
-//				case FuseProperty.Right:
-//				case FuseProperty.Center:
-//					return false;
-//				default:
-//					throw new ArgumentException(getErrorString(targetViewPropertyXYWH));
-
-//			}
-//		case FuseProperty.Width:
-//			switch (TargetProperty)
-//			{
-//				case FuseProperty.Width:
-//				case FuseProperty.Right:
-//					return true;
-//				case FuseProperty.Height:
-//				case FuseProperty.X:
-//				case FuseProperty.Center:
-//					return false;
-//				default:
-//					throw new ArgumentException(getErrorString(targetViewPropertyXYWH));
-
-//			}
-//		default:
-//			return targetViewPropertyXYWH == TargetProperty;
-//	}
-//}
