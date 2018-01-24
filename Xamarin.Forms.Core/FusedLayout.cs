@@ -56,11 +56,16 @@ namespace Xamarin.Forms.Core
 		}
 
 
-		public static void AddFusion(View targetView, FuseProperty targetProperty, FusionBase fuse)
+		public static void AddFusion(View targetView, FuseProperty targetProperty, FusionBase source)
 		{
 			var currentFuses = GetFuses(targetView) ?? new FuseCollection();
-			currentFuses.Add(new TargetWrapper(fuse, targetProperty, targetView));
+			currentFuses.Add(new TargetWrapper(source, targetProperty, targetView));
 			SetFuses(targetView, currentFuses);
+		}
+
+		public static void AddFusion(View targetView, FuseProperty targetProperty, double value)
+		{
+			AddFusion(targetView, targetProperty, new ScalarValueFusion(targetProperty, value));
 		}
 
 
@@ -68,11 +73,11 @@ namespace Xamarin.Forms.Core
 		{
 			var currentFuses = GetFuses(targetView);
 
-			foreach(var fuse in currentFuses.ToArray())
+			for(int i = currentFuses.Count - 1; i >= 0; i--)
 			{
-				if(fuse.TargetProperty == targetProperty && fuse.Fuse == removeFuse)
+				if(currentFuses[i].TargetProperty == targetProperty && currentFuses[i].Fuse == removeFuse)
 				{
-					currentFuses.Remove(fuse);
+					currentFuses.Remove(currentFuses[i]);
 				}
 			}
 
@@ -93,46 +98,63 @@ namespace Xamarin.Forms.Core
 			// this setup could just be cached after the first run through
 			// then subsequent run throughs would just reset the nodes
 			// plus on a second run through the order would be more known
-			SolveNodeList unSolvedNodeList = new SolveNodeList();
+			//SolveNodeList unSolvedNodeList = new SolveNodeList();
 			List<SolveView> unSolvedViews = new List<SolveView>();
-			foreach (var view in _children)
+			List<SolveView> solvedViews = new List<SolveView>();
+
+			// don't use foreach things
+			for (int i = _children.Count - 1; i >= 0; i--)
 			{
-				var fusesToSolveView = GetFuses(view);
-				SolveNodeList viewNodes = new SolveNodeList();
-				SolveView solveView = new SolveView(view, null);
-				unSolvedNodeList.AddRange(solveView.Nodes);
-				SetSolveView(view, solveView);
+				var fusesToSolveView = GetFuses(_children[i]);
+				//SolveNodeList viewNodes = new SolveNodeList();
+				SolveView solveView = new SolveView(_children[i]);
+				//unSolvedNodeList.AddRange(solveView.Nodes);
+				SetSolveView(_children[i], solveView);
 				unSolvedViews.Add(solveView);
 			}
 
 			// in theory after the first run through this contains the order
-			SolveNodeList solved = new SolveNodeList();
 
-			var layoutSolveView = new SolveView(this, new Size(width, height));
+			SetFuses(this, new FuseCollection());
+			FusedLayout.AddFusion(this, FuseProperty.Height, height);
+			FusedLayout.AddFusion(this, FuseProperty.Width, width);
+			FusedLayout.AddFusion(this, FuseProperty.X, x);
+			FusedLayout.AddFusion(this, FuseProperty.Y, y);
+
+			var layoutSolveView = new SolveView(this);
+			unSolvedViews.Add(layoutSolveView);
 			SetSolveView(this, layoutSolveView);
 
 			bool iSolvedSomething = true;
-			while (unSolvedNodeList.Count > 0 && iSolvedSomething)
+			while (unSolvedViews.Count > 0 && iSolvedSomething)
 			{
 				iSolvedSomething = false;
+
 				// solve is a single view being solved over
-				foreach (var unsolved in unSolvedNodeList.ToArray())
+				for (int i = unSolvedViews.Count - 1; i >= 0; i--)
 				{
-					if (unsolved.TrySolve())
+					if (unSolvedViews[i].TrySolve())
 					{
-						unSolvedNodeList.Remove(unsolved);
-						solved.Add(unsolved);
 						iSolvedSomething = true;
+					}
+
+					if(unSolvedViews[i].IsSolved)
+					{
+						solvedViews.Add(unSolvedViews[i]);
+						unSolvedViews.RemoveAt(i);
 					}
 				}
 			}
 
-			if (unSolvedNodeList.Count == 0)
+			if(unSolvedViews.Count > 0)
 			{
-				foreach (var apply in unSolvedViews)
-				{
-					apply.Apply();
-				}
+				throw new Exception("unsolved");
+			}
+
+			for (int i = 0; i < solvedViews.Count; i++)
+			{
+				if (solvedViews[i] == layoutSolveView) { continue; }
+				solvedViews[i].Apply();
 			}
 		}
 		public interface IFusedLayoutList<T> : IList<T> where T : View
@@ -155,159 +177,175 @@ namespace Xamarin.Forms.Core
 			}
 		}
 
-
-		 
-		public class SolveNode
-		{
-			public SolveNode(
-				View targetView,
-				FuseProperty fusePropertyXYHW,
-				FuseCollection viewFuses)
-			{
-				TargetView = targetView;
-				PropertyXYHW = fusePropertyXYHW;
-				Fuses = new FuseCollection();
-				if (viewFuses != null)
-				{
-					foreach (var fuseToSolveView in viewFuses)
-					{
-						if(fuseToSolveView.Influences(fusePropertyXYHW)) 
-						{
-							Fuses.Add(fuseToSolveView);
-						}
-					}
-				}
-			}
-
-			public View TargetView { get; set; }
-
-			public bool IsSolved => Value.HasValue;
-
-			// Fuses relevant to this Property
-			public FuseCollection Fuses { get; }
-			public FuseProperty PropertyXYHW { get; }
-
-			public double? Value { get; set; }
-
-
-			public void SetValue(double value)
-			{
-				Value = value;
-			}
-
-			public bool TrySolve()
-			{
-				if(IsSolved)
-				{
-					return true;
-				}
-
-				double returnValue = 0;
-				foreach (var fuse in Fuses)
-				{
-					var result = fuse.Calculate(PropertyXYHW);
-					
-					if (!result.HasValue)
-					{
-						return false;
-					}
-					returnValue += result.Value;
-				}
-
-				// naive averaged bias of values
-				SetValue(returnValue / (Fuses.Count));
-				return true;
-			}
-		}
-
 		public class SolveView
 		{
 			public View TargetElement { get; set; }
 			public FuseCollection Fuses { get; private set; }
-			public SolveNodeList Nodes { get; private set; }
+			//public SolveNodeList Nodes { get; private set; }
 
-			public SolveView(View target, Size? measureRequest)
+			public SolveView(View target)
 			{
 				TargetElement = target;
 				Fuses = GetFuses(target);
+			}
 
-				X = new SolveNode(target, FuseProperty.X, Fuses);
-				Y = new SolveNode(target, FuseProperty.Y, Fuses);
-				Height = new SolveNode(target, FuseProperty.Height, Fuses);
-				Width = new SolveNode(target, FuseProperty.Width, Fuses);
+			public double X { get; set; } = double.NaN;
+			public double Width { get; set; } = double.NaN;
+			public double Right { get; set; } = double.NaN;
+			public double Left { get; set; } = double.NaN;
 
-				// just measure here? or create a Measure Fusion to put in here
-				if(Height.Fuses.Count == 0)
+
+			public double Y { get; set; } = double.NaN;
+			public double Height { get; set; } = double.NaN;
+			public double Top { get; set; } = double.NaN;
+			public double Bottom { get; set; } = double.NaN;
+
+
+			static public Point NullPoint = new Point(-1, -1);
+			public Point Center { get; set; } = NullPoint;
+
+			// need to fix to handle more then just the double type
+			double SolveForMe(FuseProperty property, bool solveState, out bool solved)
+			{
+				for(int i = 0; i < Fuses.Count; i++)
 				{
-					measureRequest = measureRequest ?? TargetElement.Measure(Double.PositiveInfinity, Double.PositiveInfinity).Request;
-					Height.SetValue(measureRequest.Value.Height);
-				}
-				
-				if (Width.Fuses.Count == 0)
-				{
-					measureRequest = measureRequest ?? TargetElement.Measure(Double.PositiveInfinity, Double.PositiveInfinity).Request;
-					Width.SetValue(measureRequest.Value.Width);
+					double result = double.NaN;
+					if (property == Fuses[i].TargetProperty)
+					{
+						var propertySolve = Fuses[i].Fuse.GetPropertySolve();
+						if(propertySolve is double)
+						{
+							result = (double)propertySolve;
+							if(!double.IsNaN(result))
+							{
+								solved = true;
+								return result;
+							}
+						}
+					}
+
+					result = Fuses[i].Calculate(property);
+					if(!double.IsNaN(result))
+					{
+						solved = true;
+						return result;
+					}
 				}
 
-				if (X.Fuses.Count == 0)
+				solved = false || solveState;
+				return double.NaN;
+			}
+
+			public bool TrySolve()
+			{
+				bool somethingSolved = false;
+				if (double.IsNaN(X)){ X = SolveForMe(FuseProperty.X, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Y)) { Y = SolveForMe(FuseProperty.Y, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Width)) { Width = SolveForMe(FuseProperty.Width, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Height)) { Height = SolveForMe(FuseProperty.Height, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Right)) { Right = SolveForMe(FuseProperty.Right, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Left)) { Left = SolveForMe(FuseProperty.Left, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Top)) { Top = SolveForMe(FuseProperty.Top, somethingSolved, out somethingSolved); }
+				if (double.IsNaN(Bottom)) { Bottom = SolveForMe(FuseProperty.Bottom, somethingSolved, out somethingSolved); }
+				// FIX CASE if (Center == nullPoint) { SolveForMe(FuseProperty.Center, out somethingSolved); }
+
+				bool somethingNewSolved = false;
+
+				do
 				{
-					X.SetValue(0);
+					somethingNewSolved = false;
+
+					if(!double.IsNaN(Left) && double.IsNaN(X))
+					{
+						X = Left;
+					}
+					else if (double.IsNaN(Left) && !double.IsNaN(X))
+					{
+						Left = X;
+					}
+
+					if (!double.IsNaN(X) && !double.IsNaN(Width) &&
+						!double.IsNaN(Y) && !double.IsNaN(Height) &&
+						Center == NullPoint)
+					{
+						Center = new Point(X + (Width / 2), Y + (Height / 2));
+						somethingNewSolved = true;
+					}
+
+					if (double.IsNaN(Right) && !double.IsNaN(X) && !double.IsNaN(Width))
+					{
+						Right = X + Width;
+						somethingNewSolved = true;
+					}
+
+					if (!double.IsNaN(Right) && double.IsNaN(X) && !double.IsNaN(Width))
+					{
+						X = Right - Width;
+						somethingNewSolved = true;
+					}
+
+					if (!double.IsNaN(Right) && !double.IsNaN(X) && double.IsNaN(Width))
+					{
+						Width = Right - X;
+						somethingNewSolved = true;
+					}
+
+					somethingSolved = somethingNewSolved || somethingSolved;
+
+				} while (somethingNewSolved);
+
+
+				return somethingSolved;
+			}
+
+
+			/// <summary>
+			/// Todo need to throw exception to user indicating solve was impossible given constraints
+			/// </summary>
+			public void ForceSolve()
+			{
+				double width = Width;
+				double height = Height;
+
+				if (!Double.IsNaN(width)) { width = double.PositiveInfinity; }
+				if (!Double.IsNaN(height)) { height = double.PositiveInfinity; }
+
+				if(Double.IsNaN(width) || Double.IsNaN(height))
+				{
+					var sizeRequest = TargetElement.Measure(width, height);
+
+					Width = sizeRequest.Request.Width;
+					Height = sizeRequest.Request.Height;
 				}
 
-				if (Y.Fuses.Count == 0)
-				{
-					Y.SetValue(0);
-				}
+				if (Double.IsNaN(X)) { X = 0; }
+				if (Double.IsNaN(height)) { Y = 0; }
 
-				Nodes = new SolveNodeList();
-				Nodes.Add(X);
-				Nodes.Add(Y);
-				Nodes.Add(Height);
-				Nodes.Add(Width);
+
 			}
 
 			public void Apply()
 			{
+				if(!IsSolved)
+				{
+					ForceSolve();
+				}
+
 				TargetElement.Layout(
 					new Rectangle(
-						X.Value.Value,
-						Y.Value.Value,
-						Height.Value.Value,
-						Width.Value.Value
+						X,
+						Y,
+						Width,
+						Height
 						)
 					);
 			}
 
-			public SolveNode X { get; set; }
-			public SolveNode Y { get; set; }
-			public SolveNode Height { get; set; }
-			public SolveNode Width { get; set; }
-
-
 			public bool IsSolved =>
-				X.IsSolved &&
-				Y.IsSolved &&
-				Height.IsSolved &&
-				Width.IsSolved;
-		}
-
-
-		public class SolveNodeList : List<SolveNode>
-		{
-			public List<SolveNode> GetForProperty(FuseProperty fuseProperty)
-			{
-				List<SolveNode> properties = new List<SolveNode>();
-
-				foreach (var item in this)
-				{
-					if (item.PropertyXYHW == fuseProperty)
-					{
-						properties.Add(item);
-					}
-				}
-
-				return properties;
-			}
+				!double.IsNaN(X) &&
+				!double.IsNaN(Y) &&
+				!double.IsNaN(Height) &&
+				!double.IsNaN(Width);
 		}
 	}
 
