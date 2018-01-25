@@ -89,9 +89,9 @@ namespace Xamarin.Forms.Core.UnitTests
 			Assert.AreEqual(50, solveView.Width);
 			Assert.AreEqual(100, solveView.Height);
 			Assert.AreEqual(0, solveView.Left);
-			Assert.AreEqual(100, solveView.Top);
+			Assert.AreEqual(0, solveView.Top);
 			Assert.AreEqual(50, solveView.Right);
-			Assert.AreEqual(0, solveView.Bottom);
+			Assert.AreEqual(100, solveView.Bottom);
 			Assert.AreEqual(new Point(25, 50), solveView.Center);
 			Assert.AreEqual(25, solveView.CenterX);
 			Assert.AreEqual(50, solveView.CenterY);
@@ -302,22 +302,58 @@ namespace Xamarin.Forms.Core.UnitTests
 				WidthRequest = 6
 			};
 
-			// place 20x20 view in bottom right of fused layout
+			View view3 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view3",
+				HeightRequest = 16,
+				WidthRequest = 16
+			};
+
+			View view4 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view4",
+				HeightRequest = 6,
+				WidthRequest = 4
+			};
+
+			// place 20x20 view in top right of fused layout
 			FusedLayout.AddFusion(view1, FuseProperty.Right, new Fusion(fusedLayout).Right);
-			FusedLayout.AddFusion(view1, FuseProperty.Top, new Fusion(fusedLayout).Top);
+			FusedLayout.AddFusion(view1, FuseProperty.Bottom, new Fusion(fusedLayout).Bottom);
 			FusedLayout.AddFusion(view2, FuseProperty.Center, new Fusion(view1).Center);
+
+			FusedLayout.AddFusion(view3, FuseProperty.Right, new Fusion(view2).Left);
+			FusedLayout.AddFusion(view3, FuseProperty.Bottom, new Fusion(fusedLayout).Bottom);
+
+
+			FusedLayout.AddFusion(view4, FuseProperty.Bottom, new Fusion(fusedLayout).Bottom);
+
+			FusedLayout.AddFusion(
+				view4, 
+				FuseProperty.Right, 
+				new Fusion(view3).Left.Add(new Fusion(view2).Width));
+
 
 			fusedLayout.Children.Add(view1);
 			fusedLayout.Children.Add(view2);
-			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+			fusedLayout.Children.Add(view3);
+			fusedLayout.Children.Add(view4);
 
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
 
 			Assert.AreEqual(80, view1.X);
 			Assert.AreEqual(80, view1.Y);
 
-
 			Assert.AreEqual(87, view2.X);
 			Assert.AreEqual(87, view2.Y);
+			Assert.AreEqual(6, view2.Width);
+
+			Assert.AreEqual(71, view3.X); 
+
+
+			Assert.AreEqual(73, view4.X);
+
 		}
 	}
 }

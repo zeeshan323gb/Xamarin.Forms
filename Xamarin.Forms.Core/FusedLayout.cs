@@ -238,7 +238,16 @@ namespace Xamarin.Forms.Core
 				bool somethingSolved = false;
 				Action<bool> changed = (r) => somethingSolved = somethingSolved || r;
 
-				if(TargetElement.HeightRequest > -1 && double.IsNaN(Height))
+				// complex adds first
+				// call measure if these aren't solved for instead
+				// need to flip top and bottom concepts
+				// more the two for any axis (over constrained)
+				// two it's fully constrained
+				// if they have one then be conditional
+				// -if it's size then position it natural origin (0)
+				// -if it's not a width then have to do measurement to acquire width
+				// new Fusion(view2).Measure().Minimum.X
+				if (TargetElement.HeightRequest > -1 && double.IsNaN(Height))
 				{
 					Height = TargetElement.HeightRequest;
 				}
@@ -248,6 +257,8 @@ namespace Xamarin.Forms.Core
 					Width = TargetElement.WidthRequest;
 				}
 
+				//TargetElement.Measure(Double.PositiveInfinity, double.PositiveInfinity, 
+				//	MeasureFlags.IgnoreMinimums);
 
 				if (double.IsNaN(X)) { changed(SolveForMe<double>(FuseProperty.X, (v) => X = v, (v) => double.IsNaN(v))); };
 				if (double.IsNaN(Y)) { changed(SolveForMe<double>(FuseProperty.Y, (v) => Y = v, (v) => double.IsNaN(v))); };
@@ -294,14 +305,14 @@ namespace Xamarin.Forms.Core
 				}
 
 
-				if (!double.IsNaN(Bottom) && double.IsNaN(Y))
+				if (!double.IsNaN(Top) && double.IsNaN(Y))
 				{
-					Y = Bottom;
+					Y = Top;
 					somethingNewSet = true;
 				}
-				else if (double.IsNaN(Bottom) && !double.IsNaN(Y))
+				else if (double.IsNaN(Top) && !double.IsNaN(Y))
 				{
-					Bottom = Y;
+					Top = Y;
 					somethingNewSet = true;
 				}
 
@@ -401,21 +412,21 @@ namespace Xamarin.Forms.Core
 
 
 
-				if (double.IsNaN(Top) && !double.IsNaN(Y) && !double.IsNaN(Height))
+				if (double.IsNaN(Bottom) && !double.IsNaN(Y) && !double.IsNaN(Height))
 				{
-					Top = Y + Height;
+					Bottom = Y + Height;
 					somethingNewSet = true;
 				}
 
-				if (!double.IsNaN(Top) && double.IsNaN(Y) && !double.IsNaN(Height))
+				if (!double.IsNaN(Bottom) && double.IsNaN(Y) && !double.IsNaN(Height))
 				{
-					Y = Top - Height;
+					Y = Bottom - Height;
 					somethingNewSet = true;
 				}
 
-				if (!double.IsNaN(Top) && !double.IsNaN(Y) && double.IsNaN(Height))
+				if (!double.IsNaN(Bottom) && !double.IsNaN(Y) && double.IsNaN(Height))
 				{
-					Height = Top - Y;
+					Height = Bottom - Y;
 					somethingNewSet = true;
 				}
 
