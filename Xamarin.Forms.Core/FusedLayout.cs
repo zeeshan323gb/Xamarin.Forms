@@ -30,10 +30,8 @@ namespace Xamarin.Forms.Core
 				new PlatformConfigurationRegistry<FusedLayout>(this));
 		}
 
-		public new IFusedLayoutList<View> Children
-		{
-			get { return _children; }
-		}
+		public new IFusedLayoutList<View> Children => _children;
+		
 
 		public static FuseCollection GetFuses(BindableObject bindable)
 		{
@@ -65,7 +63,7 @@ namespace Xamarin.Forms.Core
 
 		public static void AddFusion(View targetView, FuseProperty targetProperty, double value)
 		{
-			AddFusion(targetView, targetProperty, new ScalarValueFusion(targetProperty, value));
+			AddFusion(targetView, targetProperty, new ScalarOperationFusion(targetProperty, value));
 		}
 
 
@@ -207,21 +205,26 @@ namespace Xamarin.Forms.Core
 				List<FuseProperty> yAxisFuses = new List<FuseProperty>();
 				List<FuseProperty> xAxisFuses = new List<FuseProperty>();
 
-				for (int j = 0; j < fuses.Count; j++)
-				{
-					TargetWrapper fuse = fuses[j];
-					
-					if(xFuses.Contains(fuse.TargetProperty))
-					{
-						xAxisFuses.Add(fuse.TargetProperty);
-					}
 
-					if(yFuses.Contains(fuse.TargetProperty))
+				if (fuses != null)
+				{
+					for (int j = 0; j < fuses.Count; j++)
 					{
-						yAxisFuses.Add(fuse.TargetProperty);
+						TargetWrapper fuse = fuses[j];
+
+						if (xFuses.Contains(fuse.TargetProperty))
+						{
+							xAxisFuses.Add(fuse.TargetProperty);
+						}
+
+						if (yFuses.Contains(fuse.TargetProperty))
+						{
+							yAxisFuses.Add(fuse.TargetProperty);
+						}
 					}
 				}
-								
+
+
 				if(xAxisFuses.Count > 2 || yAxisFuses.Count > 2)
 				{					
 					throw new ArgumentException($"{childView} is over constrained");
@@ -342,12 +345,12 @@ namespace Xamarin.Forms.Core
 
 		public class SolveView
 		{
-			static public Point NullPoint = new Point(-1, -1);
-			static public Size NullSize = new Size(-1, -1);
+			public static Point NullPoint = new Point(-1, -1);
+			public static Size NullSize = new Size(-1, -1);
 
-			public View TargetElement { get; set; }
-			public FuseCollection Fuses { get; private set; }
-			//public SolveNodeList Nodes { get; private set; }
+			View TargetElement { get; set; }
+
+			FuseCollection Fuses { get; set; } 
 
 			public SolveView(View target)
 			{
@@ -357,6 +360,7 @@ namespace Xamarin.Forms.Core
 			}
 
 			public double X { get; set; } 
+
 			public double Width { get; set; } 
 			public double Right { get; set; } 
 			public double Left { get; set; } 
@@ -393,52 +397,108 @@ namespace Xamarin.Forms.Core
 				Size  = NullSize;
 			}
 
-			bool SolveForMe<T>(
-				FuseProperty targetProperty,
-				Action<T> setValue,
-				Func<T, bool> isNull)
-			{
-				for (int i = 0; i < Fuses.Count; i++)
-				{
-					if (targetProperty == Fuses[i].TargetProperty)
-					{
-						var propertySolve = (T)Fuses[i].Fuse.GetPropertySolve(targetProperty);
-						if(!isNull(propertySolve))
-						{
-							setValue(propertySolve);
-							return true;
-						}
-					}
-				}
 
-				return false;
+
+			bool IsPropertyNull(FuseProperty fuseProperty)
+			{
+				switch(fuseProperty)
+				{
+					case FuseProperty.X:
+						return double.IsNaN(X);
+					case FuseProperty.Bottom:
+						return double.IsNaN(Bottom);
+					case FuseProperty.CenterX:
+						return double.IsNaN(CenterX);
+					case FuseProperty.CenterY:
+						return double.IsNaN(CenterY);
+					case FuseProperty.Height:
+						return double.IsNaN(Height);
+					case FuseProperty.Left:
+						return double.IsNaN(Left);
+					case FuseProperty.Right:
+						return double.IsNaN(Right);
+					case FuseProperty.Top:
+						return double.IsNaN(Top);
+					case FuseProperty.Width:
+						return double.IsNaN(Width);
+					case FuseProperty.Y:
+						return double.IsNaN(Y);
+					case FuseProperty.Center:
+						return Center == NullPoint;
+					case FuseProperty.Size:
+						return Size == NullSize;
+					default:
+						throw new ArgumentException($"{fuseProperty}");
+				}
+			}
+
+			void SetPropertyValue(FuseProperty fuseProperty, object value)
+			{
+				switch (fuseProperty)
+				{
+					case FuseProperty.X:
+						X = (double)value;
+						break;
+					case FuseProperty.Bottom:
+						Bottom = (double)value;
+						break;
+					case FuseProperty.CenterX:
+						CenterX = (double)value;
+						break;
+					case FuseProperty.CenterY:
+						CenterY = (double)value;
+						break;
+					case FuseProperty.Height:
+						Height = (double)value;
+						break;
+					case FuseProperty.Left:
+						Left = (double)value;
+						break;
+					case FuseProperty.Right:
+						Right = (double)value;
+						break;
+					case FuseProperty.Top:
+						Top = (double)value;
+						break;
+					case FuseProperty.Width:
+						Width = (double)value;
+						break;
+					case FuseProperty.Y:
+						Y = (double)value;
+						break;
+					case FuseProperty.Center:
+						Center = (Point)value;
+						break;
+					case FuseProperty.Size:
+						Size = (Size)value;
+						break;
+					default:
+						throw new ArgumentException($"{fuseProperty}");
+				}
 			}
 
 
 			public bool TrySolve()
 			{
 				bool somethingSolved = false;
-				Action<bool> changed = (r) => somethingSolved = somethingSolved || r;
+				
+				if (Fuses != null)
+				{
+					TargetWrapper fuseTarget = null;
+					FuseProperty propertyTarget =  FuseProperty.None;
+					
+					for (int i = 0; i < Fuses.Count; i++)
+					{
+						fuseTarget = Fuses[i];
+						propertyTarget = fuseTarget.TargetProperty;
 
-				// new Fusion(view2).Measure().Minimum.X
-
-
-				if (double.IsNaN(X)) { changed(SolveForMe<double>(FuseProperty.X, (v) => X = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(Y)) { changed(SolveForMe<double>(FuseProperty.Y, (v) => Y = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(Width)) { changed(SolveForMe<double>(FuseProperty.Width, (v) => Width = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(Height)) { changed(SolveForMe<double>(FuseProperty.Height, (v) => Height = v, (v) => double.IsNaN(v))); };
-
-
-				if (double.IsNaN(Right)) { changed(SolveForMe<double>(FuseProperty.Right, (v) => Right = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(Left)) { changed(SolveForMe<double>(FuseProperty.Left, (v) => Left = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(Top)) { changed(SolveForMe<double>(FuseProperty.Top, (v) => Top = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(Bottom)) { changed(SolveForMe<double>(FuseProperty.Bottom, (v) => Bottom = v, (v) => double.IsNaN(v))); };
-				if (Center == NullPoint) { changed(SolveForMe<Point>(FuseProperty.Center, (v) => Center = v, (v) => v == NullPoint)); };
-
-
-				if (double.IsNaN(CenterX)) { changed(SolveForMe<double>(FuseProperty.CenterX, (v) => CenterX = v, (v) => double.IsNaN(v))); };
-				if (double.IsNaN(CenterY)) { changed(SolveForMe<double>(FuseProperty.CenterY, (v) => CenterY = v, (v) => double.IsNaN(v))); };
-				if (Size == NullSize) { changed(SolveForMe<Size>(FuseProperty.Size, (v) => Size = v, (v) => Size == NullSize)); };
+						if (IsPropertyNull(propertyTarget))
+						{
+							SetPropertyValue(propertyTarget, fuseTarget.Fuse.GetPropertySolve(propertyTarget));
+							somethingSolved = somethingSolved || !IsPropertyNull(propertyTarget);
+						}
+					}
+				}
 
 
 				bool implicitValueSet = false;

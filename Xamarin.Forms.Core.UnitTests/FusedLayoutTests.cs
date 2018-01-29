@@ -12,6 +12,50 @@ namespace Xamarin.Forms.Core.UnitTests
 	[TestFixture]
 	public class FusedLayoutTests : BaseTestFixture
 	{
+
+		[Test]
+		public void SizeFusionTests()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+				HeightRequest = 15,
+				WidthRequest = 25
+			};
+
+
+			View view2 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view2"
+			};
+ 
+			FusedLayout.AddFusion(view2, FuseProperty.Left, new Fusion(view1).Size.Height);
+			FusedLayout.AddFusion(view2, FuseProperty.Top, new Fusion(view1).Size.Width);
+
+
+			fusedLayout.Children.Add(view1);
+			fusedLayout.Children.Add(view2);
+
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
+			Assert.AreEqual(15, view1.Height);
+			Assert.AreEqual(25, view1.Width);
+			
+			
+			Assert.AreEqual(view1.Height, view2.X);
+			Assert.AreEqual(view1.Width, view2.Y);
+				
+		}
+
+
 		[Test]
 		public void AlignCenterTest()
 		{
@@ -96,20 +140,6 @@ namespace Xamarin.Forms.Core.UnitTests
 			Assert.AreEqual(25, solveView.CenterX);
 			Assert.AreEqual(50, solveView.CenterY);
 			Assert.AreEqual(new Size(50, 100), solveView.Size);
-
-			//	None = 0,
-			//X,
-			//Y,
-			//Width,
-			//Height,
-			//Left,
-			//Top,
-			//Right,
-			//Bottom,
-			//Center,
-			//CenterX,
-			//CenterY,
-			//Size
 		}
 
 
