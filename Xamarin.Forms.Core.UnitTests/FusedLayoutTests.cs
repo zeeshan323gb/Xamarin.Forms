@@ -355,5 +355,108 @@ namespace Xamarin.Forms.Core.UnitTests
 			Assert.AreEqual(73, view4.X);
 
 		}
+		
+		
+		
+		[Test]
+		public void OverFuse_X_Left()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+			};
+ 
+			FusedLayout.AddFusion(view1, FuseProperty.X, 10);
+			FusedLayout.AddFusion(view1, FuseProperty.Left, 20);
+
+			fusedLayout.Children.Add(view1);
+			
+			Assert.Throws<ArgumentException>(() => fusedLayout.Layout(new Rectangle(0, 0, 100, 100)));
+
+		}
+		
+		[Test]
+		public void OverFuseX()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+			};
+ 
+			FusedLayout.AddFusion(view1, FuseProperty.X, 10);
+			FusedLayout.AddFusion(view1, FuseProperty.CenterX, 20);
+			FusedLayout.AddFusion(view1, FuseProperty.Right, 20);
+
+			fusedLayout.Children.Add(view1);
+			
+			Assert.Throws<ArgumentException>(() => fusedLayout.Layout(new Rectangle(0, 0, 100, 100)));
+
+		}
+		
+		
+		
+		
+		[Test]
+		public void OverFuse_Y_Top()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+			};
+ 
+			FusedLayout.AddFusion(view1, FuseProperty.Y, 10);
+			FusedLayout.AddFusion(view1, FuseProperty.Top, 20);
+
+			fusedLayout.Children.Add(view1);
+			
+			Assert.Throws<ArgumentException>(() => fusedLayout.Layout(new Rectangle(0, 0, 100, 100)));
+
+		}
+		
+		[Test]
+		public void OverFuseY()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+			};
+ 
+			FusedLayout.AddFusion(view1, FuseProperty.Y, 10);
+			FusedLayout.AddFusion(view1, FuseProperty.CenterY, 20);
+			FusedLayout.AddFusion(view1, FuseProperty.Bottom, 20);
+
+			fusedLayout.Children.Add(view1);
+			
+			Assert.Throws<ArgumentException>(() => fusedLayout.Layout(new Rectangle(0, 0, 100, 100)));
+
+		}
 	}
 }

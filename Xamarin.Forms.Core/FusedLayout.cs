@@ -90,7 +90,7 @@ namespace Xamarin.Forms.Core
 			return _platformConfigurationRegistry.Value.On<T>();
 		}
 
-
+		
 
 		protected override void LayoutChildren(double x, double y, double width, double height)
 		{
@@ -101,8 +101,7 @@ namespace Xamarin.Forms.Core
 			//SolveNodeList unSolvedNodeList = new SolveNodeList();
 			List<SolveView> unSolvedViews = new List<SolveView>();
 			List<SolveView> solvedViews = new List<SolveView>();
-
-			// don't use foreach things
+			 
 			for (int i = _children.Count - 1; i >= 0; i--)
 			{
 				var fusesToSolveView = GetFuses(_children[i]);
@@ -111,10 +110,10 @@ namespace Xamarin.Forms.Core
 				//unSolvedNodeList.AddRange(solveView.Nodes);
 				SetSolveView(_children[i], solveView);
 				unSolvedViews.Add(solveView);
+				solveView.ResetSolves();
 			}
 
 			// in theory after the first run through this contains the order
-
 			SetFuses(this, new FuseCollection());
 			FusedLayout.AddFusion(this, FuseProperty.Height, height);
 			FusedLayout.AddFusion(this, FuseProperty.Width, width);
@@ -125,6 +124,7 @@ namespace Xamarin.Forms.Core
 			unSolvedViews.Add(layoutSolveView);
 			SetSolveView(this, layoutSolveView);
 
+			ValidateAndFillInFusions();
 			bool iSolvedSomething = true;
 			while (unSolvedViews.Count > 0 && iSolvedSomething)
 			{
@@ -177,6 +177,169 @@ namespace Xamarin.Forms.Core
 			}
 		}
 
+
+		static List<FuseProperty> xFuses =
+			new List<FuseProperty> { FuseProperty.Width, FuseProperty.X, FuseProperty.Center, FuseProperty.CenterX, FuseProperty.Left, FuseProperty.Right, FuseProperty.Size };
+
+
+		static List<FuseProperty> yFuses =
+			new List <FuseProperty> { FuseProperty.Height, FuseProperty.Y, FuseProperty.Center, FuseProperty.CenterY, FuseProperty.Top, FuseProperty.Bottom, FuseProperty.Size };
+
+
+
+		void logWarning(string warning)
+		{
+			Internals.Log.Warning(nameof(FusedLayout), warning);
+		}
+		
+		/// <summary>
+		/// If you have over constrained this throws an exception.
+		/// If you have under constrainted this fills in the details by calling measure
+		/// </summary>
+		void ValidateAndFillInFusions()
+		{
+			for (int i = 0; i < _children.Count; i++)
+			{
+				View childView = _children[i];
+				FuseCollection fuses = GetFuses(childView);
+				SolveView solveView = GetSolveView(childView);
+
+				List<FuseProperty> yAxisFuses = new List<FuseProperty>();
+				List<FuseProperty> xAxisFuses = new List<FuseProperty>();
+
+				for (int j = 0; j < fuses.Count; j++)
+				{
+					TargetWrapper fuse = fuses[j];
+					
+					if(xFuses.Contains(fuse.TargetProperty))
+					{
+						xAxisFuses.Add(fuse.TargetProperty);
+					}
+
+					if(yFuses.Contains(fuse.TargetProperty))
+					{
+						yAxisFuses.Add(fuse.TargetProperty);
+					}
+				}
+								
+				if(xAxisFuses.Count > 2 || yAxisFuses.Count > 2)
+				{					
+					throw new ArgumentException($"{childView} is over constrained");
+				}
+
+
+				if (xAxisFuses.Count == 2)
+				{
+					if ((xAxisFuses[0] == FuseProperty.Left && xAxisFuses[1] == FuseProperty.X) ||
+					    (xAxisFuses[0] == FuseProperty.X && xAxisFuses[1] == FuseProperty.Left))
+					{
+						throw new ArgumentException($"{childView} is over constrained");
+					}
+				}
+				if (yAxisFuses.Count == 2)
+				{
+
+					if ((yAxisFuses[0] == FuseProperty.Top && yAxisFuses[1] == FuseProperty.Y) ||
+					    (yAxisFuses[0] == FuseProperty.Y && yAxisFuses[1] == FuseProperty.Top))
+					{
+						throw new ArgumentException($"{childView} is over constrained");
+					}
+				}
+				
+
+				Size sizeRequest = SolveView.NullSize;
+				Func<Size, Size> doMeasure = (sr) =>
+				{
+					if (sr == SolveView.NullSize)
+					{
+
+						logWarning("Measure");
+						return childView.Measure(double.PositiveInfinity, double.PositiveInfinity).Request;
+					}
+
+					return sr;
+				};
+
+
+				
+				if (xAxisFuses.Count == 0)
+				{
+					sizeRequest = doMeasure(sizeRequest);
+					solveView.Width = sizeRequest.Width;
+					solveView.X = 0;
+				}
+				else if (xAxisFuses.Count == 1)
+				{
+					switch (xAxisFuses[0])
+					{
+						case FuseProperty.Width:
+						case FuseProperty.Size:
+							solveView.X = 0;
+							break;
+						case FuseProperty.X:
+						case FuseProperty.Left:
+							sizeRequest = doMeasure(sizeRequest);
+							solveView.Width = sizeRequest.Width;
+							break;
+						case FuseProperty.Center:
+						case FuseProperty.CenterX:
+						case FuseProperty.Right:
+							if (childView.WidthRequest > -1)
+							{
+								sizeRequest = doMeasure(sizeRequest);
+								solveView.Width = sizeRequest.Width;
+							}
+							else
+							{
+								solveView.X = 0;	
+							}
+							
+							break;
+						default:
+							throw new ArgumentException($"{xAxisFuses[0]}");
+					}
+				}
+
+				if (yAxisFuses.Count == 0)
+				{
+					sizeRequest = doMeasure(sizeRequest);
+					solveView.Height = sizeRequest.Height;
+					solveView.Y = 0;
+				}
+				else if (yAxisFuses.Count == 1)
+				{
+					switch (yAxisFuses[0])
+					{
+						case FuseProperty.Height:
+						case FuseProperty.Size:
+							solveView.Y = 0;
+							break;
+						case FuseProperty.Y:
+						case FuseProperty.Top:
+							sizeRequest = doMeasure(sizeRequest);
+							solveView.Height = sizeRequest.Height;
+							break;
+						case FuseProperty.Center:
+						case FuseProperty.CenterY:
+						case FuseProperty.Bottom:
+							if (childView.WidthRequest > -1)
+							{
+								sizeRequest = doMeasure(sizeRequest);
+								solveView.Height = sizeRequest.Height;
+							}
+							else
+							{
+								solveView.Y = 0;
+							}
+							break;
+						default:
+							throw new ArgumentException($"{yAxisFuses[0]}");
+					}
+				}
+			}
+		}
+
+
 		public class SolveView
 		{
 			static public Point NullPoint = new Point(-1, -1);
@@ -190,26 +353,45 @@ namespace Xamarin.Forms.Core
 			{
 				TargetElement = target;
 				Fuses = GetFuses(target);
+				ResetSolves();
 			}
 
-			public double X { get; set; } = double.NaN;
-			public double Width { get; set; } = double.NaN;
-			public double Right { get; set; } = double.NaN;
-			public double Left { get; set; } = double.NaN;
+			public double X { get; set; } 
+			public double Width { get; set; } 
+			public double Right { get; set; } 
+			public double Left { get; set; } 
 
 
-			public double Y { get; set; } = double.NaN;
-			public double Height { get; set; } = double.NaN;
-			public double Top { get; set; } = double.NaN;
-			public double Bottom { get; set; } = double.NaN;
+			public double Y { get; set; } 
+			public double Height { get; set; } 
+			public double Top { get; set; } 
+			public double Bottom { get; set; } 
 
 
-			public Point Center { get; set; } = NullPoint;
+			public Point Center { get; set; } 
 
-			public double CenterX { get; set; } = double.NaN;
-			public double CenterY { get; set; } = double.NaN;
+			public double CenterX { get; set; } 
+			public double CenterY { get; set; } 
 
-			public Size Size { get; set; } = NullSize;
+			public Size Size { get; set; } 
+
+			internal void ResetSolves()
+			{
+				X  = double.NaN;
+				Width  = double.NaN;
+				Right  = double.NaN;
+				Left  = double.NaN;
+
+				Y  = double.NaN;
+				Height  = double.NaN;
+				Top  = double.NaN;
+				Bottom  = double.NaN;
+
+				Center  = NullPoint;
+				CenterX  = double.NaN;
+				CenterY  = double.NaN;
+				Size  = NullSize;
+			}
 
 			bool SolveForMe<T>(
 				FuseProperty targetProperty,
@@ -238,27 +420,8 @@ namespace Xamarin.Forms.Core
 				bool somethingSolved = false;
 				Action<bool> changed = (r) => somethingSolved = somethingSolved || r;
 
-				// complex adds first
-				// call measure if these aren't solved for instead
-				// need to flip top and bottom concepts
-				// more the two for any axis (over constrained)
-				// two it's fully constrained
-				// if they have one then be conditional
-				// -if it's size then position it natural origin (0)
-				// -if it's not a width then have to do measurement to acquire width
 				// new Fusion(view2).Measure().Minimum.X
-				if (TargetElement.HeightRequest > -1 && double.IsNaN(Height))
-				{
-					Height = TargetElement.HeightRequest;
-				}
 
-				if(TargetElement.WidthRequest > -1 && double.IsNaN(Width))
-				{
-					Width = TargetElement.WidthRequest;
-				}
-
-				//TargetElement.Measure(Double.PositiveInfinity, double.PositiveInfinity, 
-				//	MeasureFlags.IgnoreMinimums);
 
 				if (double.IsNaN(X)) { changed(SolveForMe<double>(FuseProperty.X, (v) => X = v, (v) => double.IsNaN(v))); };
 				if (double.IsNaN(Y)) { changed(SolveForMe<double>(FuseProperty.Y, (v) => Y = v, (v) => double.IsNaN(v))); };
@@ -275,7 +438,7 @@ namespace Xamarin.Forms.Core
 
 				if (double.IsNaN(CenterX)) { changed(SolveForMe<double>(FuseProperty.CenterX, (v) => CenterX = v, (v) => double.IsNaN(v))); };
 				if (double.IsNaN(CenterY)) { changed(SolveForMe<double>(FuseProperty.CenterY, (v) => CenterY = v, (v) => double.IsNaN(v))); };
-				if (Size == NullSize) { changed(SolveForMe<Size>(FuseProperty.CenterY, (v) => Size = v, (v) => Size == NullSize)); };
+				if (Size == NullSize) { changed(SolveForMe<Size>(FuseProperty.Size, (v) => Size = v, (v) => Size == NullSize)); };
 
 
 				bool implicitValueSet = false;
@@ -409,9 +572,6 @@ namespace Xamarin.Forms.Core
 					somethingNewSet = true;
 				}
 
-
-
-
 				if (double.IsNaN(Bottom) && !double.IsNaN(Y) && !double.IsNaN(Height))
 				{
 					Bottom = Y + Height;
@@ -433,38 +593,10 @@ namespace Xamarin.Forms.Core
 				return somethingNewSet;
 			}
 
-			/// <summary>
-			/// Todo need to throw exception to user indicating solve was impossible given constraints
-			/// </summary>
-			public void ForceSolve()
-			{
-				double width = Width;
-				double height = Height;
 
-				if (!Double.IsNaN(width)) { width = double.PositiveInfinity; }
-				if (!Double.IsNaN(height)) { height = double.PositiveInfinity; }
-
-				if (Double.IsNaN(width) || Double.IsNaN(height))
-				{
-					var sizeRequest = TargetElement.Measure(width, height);
-
-					Width = sizeRequest.Request.Width;
-					Height = sizeRequest.Request.Height;
-				}
-
-				if (Double.IsNaN(X)) { X = 0; }
-				if (Double.IsNaN(height)) { Y = 0; }
-
-
-			}
 
 			public void Apply()
 			{
-				if (!IsSolved)
-				{
-					ForceSolve();
-				}
-
 				TargetElement.Layout(
 					new Rectangle(
 						X,
