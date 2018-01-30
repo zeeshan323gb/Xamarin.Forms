@@ -432,45 +432,47 @@ namespace Xamarin.Forms.Core
 				}
 			}
 
-			void SetPropertyValue(FuseProperty fuseProperty, object value)
+			void SetPropertyValue(TargetWrapper fuseTarget)
 			{
+				FuseProperty fuseProperty = fuseTarget.TargetProperty;
+
 				switch (fuseProperty)
 				{
 					case FuseProperty.X:
-						X = (double)value;
+						X = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Bottom:
-						Bottom = (double)value;
+						Bottom = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.CenterX:
-						CenterX = (double)value;
+						CenterX = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.CenterY:
-						CenterY = (double)value;
+						CenterY = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Height:
-						Height = (double)value;
+						Height = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Left:
-						Left = (double)value;
+						Left = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Right:
-						Right = (double)value;
+						Right = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Top:
-						Top = (double)value;
+						Top = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Width:
-						Width = (double)value;
+						Width = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Y:
-						Y = (double)value;
+						Y = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Center:
-						Center = (Point)value;
+						Center = ((IFusion<Point>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					case FuseProperty.Size:
-						Size = (Size)value;
+						Size = ((IFusion<Size>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
 						break;
 					default:
 						throw new ArgumentException($"{fuseProperty}");
@@ -494,7 +496,7 @@ namespace Xamarin.Forms.Core
 
 						if (IsPropertyNull(propertyTarget))
 						{
-							SetPropertyValue(propertyTarget, fuseTarget.Fuse.GetPropertySolve(propertyTarget));
+							SetPropertyValue(fuseTarget);
 							somethingSolved = somethingSolved || !IsPropertyNull(propertyTarget);
 						}
 					}

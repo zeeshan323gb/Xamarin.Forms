@@ -19,7 +19,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		// view2 is the targetview    mainLayout is the source view
 		FusedLayout.AddFusion(view2, FuseProperty.Center, new Fuse (mainLayout).Center.Add (20, 0));
  */
- 	public abstract class PointFusionBase : FusionBase
+ 	public abstract class PointFusionBase : FusionBase<Point>
 	{ 
 		protected PointFusionBase(FusionBase  parent) : base(parent)
 		{
@@ -79,7 +79,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			FusionScalarValue = value;
 		}
 
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		public override Point GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			var parentSolve = (Point)ParentFusion.GetPropertySolve(SourceProperty);
 
@@ -134,7 +134,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			SourceElement = parent.SourceElement;
 		} 
 
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		public override Point GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			return FusedLayout.GetSolveView(SourceElement).Center;
 		}
@@ -177,7 +177,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			FusionScalarValue = value;
 		}
 
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		public override Size GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			var parentSolve = (Size)ParentFusion.GetPropertySolve(SourceProperty);
 
@@ -224,7 +224,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 	}
 
 
-	public abstract class SizeFusionBase : FusionBase
+	public abstract class SizeFusionBase : FusionBase<Size>
 	{
 		protected SizeFusionBase(FusionBase parent) : base(parent)
 		{
@@ -245,33 +245,10 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		{
 			return new SizeOperationFusion(this, FuseOperator.Add, scalar);
 		}
-
-
-
-		//public ScalarPropertyFusion Height => new ScalarValueFusion(this, FuseProperty.Height);
-		//public ScalarPropertyFusion Width => new ScalarPropertyFusion(this, FuseProperty.Width);
-
-	}
-
-
-
-	public class SizeFusion : SizeFusionBase
-	{
-		public SizeFusion(FusionBase parent) : base(parent)
-		{
-			SourceElement = parent.SourceElement;
-		}
-
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
-		{
-			return FusedLayout.GetSolveView(SourceElement).Size;
-		}
-
-
 		double GetHeight()
 		{
 			var result = (Size)GetPropertySolve(FuseProperty.None);
-			if(result == FusedLayout.SolveView.NullSize)
+			if (result == FusedLayout.SolveView.NullSize)
 			{
 				return double.NaN;
 			}
@@ -293,7 +270,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public ScalarFusionBase Height
 		{
 			get
-			{				
+			{
 				return new ScalarFunctionFusion(this, GetHeight);
 			}
 		}
@@ -303,6 +280,22 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			{
 				return new ScalarFunctionFusion(this, GetWidth);
 			}
+		}
+
+	}
+
+
+
+	public class SizeFusion : SizeFusionBase
+	{
+		public SizeFusion(FusionBase parent) : base(parent)
+		{
+			SourceElement = parent.SourceElement;
+		}
+
+		public override Size GetPropertySolve(FuseProperty targetPropertySolving)
+		{
+			return FusedLayout.GetSolveView(SourceElement).Size;
 		}
 	} 
 
@@ -322,19 +315,32 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public VisualElement SourceElement { get; set; } // BP 
 
 		public FuseProperty SourceProperty { get; set; } // BP 
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="targetPropertySolving">this property is a little silly right now and only matters if an ask goes all the way up the hierarchy
-		/// to the flow layout itself. Need to surface this better.
-		/// Also should this be surface using generics?
-		/// </param>
-		/// <returns></returns>
-		public abstract object GetPropertySolve(FuseProperty targetPropertySolving);
 	}
 
-	public abstract class ScalarFusionBase : FusionBase
+	public abstract class FusionBase<T> : FusionBase, IFusion<T>
+	{
+		protected FusionBase(FusionBase parent) : base(parent)
+		{
+		}
+
+		public new FusionBase<T> ParentFusion
+		{
+			get
+			{
+				return (FusionBase<T>)base.ParentFusion;
+			}
+		}
+
+		public abstract T GetPropertySolve(FuseProperty targetPropertySolving);
+	}
+
+	public interface IFusion<T>
+	{
+		T GetPropertySolve(FuseProperty targetPropertySolving);
+	}
+
+
+	public abstract class ScalarFusionBase : FusionBase<double>
 	{
 		protected ScalarFusionBase(FusionBase parent) : base(parent)
 		{
@@ -357,7 +363,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			Value = value;
 		}
 
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		public override double GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			return Value();
 		}
@@ -397,7 +403,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		}
 
 
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		public override double GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			var returnValue = double.NaN;
 
@@ -458,15 +464,15 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		}
 
 
-		public override object GetPropertySolve(FuseProperty targetPropertySolving)
+		public override double GetPropertySolve(FuseProperty targetPropertySolving)
 		{
-			return Fusion.GetViewProperty(SourceElement, SourceProperty);
+			return (double)Fusion.GetViewProperty(SourceElement, SourceProperty);
 		}
 	}
  
 
 
-	public class Fusion : FusionBase
+	public class Fusion : FusionBase<object>, IFusion<double>, IFusion<Point>, IFusion<Size>
 	{
 		public Fusion(VisualElement sourceElement) : base(null)
 		{
@@ -546,6 +552,21 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public override object GetPropertySolve(FuseProperty targetPropertySolving)
 		{
 			return GetViewProperty(SourceElement, targetPropertySolving);
+		}
+
+		double IFusion<double>.GetPropertySolve(FuseProperty targetPropertySolving)
+		{
+			return (double)GetPropertySolve(targetPropertySolving);
+		}
+
+		Point IFusion<Point>.GetPropertySolve(FuseProperty targetPropertySolving)
+		{
+			return (Point)GetPropertySolve(targetPropertySolving);
+		}
+
+		Size IFusion<Size>.GetPropertySolve(FuseProperty targetPropertySolving)
+		{
+			return (Size)GetPropertySolve(targetPropertySolving);
 		}
 	}
 
