@@ -45,22 +45,6 @@
         <remarks>To be added.</remarks>
       </Docs>
     </Member>
-    <Member MemberName="IsAuto">
-      <MemberSignature Language="C#" Value="public bool IsAuto { get; }" />
-      <MemberSignature Language="ILAsm" Value=".property instance bool IsAuto" />
-      <MemberType>Property</MemberType>
-      <AssemblyInfo>
-        <AssemblyVersion>2.0.0.0</AssemblyVersion>
-      </AssemblyInfo>
-      <ReturnValue>
-        <ReturnType>System.Boolean</ReturnType>
-      </ReturnValue>
-      <Docs>
-        <summary>To be added.</summary>
-        <value>To be added.</value>
-        <remarks>To be added.</remarks>
-      </Docs>
-    </Member>
     <Member MemberName="Length">
       <MemberSignature Language="C#" Value="public float Length { get; }" />
       <MemberSignature Language="ILAsm" Value=".property instance float32 Length" />
