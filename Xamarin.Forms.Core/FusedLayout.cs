@@ -253,9 +253,12 @@ namespace Xamarin.Forms.Core
 				Size sizeRequest = SolveView.NullSize;
 				Func<Size, Size> doMeasure = (sr) =>
 				{
-					if (sr == SolveView.NullSize)
+					if (!childView.IsVisible)
 					{
-
+						return new Size(0, 0);
+					}
+					else if (sr == SolveView.NullSize)
+					{
 						logWarning("Measure");
 						return childView.Measure(double.PositiveInfinity, double.PositiveInfinity).Request;
 					}
@@ -439,40 +442,40 @@ namespace Xamarin.Forms.Core
 				switch (fuseProperty)
 				{
 					case FuseProperty.X:
-						X = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						X = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Bottom:
-						Bottom = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Bottom = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.CenterX:
-						CenterX = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						CenterX = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.CenterY:
-						CenterY = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						CenterY = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Height:
-						Height = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Height = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Left:
-						Left = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Left = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Right:
-						Right = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Right = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Top:
-						Top = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Top = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Width:
-						Width = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Width = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Y:
-						Y = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Y = ((IFusion<double>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Center:
-						Center = ((IFusion<Point>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Center = ((IFusion<Point>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					case FuseProperty.Size:
-						Size = ((IFusion<Size>)fuseTarget.Fuse).GetPropertySolve(fuseProperty);
+						Size = ((IFusion<Size>)fuseTarget.Fuse).GetPropertySolve();
 						break;
 					default:
 						throw new ArgumentException($"{fuseProperty}");
@@ -659,6 +662,11 @@ namespace Xamarin.Forms.Core
 
 			public void Apply()
 			{
+				if(!TargetElement.IsVisible)
+				{
+					return;
+				}
+
 				TargetElement.Layout(
 					new Rectangle(
 						X,
@@ -668,6 +676,7 @@ namespace Xamarin.Forms.Core
 						)
 					);
 			}
+
 
 			public bool IsSolved =>
 				!double.IsNaN(X) &&

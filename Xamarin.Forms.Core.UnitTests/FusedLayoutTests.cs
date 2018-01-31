@@ -53,6 +53,132 @@ namespace Xamarin.Forms.Core.UnitTests
 			Assert.AreEqual(view1.Height, view2.X);
 			Assert.AreEqual(view1.Width, view2.Y);
 				
+			
+			
+		}
+
+
+		[Test]
+		public void IncompatibleFusions()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+
+			var fuse1 = new Fusion(fusedLayout).Center;
+			fusedLayout.Children.Add(view1, FuseProperty.Left, fuse1);
+			fusedLayout.Children.Add(view1, FuseProperty.Left, fuse1);
+
+
+
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
+			Assert.AreEqual(20, view1.Height);
+			Assert.AreEqual(20, view1.Width);
+			Assert.AreEqual(50, view1.X);
+			Assert.AreEqual(50, view1.Y);
+		}
+
+		[Test]
+		public void StackingViewsTest()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+			View view2 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view2",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+			View view3 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view3",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+
+			var view1fusion = new Fusion(view1).Height;
+			var view2fusion = new Fusion(view2).Height.Add(3);
+
+			FusedLayout.AddFusion(view1, FuseProperty.Top, 0);
+			FusedLayout.AddFusion(view2, FuseProperty.Top, view1fusion);
+			FusedLayout.AddFusion(view3, FuseProperty.Top, view1fusion.Add(view2fusion));
+
+			fusedLayout.Children.Add(view1);
+			fusedLayout.Children.Add(view2);
+			fusedLayout.Children.Add(view3);
+
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
+			Assert.AreEqual(0, view1.Y);
+			Assert.AreEqual(20, view2.Y);
+			Assert.AreEqual(43, view3.Y);
+
+			view2.IsVisible = false;
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
+			Assert.AreEqual(0, view1.Y);
+			Assert.AreEqual(20, view3.Y);
+		}
+
+
+		[Test]
+		public void AlignLeftToCenterOfLayoutTest()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+
+			var fuse1 = new Fusion(fusedLayout).Center;
+			fusedLayout.Children.Add(view1, FuseProperty.Left, new Fusion(fusedLayout).CenterX);
+			fusedLayout.Children.Add(view1, FuseProperty.Top, new Fusion(fusedLayout).CenterY);
+
+
+
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
+			Assert.AreEqual(20, view1.Height);
+			Assert.AreEqual(20, view1.Width);
+			Assert.AreEqual(50, view1.X);
+			Assert.AreEqual(50, view1.Y);
 		}
 
 
@@ -83,6 +209,7 @@ namespace Xamarin.Forms.Core.UnitTests
 			};
 
 			var fuse1 = new Fusion(fusedLayout).Center;
+
 			fusedLayout.Children.Add(view1, FuseProperty.Center, fuse1.Add(new Point(3, -3)));
 
 
@@ -118,10 +245,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			};
 
 			Fusion fusion = new Fusion(fusedLayout);
-			FusedLayout.AddFusion(view1, FuseProperty.X, fusion);
-			FusedLayout.AddFusion(view1, FuseProperty.Y, fusion);
-			FusedLayout.AddFusion(view1, FuseProperty.Height, fusion);
-			FusedLayout.AddFusion(view1, FuseProperty.Width, fusion);
+			FusedLayout.AddFusion(view1, FuseProperty.X, fusion.X);
+			FusedLayout.AddFusion(view1, FuseProperty.Y, fusion.Y);
+			FusedLayout.AddFusion(view1, FuseProperty.Height, fusion.Height);
+			FusedLayout.AddFusion(view1, FuseProperty.Width, fusion.Width);
 
 			fusedLayout.Children.Add(view1);
 			fusedLayout.Layout(new Rectangle(0, 0, 50, 100));
