@@ -412,7 +412,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public FuseProperty SourceProperty { get; set; } // BP 
 
 
-		protected bool SourceElementVisible => SourceElement == null || SourceElement.IsVisible;
+		protected bool SourceElementVisible => SourceElement.IsVisible;
 	}
 
 	public abstract class FusionBase<T> : FusionBase, IFusion<T>
@@ -478,9 +478,11 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		private readonly ScalarFusionBase _fusionValue;
 
 		public ScalarOperationFusion(
+			VisualElement sourceElement,
 			FuseProperty sourceProperty,
 			double value) : base(null)
 		{
+			SourceElement = sourceElement;
 			SourceProperty = sourceProperty;
 			_operation = FuseOperator.None;
 			_scalarValue = value;

@@ -63,7 +63,7 @@ namespace Xamarin.Forms.Core
 
 		public static void AddFusion(View targetView, FuseProperty targetProperty, double value)
 		{
-			AddFusion(targetView, targetProperty, new ScalarOperationFusion(targetProperty, value));
+			AddFusion(targetView, targetProperty, new ScalarOperationFusion(targetView, targetProperty, value));
 		}
 
 
