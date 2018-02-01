@@ -183,6 +183,90 @@ namespace Xamarin.Forms.Core.UnitTests
 
 
 		[Test]
+		public void ConditionalTest()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+
+			View view2 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view2",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+
+			View view3 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view2",
+				HeightRequest = 20,
+				WidthRequest = 20
+			};
+
+			FusedLayout.AddFusion(view1, FuseProperty.Top, 0);
+			FusedLayout.AddFusion(view1, FuseProperty.Left, 0);
+
+
+			FusedLayout.AddFusion(view2, FuseProperty.Top, 0);
+			FusedLayout.AddFusion(view2, FuseProperty.Left, new Fusion(view1).Right);
+
+			// create better api for this
+
+			ConditionalTargetWrapper landscape = new ConditionalTargetWrapper(() => FusedLayout.GetSolveView(fusedLayout).Width >= 100,
+				new []
+				{
+					new TargetWrapper(new Fusion(fusedLayout).Top, FuseProperty.Top, view3),
+					new TargetWrapper(new Fusion(view2).Right, FuseProperty.Left, view3)
+				});
+
+			ConditionalTargetWrapper portrait = new ConditionalTargetWrapper(() => !(FusedLayout.GetSolveView(fusedLayout).Width >= 100),
+				new[]
+				{
+					new TargetWrapper(new Fusion(view1).Bottom, FuseProperty.Top, view3),
+					new TargetWrapper(new Fusion(fusedLayout).Left, FuseProperty.Left, view3)
+				});
+
+
+			FusedLayout.AddFusion(view3, 
+				new ConditionalTargetWrapperSet(new [] { landscape, portrait }));			
+						
+			fusedLayout.Children.Add(view3);
+			fusedLayout.Children.Add(view1);
+			fusedLayout.Children.Add(view2);
+
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 50));
+
+			Assert.AreEqual(0, view3.Y);
+			Assert.AreEqual(40, view3.X);
+
+			fusedLayout.Layout(new Rectangle(0, 0, 50, 100));
+
+			Assert.AreEqual(20, view3.Y);
+			Assert.AreEqual(0, view3.X);
+
+		}
+
+		public class ConditionalFusion
+		{
+			TargetWrapper Wrapper;
+		}
+
+
+		[Test]
 		public void AlignCenterTest()
 		{
 			FusedLayout fusedLayout = new FusedLayout()
@@ -209,10 +293,7 @@ namespace Xamarin.Forms.Core.UnitTests
 			};
 
 			var fuse1 = new Fusion(fusedLayout).Center;
-
 			fusedLayout.Children.Add(view1, FuseProperty.Center, fuse1.Add(new Point(3, -3)));
-
-
 			FusedLayout.AddFusion(view2, FuseProperty.Center, new Fusion(view1).Center);
 			fusedLayout.Children.Add(view2);
 
@@ -512,9 +593,56 @@ namespace Xamarin.Forms.Core.UnitTests
 			Assert.AreEqual(73, view4.X);
 
 		}
-		
-		
-		
+
+		[Test]
+		public void OverFuse_Redundant_X_Properties()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+			};
+
+			FusedLayout.AddFusion(view1, FuseProperty.X, 10);
+			FusedLayout.AddFusion(view1, FuseProperty.X, 20);
+
+			fusedLayout.Children.Add(view1);
+
+			Assert.Throws<ArgumentException>(() => fusedLayout.Layout(new Rectangle(0, 0, 100, 100)));
+
+		}
+
+		[Test]
+		public void OverFuse_Redundant_Y_Properties()
+		{
+			FusedLayout fusedLayout = new FusedLayout()
+			{
+				Platform = new UnitPlatform(),
+				IsPlatformEnabled = true
+			};
+
+			View view1 = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "view1",
+			};
+
+			FusedLayout.AddFusion(view1, FuseProperty.Y, 10);
+			FusedLayout.AddFusion(view1, FuseProperty.Y, 20);
+
+			fusedLayout.Children.Add(view1);
+
+			Assert.Throws<ArgumentException>(() => fusedLayout.Layout(new Rectangle(0, 0, 100, 100)));
+
+		}
+
+
 		[Test]
 		public void OverFuse_X_Left()
 		{

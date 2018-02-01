@@ -54,31 +54,29 @@ namespace Xamarin.Forms.Core
 		}
 
 
-		public static void AddFusion(View targetView, FuseProperty targetProperty, FusionBase source)
+
+		public static IFusionSolve AddFusion(View targetView, FuseProperty targetProperty, FusionBase source)
+		{
+			return AddFusion(targetView, new TargetWrapper(source, targetProperty, targetView));
+		}
+
+		public static IFusionSolve AddFusion(View targetView, FuseProperty targetProperty, double value)
+		{ 
+			return AddFusion(targetView, targetProperty, new ScalarOperationFusion(targetView, targetProperty, value)); 
+		}
+
+		public static IFusionSolve AddFusion(View targetView, IFusionSolve fusionSolve)
 		{
 			var currentFuses = GetFuses(targetView) ?? new FuseCollection();
-			currentFuses.Add(new TargetWrapper(source, targetProperty, targetView));
+			currentFuses.Add(fusionSolve);
 			SetFuses(targetView, currentFuses);
+			return fusionSolve;
 		}
 
-		public static void AddFusion(View targetView, FuseProperty targetProperty, double value)
-		{
-			AddFusion(targetView, targetProperty, new ScalarOperationFusion(targetView, targetProperty, value));
-		}
-
-
-		public static void RemoveFusion(View targetView, FuseProperty targetProperty, FusionBase removeFuse)
+		public static void RemoveFusion(View targetView, IFusionSolve solve)
 		{
 			var currentFuses = GetFuses(targetView);
-
-			for (int i = currentFuses.Count - 1; i >= 0; i--)
-			{
-				if (currentFuses[i].TargetProperty == targetProperty && currentFuses[i].Fuse == removeFuse)
-				{
-					currentFuses.Remove(currentFuses[i]);
-				}
-			}
-
+			currentFuses.Remove(solve);
 			SetFuses(targetView, currentFuses);
 		}
 
@@ -176,11 +174,11 @@ namespace Xamarin.Forms.Core
 		}
 
 
-		static List<FuseProperty> xFuses =
+		static internal List<FuseProperty> xFuses =
 			new List<FuseProperty> { FuseProperty.Width, FuseProperty.X, FuseProperty.Center, FuseProperty.CenterX, FuseProperty.Left, FuseProperty.Right, FuseProperty.Size };
 
 
-		static List<FuseProperty> yFuses =
+		static internal List<FuseProperty> yFuses =
 			new List <FuseProperty> { FuseProperty.Height, FuseProperty.Y, FuseProperty.Center, FuseProperty.CenterY, FuseProperty.Top, FuseProperty.Bottom, FuseProperty.Size };
 
 
@@ -209,18 +207,9 @@ namespace Xamarin.Forms.Core
 				if (fuses != null)
 				{
 					for (int j = 0; j < fuses.Count; j++)
-					{
-						TargetWrapper fuse = fuses[j];
-
-						if (xFuses.Contains(fuse.TargetProperty))
-						{
-							xAxisFuses.Add(fuse.TargetProperty);
-						}
-
-						if (yFuses.Contains(fuse.TargetProperty))
-						{
-							yAxisFuses.Add(fuse.TargetProperty);
-						}
+					{ 
+						xAxisFuses.AddRange(fuses[j].GetXFuseProperties());
+						yAxisFuses.AddRange(fuses[j].GetYFuseProperties());
 					}
 				}
 
@@ -234,7 +223,8 @@ namespace Xamarin.Forms.Core
 				if (xAxisFuses.Count == 2)
 				{
 					if ((xAxisFuses[0] == FuseProperty.Left && xAxisFuses[1] == FuseProperty.X) ||
-					    (xAxisFuses[0] == FuseProperty.X && xAxisFuses[1] == FuseProperty.Left))
+					    (xAxisFuses[0] == FuseProperty.X && xAxisFuses[1] == FuseProperty.Left) ||
+						(xAxisFuses[0] == xAxisFuses[1]))
 					{
 						throw new ArgumentException($"{childView} is over constrained");
 					}
@@ -243,7 +233,8 @@ namespace Xamarin.Forms.Core
 				{
 
 					if ((yAxisFuses[0] == FuseProperty.Top && yAxisFuses[1] == FuseProperty.Y) ||
-					    (yAxisFuses[0] == FuseProperty.Y && yAxisFuses[1] == FuseProperty.Top))
+					    (yAxisFuses[0] == FuseProperty.Y && yAxisFuses[1] == FuseProperty.Top) ||
+						(yAxisFuses[0] == yAxisFuses[1]))
 					{
 						throw new ArgumentException($"{childView} is over constrained");
 					}
@@ -346,6 +337,14 @@ namespace Xamarin.Forms.Core
 		}
 
 
+
+		// possibly hide these behind a specific contained solver you can ask questions of	
+
+		public SolveView GetSolveFor(View element)
+		{
+			return FusedLayout.GetSolveView(element);
+		}
+
 		public class SolveView
 		{
 			public static Point NullPoint = new Point(-1, -1);
@@ -402,7 +401,7 @@ namespace Xamarin.Forms.Core
 
 
 
-			bool IsPropertyNull(FuseProperty fuseProperty)
+			internal bool IsPropertyNull(FuseProperty fuseProperty)
 			{
 				switch(fuseProperty)
 				{
@@ -435,7 +434,7 @@ namespace Xamarin.Forms.Core
 				}
 			}
 
-			void SetPropertyValue(TargetWrapper fuseTarget)
+			internal void SetPropertyValue(TargetWrapper fuseTarget)
 			{
 				FuseProperty fuseProperty = fuseTarget.TargetProperty;
 
@@ -489,22 +488,11 @@ namespace Xamarin.Forms.Core
 				
 				if (Fuses != null)
 				{
-					TargetWrapper fuseTarget = null;
-					FuseProperty propertyTarget =  FuseProperty.None;
-					
 					for (int i = 0; i < Fuses.Count; i++)
 					{
-						fuseTarget = Fuses[i];
-						propertyTarget = fuseTarget.TargetProperty;
-
-						if (IsPropertyNull(propertyTarget))
-						{
-							SetPropertyValue(fuseTarget);
-							somethingSolved = somethingSolved || !IsPropertyNull(propertyTarget);
-						}
+						somethingSolved = somethingSolved || Fuses[i].SolveTargetProperty();
 					}
-				}
-
+				} 
 
 				bool implicitValueSet = false;
 				do
@@ -690,7 +678,7 @@ namespace Xamarin.Forms.Core
 
 
 
-	public class FuseCollection : List<TargetWrapper>
+	public class FuseCollection : List<IFusionSolve>
 	{
 
 	}

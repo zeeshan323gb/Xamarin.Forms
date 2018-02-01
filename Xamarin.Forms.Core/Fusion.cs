@@ -395,10 +395,17 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 	public abstract class FusionBase : BindableObject
 	{
-		protected FusionBase(FusionBase parent)
+		protected FusionBase(VisualElement sourceElement)
+		{
+			_ = sourceElement ??
+				throw new ArgumentNullException($"{nameof(sourceElement)} cannot be null");
+
+			SourceElement = sourceElement;
+		}
+
+		protected FusionBase(FusionBase parent) : this(parent.SourceElement)
 		{
 			this.ParentFusion = parent;
-			SourceElement = parent?.SourceElement;
 			SourceProperty = parent?.SourceProperty ?? FuseProperty.None;
 		}
 		 
@@ -418,6 +425,10 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 	public abstract class FusionBase<T> : FusionBase, IFusion<T>
 	{
 		protected FusionBase(FusionBase parent) : base(parent)
+		{
+		}
+
+		protected FusionBase(VisualElement sourceElement) : base(sourceElement)
 		{
 		}
 
@@ -445,6 +456,10 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 	public abstract class ScalarFusionBase : FusionBase<double>
 	{
 		protected ScalarFusionBase(FusionBase parent) : base(parent)
+		{
+		}
+
+		protected ScalarFusionBase(VisualElement sourceElement) : base(sourceElement)
 		{
 		}
 
@@ -480,7 +495,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public ScalarOperationFusion(
 			VisualElement sourceElement,
 			FuseProperty sourceProperty,
-			double value) : base(null)
+			double value) : base(sourceElement)
 		{
 			SourceElement = sourceElement;
 			SourceProperty = sourceProperty;
@@ -504,7 +519,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		{
 			_fusionValue = fusionValue;
 		}
-
+		 
 
 		public override double GetPropertySolve()
 		{
@@ -581,9 +596,9 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 	internal class FusionRootView : FusionBase
 	{
-		internal FusionRootView(VisualElement sourceElement) : base(null)
+		internal FusionRootView(VisualElement sourceElement) : base(sourceElement)
 		{
-			SourceElement = sourceElement;
+			
 		}
 	}
 
@@ -670,40 +685,141 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 	}
 
-	public class ConditionalTargetWrapper : TargetWrapper
+	public class ConditionalTargetWrapperSet : BindableObject, IFusionSolve
 	{
-		List<(Func<bool>, FusionBase[])> _fusions;
-		public ConditionalTargetWrapper(FusionBase fusion, FuseProperty targetProperty, View targetView) 
-			: base(fusion, targetProperty, targetView)
+		public bool SignalChange { get; set; } //BP
+		public ConditionalTargetWrapper[] ConditionalWrappers { get; }
+
+		public bool IsActive => true;
+
+		public ConditionalTargetWrapperSet(ConditionalTargetWrapper[] conditionalWrappers)
 		{
-			_fusions = new List<(Func<bool>, FusionBase[])>();
+			ConditionalWrappers = conditionalWrappers;
 		}
 
-		public override void SetProperty<T>(Action<T> propertyToSet)
+		public List<FuseProperty> GetXFuseProperties()
 		{
-			for (int i = 0; i < _fusions.Count; i++)
+			List<FuseProperty> returnValue = new List<FuseProperty>();
+			for (int i = 0; i < ConditionalWrappers.Length; i++)
 			{
-				if (_fusions[i].Item1())
+				if (ConditionalWrappers[i].IsActive)
 				{
-					
-					break;
+					returnValue.AddRange(ConditionalWrappers[i].GetXFuseProperties());
+
+					if (ConditionalWrappers[i].StopOnMatch)
+					{
+						break;
+					}
 				}
 			}
+
+			return returnValue;
 		}
 
-		public void AddSet(Func<bool> condition, params FusionBase[] fusions)
+		public List<FuseProperty> GetYFuseProperties()
 		{
-			_fusions.Add((condition, fusions));
+			List<FuseProperty> returnValue = new List<FuseProperty>();
+			for (int i = 0; i < ConditionalWrappers.Length; i++)
+			{
+				if (ConditionalWrappers[i].IsActive)
+				{
+					returnValue.AddRange(ConditionalWrappers[i].GetYFuseProperties());
+
+					if (ConditionalWrappers[i].StopOnMatch)
+					{
+						break;
+					}
+				}
+			}
+
+			return returnValue;
+		}
+
+		public bool SolveTargetProperty()
+		{
+			bool propertySolve = false;
+			for(int i = 0; i < ConditionalWrappers.Length; i++)
+			{
+				var element = ConditionalWrappers[i];
+				if(element.Condition())
+				{
+					for(int j = 0; j < element.Wrappers.Length; j++)
+					{
+						// Only return true if all applicable solves return true
+						propertySolve = propertySolve || element.Wrappers[j].SolveTargetProperty();
+					}
+
+					if(element.StopOnMatch)
+					{
+						break;
+					}
+				}
+			}
+
+			return propertySolve;
 		}
 	}
 
+	public class ConditionalTargetWrapper : BindableObject, IFusionSolve
+	{
+		public bool SignalChange { get; set; } //BP
+		public bool IsActive => Condition();
+
+		/// <summary>
+		/// parent, me, fusedlayout
+		/// </summary>
+		public Func<bool> Condition;
+		public IFusionSolve[] Wrappers;
+		public bool StopOnMatch = true;
 
 
+		public ConditionalTargetWrapper(
+			Func<bool> condtion, 
+			IFusionSolve[] wrappers)
+		{			
+			Condition = condtion;
+			Wrappers = wrappers;
+		}
+
+		public bool SolveTargetProperty()
+		{
+			bool propertySolve = false;
+			for (int i = 0; i < Wrappers.Length; i++)
+			{
+				propertySolve = propertySolve || Wrappers[i].SolveTargetProperty();
+			}
+
+			return propertySolve;
+		}
+
+
+		public List<FuseProperty> GetXFuseProperties()
+		{
+			List<FuseProperty> returnValue = new List<FuseProperty>();
+			for (int i = 0; i < Wrappers.Length; i++)
+			{
+				returnValue.AddRange(Wrappers[i].GetXFuseProperties());
+			}
+
+			return returnValue;
+		}
+
+		public List<FuseProperty> GetYFuseProperties()
+		{
+			List<FuseProperty> returnValue = new List<FuseProperty>();
+			for (int i = 0; i < Wrappers.Length; i++)
+			{
+				returnValue.AddRange(Wrappers[i].GetYFuseProperties());
+			}
+
+			return returnValue;
+		}
+	}
 
 	/// <summary>
 	/// Transforms the Source result to the target property
 	/// </summary>
-	public class TargetWrapper
+	public class TargetWrapper : IFusionSolve
 	{
 		public TargetWrapper(FusionBase fusion, FuseProperty targetProperty, View targetView)
 		{
@@ -718,15 +834,48 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 			return $"{targetViewPropertyXYWH} - {TargetProperty}";
 		}
 
-
 		public FuseProperty TargetProperty { get; set; } // BP 
 		public FusionBase Fuse { get; set; }
 		public View TargetView { get; set; } // BP 
 
-		public virtual void SetProperty<T>(Action<T> propertyToSet)
-		{			
-			propertyToSet(((IFusion<T>)Fuse).GetPropertySolve());
+		public bool IsActive => true;
+
+		public bool SolveTargetProperty()
+		{
+			var solveView = FusedLayout.GetSolveView(TargetView);
+			if (solveView.IsPropertyNull(TargetProperty))
+			{
+				solveView.SetPropertyValue(this);
+				return !solveView.IsPropertyNull(TargetProperty);
+			}
+
+			return false;
+		}
+
+		public List<FuseProperty> GetXFuseProperties()
+		{
+			if (FusedLayout.xFuses.Contains(TargetProperty))
+				return new List<FuseProperty> { TargetProperty };
+
+			return new List<FuseProperty>();
+		}
+
+
+		public List<FuseProperty> GetYFuseProperties()
+		{
+			if (FusedLayout.yFuses.Contains(TargetProperty))
+				return new List<FuseProperty> { TargetProperty };
+
+			return new List<FuseProperty>();
 		}
 	}
 
+
+	public interface IFusionSolve
+	{
+		bool IsActive { get;  }
+		bool SolveTargetProperty();
+		List<FuseProperty> GetXFuseProperties();
+		List<FuseProperty> GetYFuseProperties();
+	}
 }
