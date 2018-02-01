@@ -195,8 +195,7 @@ namespace Xamarin.Forms.Core.UnitTests
 			{
 				IsPlatformEnabled = true,
 				AutomationId = "container",
-				HeightRequest = 40,
-				WidthRequest = 60
+				HeightRequest = 40
 			};
 
 
@@ -233,6 +232,9 @@ namespace Xamarin.Forms.Core.UnitTests
 			FusedLayout.AddFusion(view2, FuseProperty.Left, new Fusion(view1).Right);
 
 
+			FusedLayout.AddFusion(container, FuseProperty.Width, new Fusion(fusedLayout).Width);
+
+
 
 
 			var targetWrapperSet = new ConditionalTargetWrapperSet(view3);
@@ -258,14 +260,12 @@ namespace Xamarin.Forms.Core.UnitTests
 			fusedLayout.Children.Add(view1);
 			fusedLayout.Children.Add(view2);
 
-			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 50));
 
 			Assert.AreEqual(0, view3.Y);
 			Assert.AreEqual(40, view3.X);
 
-			container.WidthRequest = 40;
-			container.HeightRequest = 60;
-			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+			fusedLayout.Layout(new Rectangle(0, 0, 50, 100));
 
 
 			Assert.AreEqual(20, view3.Y);
