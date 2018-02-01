@@ -191,6 +191,15 @@ namespace Xamarin.Forms.Core.UnitTests
 				IsPlatformEnabled = true
 			};
 
+			View container = new View()
+			{
+				IsPlatformEnabled = true,
+				AutomationId = "container",
+				HeightRequest = 40,
+				WidthRequest = 60
+			};
+
+
 			View view1 = new View()
 			{
 				IsPlatformEnabled = true,
@@ -220,40 +229,44 @@ namespace Xamarin.Forms.Core.UnitTests
 			FusedLayout.AddFusion(view1, FuseProperty.Top, 0);
 			FusedLayout.AddFusion(view1, FuseProperty.Left, 0);
 
-
 			FusedLayout.AddFusion(view2, FuseProperty.Top, 0);
 			FusedLayout.AddFusion(view2, FuseProperty.Left, new Fusion(view1).Right);
 
-			// create better api for this
-
-			ConditionalTargetWrapper landscape = new ConditionalTargetWrapper(() => FusedLayout.GetSolveView(fusedLayout).Width >= 100,
-				new []
-				{
-					new TargetWrapper(new Fusion(fusedLayout).Top, FuseProperty.Top, view3),
-					new TargetWrapper(new Fusion(view2).Right, FuseProperty.Left, view3)
-				});
-
-			ConditionalTargetWrapper portrait = new ConditionalTargetWrapper(() => !(FusedLayout.GetSolveView(fusedLayout).Width >= 100),
-				new[]
-				{
-					new TargetWrapper(new Fusion(view1).Bottom, FuseProperty.Top, view3),
-					new TargetWrapper(new Fusion(fusedLayout).Left, FuseProperty.Left, view3)
-				});
 
 
-			FusedLayout.AddFusion(view3, 
-				new ConditionalTargetWrapperSet(new [] { landscape, portrait }));			
-						
+
+			var targetWrapperSet = new ConditionalTargetWrapperSet(view3);
+
+			ConditionalTargetWrapper landscape = 
+				targetWrapperSet.AddConditionalSet(() => (FusedLayout.GetSolveView(container).Width >= 60));
+
+			landscape.AddFusion(FuseProperty.Top, new Fusion(fusedLayout).Top);
+			landscape.AddFusion(FuseProperty.Left, new Fusion(view2).Right);
+
+
+			ConditionalTargetWrapper portrait =
+				targetWrapperSet.AddConditionalSet(() => !(FusedLayout.GetSolveView(container).Width >= 60));
+
+			portrait.AddFusion(FuseProperty.Top, new Fusion(view1).Bottom);
+			portrait.AddFusion(FuseProperty.Left, new Fusion(fusedLayout).Left);
+
+
+			FusedLayout.AddFusion(targetWrapperSet);
+
+			fusedLayout.Children.Add(container);
 			fusedLayout.Children.Add(view3);
 			fusedLayout.Children.Add(view1);
 			fusedLayout.Children.Add(view2);
 
-			fusedLayout.Layout(new Rectangle(0, 0, 100, 50));
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
 
 			Assert.AreEqual(0, view3.Y);
 			Assert.AreEqual(40, view3.X);
 
-			fusedLayout.Layout(new Rectangle(0, 0, 50, 100));
+			container.WidthRequest = 40;
+			container.HeightRequest = 60;
+			fusedLayout.Layout(new Rectangle(0, 0, 100, 100));
+
 
 			Assert.AreEqual(20, view3.Y);
 			Assert.AreEqual(0, view3.X);

@@ -688,19 +688,24 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 	public class ConditionalTargetWrapperSet : BindableObject, IFusionSolve
 	{
 		public bool SignalChange { get; set; } //BP
-		public ConditionalTargetWrapper[] ConditionalWrappers { get; }
+		public List<ConditionalTargetWrapper> ConditionalWrappers { get; }
 
 		public bool IsActive => true;
 
-		public ConditionalTargetWrapperSet(ConditionalTargetWrapper[] conditionalWrappers)
+		public View TargetView  { get; }
+
+		public ConditionalTargetWrapperSet(View targetView)
 		{
-			ConditionalWrappers = conditionalWrappers;
+			TargetView = targetView;
+			ConditionalWrappers = new List<ConditionalTargetWrapper>();
 		}
+
+
 
 		public List<FuseProperty> GetXFuseProperties()
 		{
 			List<FuseProperty> returnValue = new List<FuseProperty>();
-			for (int i = 0; i < ConditionalWrappers.Length; i++)
+			for (int i = 0; i < ConditionalWrappers.Count; i++)
 			{
 				if (ConditionalWrappers[i].IsActive)
 				{
@@ -719,7 +724,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public List<FuseProperty> GetYFuseProperties()
 		{
 			List<FuseProperty> returnValue = new List<FuseProperty>();
-			for (int i = 0; i < ConditionalWrappers.Length; i++)
+			for (int i = 0; i < ConditionalWrappers.Count; i++)
 			{
 				if (ConditionalWrappers[i].IsActive)
 				{
@@ -738,12 +743,12 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public bool SolveTargetProperty()
 		{
 			bool propertySolve = false;
-			for(int i = 0; i < ConditionalWrappers.Length; i++)
+			for(int i = 0; i < ConditionalWrappers.Count; i++)
 			{
 				var element = ConditionalWrappers[i];
 				if(element.Condition())
 				{
-					for(int j = 0; j < element.Wrappers.Length; j++)
+					for(int j = 0; j < element.Wrappers.Count; j++)
 					{
 						// Only return true if all applicable solves return true
 						propertySolve = propertySolve || element.Wrappers[j].SolveTargetProperty();
@@ -758,6 +763,14 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 			return propertySolve;
 		}
+
+		internal ConditionalTargetWrapper AddConditionalSet(Func<bool> condition)
+		{
+			var returnValue =  new ConditionalTargetWrapper(TargetView, condition);
+			ConditionalWrappers.Add(returnValue);
+			return returnValue;
+		}
+
 	}
 
 	public class ConditionalTargetWrapper : BindableObject, IFusionSolve
@@ -765,26 +778,27 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public bool SignalChange { get; set; } //BP
 		public bool IsActive => Condition();
 
+		public View TargetView  { get;   }
+
 		/// <summary>
 		/// parent, me, fusedlayout
 		/// </summary>
-		public Func<bool> Condition;
-		public IFusionSolve[] Wrappers;
+		public Func<bool> Condition { get; }
+		internal List<IFusionSolve> Wrappers;
 		public bool StopOnMatch = true;
 
 
-		public ConditionalTargetWrapper(
-			Func<bool> condtion, 
-			IFusionSolve[] wrappers)
+		internal ConditionalTargetWrapper(View targetView, Func<bool> condition)
 		{			
-			Condition = condtion;
-			Wrappers = wrappers;
+			Condition = condition;
+			TargetView = targetView;
+			Wrappers = new List<IFusionSolve>();
 		}
 
 		public bool SolveTargetProperty()
 		{
 			bool propertySolve = false;
-			for (int i = 0; i < Wrappers.Length; i++)
+			for (int i = 0; i < Wrappers.Count; i++)
 			{
 				propertySolve = propertySolve || Wrappers[i].SolveTargetProperty();
 			}
@@ -796,7 +810,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public List<FuseProperty> GetXFuseProperties()
 		{
 			List<FuseProperty> returnValue = new List<FuseProperty>();
-			for (int i = 0; i < Wrappers.Length; i++)
+			for (int i = 0; i < Wrappers.Count; i++)
 			{
 				returnValue.AddRange(Wrappers[i].GetXFuseProperties());
 			}
@@ -807,12 +821,18 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 		public List<FuseProperty> GetYFuseProperties()
 		{
 			List<FuseProperty> returnValue = new List<FuseProperty>();
-			for (int i = 0; i < Wrappers.Length; i++)
+			for (int i = 0; i < Wrappers.Count; i++)
 			{
 				returnValue.AddRange(Wrappers[i].GetYFuseProperties());
 			}
 
 			return returnValue;
+		}
+
+
+		public void AddFusion(FuseProperty fuseProperty, FusionBase sourceFusion)
+		{
+			Wrappers.Add(FusedLayout.CreateFusion(TargetView, fuseProperty, sourceFusion));
 		}
 	}
 
@@ -873,6 +893,7 @@ var sizeFuse = new Fusion (view2).Measure().Add (20, 20);(
 
 	public interface IFusionSolve
 	{
+		View TargetView { get; }
 		bool IsActive { get;  }
 		bool SolveTargetProperty();
 		List<FuseProperty> GetXFuseProperties();

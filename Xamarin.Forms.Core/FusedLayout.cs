@@ -54,10 +54,20 @@ namespace Xamarin.Forms.Core
 		}
 
 
+		public static IFusionSolve CreateFusion(View targetView, FuseProperty targetProperty, FusionBase source)
+		{
+			return  new TargetWrapper(source, targetProperty, targetView);
+		}
+
+		public static IFusionSolve CreateFusion(View targetView, FuseProperty targetProperty, double value)
+		{
+			return CreateFusion(targetView, targetProperty, new ScalarOperationFusion(targetView, targetProperty, value));
+		}
+
 
 		public static IFusionSolve AddFusion(View targetView, FuseProperty targetProperty, FusionBase source)
 		{
-			return AddFusion(targetView, new TargetWrapper(source, targetProperty, targetView));
+			return AddFusion(new TargetWrapper(source, targetProperty, targetView));
 		}
 
 		public static IFusionSolve AddFusion(View targetView, FuseProperty targetProperty, double value)
@@ -65,11 +75,11 @@ namespace Xamarin.Forms.Core
 			return AddFusion(targetView, targetProperty, new ScalarOperationFusion(targetView, targetProperty, value)); 
 		}
 
-		public static IFusionSolve AddFusion(View targetView, IFusionSolve fusionSolve)
+		public static IFusionSolve AddFusion(IFusionSolve fusionSolve)
 		{
-			var currentFuses = GetFuses(targetView) ?? new FuseCollection();
+			var currentFuses = GetFuses(fusionSolve.TargetView) ?? new FuseCollection();
 			currentFuses.Add(fusionSolve);
-			SetFuses(targetView, currentFuses);
+			SetFuses(fusionSolve.TargetView, currentFuses);
 			return fusionSolve;
 		}
 
