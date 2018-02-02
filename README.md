@@ -14,13 +14,12 @@ Read more about the platform at https://www.xamarin.com/forms.
 
 ## Packages ##
 
-##### Official Nuget.org ##### 
-![Xamarin Forms stable package](https://img.shields.io/nuget/v/Xamarin.Forms.svg?style=flat&label=stable "nuget")
-![Xamarin Forms pre release package](https://img.shields.io/nuget/vpre/Xamarin.Forms.svg?style=flat&label=latest "nuget")
 
-##### Nightly feed [MyGet](https://www.myget.org/F/xamarinforms-ci/api/v2) ##### 
-![Visual Studio Team Services ](https://img.shields.io/myget/xamarinforms-ci/v/Xamarin.Forms.svg "VSTS")
-
+Platform/Feature               | Package name                              | Stable Nuget.org (2.5.0 branch)     |  Next Nuget.org (not branched)     |Nightly Feed [MyGet](https://www.myget.org/F/xamarinforms-ci/api/v2)  (master branch)
+-----------------------|-------------------------------------------|-----------------------------|-----------------------------|-------------------------
+Core             | `Xamarin.Forms` | [![NuGet](https://img.shields.io/nuget/v/Xamarin.Forms.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Xamarin.Forms/)| [![NuGet](https://img.shields.io/nuget/vpre/Xamarin.Forms.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Xamarin.Forms/) | [![MyGet](https://img.shields.io/myget/xamarinforms-ci/vpre/Xamarin.Forms.svg?style=flat-square&label=myget)](https://myget.org/feed/aspnetcore-dev/package/nuget/Xamarin.Forms)
+Maps                 | `Xamarin.Forms.Maps`    | [![NuGet](https://img.shields.io/nuget/v/Xamarin.Forms.Maps.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Xamarin.Forms.Maps/) | [![NuGet](https://img.shields.io/nuget/vpre/Xamarin.Forms.Maps.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Xamarin.Forms.Maps/) | [![MyGet](https://img.shields.io/myget/xamarinforms-ci/vpre/Xamarin.Forms.Maps.svg?style=flat-square&label=myget)](https://myget.org/feed/xamarinforms-ci/package/nuget/Xamarin.Forms.Maps)
+Pages  | `Xamarin.Forms.Pages`  | [![NuGet](https://img.shields.io/nuget/v/Xamarin.Forms.Pages.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Xamarin.Forms.Pages/) | [![NuGet](https://img.shields.io/nuget/vpre/Xamarin.Forms.Pages.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Xamarin.Forms.Pages/) | [![MyGet](https://img.shields.io/myget/xamarinforms-ci/vpre/Xamarin.Forms.Pages.svg?style=flat-square&label=myget)](https://myget.org/feed/xamarin.forms-ci/package/nuget/Xamarin.Forms.Pages)
 
 If you want to use the latest dev build then you should read [this blog post]( https://blog.xamarin.com/try-the-latest-in-xamarin-forms-with-nightly-builds) :
 - Add the nightly feed to your nuget sources or add a NuGet.Config to your app with the following content:
@@ -38,7 +37,7 @@ If you want to use the latest dev build then you should read [this blog post]( h
 
   *NOTE: This NuGet.Config should be with your application unless you want nightly packages to potentially start being restored for other apps on the machine.*
 
-- Change your applications dependencies to have a `*` to get the latest version.
+- Change your application's dependencies to have a `*` to get the latest version.
 
 
 ## Getting Started ##
@@ -70,15 +69,15 @@ Due to the way that Android works, the maps API key cannot be injected at runtim
 You can find out how to obtain a Google Maps API key [here](https://developer.xamarin.com/guides/android/platform_features/maps_and_location/maps/obtaining_a_google_maps_api_key/).
 
 ##### Build from the Command line #####
-Make sure you have Nuget.exe 4.0 or above and the a latest dotnet core sdk (2.0) 
+Make sure you have Nuget.exe 4.0 or above and the latest dotnet core sdk (2.0.3). On OSX you should specify the platform in the msbuild command (`/p:Platform=iPhoneSimulator`)
   
 
      nuget restore Xamarin.Forms.sln
-     dotnet build Xamarin.Forms.sln
-
+     msbuild Xamarin.Forms.sln
+ 
 
 ##### API documentation changes #####
-If you change or add a public API on Xamarin.Forms the associated documentation should be updated and pushed as part of the pull request. This will also be needed to create a local nuget if you want. We rely on mdoc that is shipped on the repo on the tools folder. After building the .sln on Windows run:
+If you change or add a public API on Xamarin.Forms the associated documentation should be updated and pushed as part of the pull request. This will also be needed to create a local nuget if you want. We rely on mdoc that is shipped in the repo on the tools folder. After building the .sln on Windows run:
      
      ./update-docs-windows.bat
 
