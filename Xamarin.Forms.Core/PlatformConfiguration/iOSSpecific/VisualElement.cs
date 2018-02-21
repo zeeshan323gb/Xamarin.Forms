@@ -42,7 +42,7 @@ namespace Xamarin.Forms.PlatformConfiguration.iOSSpecific
 			BindableProperty.Create("IsShadowEnabled", typeof(bool),
 			typeof(VisualElement), false, propertyChanged: OnIsShadowEnabledChanged);
 
-		private static void OnIsShadowEnabledChanged(BindableObject bindable, object oldValue, object newValue)
+		static void OnIsShadowEnabledChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var visualElement = bindable as FormsElement;
 			var enabled = (bool)newValue;
@@ -98,12 +98,12 @@ namespace Xamarin.Forms.PlatformConfiguration.iOSSpecific
 			element.SetValue(ShadowColorProperty, value);
 		}
 
-		public static Color GetShadowColor(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config)
+		public static Color GetShadowColor(this IPlatformElementConfiguration<iOS, FormsElement> config)
 		{
 			return GetShadowColor(config.Element);
 		}
 
-		public static IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> SetShadowColor(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config, Color value)
+		public static IPlatformElementConfiguration<iOS, FormsElement> SetShadowColor(this IPlatformElementConfiguration<iOS, FormsElement> config, Color value)
 		{
 			SetShadowColor(config.Element, value);
 			return config;
@@ -123,12 +123,12 @@ namespace Xamarin.Forms.PlatformConfiguration.iOSSpecific
 			element.SetValue(ShadowRadiusProperty, value);
 		}
 
-		public static double GetShadowRadius(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config)
+		public static double GetShadowRadius(this IPlatformElementConfiguration<iOS, FormsElement> config)
 		{
 			return GetShadowRadius(config.Element);
 		}
 
-		public static IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> SetShadowRadius(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config, double value)
+		public static IPlatformElementConfiguration<iOS, FormsElement> SetShadowRadius(this IPlatformElementConfiguration<iOS, FormsElement> config, double value)
 		{
 			SetShadowRadius(config.Element, value);
 			return config;
@@ -148,12 +148,12 @@ namespace Xamarin.Forms.PlatformConfiguration.iOSSpecific
 			element.SetValue(ShadowOffsetProperty, value);
 		}
 
-		public static Size GetShadowOffset(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config)
+		public static Size GetShadowOffset(this IPlatformElementConfiguration<iOS, FormsElement> config)
 		{
 			return GetShadowOffset(config.Element);
 		}
 
-		public static IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> SetShadowOffset(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config, Size value)
+		public static IPlatformElementConfiguration<iOS, FormsElement> SetShadowOffset(this IPlatformElementConfiguration<iOS, FormsElement> config, Size value)
 		{
 			SetShadowOffset(config.Element, value);
 			return config;
@@ -173,12 +173,12 @@ namespace Xamarin.Forms.PlatformConfiguration.iOSSpecific
 			element.SetValue(ShadowOpacityProperty, value);
 		}
 
-		public static double GetShadowOpacity(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config)
+		public static double GetShadowOpacity(this IPlatformElementConfiguration<iOS, FormsElement> config)
 		{
 			return GetShadowOpacity(config.Element);
 		}
 
-		public static IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> SetShadowOpacity(this IPlatformElementConfiguration<iOS, Xamarin.Forms.VisualElement> config, double value)
+		public static IPlatformElementConfiguration<iOS, FormsElement> SetShadowOpacity(this IPlatformElementConfiguration<iOS, FormsElement> config, double value)
 		{
 			SetShadowOpacity(config.Element, value);
 			return config;

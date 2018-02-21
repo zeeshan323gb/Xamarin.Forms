@@ -6,7 +6,7 @@ using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
 namespace Xamarin.Forms.Controls.Issues
 {
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Github, 1707, "[Enhancement] Drop shadow support for iOS/UWP", PlatformAffected.iOS | PlatformAffected.UWP)]
+	[Issue(IssueTracker.Github, 1707, "[Enhancement] Drop shadow support for iOS", PlatformAffected.iOS)]
 	public class Issue1707 : ContentPage
 	{
 		public Issue1707()
