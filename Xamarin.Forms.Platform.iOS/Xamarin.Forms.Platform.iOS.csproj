@@ -138,6 +138,7 @@
     <Compile Include="Extensions\LayoutExtensions.cs" />
     <Compile Include="NativeValueConverterService.cs" />
     <Compile Include="NativeBindingService.cs" />
+    <Compile Include="ListViewDataSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\StringResources.ar.resx" />
