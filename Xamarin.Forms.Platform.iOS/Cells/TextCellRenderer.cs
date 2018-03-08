@@ -7,16 +7,27 @@ namespace Xamarin.Forms.Platform.iOS
 	{
 		static readonly Color DefaultDetailColor = new Color(.32, .4, .57);
 		static readonly Color DefaultTextColor = Color.Black;
+		UIColor defaultSelectedItemColor;
 
 		public override UITableViewCell GetCell(Cell item, UITableViewCell reusableCell, UITableView tv)
 		{
 			var textCell = (TextCell)item;
 
 			var tvc = reusableCell as CellTableViewCell;
+
 			if (tvc == null)
 				tvc = new CellTableViewCell(UITableViewCellStyle.Subtitle, item.GetType().FullName);
 			else
 				tvc.Cell.PropertyChanged -= tvc.HandlePropertyChanged;
+
+			if (item.SelectedItemBackgroundColor != Color.Default)
+			{
+				defaultSelectedItemColor = tvc.SelectedBackgroundView.BackgroundColor;
+				tvc.SelectedBackgroundView = new UIView()
+				{
+					BackgroundColor = item.SelectedItemBackgroundColor.ToUIColor()
+				};
+			}
 
 			tvc.Cell = textCell;
 			textCell.PropertyChanged += tvc.HandlePropertyChanged;
@@ -58,6 +69,19 @@ namespace Xamarin.Forms.Platform.iOS
 				tvc.DetailTextLabel.TextColor = textCell.DetailColor.ToUIColor(DefaultTextColor);
 			else if (args.PropertyName == Cell.IsEnabledProperty.PropertyName)
 				UpdateIsEnabled(tvc, textCell);
+			else if (args.PropertyName == TextCell.SelectedItemBackgroundColorProperty.PropertyName)
+				UpdateSelectedItemBackgroundColor(textCell, tvc);
+		}
+
+		private void UpdateSelectedItemBackgroundColor(TextCell cell, CellTableViewCell target)
+		{
+			if (cell.SelectedItemBackgroundColor == Color.Default)
+				target.SelectedBackgroundView.BackgroundColor = defaultSelectedItemColor;
+			else
+				target.SelectedBackgroundView = new UIView()
+				{
+					BackgroundColor = cell.SelectedItemBackgroundColor.ToUIColor()
+				};
 		}
 
 		static void UpdateIsEnabled(CellTableViewCell cell, TextCell entryCell)
