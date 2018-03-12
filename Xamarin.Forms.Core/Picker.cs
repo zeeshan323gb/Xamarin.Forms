@@ -222,6 +222,8 @@ namespace Xamarin.Forms
 			var picker = (Picker)bindable;
 			picker.UpdateSelectedItem();
 			picker.SelectedIndexChanged?.Invoke(bindable, EventArgs.Empty);
+
+			picker.InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
 		}
 
 		static void OnSelectedItemChanged(BindableObject bindable, object oldValue, object newValue)
