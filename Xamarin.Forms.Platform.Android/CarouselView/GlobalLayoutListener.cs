@@ -1,8 +1,9 @@
 ﻿using System;
+using Android.App;
 using Android.Content;
-using Android.Support.V4.View;
-using Android.Util;
 using Android.Views;
+using Android.Views.InputMethods;
+using Object = Java.Lang.Object;
 
 /*
 The MIT License(MIT)
@@ -25,43 +26,35 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
+// PR Fix for entry focus bug #242
 namespace Xamarin.Forms.Platform.Android
 {
-	public class CustomViewPager : ViewPager
-	{
-		private bool isSwipingEnabled = true;
+    internal class GlobalLayoutListener : Object, ViewTreeObserver.IOnGlobalLayoutListener
+    {
+        private static InputMethodManager _inputManager;
+        private readonly SoftKeyboardService _softwareKeyboardService;
+        Activity _activity;
 
-		public CustomViewPager(Context context) : base(context, null)
-		{
-		}
+        private static void ObtainInputManager(Activity activity)
+        {
+            _inputManager = (InputMethodManager)activity.GetSystemService(Context.InputMethodService);
+        }
 
-		public CustomViewPager(Context context, IAttributeSet attrs) : base(context, attrs)
-		{
-		}
+        public GlobalLayoutListener(SoftKeyboardService softwareKeyboardService, Activity activity)
+        {
+            _softwareKeyboardService = softwareKeyboardService;
+            _activity = activity;
+            ObtainInputManager(activity);
+        }
 
-		public override bool OnTouchEvent(MotionEvent ev)
-		{
-			if (this.isSwipingEnabled)
-			{
-				return base.OnTouchEvent(ev);
-			}
+        public void OnGlobalLayout()
+        {
+            if (_inputManager.Handle == IntPtr.Zero)
+            {
+                ObtainInputManager(_activity);
+            }
 
-			return false;
-		}
-
-		public override bool OnInterceptTouchEvent(MotionEvent ev)
-		{
-			if (this.isSwipingEnabled)
-			{
-				return base.OnInterceptTouchEvent(ev);
-			}
-
-			return false;
-		}
-
-		public void SetPagingEnabled(bool enabled)
-		{
-			this.isSwipingEnabled = enabled;
-		}
-	}
+            _softwareKeyboardService.InvokeVisibilityChanged(new SoftKeyboardEventArgs(_inputManager.IsAcceptingText));
+        }
+    }
 }

@@ -1,4 +1,4 @@
-﻿using Windows.UI.Xaml.Controls;
+﻿using System;
 
 /*
 The MIT License(MIT)
@@ -21,21 +21,13 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
-namespace Xamarin.Forms.Platform.UAP
+namespace Xamarin.Forms
 {
-    public sealed partial class FlipViewControl : UserControl
+    public enum ScrollDirection
     {
-        public bool IsSwipeEnabled;
-
-        public FlipViewControl(bool isSwipeEnabled)
-        {
-            this.InitializeComponent();
-            this.IsSwipeEnabled = isSwipeEnabled;
-        }
-
-        private void VirtualizingStackPanel_PointerWheelChanged(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
-        {
-            e.Handled = !this.IsSwipeEnabled;
-        }
+        Left,
+        Right,
+        Up,
+        Down
     }
 }

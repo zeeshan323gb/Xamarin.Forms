@@ -1,4 +1,4 @@
-﻿using Windows.UI.Xaml.Controls;
+﻿using System;
 
 /*
 The MIT License(MIT)
@@ -21,13 +21,11 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
-namespace Xamarin.Forms.Platform.UAP
+namespace Xamarin.Forms.Platform.Android
 {
-    public sealed partial class VerticalFlipViewControl : UserControl
+    public interface IViewPager
     {
-        public VerticalFlipViewControl()
-        {
-            this.InitializeComponent();
-        }
+        void SetPagingEnabled(bool enabled);
+        void SetElement(CarouselView element);
     }
 }

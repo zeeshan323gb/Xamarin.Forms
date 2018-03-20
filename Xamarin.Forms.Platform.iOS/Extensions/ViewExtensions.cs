@@ -19,24 +19,27 @@ namespace Xamarin.Forms.Platform.iOS
 			return result;
 		}
 
-		public static UIView ToiOS(this Xamarin.Forms.View view, CGRect size)
-		{
-			if (Platform.GetRenderer(view) == null)
-				Platform.SetRenderer(view, Platform.CreateRenderer(view));
-			var vRenderer = Platform.GetRenderer(view);
+        public static UIView ToiOS(this Xamarin.Forms.View view, CGRect size)
+        {
+            //var vRenderer = RendererFactory.GetRenderer (view);
 
-			vRenderer.NativeView.Frame = size;
+            if (Platform.GetRenderer(view) == null)
+                Platform.SetRenderer(view, Platform.CreateRenderer(view));
 
-			vRenderer.NativeView.AutoresizingMask = UIViewAutoresizing.All;
-			vRenderer.NativeView.ContentMode = UIViewContentMode.ScaleToFill;
+            var vRenderer = Platform.GetRenderer(view);
 
-			vRenderer.Element.Layout(size.ToRectangle());
+            vRenderer.NativeView.Frame = size;
 
-			var nativeView = vRenderer.NativeView;
+            vRenderer.NativeView.AutoresizingMask = UIViewAutoresizing.All;
+            vRenderer.NativeView.ContentMode = UIViewContentMode.ScaleToFill;
 
-			nativeView.SetNeedsLayout();
+            vRenderer.Element?.Layout(size.ToRectangle());
 
-			return nativeView;
-		}
+            var nativeView = vRenderer.NativeView;
+
+            nativeView.SetNeedsLayout();
+
+            return nativeView;
+        }
 	}
 }
