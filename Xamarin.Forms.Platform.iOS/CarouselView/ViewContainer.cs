@@ -24,34 +24,34 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ViewContainer : UIViewController
-	{
-        // To hold binding context
-		public object Tag { get; set; }
+    public class ViewContainer : UIViewController
+    {
+        // To save current position
+        public object Tag { get; set; }
 
-		protected override void Dispose(bool disposing)
-		{
-			// because this runs in the finalizer thread and disposing is equal false
-			InvokeOnMainThread(() =>
-			{
+        protected override void Dispose(bool disposing)
+        {
+            // because this runs in the finalizer thread and disposing is equal false
+            InvokeOnMainThread(() => {
+
                 WillMoveToParentViewController(null);
 
-				// Significant Memory Leak for iOS when using custom layout for page content #125
-				foreach (var view in View.Subviews)
-				{
-					view.RemoveFromSuperview();
-					view.Dispose();
-				}
+                // Significant Memory Leak for iOS when using custom layout for page content #125
+                foreach (var view in View.Subviews)
+                {
+                    view.RemoveFromSuperview();
+                    view.Dispose();
+                }
 
-				View.RemoveFromSuperview();
-				View.Dispose();
-				View = null;
+                View.RemoveFromSuperview();
+                View.Dispose();
+                View = null;
 
                 RemoveFromParentViewController();
-			});
+            });
 
-			base.Dispose(disposing);
-		}
-	}
+            base.Dispose(disposing);
+        }
+    }
 }
 

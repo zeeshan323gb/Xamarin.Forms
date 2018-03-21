@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using Android.App;
 
 /*
 The MIT License(MIT)
@@ -23,43 +22,48 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
-namespace Xamarin.Forms
+// PR Fix for entry focus bug #242
+namespace Xamarin.Forms.Platform.Android
 {
-    public static class IEnumerableExtensions
+    public class SoftKeyboardService : SoftKeyboardServiceBase
     {
-        public static object GetItem(this IEnumerable e, int index)
+        private readonly Activity _activity;
+        private GlobalLayoutListener _globalLayoutListener;
+
+        public SoftKeyboardService(Activity activity)
         {
-            var enumerator = e.GetEnumerator();
-            int i = 0;
-            while (enumerator.MoveNext())
-            {
-                if (i == index)
-                    return enumerator.Current;
-                i++;
-            }
-            return null;
+            _activity = activity;
+            if (_activity == null)
+                throw new Exception("Activity can't be null!");
         }
 
-        public static int GetCount(this IEnumerable e)
+        public override event EventHandler<SoftKeyboardEventArgs> VisibilityChanged
         {
-            var enumerator = e.GetEnumerator();
-            int i = 0;
-            while (enumerator.MoveNext())
+            add
             {
-                i++;
+                base.VisibilityChanged += value;
+                CheckListener();
             }
-            return i;
+            remove { base.VisibilityChanged -= value; }
         }
 
-        public static List<object> GetList(this IEnumerable e)
+        private void CheckListener()
         {
-            var enumerator = e.GetEnumerator();
-            var list = new List<object>();
-            while (enumerator.MoveNext())
+            if (_globalLayoutListener == null)
             {
-                list.Add(enumerator.Current);
+                _globalLayoutListener = new GlobalLayoutListener(this, _activity);
+                _activity.Window.DecorView.ViewTreeObserver.AddOnGlobalLayoutListener(_globalLayoutListener);
             }
-            return list;
+        }
+    }
+
+    public abstract class SoftKeyboardServiceBase
+    {
+        public virtual event EventHandler<SoftKeyboardEventArgs> VisibilityChanged;
+
+        public void InvokeVisibilityChanged(SoftKeyboardEventArgs args)
+        {
+            VisibilityChanged?.Invoke(this, args);
         }
     }
 }

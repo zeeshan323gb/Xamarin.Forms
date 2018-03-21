@@ -199,4 +199,10 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\Down.png" />
+    <BundleResource Include="Resources\Next.png" />
+    <BundleResource Include="Resources\Prev.png" />
+    <BundleResource Include="Resources\Up.png" />
+  </ItemGroup>
 </Project>

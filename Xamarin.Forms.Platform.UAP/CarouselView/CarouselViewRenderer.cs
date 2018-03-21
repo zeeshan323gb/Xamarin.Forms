@@ -42,336 +42,450 @@ namespace Xamarin.Forms.Platform.UWP
 	/// </summary>
 	public class CarouselViewRenderer : ViewRenderer<CarouselView, UserControl>
 	{
-		UserControl nativeView;
-		FlipView flipView;
-		StackPanel indicators;
+        bool orientationChanged;
 
-		ColorConverter converter;
-		SolidColorBrush selectedColor;
-		SolidColorBrush fillColor;
+        FlipViewControl nativeView;
+        FlipView flipView;
+        StackPanel indicators;
 
-		double ElementWidth;
-		double ElementHeight;
+        ColorConverter converter;
+        SolidColorBrush selectedColor;
+        SolidColorBrush fillColor;
 
-		// To hold all the rendered views
-		ObservableCollection<FrameworkElement> Source;
+        double ElementWidth;
+        double ElementHeight;
 
-		// To hold the indicators dots
-		ObservableCollection<Shape> Dots;
+        // To hold all the rendered views
+        ObservableCollection<FrameworkElement> Source;
 
-		// To manage SizeChanged
-		Timer timer;
+        // To hold the indicators dots
+        ObservableCollection<Shape> Dots;
 
-		bool _disposed;
+        // To manage SizeChanged
+        Timer timer;
 
-		protected override void OnElementChanged(ElementChangedEventArgs<CarouselView> e)
-		{
-			base.OnElementChanged(e);
+        bool _disposed;
 
-			if (Control == null)
-			{
-				// Instantiate the native control and assign it to the Control property with
-				// the SetNativeControl method
-			}
+        // To avoid triggering Position changed more than once
+        bool isChangingPosition;
 
-			if (e.OldElement != null)
-			{
-				// Unsubscribe from event handlers and cleanup any resources
-				if (flipView != null)
-				{
-					flipView.Loaded -= FlipView_Loaded;
-					flipView.SelectionChanged -= FlipView_SelectionChanged;
-					flipView.SizeChanged -= FlipView_SizeChanged;
-				}
+        ScrollViewer ScrollingHost;
+        Windows.UI.Xaml.Controls.Button prevBtn;
+        Windows.UI.Xaml.Controls.Button nextBtn;
 
-				if (Element != null)
-				{
-					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
-				}
-			}
+        protected override void OnElementChanged(ElementChangedEventArgs<CarouselView> e)
+        {
+            base.OnElementChanged(e);
 
-			if (e.NewElement != null)
-			{
-				// Configure the control and subscribe to event handlers
-				if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-					((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
-			}
-		}
+            if (Control == null)
+            {
+                // Instantiate the native control and assign it to the Control property with
+                // the SetNativeControl method
+                orientationChanged = true;
+            }
 
-		async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			// NewItems contains the item that was added.
-			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
+            if (e.OldElement != null)
+            {
+                // Unsubscribe from event handlers and cleanup any resources
+                /*if (flipView != null)
+                {
+                    flipView.Loaded -= FlipView_Loaded;
+                    flipView.SelectionChanged -= FlipView_SelectionChanged;
+                    flipView.SizeChanged -= FlipView_SizeChanged;
+                }*/
+
+                if (Element == null) return;
+
+                if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+                    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+            }
+
+            if (e.NewElement != null)
+            {
+                Element.SizeChanged += Element_SizeChanged;
+                // Configure the control and subscribe to event handlers
+                if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+                    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+            }
+        }
+
+        async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // NewItems contains the item that was added.
+            // If NewStartingIndex is not -1, then it contains the index where the new item was added.
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
             }
 
-			// OldItems contains the item that was removed.
-			// If OldStartingIndex is not -1, then it contains the index where the old item was removed.
+            // OldItems contains the item that was removed.
+            // If OldStartingIndex is not -1, then it contains the index where the old item was removed.
             if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 await RemovePage(e.OldStartingIndex);
             }
 
-			// OldItems contains the moved item.
-			// OldStartingIndex contains the index where the item was moved from.
-			// NewStartingIndex contains the index where the item was moved to.
-			if (e.Action == NotifyCollectionChangedAction.Move)
-			{
-				if (Element != null && flipView != null && Source != null)
-				{
-                    var obj = Source[e.OldStartingIndex];
-					Source.RemoveAt(e.OldStartingIndex);
-					Source.Insert(e.NewStartingIndex, obj);
+            // OldItems contains the moved item.
+            // OldStartingIndex contains the index where the item was moved from.
+            // NewStartingIndex contains the index where the item was moved to.
+            if (e.Action == NotifyCollectionChangedAction.Move)
+            {
+                if (Element == null || flipView == null || Source == null) return;
 
-                    SetCurrentPage(Element.Position);
-				}
+                var obj = Source[e.OldStartingIndex];
+                Source.RemoveAt(e.OldStartingIndex);
+                Source.Insert(e.NewStartingIndex, obj);
+
+                SetCurrentPage(Element.Position);
             }
 
-			// NewItems contains the replacement item.
-			// NewStartingIndex and OldStartingIndex are equal, and if they are not -1,
-			// then they contain the index where the item was replaced.
-			if (e.Action == NotifyCollectionChangedAction.Replace)
-			{
-				if (Element != null && flipView != null && Source != null)
-				{
-					Source[e.OldStartingIndex] = CreateView(e.NewItems[e.NewStartingIndex]);
-				}
+            // NewItems contains the replacement item.
+            // NewStartingIndex and OldStartingIndex are equal, and if they are not -1,
+            // then they contain the index where the item was replaced.
+            if (e.Action == NotifyCollectionChangedAction.Replace)
+            {
+                if (Element == null || flipView == null || Source == null) return;
+
+                Source[e.OldStartingIndex] = CreateView(e.NewItems[e.NewStartingIndex]);
             }
 
-			// No other properties are valid.
-			if (e.Action == NotifyCollectionChangedAction.Reset)
-			{
-				if (Element != null)
-				{
-					SetPosition();
-					SetNativeView();
-					Element.PositionSelected?.Invoke(Element, Element.Position);
-				}
-			}
-		}
+            // No other properties are valid.
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                if (Element == null) return;
 
-		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			base.OnElementPropertyChanged(sender, e);
+                SetPosition();
+                SetNativeView();
 
-			var rect = this.Element?.Bounds;
+                SetArrowsVisibility();
 
-			switch (e.PropertyName)
-			{
-				case "Width":
-					// Save width only the first time to enable SizeChanged
-					if (Element != null)
-					{
-						if (ElementWidth == 0)
-							ElementWidth = ((Xamarin.Forms.Rectangle)rect).Width;
-					}
-					break;
-				case "Height":
-					// Save height only the first time to enable SizeChanged
-					if (Element != null)
-					{
-						if (ElementHeight == 0)
-							ElementHeight = ((Xamarin.Forms.Rectangle)rect).Height;
-						SetNativeView();
-						Element.PositionSelected?.Invoke(Element, Element.Position);
-					}
-					break;
-				case "Orientation":
-					if (Element != null)
-					{
-						SetNativeView();
-						Element.PositionSelected?.Invoke(Element, Element.Position);
-					}
-					break;
-				case "BackgroundColor":
-					if (flipView != null)
-						flipView.Background = (SolidColorBrush)converter.Convert(Element.BackgroundColor, null, null, null);
-					break;
-				case "IsSwipingEnabled":
-					//flipView.ManipulationMode = Element.IsSwipingEnabled ? ManipulationModes.All : ManipulationModes.None;
-					break;
-				case "IndicatorsTintColor":
-					fillColor = (SolidColorBrush)converter.Convert(Element.IndicatorsTintColor, null, null, null);
+                Element.SendPositionSelected();
+            }
+        }
+
+        // Arrows visibility
+        private void FlipView_Loaded(object sender, RoutedEventArgs e)
+        {
+            ButtonHide(flipView, "PreviousButtonHorizontal");
+            ButtonHide(flipView, "NextButtonHorizontal");
+            ButtonHide(flipView, "PreviousButtonVertical");
+            ButtonHide(flipView, "NextButtonVertical");
+
+            //var controls = AllChildren(flipView);
+
+            if (ScrollingHost == null)
+            {
+                ScrollingHost = FindVisualChild<Windows.UI.Xaml.Controls.ScrollViewer>(flipView, "ScrollingHost");
+
+                ScrollingHost.ViewChanging += ScrollingHost_ViewChanging;
+                ScrollingHost.ViewChanged += ScrollingHost_ViewChanged;
+            }
+
+            SetArrows();
+        }
+
+        private void Element_SizeChanged(object sender, EventArgs e)
+        {
+            if (Element == null) return;
+
+            var rect = Element.Bounds;
+
+            if (nativeView == null)
+            {
+                ElementWidth = ((Xamarin.Forms.Rectangle)rect).Width;
+                ElementHeight = ((Xamarin.Forms.Rectangle)rect).Height;
+                SetNativeView();
+                Element.SendPositionSelected();
+            }
+        }
+
+        // Reset timer as this is called multiple times
+        private void FlipView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width != ElementWidth || e.NewSize.Height != ElementHeight)
+            {
+                if (timer != null)
+                    timer.Dispose();
+                timer = null;
+
+                timer = new Timer(OnTick, e.NewSize, 100, 100);
+            }
+        }
+
+        private void OnTick(object args)
+        {
+            timer.Dispose();
+            timer = null;
+
+            // Save new dimensions when resize completes
+            var size = (Windows.Foundation.Size)args;
+            ElementWidth = size.Width;
+            ElementHeight = size.Height;
+
+            // Refresh UI
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                if (Element != null)
+                {
+                    SetNativeView();
+                    Element.SendPositionSelected();
+                }
+            });
+        }
+
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            base.OnElementPropertyChanged(sender, e);
+
+            if (Element == null || flipView == null) return;
+
+            var rect = this.Element?.Bounds;
+
+            switch (e.PropertyName)
+            {
+                case "Orientation":
+                    orientationChanged = true;
+                    SetNativeView();
+                    Element.SendPositionSelected();
+                    break;
+                case "BackgroundColor":
+                    flipView.Background = (SolidColorBrush)converter.Convert(Element.BackgroundColor, null, null, null);
+                    break;
+                case "IsSwipeEnabled":
+                    nativeView.IsSwipeEnabled = Element.IsSwipeEnabled;
+                    break;
+                case "IndicatorsTintColor":
+                    fillColor = (SolidColorBrush)converter.Convert(Element.IndicatorsTintColor, null, null, null);
                     UpdateIndicatorsTint();
-					break;
-				case "CurrentPageIndicatorTintColor":
-					selectedColor = (SolidColorBrush)converter.Convert(Element.CurrentPageIndicatorTintColor, null, null, null);
+                    break;
+                case "CurrentPageIndicatorTintColor":
+                    selectedColor = (SolidColorBrush)converter.Convert(Element.CurrentPageIndicatorTintColor, null, null, null);
                     UpdateIndicatorsTint();
-					break;
-				case "IndicatorsShape":
-					SetIndicators();
-					break;
-				case "ShowIndicators":
+                    break;
+                case "IndicatorsShape":
                     SetIndicators();
-					break;
-				case "ItemsSource":
-					if (Element != null)
-					{
-						SetPosition();
-						SetNativeView();
-						Element.PositionSelected?.Invoke(Element, Element.Position);
-						if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-							((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
-					}
-					break;
-				case "ItemTemplate":
-					if (Element != null)
-					{
-						SetNativeView();
-						Element.PositionSelected?.Invoke(Element, Element.Position);
-					}
-					break;
-				case "Position":
-					if (Element != null && !isSwiping)
-						SetCurrentPage(Element.Position);
-					break;
-				case "ShowArrows":
-					if (flipView != null)
-						FlipView_Loaded(flipView, null);
-					break;
-			}
-		}
+                    break;
+                case "ShowIndicators":
+                    SetIndicators();
+                    break;
+                case "ItemsSource":
+                    SetPosition();
+                    SetNativeView();
+                    SetArrowsVisibility();
+                    Element.SendPositionSelected();
+                    if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+                        ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+                    break;
+                case "ItemTemplate":
+                    SetNativeView();
+                    Element.SendPositionSelected();
+                    break;
+                case "Position":
+                    if (!isChangingPosition)
+                    {
+                        SetCurrentPage(Element.Position);
+                    }
+                    break;
+                case "ShowArrows":
+                    FlipView_Loaded(flipView, null);
+                    break;
+                case "ArrowsBackgroundColor":
 
-		// To avoid triggering Position changed more than once
-		bool isSwiping;
+                    break;
+                case "ArrowsTintColor":
 
-		// Arrows visibility
-		private void FlipView_Loaded(object sender, RoutedEventArgs e)
-		{
-			ButtonHide(flipView, "PreviousButtonHorizontal");
-			ButtonHide(flipView, "NextButtonHorizontal");
-			ButtonHide(flipView, "PreviousButtonVertical");
-			ButtonHide(flipView, "NextButtonVertical");
-		}
+                    break;
+                case "ArrowsTransparency":
 
-		private void FlipView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			if (Element != null && !isSwiping)
-			{
-				Element.Position = flipView.SelectedIndex;
+                    break;
+            }
+        }
+
+        #region adapter callbacks
+
+        private void FlipView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Element != null && !isChangingPosition)
+            {
+                Element.Position = flipView.SelectedIndex;
                 UpdateIndicatorsTint();
 
-				Element.PositionSelected?.Invoke(Element, flipView.SelectedIndex);
-			}
-		}
+                Element.SendPositionSelected();
+            }
+        }
 
-		// Reset timer as this is called multiple times
-		private void FlipView_SizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			if (e.NewSize.Width != ElementWidth || e.NewSize.Height != ElementHeight)
-			{
-				if (timer != null)
-					timer.Dispose();
-				timer = null;
+        double lastOffset;
 
-				timer = new Timer(OnTick, e.NewSize, 100, 100);
-			}
-		}
+        private void ScrollingHost_ViewChanging(object sender, ScrollViewerViewChangingEventArgs e)
+        {
+            var scrollView = (ScrollViewer)sender;
 
-		private void OnTick(object args)
-		{
-			timer.Dispose();
-			timer = null;
+            double percentCompleted;
+            ScrollDirection direction;
 
-			// Save new dimensions when resize completes
-			var size = (Windows.Foundation.Size)args;
-			ElementWidth = size.Width;
-			ElementHeight = size.Height;
+            // Get Horizontal or Vertical Offset depending on carousel orientation
+            var currentOffset = Element.Orientation == CarouselViewOrientation.Horizontal ? scrollView.HorizontalOffset : scrollView.VerticalOffset;
 
-			// Refresh UI
-			Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
-			{
-				if (Element != null)
-				{
-					SetNativeView();
-					Element.PositionSelected?.Invoke(Element, Element.Position);
-				}
-			});
-		}
+            // Scrolling to the right
+            if (currentOffset > lastOffset)
+            {
+                percentCompleted = Math.Floor((currentOffset - (int)currentOffset) * 100);
+                direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
+            }
+            else
+            {
+                percentCompleted = Math.Floor((lastOffset - currentOffset) * 100);
+                direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
+            }
 
-		void SetPosition()
-		{
-			isSwiping = true;
-			if (Element.ItemsSource != null)
-			{
-				if (Element.Position > Element.ItemsSource.GetCount() - 1)
-					Element.Position = Element.ItemsSource.GetCount() - 1;
+            if (percentCompleted <= 100)
+                Element.SendScrolled(percentCompleted, direction);
+        }
 
-				if (Element.Position == -1)
-					Element.Position = 0;
-			}
-			else
-			{
-				Element.Position = 0;
-			}
-			isSwiping = false;
-		}
+        private void ScrollingHost_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        {
+            if (!e.IsIntermediate)
+            {
+                var scrollView = (ScrollViewer)sender;
+                lastOffset = Element.Orientation == CarouselViewOrientation.Horizontal ? scrollView.HorizontalOffset : scrollView.VerticalOffset;
+            }
+        }
 
-		public void SetNativeView()
-		{
-            CleanUpFlipView();
+        #endregion
 
-			// Orientation BP
-			if (Element.Orientation == CarouselViewOrientation.Horizontal)
-				nativeView = new FlipViewControl();
-			else
-				nativeView = new VerticalFlipViewControl();
+        public void SetNativeView()
+        {
+            var position = Element.Position;
 
-			flipView = nativeView.FindName("flipView") as FlipView;
+            if (nativeView == null)
+            {
+                nativeView = new FlipViewControl(Element.IsSwipeEnabled);
+                flipView = nativeView.FindName("flipView") as FlipView;
+            }
 
-			var source = new List<FrameworkElement>();
-			if (Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
-			{
-				for (int j = 0; j <= Element.ItemsSource.GetCount() - 1; j++)
-				{
-					source.Add(CreateView(Element.ItemsSource.GetItem(j)));
-				}
-			}
-			Source = new ObservableCollection<FrameworkElement>(source);
-			flipView.ItemsSource = Source;
+            if (orientationChanged)
+            {
+                // Orientation BP
+                if (Element.Orientation == CarouselViewOrientation.Horizontal)
+                    flipView.ItemsPanel = nativeView.Resources["HPanel"] as ItemsPanelTemplate;
+                else
+                    flipView.ItemsPanel = nativeView.Resources["VPanel"] as ItemsPanelTemplate;
 
-			//flipView.ItemsSource = Element.ItemsSource;
-			//flipView.ItemTemplateSelector = new MyTemplateSelector(Element); (the way it should be)
+                orientationChanged = false;
+            }
 
-			converter = new ColorConverter();
+            var source = new List<FrameworkElement>();
+            if (Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+            {
+                for (int j = 0; j <= Element.ItemsSource.GetCount() - 1; j++)
+                {
+                    source.Add(CreateView(Element.ItemsSource.GetItem(j)));
+                }
+            }
 
-			// BackgroundColor BP
-			flipView.Background = (SolidColorBrush)converter.Convert(Element.BackgroundColor, null, null, null);
+            Source = new ObservableCollection<FrameworkElement>(source);
+            flipView.ItemsSource = Source;
 
-			// IndicatorsTintColor BP
-			fillColor = (SolidColorBrush)converter.Convert(Element.IndicatorsTintColor, null, null, null);
+            //flipView.ItemsSource = Element.ItemsSource;
+            //flipView.ItemTemplateSelector = new MyTemplateSelector(Element); (the way it should be)
 
-			// CurrentPageIndicatorTintColor BP
-			selectedColor = (SolidColorBrush)converter.Convert(Element.CurrentPageIndicatorTintColor, null, null, null);
+            converter = new ColorConverter();
 
-			flipView.Loaded += FlipView_Loaded;
-			flipView.SelectionChanged += FlipView_SelectionChanged;
-			flipView.SizeChanged += FlipView_SizeChanged;
+            // BackgroundColor BP
+            flipView.Background = (SolidColorBrush)converter.Convert(Element.BackgroundColor, null, null, null);
 
-			//IsSwipingEnabled BP (not working)
-			//flipView.ManipulationMode = Element.IsSwipingEnabled ? ManipulationModes.All : ManipulationModes.None;
+            // IndicatorsTintColor BP
+            fillColor = (SolidColorBrush)converter.Convert(Element.IndicatorsTintColor, null, null, null);
 
-			if (Source.Count > 0)
-			{
-				flipView.SelectedIndex = Element.Position;
-			}
+            // CurrentPageIndicatorTintColor BP
+            selectedColor = (SolidColorBrush)converter.Convert(Element.CurrentPageIndicatorTintColor, null, null, null);
 
-			SetNativeControl(nativeView);
+            flipView.Loaded += FlipView_Loaded;
+            flipView.SelectionChanged += FlipView_SelectionChanged;
+            flipView.SizeChanged += FlipView_SizeChanged;
 
-			// INDICATORS
+            if (Source.Count > 0)
+            {
+                flipView.SelectedIndex = position;
+            }
+
+            SetNativeControl(nativeView);
+
+            //SetArrows();
+
+            // INDICATORS
             indicators = nativeView.FindName("indicators") as StackPanel;
             SetIndicators();
-		}
+        }
 
-		void SetIndicators()
-		{
-			var dotsPanel = nativeView.FindName("dotsPanel") as ItemsControl;
+        void SetPosition()
+        {
+            isChangingPosition = true;
+            if (Element.ItemsSource != null)
+            {
+                if (Element.Position > Element.ItemsSource.GetCount() - 1)
+                    Element.Position = Element.ItemsSource.GetCount() - 1;
+
+                if (Element.Position == -1)
+                    Element.Position = 0;
+            }
+            else
+            {
+                Element.Position = 0;
+            }
+            isChangingPosition = false;
+        }
+
+        void SetArrows()
+        {
+            if (Element.Orientation == CarouselViewOrientation.Horizontal)
+            {
+                prevBtn = FindVisualChild<Windows.UI.Xaml.Controls.Button>(flipView, "PreviousButtonHorizontal");
+                nextBtn = FindVisualChild<Windows.UI.Xaml.Controls.Button>(flipView, "NextButtonHorizontal");
+            }
+            else
+            {
+                prevBtn = FindVisualChild<Windows.UI.Xaml.Controls.Button>(flipView, "PreviousButtonVertical");
+                nextBtn = FindVisualChild<Windows.UI.Xaml.Controls.Button>(flipView, "NextButtonVertical");
+            }
+
+            // TODO: Set BackgroundColor, TintColor and Transparency
+        }
+
+        void SetArrowsVisibility()
+        {
+            if (prevBtn == null || nextBtn == null) return;
+            prevBtn.Visibility = Element.Position == 0 || Element.ItemsSource.GetCount() == 0 ? Visibility.Collapsed : Visibility.Visible;
+            nextBtn.Visibility = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0 ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        void SetIndicators()
+        {
+            var dotsPanel = nativeView.FindName("dotsPanel") as ItemsControl;
 
             if (Element.ShowIndicators)
             {
+                if (Element.Orientation == CarouselViewOrientation.Horizontal)
+                {
+                    indicators.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    indicators.VerticalAlignment = VerticalAlignment.Bottom;
+                    indicators.Width = Double.NaN;
+                    indicators.Height = 32;
+                    dotsPanel.HorizontalAlignment = HorizontalAlignment.Center;
+                    dotsPanel.VerticalAlignment = VerticalAlignment.Bottom;
+                    dotsPanel.ItemsPanel = nativeView.Resources["dotsHPanel"] as ItemsPanelTemplate;
+                }
+                else
+                {
+                    indicators.HorizontalAlignment = HorizontalAlignment.Right;
+                    indicators.VerticalAlignment = VerticalAlignment.Center;
+                    indicators.Width = 32;
+                    indicators.Height = Double.NaN;
+                    dotsPanel.HorizontalAlignment = HorizontalAlignment.Center;
+                    dotsPanel.VerticalAlignment = VerticalAlignment.Center;
+                    dotsPanel.ItemsPanel = nativeView.Resources["dotsVPanel"] as ItemsPanelTemplate;
+                }
+
                 var dots = new List<Shape>();
 
                 if (Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
@@ -393,192 +507,201 @@ namespace Xamarin.Forms.Platform.UWP
             }
 
             // ShowIndicators BP
-            indicators.Visibility = Element.ShowIndicators? Visibility.Visible : Visibility.Collapsed;
-		}
+            indicators.Visibility = Element.ShowIndicators ? Visibility.Visible : Visibility.Collapsed;
+        }
 
-		void UpdateIndicatorsTint()
-		{
-			var dotsPanel = nativeView.FindName("dotsPanel") as ItemsControl;
-			int i = 0;
-			foreach (var item in dotsPanel.Items)
-			{
-				((Shape)item).Fill = i == Element.Position ? selectedColor : fillColor;
-				i++;
-			}
-		}
+        void UpdateIndicatorsTint()
+        {
+            var dotsPanel = nativeView.FindName("dotsPanel") as ItemsControl;
+            int i = 0;
+            foreach (var item in dotsPanel.Items)
+            {
+                ((Shape)item).Fill = i == Element.Position ? selectedColor : fillColor;
+                i++;
+            }
+        }
 
-		void InsertPage(object item, int position)
-		{
-			if (Element != null && flipView != null && Source != null)
-			{
-				if (position <= Element.Position)
-				{
-					isSwiping = true;
-					Element.Position++;
-					isSwiping = false;
-				}
+        void InsertPage(object item, int position)
+        {
+            if (Element == null || flipView == null || Source == null) return;
 
-				Source.Insert(position, CreateView(item));
-				Dots.Insert(position, CreateDot(position, Element.Position));
+            if (position <= Element.Position)
+            {
+                isChangingPosition = true;
+                Element.Position++;
+                isChangingPosition = false;
+            }
 
-				flipView.SelectedIndex = Element.Position;
+            Source.Insert(position, CreateView(item));
+            Dots?.Insert(position, CreateDot(position, Element.Position));
 
-				if (position <= Element.Position)
-					Element.PositionSelected?.Invoke(Element, flipView.SelectedIndex);
-			}
-		}
+            flipView.SelectedIndex = Element.Position;
 
-		public async Task RemovePage(int position)
-		{
-			if (Element != null && flipView != null && Source != null && Source?.Count > 0)
-			{
-				// To remove latest page, rebuild flipview or the page wont disappear
-				if (Source.Count == 1)
-				{
-					SetNativeView();
-				}
-				else
-				{
+            //if (position <= Element.Position)
+            Element.SendPositionSelected();
+        }
 
-					isSwiping = true;
+        public async Task RemovePage(int position)
+        {
+            if (Element == null || flipView == null || Source == null) return;
 
-					// To remove current page
-					if (position == Element.Position)
-					{
-						// Swipe animation at position 0 doesn't work :(
-						/*if (position == 0)
-						{
-							flipView.SelectedIndex = 1;
-						}
-						else
-						{*/
-						if (position > 0)
-						{
-							var newPos = position - 1;
-							if (newPos == -1)
-								newPos = 0;
+            if (Source?.Count > 0)
+            {
+                // To remove latest page, rebuild flipview or the page wont disappear
+                if (Source.Count == 1)
+                {
+                    SetNativeView();
+                }
+                else
+                {
 
-							flipView.SelectedIndex = newPos;
-						}
+                    isChangingPosition = true;
 
-						// With a swipe transition
-						if (Element.AnimateTransition)
-							await Task.Delay(100);
-					}
+                    // To remove current page
+                    if (position == Element.Position)
+                    {
+                        // Swipe animation at position 0 doesn't work :(
+                        /*if (position == 0)
+                        {
+                            flipView.SelectedIndex = 1;
+                        }
+                        else
+                        {*/
+                        if (position > 0)
+                        {
+                            var newPos = position - 1;
+                            if (newPos == -1)
+                                newPos = 0;
 
-					Source.RemoveAt(position);
+                            flipView.SelectedIndex = newPos;
+                        }
 
-					Element.Position = flipView.SelectedIndex;
+                        // With a swipe transition
+                        if (Element.AnimateTransition)
+                            await Task.Delay(100);
+                    }
 
-					Dots.RemoveAt(position);
-					UpdateIndicatorsTint();
+                    Source.RemoveAt(position);
 
-					isSwiping = false;
+                    Element.Position = flipView.SelectedIndex;
 
-					Element.PositionSelected?.Invoke(Element, Element.Position);
-				}
-			}
-		}
+                    Dots?.RemoveAt(position);
+                    UpdateIndicatorsTint();
 
-		void SetCurrentPage(int position)
-		{
-			if (flipView != null && Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
-			{
-				flipView.SelectedIndex = position;
-			}
-		}
+                    isChangingPosition = false;
 
-		FrameworkElement CreateView(object item)
-		{
-			Xamarin.Forms.View formsView = null;
-			var bindingContext = item;
+                    Element.SendPositionSelected();
+                }
+            }
+        }
 
-			var dt = bindingContext as Xamarin.Forms.DataTemplate;
+        void SetCurrentPage(int position)
+        {
+            if (position < 0 || position > Element.ItemsSource?.GetCount() - 1)
+                return;
 
-			// Support for List<DataTemplate> as ItemsSource
-			if (dt != null)
-			{
-				formsView = (Xamarin.Forms.View)dt.CreateContent();
-			}
-			else
-			{
-				var view = bindingContext as View;
+            if (Element == null || flipView == null || Element?.ItemsSource == null) return;
 
-				if (view != null)
-				{
-					formsView = view;
-				}
-				else
-				{
-					var selector = Element.ItemTemplate as Xamarin.Forms.DataTemplateSelector;
-					if (selector != null)
-						formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
-					else
-						formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
+            if (Element.ItemsSource?.GetCount() > 0)
+            {
+                flipView.SelectedIndex = position;
+            }
+        }
 
-					formsView.BindingContext = bindingContext;
-				}
-			}
+        FrameworkElement CreateView(object item)
+        {
+            Xamarin.Forms.View formsView = null;
+            var bindingContext = item;
 
-			formsView.Parent = this.Element;
+            var dt = bindingContext as Xamarin.Forms.DataTemplate;
+            var view = bindingContext as View;
 
-			var element = formsView.ToWindows(new Xamarin.Forms.Rectangle(0, 0, ElementWidth, ElementHeight));
+            // Support for List<DataTemplate> as ItemsSource
+            if (dt != null)
+            {
+                formsView = (Xamarin.Forms.View)dt.CreateContent();
+            }
+            else
+            {
 
-			return element;
-		}
+                if (view != null)
+                {
+                    formsView = view;
+                }
+                else
+                {
+                    var selector = Element.ItemTemplate as Xamarin.Forms.DataTemplateSelector;
+                    if (selector != null)
+                        formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+                    else
+                        formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
 
-		Shape CreateDot(int i, int position)
-		{
-			if (Element.IndicatorsShape == IndicatorsShape.Circle)
-			{
-				return new Ellipse()
-				{
-					Fill = i == position ? selectedColor : fillColor,
-					Height = 7,
-					Width = 7,
-					Margin = new Windows.UI.Xaml.Thickness(4, 12, 4, 12)
-				};
-			}
-			else
-			{
-				return new Windows.UI.Xaml.Shapes.Rectangle()
-				{
-					Fill = i == position ? selectedColor : fillColor,
-					Height = 6,
-					Width = 6,
-					Margin = new Windows.UI.Xaml.Thickness(4, 12, 4, 12)
-				};
-			}
-		}
+                    formsView.BindingContext = bindingContext;
+                }
+            }
 
-		private void ButtonHide(FlipView f, string name)
-		{
-			var b = FindVisualChild<Windows.UI.Xaml.Controls.Button>(f, name);
-			if (b != null)
-			{
-				b.Opacity = Element.ShowArrows ? 1.0 : 0.0;
-				b.IsHitTestVisible = Element.ShowArrows;
-			}
-		}
+            formsView.Parent = this.Element;
 
-		private childItemType FindVisualChild<childItemType>(DependencyObject obj, string name) where childItemType : FrameworkElement
-		{
-			for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-			{
-				DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-				if (child is childItemType && ((FrameworkElement)child).Name == name)
-					return (childItemType)child;
-				else
-				{
-					childItemType childOfChild = FindVisualChild<childItemType>(child, name);
-					if (childOfChild != null)
-						return childOfChild;
-				}
-			}
-			return null;
-		}
+            var element = formsView.ToWindows(new Xamarin.Forms.Rectangle(0, 0, ElementWidth, ElementHeight));
 
-		/*public List<Control> AllChildren(DependencyObject parent)
+            //if (dt == null && view == null)
+            //formsView.Parent = null;
+
+            return element;
+        }
+
+        Shape CreateDot(int i, int position)
+        {
+            if (Element.IndicatorsShape == IndicatorsShape.Circle)
+            {
+                return new Ellipse()
+                {
+                    Fill = i == position ? selectedColor : fillColor,
+                    Height = 7,
+                    Width = 7,
+                    Margin = new Windows.UI.Xaml.Thickness(4, 12, 4, 12)
+                };
+            }
+            else
+            {
+                return new Windows.UI.Xaml.Shapes.Rectangle()
+                {
+                    Fill = i == position ? selectedColor : fillColor,
+                    Height = 6,
+                    Width = 6,
+                    Margin = new Windows.UI.Xaml.Thickness(4, 12, 4, 12)
+                };
+            }
+        }
+
+        private void ButtonHide(FlipView f, string name)
+        {
+            var b = FindVisualChild<Windows.UI.Xaml.Controls.Button>(f, name);
+            if (b != null)
+            {
+                b.Opacity = Element.ShowArrows ? 1.0 : 0.0;
+                b.IsHitTestVisible = Element.ShowArrows;
+            }
+        }
+
+        private childItemType FindVisualChild<childItemType>(DependencyObject obj, string name) where childItemType : FrameworkElement
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child is childItemType && ((FrameworkElement)child).Name == name)
+                    return (childItemType)child;
+                else
+                {
+                    childItemType childOfChild = FindVisualChild<childItemType>(child, name);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+        public List<Control> AllChildren(DependencyObject parent)
         {
             var _list = new List<Control>();
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -586,64 +709,56 @@ namespace Xamarin.Forms.Platform.UWP
                 var _child = VisualTreeHelper.GetChild(parent, i);
                 if (_child is Control)
                     _list.Add(_child as Control);
-                _list.AddRange(AllChildren(_child));              
+                _list.AddRange(AllChildren(_child));
             }
             return _list;
-        }*/
+        }
 
-		void CleanUpFlipView()
-		{
-			if (indicators != null)
-			{
-				indicators = null;
-			}
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !_disposed)
+            {
+                prevBtn = null;
+                nextBtn = null;
 
-			if (flipView != null)
-			{
-				flipView.SelectionChanged -= FlipView_SelectionChanged;
-				flipView = null;
-			}
-		}
+                indicators = null;
 
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && !_disposed)
-			{
-                CleanUpFlipView();
+                if (flipView != null)
+                {
+                    flipView.SelectionChanged -= FlipView_SelectionChanged;
+                    flipView = null;
+                }
 
-				if (Element != null)
-				{
-					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
-				}
+                if (Element != null)
+                {
+                    if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
+                        ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+                }
 
-				indicators = null;
+                nativeView = null;
 
-				nativeView = null;
+                _disposed = true;
+            }
 
-				_disposed = true;
-			}
+            try
+            {
+                base.Dispose(disposing);
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
+        }
+    }
 
-			try
-			{
-				base.Dispose(disposing);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine(ex.Message);
-				return;
-			}
-		}
-	}
+    // UWP DataTemplate doesn't support loadTemplate function as parameter
+    // Having that, rendering all the views ahead of time is not needed
 
-	// UWP DataTemplate doesn't support loadTemplate function as parameter
-	// Having that, to render all the views ahead of time is not needed
-
-	/*public class MyTemplateSelector : DataTemplateSelector
+    /*public class MyTemplateSelector : DataTemplateSelector
     {
-        CarouselViewControl Element;
+        CarouselView Element;
 
-        public MyTemplateSelector(CarouselViewControl element)
+        public MyTemplateSelector(CarouselView element)
         {
             Element = element;
         }
@@ -657,24 +772,24 @@ namespace Xamarin.Forms.Platform.UWP
 
             // Support for List<DataTemplate> as ItemsSource
             if (dt != null)
-			{
-				formsView = (Xamarin.Forms.View)dt.CreateContent();
-			}
-			else {
+            {
+                formsView = (Xamarin.Forms.View)dt.CreateContent();
+            }
+            else {
 
-				var selector = Element.ItemTemplate as Xamarin.Forms.DataTemplateSelector;
-				if (selector != null)
-					formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
-				else
-					formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
+                var selector = Element.ItemTemplate as Xamarin.Forms.DataTemplateSelector;
+                if (selector != null)
+                    formsView = (Xamarin.Forms.View)selector.SelectTemplate(bindingContext, Element).CreateContent();
+                else
+                    formsView = (Xamarin.Forms.View)Element.ItemTemplate.CreateContent();
 
-				formsView.BindingContext = bindingContext;
-			}
+                formsView.BindingContext = bindingContext;
+            }
 
-			formsView.Parent = this.Element;
+            formsView.Parent = this.Element;
 
 
-			var element = FormsViewToNativeUWP.ConvertFormsToNative(formsView, new Xamarin.Forms.Rectangle(0, 0, ElementWidth, ElementHeight));
+            var element = FormsViewToNativeUWP.ConvertFormsToNative(formsView, new Xamarin.Forms.Rectangle(0, 0, ElementWidth, ElementHeight));
 
             var template = new DataTemplate(() => return element; ); // THIS IS NOT SUPPORTED :(
 

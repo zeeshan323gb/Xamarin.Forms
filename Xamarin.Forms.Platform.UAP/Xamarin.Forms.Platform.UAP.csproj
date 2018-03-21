@@ -149,9 +149,6 @@
     <Compile Include="CarouselView\FlipViewControl.xaml.cs">
       <DependentUpon>FlipViewControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CarouselView\VerticalFlipViewControl.xaml.cs">
-      <DependentUpon>VerticalFlipViewControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="FormsPresenter.cs" />
     <Compile Include="FormsUWP.cs" />
     <Compile Include="IToolBarForegroundBinder.cs" />
@@ -259,10 +256,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CarouselView\FlipViewControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="CarouselView\VerticalFlipViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

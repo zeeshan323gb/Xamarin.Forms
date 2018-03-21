@@ -1,4 +1,4 @@
-﻿using Windows.UI.Xaml.Controls;
+﻿using System;
 
 /*
 The MIT License(MIT)
@@ -21,21 +21,16 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
-namespace Xamarin.Forms.Platform.UAP
+// PR Fix for entry focus bug #242
+namespace Xamarin.Forms.Platform.Android
 {
-    public sealed partial class FlipViewControl : UserControl
+    public class SoftKeyboardEventArgs : EventArgs
     {
-        public bool IsSwipeEnabled;
-
-        public FlipViewControl(bool isSwipeEnabled)
+        public SoftKeyboardEventArgs(bool isVisible)
         {
-            this.InitializeComponent();
-            this.IsSwipeEnabled = isSwipeEnabled;
+            IsVisible = isVisible;
         }
 
-        private void VirtualizingStackPanel_PointerWheelChanged(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
-        {
-            e.Handled = !this.IsSwipeEnabled;
-        }
+        public bool IsVisible { get; private set; }
     }
 }
