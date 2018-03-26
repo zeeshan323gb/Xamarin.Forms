@@ -4,7 +4,8 @@ using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Xamarin.Forms.Internals;
 using static System.String;
-
+using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
+using System.Threading.Tasks;
 
 
 namespace Xamarin.Forms.Platform.UWP
@@ -76,6 +77,7 @@ if(bases.length == 0){
 					Control.NavigationStarting -= OnNavigationStarted;
 					Control.NavigationCompleted -= OnNavigationCompleted;
 					Control.NavigationFailed -= OnNavigationFailed;
+					Control.ScriptNotify -= OnScriptNotify;
 				}
 			}
 
@@ -90,6 +92,7 @@ if(bases.length == 0){
 			{
 				var oldElement = e.OldElement;
 				oldElement.EvalRequested -= OnEvalRequested;
+				oldElement.EvaluateJavaScriptRequested -= OnEvaluateJavaScriptRequested;
 				oldElement.GoBackRequested -= OnGoBackRequested;
 				oldElement.GoForwardRequested -= OnGoForwardRequested;
 			}
@@ -102,11 +105,13 @@ if(bases.length == 0){
 					webView.NavigationStarting += OnNavigationStarted;
 					webView.NavigationCompleted += OnNavigationCompleted;
 					webView.NavigationFailed += OnNavigationFailed;
+					webView.ScriptNotify += OnScriptNotify;
 					SetNativeControl(webView);
 				}
 
 				var newElement = e.NewElement;
 				newElement.EvalRequested += OnEvalRequested;
+				newElement.EvaluateJavaScriptRequested += OnEvaluateJavaScriptRequested;
 				newElement.GoForwardRequested += OnGoForwardRequested;
 				newElement.GoBackRequested += OnGoBackRequested;
 
@@ -138,6 +143,11 @@ if(bases.length == 0){
 			await Control.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => await Control.InvokeScriptAsync("eval", new[] { eventArg.Script }));
 		}
 
+		async Task<string> OnEvaluateJavaScriptRequested(string script)
+		{
+			return await Control.InvokeScriptAsync("eval", new[] { script });
+		}
+
 		void OnGoBackRequested(object sender, EventArgs eventArgs)
 		{
 			if (Control.CanGoBack)
@@ -160,12 +170,15 @@ if(bases.length == 0){
 			UpdateCanGoBackForward();
 		}
 
-		void OnNavigationCompleted(Windows.UI.Xaml.Controls.WebView sender, WebViewNavigationCompletedEventArgs e)
+		async void OnNavigationCompleted(Windows.UI.Xaml.Controls.WebView sender, WebViewNavigationCompletedEventArgs e)
 		{
 			if (e.Uri != null)
 				SendNavigated(new UrlWebViewSource { Url = e.Uri.AbsoluteUri }, _eventState, WebNavigationResult.Success);
 
 			UpdateCanGoBackForward();
+
+			if (Element.OnThisPlatform().IsJavaScriptAlertEnabled())
+				await Control.InvokeScriptAsync("eval", new string[] { "window.alert = function(message){ window.external.notify(message); };" });
 		}
 
 		void OnNavigationFailed(object sender, WebViewNavigationFailedEventArgs e)
@@ -189,6 +202,12 @@ if(bases.length == 0){
 				if (args.Cancel)
 					_eventState = WebNavigationEvent.NewPage;
 			}
+		}
+
+		async void OnScriptNotify(object sender, NotifyEventArgs e)
+		{
+			if (Element.OnThisPlatform().IsJavaScriptAlertEnabled())
+				await new Windows.UI.Popups.MessageDialog(e.Value).ShowAsync();
 		}
 
 		void SendNavigated(UrlWebViewSource source, WebNavigationEvent evnt, WebNavigationResult result)

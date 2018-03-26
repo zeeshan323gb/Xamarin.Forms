@@ -1,26 +1,35 @@
-﻿using ElmSharp;
-using System;
+﻿using System;
+using ElmSharp;
 using ELayout = ElmSharp.Layout;
 
 namespace Xamarin.Forms.Platform.Tizen.Native
 {
 	public class EditfieldEntry : Native.Entry, IMeasurable
 	{
+		public event EventHandler TextBlockFocused;
+		public event EventHandler TextBlockUnfocused;
+
+		public bool IsTextBlockFocused => _isTexstBlockFocused;
+
 		ELayout _editfieldLayout;
 		int _heightPadding = 0;
+		bool _isTexstBlockFocused = false;
 
 		public EditfieldEntry(EvasObject parent) : base(parent)
 		{
 		}
 
+		public EditfieldEntry(EvasObject parent, string style) : base(parent)
+		{
+			if (!string.IsNullOrEmpty(style))
+				_editfieldLayout.SetTheme("layout", "editfield", style);
+		}
+
 		protected override IntPtr CreateHandle(EvasObject parent)
 		{
-			var bg = new ELayout(parent);
-			bg.SetTheme("layout", "background", "default");
-			_editfieldLayout = new ELayout(parent);
-			_editfieldLayout.SetTheme("layout", "editfield", "singleline");
-
 			var handle = base.CreateHandle(parent);
+			AllowFocus(false);
+			_editfieldLayout = CreateEditFieldLayout(parent);
 
 			// If true, It means, there is no extra layout on the widget handle
 			// We need to set RealHandle, becuase we replace Handle to Layout
@@ -30,12 +39,83 @@ namespace Xamarin.Forms.Platform.Tizen.Native
 			}
 			Handle = handle;
 
-			_editfieldLayout.SetPartContent("elm.swallow.content", this);
-			bg.SetPartContent("elm.swallow.content", _editfieldLayout);
+			if (!_editfieldLayout.SetPartContent("elm.swallow.content", this))
+			{
+				// Restore theme to default if editfield style is not available
+				_editfieldLayout.SetTheme("layout", "application", "default");
+				_editfieldLayout.SetPartContent("elm.swallow.content", this);
+			}
 
-			// The minimun size for the Content area of an Editfield. This is used to calculate the size when layouting.
 			_heightPadding = _editfieldLayout.EdjeObject["elm.swallow.content"].Geometry.Height;
-			return bg;
+			return _editfieldLayout;
+		}
+
+		ELayout CreateEditFieldLayout(EvasObject parent)
+		{
+			var layout = new ELayout(parent);
+			layout.SetTheme("layout", "editfield", "singleline");
+			layout.AllowFocus(true);
+			layout.Unfocused += (s, e) =>
+			{
+				SetFocusOnTextBlock(false);
+				layout.SignalEmit("elm,state,unfocused", "");
+			};
+			layout.Focused += (s, e) =>
+			{
+				AllowFocus(false);
+				layout.SignalEmit("elm,state,focused", "");
+			};
+
+			layout.KeyDown += (s, e) =>
+			{
+				if (e.KeyName == "Return")
+				{
+					if (!_isTexstBlockFocused)
+					{
+						SetFocusOnTextBlock(true);
+						e.Flags |= EvasEventFlag.OnHold;
+					}
+				}
+			};
+			Clicked += (s, e) => SetFocusOnTextBlock(true);
+
+			Focused += (s, e) =>
+			{
+				layout.RaiseTop();
+				layout.SignalEmit("elm,state,focused", "");
+			};
+
+			Unfocused += (s, e) =>
+			{
+				layout.SignalEmit("elm,state,unfocused", "");
+			};
+
+			return layout;
+		}
+
+		public override ElmSharp.Color BackgroundColor
+		{
+			get
+			{
+				return _editfieldLayout.BackgroundColor;
+			}
+			set
+			{
+				_editfieldLayout.BackgroundColor = value;
+			}
+
+		}
+
+		public void SetFocusOnTextBlock(bool isFocused)
+		{
+			AllowFocus(isFocused);
+			SetFocus(isFocused);
+			_isTexstBlockFocused = isFocused;
+
+			if (isFocused)
+				TextBlockFocused?.Invoke(this, EventArgs.Empty);
+			else
+				TextBlockUnfocused?.Invoke(this, EventArgs.Empty);
 		}
 
 		public new ElmSharp.Size Measure(int availableWidth, int availableHeight)

@@ -12,6 +12,7 @@ namespace Xamarin.Forms
 		internal static void RegisterAll(Type[] attrTypes) => Internals.Registrar.RegisterAll(attrTypes);
 	}
 }
+
 namespace Xamarin.Forms.Internals
 {
 	[EditorBrowsable(EditorBrowsableState.Never)]
@@ -33,7 +34,8 @@ namespace Xamarin.Forms.Internals
 			if (handlerType == null)
 				return null;
 
-			object handler = Activator.CreateInstance(handlerType);
+			object handler = DependencyResolver.ResolveOrCreate(handlerType);
+
 			return (TRegistrable)handler;
 		}
 
@@ -48,16 +50,7 @@ namespace Xamarin.Forms.Internals
 			if (handlerType == null)
 				return null;
 
-			// This is by no means a general solution to matching with the correct constructor, but it'll
-			// do for finding Android renderers which need Context (vs older custom renderers which may still use
-			// parameterless constructors)
-			if (handlerType.GetTypeInfo().DeclaredConstructors.Any(info => info.GetParameters().Length == args.Length))
-			{
-				object handler = Activator.CreateInstance(handlerType, args);
-				return (TRegistrable)handler;
-			}
-			
-			return GetHandler(type);
+			return (TRegistrable)DependencyResolver.ResolveOrCreate(handlerType, args);
 		}
 
 		public TOut GetHandler<TOut>(Type type) where TOut : TRegistrable
@@ -79,6 +72,17 @@ namespace Xamarin.Forms.Internals
 			var type = reflectableType != null ? reflectableType.GetTypeInfo().AsType() : obj.GetType();
 
 			return (TOut)GetHandler(type);
+		}
+
+		public TOut GetHandlerForObject<TOut>(object obj, params object[] args) where TOut : TRegistrable
+		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+
+			var reflectableType = obj as IReflectableType;
+			var type = reflectableType != null ? reflectableType.GetTypeInfo().AsType() : obj.GetType();
+
+			return (TOut)GetHandler(type, args);
 		}
 
 		public Type GetHandlerType(Type viewType)
@@ -160,7 +164,7 @@ namespace Xamarin.Forms.Internals
 
 		public static IEnumerable<Assembly> ExtraAssemblies { get; set; }
 
-		public static Registrar<IRegisterable> Registered { get; }
+		public static Registrar<IRegisterable> Registered { get; internal set; }
 
 		public static void RegisterAll(Type[] attrTypes)
 		{
@@ -183,7 +187,17 @@ namespace Xamarin.Forms.Internals
 			{
 				foreach (Type attrType in attrTypes)
 				{
-					Attribute[] attributes = assembly.GetCustomAttributes(attrType).ToArray();
+					Attribute[] attributes;
+					try
+					{
+						attributes = assembly.GetCustomAttributes(attrType).ToArray();
+					}
+					catch (System.IO.FileNotFoundException)
+					{
+						// Sometimes the previewer doesn't actually have everything required for these loads to work
+						Log.Warning(nameof(Registrar), "Could not load assembly: {0} for Attibute {1} | Some renderers may not be loaded", assembly.FullName, attrType.FullName);
+						continue;
+					}
 					var length = attributes.Length;
 					for (var i = 0; i < length;i++)
 					{

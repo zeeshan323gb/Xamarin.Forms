@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using Windows.Foundation;
-using Windows.UI;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Input;
 
 namespace Xamarin.Forms.Platform.UWP
 {
@@ -18,15 +18,6 @@ namespace Xamarin.Forms.Platform.UWP
 			return self.AsTask().ConfigureAwait(false);
 		}
 
-		public static Windows.UI.Color GetIdealForegroundForBackgroundColor(this Windows.UI.Color backgroundColor)
-		{
-			var nThreshold = 105;
-			int bgLuminance = Convert.ToInt32(backgroundColor.R * 0.2 + backgroundColor.G * 0.7 + backgroundColor.B * 0.1);
-
-			Windows.UI.Color foregroundColor = 255 - bgLuminance < nThreshold ? Colors.Black : Colors.White;
-			return foregroundColor;
-		}
-
 		public static void SetBinding(this FrameworkElement self, DependencyProperty property, string path)
 		{
 			self.SetBinding(property, new Windows.UI.Xaml.Data.Binding { Path = new PropertyPath(path) });
@@ -35,6 +26,38 @@ namespace Xamarin.Forms.Platform.UWP
 		public static void SetBinding(this FrameworkElement self, DependencyProperty property, string path, Windows.UI.Xaml.Data.IValueConverter converter)
 		{
 			self.SetBinding(property, new Windows.UI.Xaml.Data.Binding { Path = new PropertyPath(path), Converter = converter });
+		}
+
+		internal static InputScopeNameValue GetKeyboardButtonType(this ReturnType returnType)
+		{		
+			switch (returnType)
+			{
+				case ReturnType.Default:
+				case ReturnType.Done:
+				case ReturnType.Go:
+				case ReturnType.Next:
+				case ReturnType.Send:
+					return InputScopeNameValue.Default;
+				case ReturnType.Search:
+					return InputScopeNameValue.Search;
+				default:
+					throw new System.NotImplementedException($"ReturnType {returnType} not supported");
+			}
+		}
+
+		internal static InputScope ToInputScope(this ReturnType returnType)
+		{
+			var scopeName = new InputScopeName()
+			{
+				NameValue = GetKeyboardButtonType(returnType)
+			};
+
+			var inputScope = new InputScope
+			{
+				Names = { scopeName }
+			};
+
+			return inputScope;
 		}
 	}
 }

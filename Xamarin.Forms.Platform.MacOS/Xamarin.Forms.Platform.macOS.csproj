@@ -71,6 +71,7 @@
     <Compile Include="..\Xamarin.Forms.Platform.iOS\Flags.cs">
       <Link>Flags.cs</Link>
     </Compile>
+    <Compile Include="Controls\FormsNSDatePicker.cs" />
     <Compile Include="Extensions\FlowDirectionExtensions.cs" />
     <Compile Include="FormsApplicationDelegate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -241,4 +242,5 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Mac\Xamarin.Mac.CSharp.targets" />
+  <Target Name="_VerifyBuildSignature" />
 </Project>
