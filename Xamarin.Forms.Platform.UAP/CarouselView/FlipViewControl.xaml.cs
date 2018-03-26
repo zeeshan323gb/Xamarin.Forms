@@ -21,7 +21,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
  */
 
-namespace Xamarin.Forms.Platform.UAP
+namespace Xamarin.Forms.Platform.UWP
 {
     public sealed partial class FlipViewControl : UserControl
     {

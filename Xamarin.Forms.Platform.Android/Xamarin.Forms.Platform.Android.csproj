@@ -22,14 +22,12 @@
     <AndroidTlsProvider>
     </AndroidTlsProvider>
   </PropertyGroup>
-  
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true'">
     <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-  </PropertyGroup>  
-  
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -52,6 +50,12 @@
     <NoWarn>CS0109</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Com.Android.DeskClock, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xamarin.Android.VerticalViewPager.1.0.1\lib\MonoAndroid\Com.Android.DeskClock.dll</HintPath>
+    </Reference>
+    <Reference Include="Com.ViewPagerIndicator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xamarin.Android.CirclePageIndicator.1.0.2\lib\MonoAndroid\Com.ViewPagerIndicator.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -112,6 +116,14 @@
     <Compile Include="AndroidTitleBarVisibility.cs" />
     <Compile Include="AppCompat\FrameRenderer.cs" />
     <Compile Include="ButtonBackgroundTracker.cs" />
+    <Compile Include="CarouselView\CarouselViewRenderer.cs" />
+    <Compile Include="CarouselView\GlobalLayoutListener.cs" />
+    <Compile Include="CarouselView\HorizontalViewPager.cs" />
+    <Compile Include="CarouselView\IViewPager.cs" />
+    <Compile Include="CarouselView\SoftKeyboardEventArgs.cs" />
+    <Compile Include="CarouselView\SoftKeyboardService.cs" />
+    <Compile Include="CarouselView\Tag.cs" />
+    <Compile Include="CarouselView\VerticalViewPager.cs" />
     <Compile Include="Elevation.cs" />
     <Compile Include="Extensions\EntryRendererExtensions.cs" />
     <Compile Include="FastRenderers\AutomationPropertiesProvider.cs" />
