@@ -323,10 +323,10 @@ namespace Xamarin.Forms.Platform.Android
                     nextBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
                     break;
                 case "ArrowsTintColor":
-                    var prevArrow = nativeView.FindViewById<ImageView>(Resource.Id.prevArrow);
-                    prevArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
-                    var nextArrow = nativeView.FindViewById<ImageView>(Resource.Id.nextArrow);
-                    nextArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
+                    //var prevArrow = nativeView.FindViewById<ImageView>(Resource.Id.prevArrow);
+                    //prevArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
+                    //var nextArrow = nativeView.FindViewById<ImageView>(Resource.Id.nextArrow);
+                    //nextArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
                     break;
                 case "ArrowsTransparency":
                     if (prevBtn == null || nextBtn == null) return;
@@ -487,31 +487,31 @@ namespace Xamarin.Forms.Platform.Android
         {
             if (Element.ShowArrows)
             {
-                if (prevBtn == null)
-                {
-                    prevBtn = nativeView.FindViewById<LinearLayout>(Resource.Id.prev);
-                    prevBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
-                    prevBtn.Visibility = Element.Position == 0 || Element.ItemsSource.GetCount() == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
-                    prevBtn.Alpha = Element.ArrowsTransparency;
+                //if (prevBtn == null)
+                //{
+                //    prevBtn = nativeView.FindViewById<LinearLayout>(Resource.Id.prev);
+                //    prevBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
+                //    prevBtn.Visibility = Element.Position == 0 || Element.ItemsSource.GetCount() == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
+                //    prevBtn.Alpha = Element.ArrowsTransparency;
 
-                    var prevArrow = nativeView.FindViewById<ImageView>(Resource.Id.prevArrow);
-                    prevArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
+                //    var prevArrow = nativeView.FindViewById<ImageView>(Resource.Id.prevArrow);
+                //    prevArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
 
-                    prevBtn.Click += PrevBtn_Click;
-                }
+                //    prevBtn.Click += PrevBtn_Click;
+                //}
 
-                if (nextBtn == null)
-                {
-                    nextBtn = nativeView.FindViewById<LinearLayout>(Resource.Id.next);
-                    nextBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
-                    nextBtn.Visibility = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
-                    nextBtn.Alpha = Element.ArrowsTransparency;
+                //if (nextBtn == null)
+                //{
+                //    nextBtn = nativeView.FindViewById<LinearLayout>(Resource.Id.next);
+                //    nextBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
+                //    nextBtn.Visibility = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
+                //    nextBtn.Alpha = Element.ArrowsTransparency;
 
-                    var nextArrow = nativeView.FindViewById<ImageView>(Resource.Id.nextArrow);
-                    nextArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
+                //    var nextArrow = nativeView.FindViewById<ImageView>(Resource.Id.nextArrow);
+                //    nextArrow.SetColorFilter(Element.ArrowsTintColor.ToAndroid());
 
-                    nextBtn.Click += NextBtn_Click;
-                }
+                //    nextBtn.Click += NextBtn_Click;
+                //}
             }
             else
             {
