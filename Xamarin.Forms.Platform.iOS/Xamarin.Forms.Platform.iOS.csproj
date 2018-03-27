@@ -138,8 +138,7 @@
     <Compile Include="Extensions\LayoutExtensions.cs" />
     <Compile Include="NativeValueConverterService.cs" />
     <Compile Include="NativeBindingService.cs" />
-    <Compile Include="CarouselView\CarouselViewRenderer.cs" />
-    <Compile Include="CarouselView\ViewContainer.cs" />
+    <Compile Include="Renderers\CarouselViewRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\StringResources.ar.resx" />
