@@ -156,7 +156,7 @@ namespace Xamarin.Forms.Platform.Android
         {
             if (ev.Action == MotionEventActions.Up)
             {
-                if (Element?.GestureRecognizers.GetCount() > 0)
+                if (Element?.GestureRecognizers.Count > 0)
                 {
                     var gesture = Element.GestureRecognizers.First() as Xamarin.Forms.TapGestureRecognizer;
                     if (gesture != null)

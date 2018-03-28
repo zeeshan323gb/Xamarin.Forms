@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 /*
@@ -175,5 +176,23 @@ namespace Xamarin.Forms
         {
             Scrolled?.Invoke(this, new ScrollDirectionEventArgs { NewValue = percent, Direction = direction });
         }
-    }
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public int GetCount()
+		{
+			return ItemsSource.GetCount();
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public IList<object> GetList()
+		{
+			return ItemsSource.GetList();
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public object GetItem(int i)
+		{
+			return ItemsSource.GetItem(i);
+		}
+	}
 }

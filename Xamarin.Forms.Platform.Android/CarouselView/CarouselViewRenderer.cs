@@ -134,7 +134,7 @@ namespace Xamarin.Forms.Platform.Android
             // If NewStartingIndex is not -1, then it contains the index where the new item was added.
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+                InsertPage(Element?.GetItem(e.NewStartingIndex), e.NewStartingIndex);
             }
 
             // OldItems contains the item that was removed.
@@ -468,8 +468,8 @@ namespace Xamarin.Forms.Platform.Android
             isChangingPosition = true;
             if (Element.ItemsSource != null)
             {
-                if (Element.Position > Element.ItemsSource.GetCount() - 1)
-                    Element.Position = Element.ItemsSource.GetCount() - 1;
+                if (Element.Position > Element.GetCount() - 1)
+                    Element.Position = Element.GetCount() - 1;
                 if (Element.Position == -1)
                     Element.Position = 0;
             }
@@ -532,7 +532,7 @@ namespace Xamarin.Forms.Platform.Android
 
         void NextBtn_Click(object sender, EventArgs e)
         {
-            if (Element.Position < Element.ItemsSource.GetCount() - 1)
+            if (Element.Position < Element.GetCount() - 1)
             {
                 Element.Position = Element.Position + 1;
                 direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
@@ -542,8 +542,10 @@ namespace Xamarin.Forms.Platform.Android
         void SetArrowsVisibility()
         {
             if (prevBtn == null || nextBtn == null) return;
-            prevBtn.Visibility = Element.Position == 0 || Element.ItemsSource.GetCount() == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
-            nextBtn.Visibility = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
+			var count = Element.GetCount();
+
+			prevBtn.Visibility = Element.Position == 0 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
+            nextBtn.Visibility = Element.Position == count - 1 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
         }
 
         void SetIndicators()
@@ -637,14 +639,14 @@ namespace Xamarin.Forms.Platform.Android
 
         void SetCurrentPage(int position)
         {
-            if (position < 0 || position > Element.ItemsSource?.GetCount() - 1)
+            if (position < 0 || position > Element.GetCount() - 1)
                 return;
 
             setCurrentPageCalled = true;
 
             if (Element == null || viewPager == null || Element.ItemsSource == null) return;
 
-            if (Element.ItemsSource?.GetCount() > 0)
+            if (Element.GetCount() > 0)
             {
                 viewPager.SetCurrentItem(position, Element.AnimateTransition);
 
@@ -677,7 +679,7 @@ namespace Xamarin.Forms.Platform.Android
             {
                 Element = element;
                 _context = context;
-                Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
+                Source = Element.ItemsSource != null ? new List<object>(Element.GetList()) : null;
             }
 
             public override int Count
