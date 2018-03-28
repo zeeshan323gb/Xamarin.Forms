@@ -25,12 +25,9 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms
 {
-    /// <summary>
-    /// CarouselView Interface
-    /// </summary>
     public class CarouselView : View
     {
-        public static readonly BindableProperty OrientationProperty = BindableProperty.Create("Orientation", typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
+        public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
 
         public CarouselViewOrientation Orientation
         {
@@ -39,7 +36,7 @@ namespace Xamarin.Forms
         }
 
         // Android and iOS only
-        public static readonly BindableProperty InterPageSpacingProperty = BindableProperty.Create("InterPageSpacing", typeof(int), typeof(CarouselView), 0);
+        public static readonly BindableProperty InterPageSpacingProperty = BindableProperty.Create(nameof(InterPageSpacing), typeof(int), typeof(CarouselView), 0);
 
         public int InterPageSpacing
         {
@@ -47,7 +44,7 @@ namespace Xamarin.Forms
             set { SetValue(InterPageSpacingProperty, value); }
         }
 
-        public static readonly BindableProperty IsSwipeEnabledProperty = BindableProperty.Create("IsSwipeEnabled", typeof(bool), typeof(CarouselView), true);
+        public static readonly BindableProperty IsSwipeEnabledProperty = BindableProperty.Create(nameof(IsSwipeEnabled), typeof(bool), typeof(CarouselView), true);
 
         public bool IsSwipeEnabled
         {
@@ -55,7 +52,7 @@ namespace Xamarin.Forms
             set { SetValue(IsSwipeEnabledProperty, value); }
         }
 
-        public static readonly BindableProperty IndicatorsTintColorProperty = BindableProperty.Create("IndicatorsTintColor", typeof(Color), typeof(CarouselView), Color.Silver);
+        public static readonly BindableProperty IndicatorsTintColorProperty = BindableProperty.Create(nameof(IndicatorsTintColor), typeof(Color), typeof(CarouselView), Color.Silver);
 
         public Color IndicatorsTintColor
         {
@@ -63,7 +60,7 @@ namespace Xamarin.Forms
             set { SetValue(IndicatorsTintColorProperty, value); }
         }
 
-        public static readonly BindableProperty CurrentPageIndicatorTintColorProperty = BindableProperty.Create("CurrentPageIndicatorTintColor", typeof(Color), typeof(CarouselView), Color.Gray);
+        public static readonly BindableProperty CurrentPageIndicatorTintColorProperty = BindableProperty.Create(nameof(CurrentPageIndicatorTintColor), typeof(Color), typeof(CarouselView), Color.Gray);
 
         public Color CurrentPageIndicatorTintColor
         {
@@ -71,7 +68,7 @@ namespace Xamarin.Forms
             set { SetValue(CurrentPageIndicatorTintColorProperty, value); }
         }
 
-        public static readonly BindableProperty IndicatorsShapeProperty = BindableProperty.Create("IndicatorsShape", typeof(IndicatorsShape), typeof(CarouselView), IndicatorsShape.Circle);
+        public static readonly BindableProperty IndicatorsShapeProperty = BindableProperty.Create(nameof(IndicatorsShape), typeof(IndicatorsShape), typeof(CarouselView), IndicatorsShape.Circle);
 
         public IndicatorsShape IndicatorsShape
         {
@@ -79,7 +76,7 @@ namespace Xamarin.Forms
             set { SetValue(IndicatorsShapeProperty, value); }
         }
 
-        public static readonly BindableProperty ShowIndicatorsProperty = BindableProperty.Create("ShowIndicators", typeof(bool), typeof(CarouselView), false);
+        public static readonly BindableProperty ShowIndicatorsProperty = BindableProperty.Create(nameof(ShowIndicators), typeof(bool), typeof(CarouselView), false);
 
         public bool ShowIndicators
         {
@@ -87,7 +84,7 @@ namespace Xamarin.Forms
             set { SetValue(ShowIndicatorsProperty, value); }
         }
 
-        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create("ItemsSource", typeof(IEnumerable), typeof(CarouselView), null);
+        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(CarouselView), null);
 
         public IEnumerable ItemsSource
         {
@@ -95,7 +92,7 @@ namespace Xamarin.Forms
             set { SetValue(ItemsSourceProperty, value); }
         }
 
-        public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create("ItemTemplate", typeof(DataTemplate), typeof(CarouselView), null);
+        public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(CarouselView), null);
 
         public DataTemplate ItemTemplate
         {
@@ -103,7 +100,7 @@ namespace Xamarin.Forms
             set { SetValue(ItemTemplateProperty, value); }
         }
 
-        public static readonly BindableProperty PositionProperty = BindableProperty.Create("Position", typeof(int), typeof(CarouselView), 0, BindingMode.TwoWay);
+        public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(int), typeof(CarouselView), 0, BindingMode.TwoWay);
 
         public int Position
         {
@@ -111,7 +108,7 @@ namespace Xamarin.Forms
             set { SetValue(PositionProperty, value); }
         }
 
-        public static readonly BindableProperty AnimateTransitionProperty = BindableProperty.Create("AnimateTransition", typeof(bool), typeof(CarouselView), true);
+        public static readonly BindableProperty AnimateTransitionProperty = BindableProperty.Create(nameof(AnimateTransition), typeof(bool), typeof(CarouselView), true);
 
         public bool AnimateTransition
         {
@@ -119,7 +116,7 @@ namespace Xamarin.Forms
             set { SetValue(AnimateTransitionProperty, value); }
         }
 
-        public static readonly BindableProperty ShowArrowsProperty = BindableProperty.Create("ShowArrows", typeof(bool), typeof(CarouselView), false);
+        public static readonly BindableProperty ShowArrowsProperty = BindableProperty.Create(nameof(ShowArrows), typeof(bool), typeof(CarouselView), false);
 
         public bool ShowArrows
         {
@@ -127,7 +124,7 @@ namespace Xamarin.Forms
             set { SetValue(ShowArrowsProperty, value); }
         }
 
-        public static readonly BindableProperty ArrowsBackgroundColorProperty = BindableProperty.Create("ArrowsBackgroundColor", typeof(Color), typeof(CarouselView), Color.Black);
+        public static readonly BindableProperty ArrowsBackgroundColorProperty = BindableProperty.Create(nameof(ArrowsBackgroundColor), typeof(Color), typeof(CarouselView), Color.Black);
 
         public Color ArrowsBackgroundColor
         {
@@ -135,7 +132,7 @@ namespace Xamarin.Forms
             set { SetValue(ArrowsBackgroundColorProperty, value); }
         }
 
-        public static readonly BindableProperty ArrowsTintColorProperty = BindableProperty.Create("ArrowsTintColor", typeof(Color), typeof(CarouselView), Color.White);
+        public static readonly BindableProperty ArrowsTintColorProperty = BindableProperty.Create(nameof(ArrowsTintColor), typeof(Color), typeof(CarouselView), Color.White);
 
         public Color ArrowsTintColor
         {
@@ -144,7 +141,7 @@ namespace Xamarin.Forms
         }
 
         // Not working on UWP
-        public static readonly BindableProperty ArrowsTransparencyProperty = BindableProperty.Create("ArrowsTransparency", typeof(float), typeof(CarouselView), 0.5f);
+        public static readonly BindableProperty ArrowsTransparencyProperty = BindableProperty.Create(nameof(ArrowsTransparency), typeof(float), typeof(CarouselView), 0.5f);
 
         public float ArrowsTransparency
         {
@@ -152,7 +149,7 @@ namespace Xamarin.Forms
             set { SetValue(ArrowsTransparencyProperty, value); }
         }
 
-        public static readonly BindableProperty PositionSelectedCommandProperty = BindableProperty.Create("PositionSelectedCommand", typeof(Command), typeof(CarouselView), null, BindingMode.Default, (bindable, value) =>
+        public static readonly BindableProperty PositionSelectedCommandProperty = BindableProperty.Create(nameof(PositionSelectedCommand), typeof(Command), typeof(CarouselView), null, BindingMode.Default, (bindable, value) =>
         {
             return true;
         });
@@ -178,16 +175,5 @@ namespace Xamarin.Forms
         {
             Scrolled?.Invoke(this, new ScrollDirectionEventArgs { NewValue = percent, Direction = direction });
         }
-    }
-
-    public class PositionSelectedEventArgs : EventArgs
-    {
-        public int SelectedPosition { get; set; }
-    }
-
-    public class ScrollDirectionEventArgs : EventArgs
-    {
-        public double NewValue { get; set; }
-        public ScrollDirection Direction { get; set; }
     }
 }

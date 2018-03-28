@@ -25,7 +25,7 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms
 {
-    public static class IEnumerableExtensions
+    internal static class IEnumerableExtensions
     {
         public static object GetItem(this IEnumerable e, int index)
         {

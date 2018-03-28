@@ -83,12 +83,6 @@ namespace Xamarin.Forms.Core.UITests
 			_loaded = false;
 		}
 
-		//void IUIProxy.Load(IApp app)
-		//{
-		//	_app = app;
-		//	WaitForValue(Id.Launch, Id.Launch);
-		//}
-
 		private void WaitForValue(string marked, object value)
 		{
 			if (value == null)
