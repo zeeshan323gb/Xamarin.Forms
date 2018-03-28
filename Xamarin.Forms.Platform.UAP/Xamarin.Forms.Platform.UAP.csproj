@@ -71,7 +71,7 @@
     <Compile Include="FormsFlyout.xaml.cs">
       <DependentUpon>FormsFlyout.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CarouselView\FlipViewControl.xaml.cs">
+    <Compile Include="FlipViewControl.xaml.cs">
       <DependentUpon>FlipViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="FormsPresenter.cs" />
@@ -172,15 +172,15 @@
     <Compile Include="MasterDetailControl.cs" />
     <Compile Include="MasterDetailPageRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CarouselView\CarouselViewRenderer.cs" />
-    <Compile Include="CarouselView\Timer.cs" />
+    <Compile Include="CarouselViewRenderer.cs" />
+    <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="AutoSuggestStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CarouselView\FlipViewControl.xaml">
+    <Page Include="FlipViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
