@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections;
 using System.ComponentModel;
 
@@ -169,7 +168,7 @@ namespace Xamarin.Forms
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void SendPositionSelected()
         {
-            PositionSelected?.Invoke(this, new PositionSelectedEventArgs { NewValue = this.Position });
+            PositionSelected?.Invoke(this, new PositionSelectedEventArgs { SelectedPosition = Position });
         }
 
         public event EventHandler<ScrollDirectionEventArgs> Scrolled;
@@ -183,7 +182,7 @@ namespace Xamarin.Forms
 
     public class PositionSelectedEventArgs : EventArgs
     {
-        public int NewValue { get; set; }
+        public int SelectedPosition { get; set; }
     }
 
     public class ScrollDirectionEventArgs : EventArgs
