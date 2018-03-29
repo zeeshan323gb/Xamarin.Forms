@@ -37,7 +37,7 @@
             android:layout_height="17dip"
             android:src="@drawable/Next" />
     </LinearLayout>
-    <Com.ViewPagerIndicator.CirclePageIndicator
+    <Xamarin.Forms.Platform.Android.CirclePageIndicator
         android:id="@+id/indicator"
         android:paddingLeft="20dip"
         android:paddingTop="15dip"
