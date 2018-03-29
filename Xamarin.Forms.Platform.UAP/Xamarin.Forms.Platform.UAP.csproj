@@ -173,7 +173,6 @@
     <Compile Include="MasterDetailPageRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CarouselViewRenderer.cs" />
-    <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="AutoSuggestStyle.xaml">

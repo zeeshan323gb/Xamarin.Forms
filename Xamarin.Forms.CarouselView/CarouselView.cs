@@ -26,8 +26,8 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms
 {
-    public class CarouselView : ItemsView<View>
-    {
+    public class CarouselView : ItemsView<View>, IElementConfiguration<CarouselView>
+	{
         public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
 
         public CarouselViewOrientation Orientation
@@ -139,7 +139,7 @@ namespace Xamarin.Forms
             return true;
         });
 
-        public Command PositionSelectedCommand
+		public Command PositionSelectedCommand
         {
             get { return (Command)GetValue(PositionSelectedCommandProperty); }
             set { SetValue(PositionSelectedCommandProperty, value); }
@@ -156,6 +156,14 @@ namespace Xamarin.Forms
         public event EventHandler<ScrolledDirectionEventArgs> Scrolled;
 
 		public event EventHandler<SelectedItemChangedEventArgs> ItemSelected;
+
+		readonly Lazy<PlatformConfigurationRegistry<CarouselView>> _platformConfigurationRegistry;
+
+		public CarouselView()
+		{
+			VerticalOptions = HorizontalOptions = LayoutOptions.FillAndExpand;
+			_platformConfigurationRegistry = new Lazy<PlatformConfigurationRegistry<CarouselView>>();
+		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
         public void SendScrolled(double percent, ScrollDirection direction)
@@ -184,6 +192,11 @@ namespace Xamarin.Forms
 		protected override View CreateDefault(object item)
 		{
 			return new Label { Text = item?.ToString() ?? "" };
+		}
+
+		public IPlatformElementConfiguration<T, CarouselView> On<T>() where T : IConfigPlatform
+		{
+			return _platformConfigurationRegistry.Value.On<T>();
 		}
 	}
 }
