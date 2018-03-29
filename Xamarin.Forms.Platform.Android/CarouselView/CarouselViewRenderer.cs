@@ -560,7 +560,7 @@ namespace Xamarin.Forms.Platform.Android
                 indicators?.SetPageColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
 
                 // IndicatorsShape BP
-                indicators?.SetStyle((int)Element.IndicatorsShape); // Rounded or Squared
+                indicators?.SetStyle(Element.IndicatorsShape); // Rounded or Squared
             }
             else
             {
