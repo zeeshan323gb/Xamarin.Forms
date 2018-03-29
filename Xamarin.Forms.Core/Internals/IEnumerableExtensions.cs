@@ -42,6 +42,8 @@ namespace Xamarin.Forms
 
         public static int GetCount(this IEnumerable e)
         {
+			if (e == null)
+				return 0; 
             var enumerator = e.GetEnumerator();
             int i = 0;
             while (enumerator.MoveNext())

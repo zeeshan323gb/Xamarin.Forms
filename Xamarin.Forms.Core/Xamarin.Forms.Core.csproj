@@ -17,4 +17,5 @@
     <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
   </ItemGroup>
   <Import Project="..\Xamarin.Flex\Xamarin.Flex.projitems" Label="Shared" Condition="Exists('..\Xamarin.Flex\Xamarin.Flex.projitems')" />
+  <Import Project="..\Xamarin.Forms.CarouselView\Xamarin.Forms.CarouselView.projitems" Label="Shared" />
 </Project>

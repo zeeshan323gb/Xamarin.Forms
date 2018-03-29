@@ -21,14 +21,15 @@ namespace Xamarin.Forms.Controls.Issues
 	{
 		const string Success = "Success";
 		const string ButtonText = "Click me";
+		List<int> items = new List<int>();
 
 		protected override void Init()
 		{
-			var carousel = new CarouselView { ItemsSource = new List<int>(), ItemTemplate = new DataTemplate(() => new Label { Text = Success }), HeightRequest = 250 };
+			var carousel = new CarouselView { ItemsSource = items, ItemTemplate = new DataTemplate(() => new Label { Text = Success }), HeightRequest = 250 };
 			var button = new Button { Text = ButtonText };
 			button.Clicked += (sender, e) =>
 			{
-				carousel.InsertPage(0);
+				items.Insert(0, 0);
 			};
 			var layout = new StackLayout { Children = { carousel, button } };
 			Content = layout;

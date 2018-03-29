@@ -26,7 +26,7 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms
 {
-    public class CarouselView : View
+    public class CarouselView : ItemsView<View>
     {
         public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
 
@@ -84,23 +84,7 @@ namespace Xamarin.Forms
             get { return (bool)GetValue(ShowIndicatorsProperty); }
             set { SetValue(ShowIndicatorsProperty, value); }
         }
-
-        public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(CarouselView), null);
-
-        public IEnumerable ItemsSource
-        {
-            get { return (IEnumerable)GetValue(ItemsSourceProperty); }
-            set { SetValue(ItemsSourceProperty, value); }
-        }
-
-        public static readonly BindableProperty ItemTemplateProperty = BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(CarouselView), null);
-
-        public DataTemplate ItemTemplate
-        {
-            get { return (DataTemplate)GetValue(ItemTemplateProperty); }
-            set { SetValue(ItemTemplateProperty, value); }
-        }
-
+     
         public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(int), typeof(CarouselView), 0, BindingMode.TwoWay);
 
         public int Position
@@ -161,20 +145,22 @@ namespace Xamarin.Forms
             set { SetValue(PositionSelectedCommandProperty, value); }
         }
 
-        public event EventHandler<PositionSelectedEventArgs> PositionSelected;
+        public event EventHandler<SelectedPositionChangedEventArgs> PositionSelected;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void SendPositionSelected()
         {
-            PositionSelected?.Invoke(this, new PositionSelectedEventArgs { SelectedPosition = Position });
+            PositionSelected?.Invoke(this, new SelectedPositionChangedEventArgs(Position));
         }
 
-        public event EventHandler<ScrollDirectionEventArgs> Scrolled;
+        public event EventHandler<ScrolledDirectionEventArgs> Scrolled;
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
+		public event EventHandler<SelectedItemChangedEventArgs> ItemSelected;
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
         public void SendScrolled(double percent, ScrollDirection direction)
         {
-            Scrolled?.Invoke(this, new ScrollDirectionEventArgs { NewValue = percent, Direction = direction });
+            Scrolled?.Invoke(this, new ScrolledDirectionEventArgs { NewValue = percent, Direction = direction });
         }
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -193,6 +179,11 @@ namespace Xamarin.Forms
 		public object GetItem(int i)
 		{
 			return ItemsSource.GetItem(i);
+		}
+
+		protected override View CreateDefault(object item)
+		{
+			return new Label { Text = item.ToString() };
 		}
 	}
 }
