@@ -171,11 +171,12 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 
 			var source = new List<FrameworkElement>();
-			if (Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+			var elementCount = Element.GetCount();
+			if (Element.ItemsSource != null && elementCount > 0)
 			{
-				for (int j = 0; j <= Element.ItemsSource.GetCount() - 1; j++)
+				for (int j = 0; j <= elementCount - 1; j++)
 				{
-					source.Add(CreateView(Element.ItemsSource.GetItem(j)));
+					source.Add(CreateView(Element.GetItem(j)));
 				}
 			}
 
@@ -277,7 +278,7 @@ namespace Xamarin.Forms.Platform.UWP
 			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-				InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+				InsertPage(Element?.GetItem(e.NewStartingIndex), e.NewStartingIndex);
 			}
 
 			// OldItems contains the item that was removed.
@@ -409,8 +410,9 @@ namespace Xamarin.Forms.Platform.UWP
 			_isChangingPosition = true;
 			if (Element.ItemsSource != null)
 			{
-				if (Element.Position > Element.ItemsSource.GetCount() - 1)
-					Element.Position = Element.ItemsSource.GetCount() - 1;
+				var elementCount = Element.GetCount();
+				if (Element.Position > elementCount - 1)
+					Element.Position = elementCount - 1;
 
 				if (Element.Position == -1)
 					Element.Position = 0;
@@ -441,8 +443,9 @@ namespace Xamarin.Forms.Platform.UWP
 		void SetArrowsVisibility()
 		{
 			if (_prevBtn == null || _nextBtn == null) return;
-			_prevBtn.Visibility = Element.Position == 0 || Element.ItemsSource.GetCount() == 0 ? Visibility.Collapsed : Visibility.Visible;
-			_nextBtn.Visibility = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0 ? Visibility.Collapsed : Visibility.Visible;
+			var elementCount = Element.GetCount();
+			_prevBtn.Visibility = Element.Position == 0 || elementCount == 0 ? Visibility.Collapsed : Visibility.Visible;
+			_nextBtn.Visibility = Element.Position == elementCount - 1 || elementCount == 0 ? Visibility.Collapsed : Visibility.Visible;
 		}
 
 		void SetIndicators()
@@ -474,7 +477,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 				var dots = new List<Shape>();
 
-				if (Element.ItemsSource != null && Element.ItemsSource?.GetCount() > 0)
+				if (Element.ItemsSource != null && Element?.GetCount() > 0)
 				{
 					int i = 0;
 					foreach (var item in Element.ItemsSource)
@@ -583,12 +586,13 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void SetCurrentPage(int position)
 		{
-			if (position < 0 || position > Element.ItemsSource?.GetCount() - 1)
+			var elementCount = Element?.GetCount();
+			if (position < 0 || position > elementCount - 1)
 				return;
 
 			if (Element == null || _flipView == null || Element?.ItemsSource == null) return;
 
-			if (Element.ItemsSource?.GetCount() > 0)
+			if (elementCount > 0)
 			{
 				_flipView.SelectedIndex = position;
 			}
