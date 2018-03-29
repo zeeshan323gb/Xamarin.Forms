@@ -7,7 +7,6 @@ using System.ComponentModel;
 using AViews = Android.Views;
 using System.Collections.Specialized;
 using System.Collections.Generic;
-using Com.ViewPagerIndicator;
 using Android.Content;
 using Android.Widget;
 using Android.App;
@@ -285,7 +284,7 @@ namespace Xamarin.Forms.Platform.Android
                     indicators?.SetPageColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
                     break;
                 case "IndicatorsShape":
-                    indicators?.SetStyle((int)Element.IndicatorsShape);
+                    indicators?.SetStyle(Element.IndicatorsShape);
                     break;
                 case "ShowIndicators":
                     SetIndicators();
@@ -563,7 +562,7 @@ namespace Xamarin.Forms.Platform.Android
                 indicators?.SetPageColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
 
                 // IndicatorsShape BP
-                indicators?.SetStyle((int)Element.IndicatorsShape); // Rounded or Squared
+                indicators?.SetStyle(Element.IndicatorsShape); // Rounded or Squared
             }
             else
             {

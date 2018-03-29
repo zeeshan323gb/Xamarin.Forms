@@ -14,13 +14,14 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <TargetFrameworkVersion>v8.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <AndroidTlsProvider>
     </AndroidTlsProvider>
+    <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
@@ -50,9 +51,6 @@
     <NoWarn>CS0109</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Com.ViewPagerIndicator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xamarin.Android.CirclePageIndicator.1.0.2\lib\MonoAndroid\Com.ViewPagerIndicator.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -282,6 +280,8 @@
     <Compile Include="FastRenderers\ImageRenderer.cs" />
     <Compile Include="Extensions\ImageViewExtensions.cs" />
     <Compile Include="Extensions\TextViewExtensions.cs" />
+    <Compile Include="CarouselView\PageIndicator.cs" />
+    <Compile Include="CarouselView\CirclePageIndicator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -312,6 +312,13 @@
     <AndroidResource Include="Resources\drawable\Up.png" />
     <AndroidResource Include="Resources\layout\horizontal_viewpager.xml" />
     <AndroidResource Include="Resources\layout\vertical_viewpager.xml" />
+    <AndroidResource Include="Resources\values\vpi__attrs.xml" />
+    <AndroidResource Include="Resources\values\vpi__colors.xml" />
+    <AndroidResource Include="Resources\values\vpi__defaults.xml" />
+    <AndroidResource Include="Resources\values\vpi__styles.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\values\" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\Xamarin.Android.Support.Compat.25.4.0.2\build\MonoAndroid70\Xamarin.Android.Support.Compat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Compat.25.4.0.2\build\MonoAndroid70\Xamarin.Android.Support.Compat.targets')" />
