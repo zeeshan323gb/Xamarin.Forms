@@ -183,7 +183,7 @@ namespace Xamarin.Forms
 
 		protected override View CreateDefault(object item)
 		{
-			return new Label { Text = item.ToString() };
+			return new Label { Text = item?.ToString() ?? "" };
 		}
 	}
 }

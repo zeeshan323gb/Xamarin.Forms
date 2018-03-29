@@ -277,7 +277,7 @@ namespace Xamarin.Forms.Platform.iOS
 			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-				InsertPage(Element?.ItemsSource.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+				InsertPage(Element?.GetItem(e.NewStartingIndex), e.NewStartingIndex);
 			}
 
 			// OldItems contains the item that was removed.
@@ -430,7 +430,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_pageController.View.ClipsToBounds = true;
 			}
 
-			Source = Element.ItemsSource != null ? new List<object>(Element.ItemsSource.GetList()) : null;
+			Source = Element.ItemsSource != null ? new List<object>(Element.GetList()) : null;
 
 			// BackgroundColor BP
 			_pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
@@ -528,8 +528,9 @@ namespace Xamarin.Forms.Platform.iOS
 			_isChangingPosition = true;
 			if (Element.ItemsSource != null)
 			{
-				if (Element.Position > Element.ItemsSource.GetCount() - 1)
-					Element.Position = Element.ItemsSource.GetCount() - 1;
+				var elementCount = Element.GetCount();
+				if (Element.Position > elementCount - 1)
+					Element.Position = elementCount - 1;
 				if (Element.Position == -1)
 					Element.Position = 0;
 			}
@@ -550,8 +551,10 @@ namespace Xamarin.Forms.Platform.iOS
 				var o = Element.Orientation == CarouselViewOrientation.Horizontal ? "H" : "V";
 				var formatOptions = Element.Orientation == CarouselViewOrientation.Horizontal ? NSLayoutFormatOptions.AlignAllCenterY : NSLayoutFormatOptions.AlignAllCenterX;
 
+				var elementCount = Element.GetCount();
+
 				_prevBtn = new UIButton();
-				_prevBtn.Hidden = Element.Position == 0 || Element.ItemsSource.GetCount() == 0;
+				_prevBtn.Hidden = Element.Position == 0 || elementCount == 0;
 				_prevBtn.BackgroundColor = Element.ArrowsBackgroundColor.ToUIColor();
 				_prevBtn.Alpha = Element.ArrowsTransparency;
 				_prevBtn.TranslatesAutoresizingMaskIntoConstraints = false;
@@ -574,7 +577,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_pageController.View.AddSubview(_prevBtn);
 
 				_nextBtn = new UIButton();
-				_nextBtn.Hidden = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0;
+				_nextBtn.Hidden = Element.Position == elementCount - 1 || elementCount == 0;
 				_nextBtn.BackgroundColor = Element.ArrowsBackgroundColor.ToUIColor();
 				_nextBtn.Alpha = Element.ArrowsTransparency;
 				_nextBtn.TranslatesAutoresizingMaskIntoConstraints = false;
@@ -621,15 +624,16 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void NextBtn_TouchUpInside(object sender, EventArgs e)
 		{
-			if (Element.Position < Element.ItemsSource.GetCount() - 1)
+			if (Element.Position < Element.GetCount() - 1)
 				Element.Position = Element.Position + 1;
 		}
 
 		void SetArrowsVisibility()
 		{
 			if (_prevBtn == null || _nextBtn == null) return;
-			_prevBtn.Hidden = Element.Position == 0 || Element.ItemsSource.GetCount() == 0;
-			_nextBtn.Hidden = Element.Position == Element.ItemsSource.GetCount() - 1 || Element.ItemsSource.GetCount() == 0;
+			var elementCount = Element?.GetCount();
+			_prevBtn.Hidden = Element.Position == 0 || elementCount == 0;
+			_nextBtn.Hidden = Element.Position == elementCount - 1 || elementCount == 0;
 		}
 
 		void SetIndicators()
@@ -830,12 +834,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void SetCurrentPage(int position)
 		{
-			if (position < 0 || position > Element.ItemsSource?.GetCount() - 1)
+			var elementCount = Element?.GetCount();
+			if (position < 0 || position > elementCount - 1)
 				return;
 
 			if (Element == null || _pageController == null || Element.ItemsSource == null) return;
 
-			if (Element.ItemsSource?.GetCount() > 0)
+			if (elementCount > 0)
 			{
 				// Transition direction based on prevPosition
 				var direction = position >= _prevPosition ? UIPageViewControllerNavigationDirection.Forward : UIPageViewControllerNavigationDirection.Reverse;
