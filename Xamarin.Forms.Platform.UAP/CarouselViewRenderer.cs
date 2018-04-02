@@ -14,39 +14,32 @@ namespace Xamarin.Forms.Platform.UWP
 {
 	public class CarouselViewRenderer : ViewRenderer<CarouselView, UserControl>
 	{
-		const string PreviousButtonHorizontal = "PreviousButtonHorizontal"; 
-		const string NextButtonHorizontal = "NextButtonHorizontal"; 
-		const string PreviousButtonVertical = "PreviousButtonVertical"; 
-		const string NextButtonVertical = "NextButtonVertical"; 
+		const string PreviousButtonHorizontal = "PreviousButtonHorizontal";
+		const string NextButtonHorizontal = "NextButtonHorizontal";
+		const string PreviousButtonVertical = "PreviousButtonVertical";
+		const string NextButtonVertical = "NextButtonVertical";
 		const string DotsPanelName = "dotsPanel";
 		const string DotsHPanelName = "dotsHPanel";
 		const string DotsVPanelName = "dotsVPanel";
-		const string IndicatorsName = "indicators"; 
+		const string IndicatorsName = "indicators";
 		const string FlipViewName = "flipView";
 		const string ScrollingHostName = "ScrollingHost";
 		const string HPanel = "HPanel";
 		const string VPanel = "VPanel";
 
-		double _lastOffset;
-
 		FlipViewControl _nativeView;
 		FlipView _flipView;
-		
 		ColorConverter _converter;
 		SolidColorBrush _selectedColor;
 		SolidColorBrush _fillColor;
-
-		
 		// To hold all the rendered views
 		ObservableCollection<FrameworkElement> Source;
-
 		// To hold the indicators dots
 		ObservableCollection<Shape> Dots;
-
 		bool _disposed;
-
 		// To avoid triggering Position changed more than once
 		bool _isChangingPosition;
+		double _lastOffset;
 
 		ScrollViewer _scrollingHost;
 		Windows.UI.Xaml.Controls.Button _prevBtn;
@@ -82,7 +75,7 @@ namespace Xamarin.Forms.Platform.UWP
 						_flipView = _nativeView.FindName(FlipViewName) as FlipView;
 						_flipView.Loaded += FlipView_Loaded;
 						_flipView.SelectionChanged += FlipView_SelectionChanged;
-					
+
 						_selectedColor = (SolidColorBrush)_converter.Convert(e.NewElement.CurrentPageIndicatorTintColor, null, null, null);
 						_fillColor = (SolidColorBrush)_converter.Convert(e.NewElement.IndicatorsTintColor, null, null, null);
 					}
@@ -90,12 +83,12 @@ namespace Xamarin.Forms.Platform.UWP
 					UpdateOrientation();
 
 					SetNativeControl(_nativeView);
-				
+
 					UpdateItemsSource();
 					UpdateBackgroundColor();
 					UpdateIndicatorsTint();
 				}
-			
+
 				((ITemplatedItemsView<View>)e.NewElement).TemplatedItems.CollectionChanged += ItemsSource_CollectionChanged;
 			}
 		}
@@ -105,8 +98,6 @@ namespace Xamarin.Forms.Platform.UWP
 			base.OnElementPropertyChanged(sender, e);
 
 			if (Element == null || _flipView == null) return;
-
-			var rect = this.Element?.Bounds;
 
 			if (e.PropertyName == CarouselView.OrientationProperty.PropertyName)
 			{
@@ -174,15 +165,13 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void UpdateItemsSource()
 		{
-			SetPosition();
 			var source = new List<FrameworkElement>();
-			var elementCount = TemplatedItemsView.ListProxy.Count;
-			if (Element.ItemsSource != null && elementCount > 0)
+			var elementCount = GetItemCount();
+			if (elementCount > 0)
 			{
 				for (int j = 0; j <= elementCount - 1; j++)
 				{
-					var item = TemplatedItemsView.ListProxy[j];
-					
+					var item = GetItem(j);
 					source.Add(CreateView(item));
 				}
 			}
@@ -248,7 +237,7 @@ namespace Xamarin.Forms.Platform.UWP
 			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-				var item = TemplatedItemsView.ListProxy[e.NewStartingIndex];
+				View item = GetItem(e.NewStartingIndex);
 				InsertPage(item, e.NewStartingIndex);
 			}
 
@@ -325,19 +314,11 @@ namespace Xamarin.Forms.Platform.UWP
 		void SetPosition()
 		{
 			_isChangingPosition = true;
-			if (Element.ItemsSource != null)
-			{
-				var elementCount = TemplatedItemsView.ListProxy.Count;
-				if (Element.Position > elementCount - 1)
-					Element.Position = elementCount - 1;
+			var elementCount = GetItemCount();
+			if (Element.Position > elementCount - 1)
+				Element.Position = elementCount - 1;
 
-				if (Element.Position == -1)
-					Element.Position = 0;
-			}
-			else
-			{
-				Element.Position = 0;
-			}
+
 			_isChangingPosition = false;
 		}
 
@@ -360,7 +341,7 @@ namespace Xamarin.Forms.Platform.UWP
 		void SetArrowsVisibility()
 		{
 			if (_prevBtn == null || _nextBtn == null) return;
-			var elementCount = TemplatedItemsView.ListProxy.Count;
+			var elementCount = GetItemCount();
 			_prevBtn.Visibility = Element.Position == 0 || elementCount == 0 ? Visibility.Collapsed : Visibility.Visible;
 			_nextBtn.Visibility = Element.Position == elementCount - 1 || elementCount == 0 ? Visibility.Collapsed : Visibility.Visible;
 		}
@@ -395,13 +376,12 @@ namespace Xamarin.Forms.Platform.UWP
 
 				var dots = new List<Shape>();
 
-				if (Element.ItemsSource != null && TemplatedItemsView.ListProxy.Count > 0)
+				var itemCount = GetItemCount();
+				if (itemCount > 0)
 				{
-					int i = 0;
-					foreach (var item in Element.ItemsSource)
+					for (int i = 0; i < itemCount; i++)
 					{
 						dots.Add(CreateDot(i, Element.Position));
-						i++;
 					}
 				}
 
@@ -415,6 +395,18 @@ namespace Xamarin.Forms.Platform.UWP
 
 			// ShowIndicators BP
 			indicators.Visibility = Element.ShowIndicators ? Visibility.Visible : Visibility.Collapsed;
+		}
+
+		int GetItemCount()
+		{
+			if (TemplatedItemsView == null)
+				return -1;
+			return TemplatedItemsView.TemplatedItems.Count;
+		}
+
+		View GetItem(int index)
+		{
+			return TemplatedItemsView.TemplatedItems[index];
 		}
 
 		void UpdateIndicatorsTint()
@@ -504,16 +496,15 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void SetCurrentPage(int position)
 		{
-			var elementCount = TemplatedItemsView.ListProxy.Count;
+			if (_flipView == null || TemplatedItemsView == null) return;
+
+			var elementCount = GetItemCount();
+
 			if (position < 0 || position > elementCount - 1)
 				return;
 
-			if (Element == null || _flipView == null || Element?.ItemsSource == null) return;
-
 			if (elementCount > 0)
-			{
 				_flipView.SelectedIndex = position;
-			}
 		}
 
 		FrameworkElement CreateView(object item)
