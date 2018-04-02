@@ -18,14 +18,8 @@ namespace Xamarin.Forms.Platform.iOS
 		UIButton _prevBtn;
 		UIButton _nextBtn;
 
-		// To avoid triggering Position changed more than once
 		bool _isChangingPosition;
-		bool _orientationChanged;
 		bool _disposed;
-
-		double _elementWidth;
-		double _elementHeight;
-
 		int _prevPosition;
 		double _percentCompleted;
 		nfloat _prevPoint;
@@ -46,23 +40,24 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		public override UIViewController ViewController => _pageController;
 		// Fix #129 CarouselViewControl not rendered when loading a page from memory bug
 		// Fix #157 CarouselView Binding breaks when returning to Page bug duplicate
-		public override void MovedToSuperview()
-		{
-			if (Control == null)
-				Element_SizeChanged(Element, null);
+		//public override void MovedToSuperview()
+		//{
+		//	if (Control == null)
+		//		Element_SizeChanged(Element, null);
 
-			base.MovedToSuperview();
-		}
+		//	base.MovedToSuperview();
+		//}
 
-		public override void MovedToWindow()
-		{
-			if (Control == null)
-				Element_SizeChanged(Element, null);
+		//public override void MovedToWindow()
+		//{
+		//	if (Control == null)
+		//		Element_SizeChanged(Element, null);
 
-			base.MovedToWindow();
-		}
+		//	base.MovedToWindow();
+		//}
 
 		protected override void Dispose(bool disposing)
 		{
@@ -78,11 +73,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 					CleanUpPageController();
 
-					_pageController.View.RemoveFromSuperview();
-					_pageController.View.Dispose();
+					_pageController?.View?.RemoveFromSuperview();
+					_pageController?.View.Dispose();
 
-					_pageController.Dispose();
+					_pageController?.Dispose();
 					_pageController = null;
+
+					_pageControl?.Dispose();
+					_pageControl = null;
 
 				}
 				catch (Exception ex)
@@ -90,9 +88,8 @@ namespace Xamarin.Forms.Platform.iOS
 					Console.Write(ex.Message);
 				}
 
-				if (Element != null)
+				if (TemplatedItemsView != null)
 				{
-					Element.SizeChanged -= Element_SizeChanged;
 					TemplatedItemsView.TemplatedItems.CollectionChanged -= ItemsSource_CollectionChanged;
 				}
 
@@ -116,28 +113,87 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			base.OnElementChanged(e);
 
-			if (Control == null)
-			{
-				// Instantiate the native control and assign it to the Control property with
-				// the SetNativeControl method (called when Height BP changes)
-				_orientationChanged = true;
-			}
-
 			if (e.OldElement != null)
 			{
-				// Unsubscribe from event handlers and cleanup any resources
-
 				if (Element == null) return;
-
-				Element.SizeChanged -= Element_SizeChanged;
-				((ITemplatedItemsView<View>)e.NewElement).TemplatedItems.CollectionChanged -= ItemsSource_CollectionChanged;
+				((ITemplatedItemsView<View>)e.OldElement).TemplatedItems.CollectionChanged -= ItemsSource_CollectionChanged;
 			}
 
 			if (e.NewElement != null)
 			{
-				e.NewElement.SizeChanged += Element_SizeChanged;
+				if (Control == null)
+				{
+					var interPageSpacing = (float)Element.InterPageSpacing;
 
-				((ITemplatedItemsView<View>)e.NewElement).TemplatedItems.CollectionChanged += ItemsSource_CollectionChanged;
+					// Orientation BP
+					var orientation = (UIPageViewControllerNavigationOrientation)Element.Orientation;
+
+					// InterPageSpacing BP
+					_pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll, orientation, UIPageViewControllerSpineLocation.None, interPageSpacing);
+
+					_pageController.GetPreviousViewController = (pageViewController, referenceViewController) =>
+					{
+						var controller = (FormsUIViewContainer)referenceViewController;
+
+						if (controller != null)
+						{
+							var position = Source.IndexOf(controller.Tag);
+
+							// Determine if we are on the first page
+							if (position == 0)
+							{
+								// We are on the first page, so there is no need for a controller before that
+								return null;
+							}
+							else
+							{
+								int previousPageIndex = position - 1;
+								return CreateViewController(previousPageIndex);
+							}
+						}
+						else
+						{
+							return null;
+						}
+					};
+
+					_pageController.GetNextViewController = (pageViewController, referenceViewController) =>
+					{
+						var controller = (FormsUIViewContainer)referenceViewController;
+
+						if (controller != null)
+						{
+							var position = Source.IndexOf(controller.Tag);
+
+							// Determine if we are on the last page
+							if (position == Count - 1)
+							{
+								// We are on the last page, so there is no need for a controller after that
+								return null;
+							}
+							else
+							{
+								int nextPageIndex = position + 1;
+								return CreateViewController(nextPageIndex);
+							}
+						}
+						else
+						{
+							return null;
+						}
+					};
+
+					_pageController.DidFinishAnimating += PageController_DidFinishAnimating;
+
+					_pageController.View.ClipsToBounds = true;
+					SetNativeControl(_pageController.View);
+				}
+
+				UpdateItemsSource();
+				UpdateBackgroundColor();
+				SetIsSwipeEnabled();
+				SetArrows();
+				SetIndicators();
 			}
 		}
 
@@ -158,7 +214,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 			else if (e.PropertyName == VisualElement.BackgroundColorProperty.PropertyName)
 			{
-				_pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
+				UpdateBackgroundColor();
 			}
 			else if (e.PropertyName == CarouselView.IsSwipeEnabledProperty.PropertyName)
 			{
@@ -188,10 +244,6 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				UpdateItemsSource();
 			}
-			else if (e.PropertyName == CarouselView.ItemTemplateProperty.PropertyName)
-			{
-				UpdateItemTemplate();
-			}
 			else if (e.PropertyName == CarouselView.PositionProperty.PropertyName)
 			{
 				UpdatePosition();
@@ -214,12 +266,17 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		void UpdateBackgroundColor()
+		{
+			if (Element == null || Control == null)
+				return;
+
+			_pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
+		}
+
 		void UpdateOrientation()
 		{
-			_orientationChanged = true;
-			SetNativeView();
-			Element.SendPositionSelected();
-			Element.PositionSelectedCommand?.Execute(null);
+
 		}
 
 		void ArrowsTransparency()
@@ -252,21 +309,24 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		void UpdateItemTemplate()
-		{
-			SetNativeView();
-			Element.SendPositionSelected();
-			Element.PositionSelectedCommand?.Execute(null);
-		}
-
 		void UpdateItemsSource()
 		{
+			CleanUpPageController();
 			SetPosition();
-			SetNativeView();
-			Element.SendPositionSelected();
-			Element.PositionSelectedCommand?.Execute(null);
-			if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-				((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+			TemplatedItemsView.TemplatedItems.CollectionChanged += ItemsSource_CollectionChanged;
+			Source = TemplatedItemsView.TemplatedItems != null ? new List<object>(TemplatedItemsView.TemplatedItems.Count) : null;
+
+			var elementCount = GetItemCount();
+			if (elementCount > 0)
+			{
+				for (int j = 0; j < elementCount; j++)
+				{
+					var item = GetItem(j);
+					InsertPage(item, j);
+				}
+			}
+			UpdatePosition();
+			SetIndicators();
 		}
 
 		async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -337,27 +397,21 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (Element == null) return;
 
-				SetPosition();
-				SetNativeView();
-				Element.SendPositionSelected();
-				Element.PositionSelectedCommand?.Execute(null);
+				UpdateItemsSource();
 			}
 		}
 
-		void Element_SizeChanged(object sender, EventArgs e)
+		View GetItem(int index)
 		{
-			if (Element == null) return;
+			return TemplatedItemsView.TemplatedItems[index];
+		}
 
-			var rect = this.Element.Bounds;
-			// To avoid extra DataTemplate instantiations #158
-			if (rect.Height > 0)
-			{
-				_elementWidth = rect.Width;
-				_elementHeight = rect.Height;
-				SetNativeView();
-				Element.SendPositionSelected();
-				Element.PositionSelectedCommand?.Execute(null);
-			}
+		int GetItemCount()
+		{
+			if (TemplatedItemsView == null)
+				return -1;
+
+			return TemplatedItemsView.TemplatedItems.Count;
 		}
 
 		void Scroller_Scrolled(object sender, EventArgs e)
@@ -380,7 +434,6 @@ namespace Xamarin.Forms.Platform.iOS
 				direction = _prevPoint > point.Y ? ScrollDirection.Up : ScrollDirection.Down;
 				_prevPoint = point.Y;
 			}
-
 
 			if (currentPercentCompleted <= 100 && currentPercentCompleted > _percentCompleted)
 			{
@@ -410,105 +463,6 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		void SetNativeView()
-		{
-			// Rotation bug(iOS) #115 Fix
-			CleanUpPageController();
-
-			if (_orientationChanged)
-			{
-				var interPageSpacing = (float)Element.InterPageSpacing;
-
-				// Orientation BP
-				var orientation = (UIPageViewControllerNavigationOrientation)Element.Orientation;
-
-				// InterPageSpacing BP
-				_pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll,
-														  orientation, UIPageViewControllerSpineLocation.None, interPageSpacing);
-
-				_pageController.View.ClipsToBounds = true;
-			}
-
-			Source = Element.ItemsSource != null ? new List<object>(TemplatedItemsView.TemplatedItems.Count) : null;
-
-			// BackgroundColor BP
-			_pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
-
-			_pageController.GetPreviousViewController = (pageViewController, referenceViewController) =>
-			{
-				var controller = (FormsUIViewContainer)referenceViewController;
-
-				if (controller != null)
-				{
-					var position = Source.IndexOf(controller.Tag);
-
-					// Determine if we are on the first page
-					if (position == 0)
-					{
-						// We are on the first page, so there is no need for a controller before that
-						return null;
-					}
-					else
-					{
-						int previousPageIndex = position - 1;
-						return CreateViewController(previousPageIndex);
-					}
-				}
-				else
-				{
-					return null;
-				}
-			};
-
-			_pageController.GetNextViewController = (pageViewController, referenceViewController) =>
-			{
-				var controller = (FormsUIViewContainer)referenceViewController;
-
-				if (controller != null)
-				{
-					var position = Source.IndexOf(controller.Tag);
-
-					// Determine if we are on the last page
-					if (position == Count - 1)
-					{
-						// We are on the last page, so there is no need for a controller after that
-						return null;
-					}
-					else
-					{
-						int nextPageIndex = position + 1;
-						return CreateViewController(nextPageIndex);
-					}
-				}
-				else
-				{
-					return null;
-				}
-			};
-
-			_pageController.DidFinishAnimating += PageController_DidFinishAnimating;
-
-			// IsSwipeEnabled BP
-			SetIsSwipeEnabled();
-
-			if (Source != null && Source?.Count > 0)
-			{
-				var firstViewController = CreateViewController(Element.Position);
-
-				_pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
-				{
-				});
-			}
-
-			SetNativeControl(_pageController.View);
-
-			// ARROWS
-			SetArrows();
-
-			// INDICATORS
-			SetIndicators();
-		}
-
 		void SetIsSwipeEnabled()
 		{
 			foreach (var view in _pageController?.View.Subviews)
@@ -525,18 +479,18 @@ namespace Xamarin.Forms.Platform.iOS
 		void SetPosition()
 		{
 			_isChangingPosition = true;
-			if (Element.ItemsSource != null)
-			{
-				var elementCount = TemplatedItemsView.TemplatedItems.Count;
-				if (Element.Position > elementCount - 1)
-					Element.Position = elementCount - 1;
-				if (Element.Position == -1)
-					Element.Position = 0;
-			}
-			else
-			{
-				Element.Position = 0;
-			}
+			//if (TemplatedItemsView.TemplatedItems != null)
+			//{
+			//	var elementCount = TemplatedItemsView.TemplatedItems.Count;
+			//	if (Element.Position > elementCount - 1)
+			//		Element.Position = elementCount - 1;
+			//	if (Element.Position == -1)
+			//		Element.Position = 0;
+			//}
+			//else
+			//{
+			//	Element.Position = 0;
+			//}
 			_prevPosition = Element.Position;
 			_isChangingPosition = false;
 		}
@@ -623,14 +577,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void NextBtn_TouchUpInside(object sender, EventArgs e)
 		{
-			if (Element.Position < TemplatedItemsView.TemplatedItems.Count- 1)
+			if (Element.Position < TemplatedItemsView.TemplatedItems.Count - 1)
 				Element.Position = Element.Position + 1;
 		}
 
 		void SetArrowsVisibility()
 		{
 			if (_prevBtn == null || _nextBtn == null || Element == null) return;
-			var elementCount = TemplatedItemsView.TemplatedItems.Count;;
+			var elementCount = TemplatedItemsView.TemplatedItems.Count; ;
 			_prevBtn.Hidden = Element.Position == 0 || elementCount == 0;
 			_nextBtn.Hidden = Element.Position == elementCount - 1 || elementCount == 0;
 		}
@@ -658,11 +612,9 @@ namespace Xamarin.Forms.Platform.iOS
 					_pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:|[pageControl]|", NSLayoutFormatOptions.AlignAllTop, new NSDictionary(), viewsDictionary));
 				}
 
-				_pageControl.Pages = Count;
-				_pageControl.PageIndicatorTintColor = Element.IndicatorsTintColor.ToUIColor();
-				_pageControl.CurrentPageIndicatorTintColor = Element.CurrentPageIndicatorTintColor.ToUIColor();
-				_pageControl.CurrentPage = Element.Position;
-				SetIndicatorsShape();
+				SetIndicatorsTintColor();
+				SetCurrentPageIndicatorTintColor();
+				SetIndicatorsCurrentPage();
 			}
 			else
 			{
@@ -693,7 +645,6 @@ namespace Xamarin.Forms.Platform.iOS
 			_pageControl.Pages = Count;
 			_pageControl.CurrentPage = Element.Position;
 			SetIndicatorsShape();
-
 		}
 
 		void SetIndicatorsShape()
@@ -737,28 +688,28 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_pageController.ViewControllers.Count() > 0)
 				firstViewController = _pageController.ViewControllers[0];
 			else
-				firstViewController = CreateViewController(Element.Position);
+				firstViewController = CreateViewController(position);
 
 			_pageController.SetViewControllers(new[] { firstViewController }, UIPageViewControllerNavigationDirection.Forward, false, s =>
 			{
 				//var prevPos = Element.Position;
 
 				// To keep the same view visible when inserting in a position <= current (like Android ViewPager)
-				_isChangingPosition = true;
-				if (position <= Element.Position && Source.Count > 1)
-				{
-					Element.Position++;
-					_prevPosition = Element.Position;
-				}
-				_isChangingPosition = false;
+				//_isChangingPosition = true;
+				//if (position <= Element.Position && Source.Count > 1)
+				//{
+				//	Element.Position++;
+				//	_prevPosition = Element.Position;
+				//}
+				//_isChangingPosition = false;
 
 				SetArrowsVisibility();
 				SetIndicatorsCurrentPage();
 
 				//if (position != prevPos)
 				//{
-				Element.SendPositionSelected();
-				Element.PositionSelectedCommand?.Execute(null);
+				//Element.SendPositionSelected();
+				//Element.PositionSelectedCommand?.Execute(null);
 				//}
 			});
 		}
@@ -773,7 +724,7 @@ namespace Xamarin.Forms.Platform.iOS
 				if (Source.Count == 1)
 				{
 					Source.RemoveAt(position);
-					SetNativeView();
+					//SetNativeView();
 				}
 				else
 				{
@@ -837,7 +788,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (position < 0 || position > elementCount - 1)
 				return;
 
-			if (Element == null || _pageController == null || Element.ItemsSource == null) return;
+			if (Element == null || _pageController == null || TemplatedItemsView.TemplatedItems == null) return;
 
 			if (elementCount > 0)
 			{
@@ -919,7 +870,7 @@ namespace Xamarin.Forms.Platform.iOS
 			formsView.Parent = this.Element;
 
 			// UIScreen.MainScreen.Bounds.Width, UIScreen.MainScreen.Bounds.Height
-			var rect = new CGRect(Element.X, Element.Y, _elementWidth, _elementHeight);
+			var rect = new CGRect(Element.X, Element.Y, Element.Bounds.Width, Element.Bounds.Height);
 			var nativeConverted = formsView.ToiOS(rect);
 
 			//if (dt == null && view == null)
@@ -979,15 +930,13 @@ namespace Xamarin.Forms.Platform.iOS
 				child.Dispose();
 
 			// Cleanup ChildViewControllers
-			if (ChildViewControllers != null)
-			{
-				foreach (var child in ChildViewControllers)
-				{
-					child.Dispose();
-				}
+			if (ChildViewControllers == null) return;
 
-				ChildViewControllers = null;
-			}
+			foreach (var child in ChildViewControllers)
+				child.Dispose();
+
+			ChildViewControllers = null;
+
 		}
 
 		class FormsUIViewContainer : UIViewController
@@ -998,7 +947,8 @@ namespace Xamarin.Forms.Platform.iOS
 			protected override void Dispose(bool disposing)
 			{
 				// because this runs in the finalizer thread and disposing is equal false
-				InvokeOnMainThread(() => {
+				InvokeOnMainThread(() =>
+				{
 
 					WillMoveToParentViewController(null);
 
