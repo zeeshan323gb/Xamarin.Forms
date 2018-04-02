@@ -149,7 +149,7 @@ namespace Xamarin.Forms.Platform.Android
             if (e.Action == NotifyCollectionChangedAction.Move)
             {
                 // Fix for #168 Android NullReferenceException
-                var Source = ((PageAdapter)viewPager?.Adapter)?.Source;
+                var Source = ((CarouselViewPagerAdapter)viewPager?.Adapter)?.Source;
 
                 if (Element == null || viewPager == null || viewPager?.Adapter == null || Source == null) return;
 
@@ -169,7 +169,7 @@ namespace Xamarin.Forms.Platform.Android
             if (e.Action == NotifyCollectionChangedAction.Replace)
             {
                 // Fix for #168 Android NullReferenceException
-                var Source = ((PageAdapter)viewPager?.Adapter)?.Source;
+                var Source = ((CarouselViewPagerAdapter)viewPager?.Adapter)?.Source;
 
                 if (Element == null || viewPager == null || viewPager?.Adapter == null || Source == null) return;
 
@@ -183,7 +183,7 @@ namespace Xamarin.Forms.Platform.Android
                 if (Element == null || viewPager == null) return;
 
                 SetPosition();
-                viewPager.Adapter = new PageAdapter(Element, _context);
+                viewPager.Adapter = new CarouselViewPagerAdapter(Element, _context);
                 viewPager.SetCurrentItem(Element.Position, false);
                 SetArrowsVisibility();
                 indicators?.SetViewPager(viewPager);
@@ -291,7 +291,7 @@ namespace Xamarin.Forms.Platform.Android
                     break;
                 case "ItemsSource":
                     SetPosition();
-                    viewPager.Adapter = new PageAdapter(Element, _context);
+                    viewPager.Adapter = new CarouselViewPagerAdapter(Element, _context);
                     viewPager.SetCurrentItem(Element.Position, false);
                     SetArrowsVisibility();
                     indicators?.SetViewPager(viewPager);
@@ -301,7 +301,7 @@ namespace Xamarin.Forms.Platform.Android
                         ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
                     break;
                 case "ItemTemplate":
-                    viewPager.Adapter = new PageAdapter(Element, _context);
+                    viewPager.Adapter = new CarouselViewPagerAdapter(Element, _context);
                     viewPager.SetCurrentItem(Element.Position, false);
                     indicators?.SetViewPager(viewPager);
                     Element.SendPositionSelected();
@@ -426,7 +426,7 @@ namespace Xamarin.Forms.Platform.Android
                 orientationChanged = false;
             }
 
-            viewPager.Adapter = new PageAdapter(Element, _context);
+            viewPager.Adapter = new CarouselViewPagerAdapter(Element, _context);
             viewPager.SetCurrentItem(Element.Position, false);
 
             // InterPageSpacing BP
@@ -577,7 +577,7 @@ namespace Xamarin.Forms.Platform.Android
         void InsertPage(object item, int position)
         {
             // Fix for #168 Android NullReferenceException
-            var Source = ((PageAdapter)viewPager?.Adapter)?.Source;
+            var Source = ((CarouselViewPagerAdapter)viewPager?.Adapter)?.Source;
 
             if (Element == null || viewPager == null || viewPager?.Adapter == null || Source == null) return;
 
@@ -596,7 +596,7 @@ namespace Xamarin.Forms.Platform.Android
         async Task RemovePage(int position)
         {
             // Fix for #168 Android NullReferenceException
-            var Source = ((PageAdapter)viewPager?.Adapter)?.Source;
+            var Source = ((CarouselViewPagerAdapter)viewPager?.Adapter)?.Source;
 
             if (Element == null || viewPager == null || viewPager?.Adapter == null || Source == null) return;
 
@@ -660,9 +660,7 @@ namespace Xamarin.Forms.Platform.Android
             }
         }
 
-        #region adapter
-
-        class PageAdapter : PagerAdapter
+		class CarouselViewPagerAdapter : PagerAdapter
         {
             CarouselView Element;
             Context _context;
@@ -674,7 +672,7 @@ namespace Xamarin.Forms.Platform.Android
             //SparseArray<Parcelable> mViewStates = new SparseArray<Parcelable>();
             //ViewPager mViewPager;
 
-            public PageAdapter(CarouselView element, Context context)
+            public CarouselViewPagerAdapter(CarouselView element, Context context)
             {
                 Element = element;
                 _context = context;
@@ -788,8 +786,6 @@ namespace Xamarin.Forms.Platform.Android
                 mViewStates = (SparseArray<Parcelable>)bundle.GetSparseParcelableArray(TAG_VIEWS);
             }*/
         }
-
-        #endregion
 
         protected override void Dispose(bool disposing)
         {

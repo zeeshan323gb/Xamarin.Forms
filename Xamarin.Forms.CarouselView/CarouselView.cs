@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Xamarin.Forms.Platform;
 
 /*
 The MIT License(MIT)
@@ -26,9 +27,10 @@ IN THE SOFTWARE.
 
 namespace Xamarin.Forms
 {
-    public class CarouselView : ItemsView<View>, IElementConfiguration<CarouselView>
+	[RenderWith(typeof(_CarouselViewRenderer))]
+	public class CarouselView : ItemsView<View> //, IElementConfiguration<CarouselView>
 	{
-        public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
+		public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
 
         public CarouselViewOrientation Orientation
         {
@@ -194,9 +196,9 @@ namespace Xamarin.Forms
 			return new Label { Text = item?.ToString() ?? "" };
 		}
 
-		public IPlatformElementConfiguration<T, CarouselView> On<T>() where T : IConfigPlatform
-		{
-			return _platformConfigurationRegistry.Value.On<T>();
-		}
+		//public IPlatformElementConfiguration<T, CarouselView> On<T>() where T : IConfigPlatform
+		//{
+		//	return _platformConfigurationRegistry.Value.On<T>();
+		//}
 	}
 }
