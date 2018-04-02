@@ -173,24 +173,6 @@ namespace Xamarin.Forms
             Scrolled?.Invoke(this, new ScrolledDirectionEventArgs { NewValue = percent, Direction = direction });
         }
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public int GetCount()
-		{
-			return ItemsSource.GetCount();
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public IList<object> GetList()
-		{
-			return ItemsSource.GetList();
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public object GetItem(int i)
-		{
-			return ItemsSource.GetItem(i);
-		}
-
 		protected override View CreateDefault(object item)
 		{
 			return new Label { Text = item?.ToString() ?? "" };

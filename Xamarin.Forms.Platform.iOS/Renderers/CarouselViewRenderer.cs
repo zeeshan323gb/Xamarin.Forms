@@ -36,6 +36,8 @@ namespace Xamarin.Forms.Platform.iOS
 		// Used only when ItemsSource is a List<View>
 		List<FormsUIViewContainer> ChildViewControllers;
 
+		protected ITemplatedItemsView<View> TemplatedItemsView => Element;
+
 		int Count
 		{
 			get
@@ -91,8 +93,7 @@ namespace Xamarin.Forms.Platform.iOS
 				if (Element != null)
 				{
 					Element.SizeChanged -= Element_SizeChanged;
-					if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-						((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+					TemplatedItemsView.TemplatedItems.CollectionChanged -= ItemsSource_CollectionChanged;
 				}
 
 				Source = null;
@@ -129,17 +130,14 @@ namespace Xamarin.Forms.Platform.iOS
 				if (Element == null) return;
 
 				Element.SizeChanged -= Element_SizeChanged;
-				if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-					((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+				((ITemplatedItemsView<View>)e.NewElement).TemplatedItems.CollectionChanged -= ItemsSource_CollectionChanged;
 			}
 
 			if (e.NewElement != null)
 			{
-				Element.SizeChanged += Element_SizeChanged;
+				e.NewElement.SizeChanged += Element_SizeChanged;
 
-				// Configure the control and subscribe to event handlers
-				if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-					((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+				((ITemplatedItemsView<View>)e.NewElement).TemplatedItems.CollectionChanged += ItemsSource_CollectionChanged;
 			}
 		}
 
@@ -277,7 +275,8 @@ namespace Xamarin.Forms.Platform.iOS
 			// If NewStartingIndex is not -1, then it contains the index where the new item was added.
 			if (e.Action == NotifyCollectionChangedAction.Add)
 			{
-				InsertPage(Element?.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+				var item = TemplatedItemsView.TemplatedItems[e.NewStartingIndex];
+				InsertPage(item, e.NewStartingIndex);
 			}
 
 			// OldItems contains the item that was removed.
@@ -430,7 +429,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_pageController.View.ClipsToBounds = true;
 			}
 
-			Source = Element.ItemsSource != null ? new List<object>(Element.GetList()) : null;
+			Source = Element.ItemsSource != null ? new List<object>(TemplatedItemsView.TemplatedItems.Count) : null;
 
 			// BackgroundColor BP
 			_pageController.View.BackgroundColor = Element.BackgroundColor.ToUIColor();
@@ -528,7 +527,7 @@ namespace Xamarin.Forms.Platform.iOS
 			_isChangingPosition = true;
 			if (Element.ItemsSource != null)
 			{
-				var elementCount = Element.GetCount();
+				var elementCount = TemplatedItemsView.TemplatedItems.Count;
 				if (Element.Position > elementCount - 1)
 					Element.Position = elementCount - 1;
 				if (Element.Position == -1)
@@ -551,7 +550,7 @@ namespace Xamarin.Forms.Platform.iOS
 				var o = Element.Orientation == CarouselViewOrientation.Horizontal ? "H" : "V";
 				var formatOptions = Element.Orientation == CarouselViewOrientation.Horizontal ? NSLayoutFormatOptions.AlignAllCenterY : NSLayoutFormatOptions.AlignAllCenterX;
 
-				var elementCount = Element.GetCount();
+				var elementCount = TemplatedItemsView.TemplatedItems.Count;
 
 				_prevBtn = new UIButton();
 				_prevBtn.Hidden = Element.Position == 0 || elementCount == 0;
@@ -624,14 +623,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void NextBtn_TouchUpInside(object sender, EventArgs e)
 		{
-			if (Element.Position < Element.GetCount() - 1)
+			if (Element.Position < TemplatedItemsView.TemplatedItems.Count- 1)
 				Element.Position = Element.Position + 1;
 		}
 
 		void SetArrowsVisibility()
 		{
-			if (_prevBtn == null || _nextBtn == null) return;
-			var elementCount = Element?.GetCount();
+			if (_prevBtn == null || _nextBtn == null || Element == null) return;
+			var elementCount = TemplatedItemsView.TemplatedItems.Count;;
 			_prevBtn.Hidden = Element.Position == 0 || elementCount == 0;
 			_nextBtn.Hidden = Element.Position == elementCount - 1 || elementCount == 0;
 		}
@@ -834,7 +833,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void SetCurrentPage(int position)
 		{
-			var elementCount = Element?.GetCount();
+			var elementCount = TemplatedItemsView.TemplatedItems.Count;
 			if (position < 0 || position > elementCount - 1)
 				return;
 

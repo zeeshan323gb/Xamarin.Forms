@@ -87,6 +87,8 @@ namespace Xamarin.Forms.Platform.Android
                 keyboardService = new SoftKeyboardService(activity);
         }
 
+		protected ITemplatedItemsView<View> TemplatedItemsView => Element;
+
         protected override void OnElementChanged(ElementChangedEventArgs<CarouselView> e)
         {
             base.OnElementChanged(e);
@@ -102,11 +104,10 @@ namespace Xamarin.Forms.Platform.Android
             {
                 // Unsubscribe from event handlers and cleanup any resources
 
-                if (Element == null) return;
+				if (e.OldElement == null) return;
 
-                Element.SizeChanged -= Element_SizeChanged;
-                if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-                    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged -= ItemsSource_CollectionChanged;
+				e.OldElement.SizeChanged -= Element_SizeChanged;
+				e.OldElement.TemplatedItems.CollectionChanged -= ItemsSource_CollectionChanged;
 
                 // KeyboardService code
                 Xamarin.Forms.Application.Current.MainPage.SizeChanged -= MainPage_SizeChanged;
@@ -118,8 +119,7 @@ namespace Xamarin.Forms.Platform.Android
                 Element.SizeChanged += Element_SizeChanged;
 
                 // Configure the control and subscribe to event handlers
-                if (Element.ItemsSource != null && Element.ItemsSource is INotifyCollectionChanged)
-                    ((INotifyCollectionChanged)Element.ItemsSource).CollectionChanged += ItemsSource_CollectionChanged;
+				e.NewElement.TemplatedItems.CollectionChanged += ItemsSource_CollectionChanged;
 
                 // KeyboardService code
                 Xamarin.Forms.Application.Current.MainPage.SizeChanged += MainPage_SizeChanged;
@@ -133,7 +133,8 @@ namespace Xamarin.Forms.Platform.Android
             // If NewStartingIndex is not -1, then it contains the index where the new item was added.
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                InsertPage(Element?.GetItem(e.NewStartingIndex), e.NewStartingIndex);
+				var item = TemplatedItemsView.TemplatedItems[e.NewStartingIndex];
+                InsertPage(item, e.NewStartingIndex);
             }
 
             // OldItems contains the item that was removed.
@@ -466,13 +467,14 @@ namespace Xamarin.Forms.Platform.Android
         {
             isChangingPosition = true;
             if (Element.ItemsSource != null)
-            {
-                if (Element.Position > Element.GetCount() - 1)
-                    Element.Position = Element.GetCount() - 1;
-                if (Element.Position == -1)
-                    Element.Position = 0;
-            }
-            else
+			{
+				var itemCount = GetItemCount();
+				if (Element.Position > itemCount - 1)
+					Element.Position = itemCount - 1;
+				if (Element.Position == -1)
+					Element.Position = 0;
+			}
+			else
             {
                 Element.Position = 0;
             }
@@ -482,7 +484,13 @@ namespace Xamarin.Forms.Platform.Android
                 indicators.mSnapPage = Element.Position;
         }
 
-        void SetArrows()
+		int GetItemCount()
+		{
+			var count = TemplatedItemsView.TemplatedItems.Count();
+			return count;
+		}
+
+		void SetArrows()
         {
             if (Element.ShowArrows)
             {
@@ -531,7 +539,7 @@ namespace Xamarin.Forms.Platform.Android
 
         void NextBtn_Click(object sender, EventArgs e)
         {
-            if (Element.Position < Element.GetCount() - 1)
+            if (Element.Position < GetItemCount() - 1)
             {
                 Element.Position = Element.Position + 1;
                 direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
@@ -541,7 +549,7 @@ namespace Xamarin.Forms.Platform.Android
         void SetArrowsVisibility()
         {
             if (prevBtn == null || nextBtn == null) return;
-			var count = Element.GetCount();
+			var count = GetItemCount();
 
 			prevBtn.Visibility = Element.Position == 0 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
             nextBtn.Visibility = Element.Position == count - 1 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
@@ -638,14 +646,15 @@ namespace Xamarin.Forms.Platform.Android
 
         void SetCurrentPage(int position)
         {
-            if (position < 0 || position > Element.GetCount() - 1)
+			var itemCount = GetItemCount();
+			if (position < 0 || position > itemCount - 1)
                 return;
 
             setCurrentPageCalled = true;
 
             if (Element == null || viewPager == null || Element.ItemsSource == null) return;
 
-            if (Element.GetCount() > 0)
+			if (itemCount > 0)
             {
                 viewPager.SetCurrentItem(position, Element.AnimateTransition);
 
@@ -676,7 +685,7 @@ namespace Xamarin.Forms.Platform.Android
             {
                 Element = element;
                 _context = context;
-                Source = Element.ItemsSource != null ? new List<object>(Element.GetList()) : null;
+				Source = Element.ItemsSource != null ? new List<object>(Element.TemplatedItems.Count) : null;
             }
 
             public override int Count
