@@ -365,8 +365,7 @@ namespace Xamarin.Forms.Platform.Tizen
 			_changedByScroll++;
 			{
 				var index = Element.Orientation == CarouselViewOrientation.Horizontal ? _scroller.HorizontalPageIndex : _scroller.VerticalPageIndex;
-				Element.SetValueFromRenderer(CarouselView.PositionProperty, index);
-				Element.SendPositionSelected();
+				Element.NotifyPositionChanged(index);
 				_indicatorItems[index].Select(true);
 			}
 			_changedByScroll--;
