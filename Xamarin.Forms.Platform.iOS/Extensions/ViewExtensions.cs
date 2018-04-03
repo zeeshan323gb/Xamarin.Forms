@@ -21,8 +21,6 @@ namespace Xamarin.Forms.Platform.iOS
 
         public static UIView ToiOS(this Xamarin.Forms.View view, CGRect size)
         {
-            //var vRenderer = RendererFactory.GetRenderer (view);
-
             if (Platform.GetRenderer(view) == null)
                 Platform.SetRenderer(view, Platform.CreateRenderer(view));
 
