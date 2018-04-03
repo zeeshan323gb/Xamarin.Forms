@@ -155,7 +155,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void Reset()
 		{
-
+			UpdateItemsSource();
 		}
 
 		void UpdateArrows()
@@ -165,6 +165,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void UpdateItemsSource()
 		{
+			_isChangingPosition = true;
 			var source = new List<FrameworkElement>();
 			var elementCount = GetItemCount();
 			if (elementCount > 0)
@@ -180,7 +181,8 @@ namespace Xamarin.Forms.Platform.UWP
 			_flipView.ItemsSource = Source;
 			SetArrowsVisibility();
 			SetIndicators();
-			Element.SendPositionSelected();
+			SetCurrentPage(Element.Position);
+			_isChangingPosition = false;
 		}
 
 		void UpdateOrientation()
@@ -191,7 +193,6 @@ namespace Xamarin.Forms.Platform.UWP
 				_flipView.ItemsPanel = _nativeView.Resources[VPanel] as ItemsPanelTemplate;
 
 			_flipView.UpdateLayout();
-			Element.SendPositionSelected();
 		}
 
 		void ScrollingHost_ViewChanging(object sender, ScrollViewerViewChangingEventArgs e)
@@ -271,14 +272,8 @@ namespace Xamarin.Forms.Platform.UWP
 			// No other properties are valid.
 			if (e.Action == NotifyCollectionChangedAction.Reset)
 			{
-				if (Element == null) return;
-
-				SetPosition();
 				Reset();
-
 				SetArrowsVisibility();
-
-				Element.SendPositionSelected();
 			}
 		}
 
@@ -304,22 +299,16 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			if (Element != null && !_isChangingPosition)
 			{
-				Element.Position = _flipView.SelectedIndex;
+				var position = _flipView.SelectedIndex;
+				UpdatePositionFromRenderer(position);
 				UpdateIndicatorsTint();
-
-				Element.SendPositionSelected();
 			}
 		}
-
-		void SetPosition()
+		void UpdatePositionFromRenderer(int position)
 		{
-			_isChangingPosition = true;
-			var elementCount = GetItemCount();
-			if (Element.Position > elementCount - 1)
-				Element.Position = elementCount - 1;
-
-
-			_isChangingPosition = false;
+			if (position == -1)
+				return;
+			Element.NotifyPositionChanged(position);
 		}
 
 		void SetArrows()
@@ -427,7 +416,8 @@ namespace Xamarin.Forms.Platform.UWP
 			if (position <= Element.Position)
 			{
 				_isChangingPosition = true;
-				Element.Position++;
+				var newPosition = Element.Position + 1;
+				UpdatePositionFromRenderer(newPosition);
 				_isChangingPosition = false;
 			}
 
@@ -435,9 +425,6 @@ namespace Xamarin.Forms.Platform.UWP
 			Dots?.Insert(position, CreateDot(position, Element.Position));
 
 			_flipView.SelectedIndex = Element.Position;
-
-			//if (position <= Element.Position)
-			Element.SendPositionSelected();
 		}
 
 		async Task RemovePageAsync(int position)
@@ -482,14 +469,12 @@ namespace Xamarin.Forms.Platform.UWP
 
 					Source.RemoveAt(position);
 
-					Element.Position = _flipView.SelectedIndex;
+					UpdatePositionFromRenderer(_flipView.SelectedIndex);
 
 					Dots?.RemoveAt(position);
 					UpdateIndicatorsTint();
 
 					_isChangingPosition = false;
-
-					Element.SendPositionSelected();
 				}
 			}
 		}
@@ -522,7 +507,6 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 			else
 			{
-
 				if (view != null)
 				{
 					formsView = view;
@@ -539,12 +523,7 @@ namespace Xamarin.Forms.Platform.UWP
 				}
 			}
 
-			formsView.Parent = this.Element;
-
 			var element = formsView.ToWindows(new Xamarin.Forms.Rectangle(0, 0, Element.Bounds.Width, Element.Bounds.Height));
-
-			//if (dt == null && view == null)
-			//formsView.Parent = null;
 
 			return element;
 		}
@@ -619,6 +598,9 @@ namespace Xamarin.Forms.Platform.UWP
 			{
 				_prevBtn = null;
 				_nextBtn = null;
+
+				Source = null;
+				Dots = null;
 
 				if (_flipView != null)
 				{
