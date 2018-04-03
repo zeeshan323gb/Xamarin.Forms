@@ -771,64 +771,32 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 
 			View formsView = null;
-
-			object bindingContext = null;
-
 			if (Source != null && Source?.Count > 0)
-				bindingContext = Source.Cast<object>().ElementAt(index);
+				formsView = Source.Cast<View>().ElementAt(index);
 
-			// Support for List<View> as ItemsSource
-			var view = bindingContext as View;
+			if (ChildViewControllers == null)
+				ChildViewControllers = new List<FormsUIViewContainer>();
 
-			// Support for List<DataTemplate> as ItemsSource
-			if (bindingContext is DataTemplate dt)
+			// Return from the local copy of controllers
+			foreach (FormsUIViewContainer controller in ChildViewControllers)
 			{
-				formsView = (View)dt.CreateContent();
-			}
-			else
-			{
-				if (view != null)
+				if (controller.Tag == formsView)
 				{
-					if (ChildViewControllers == null)
-						ChildViewControllers = new List<FormsUIViewContainer>();
-
-					// Return from the local copy of controllers
-					foreach (FormsUIViewContainer controller in ChildViewControllers)
-					{
-						if (controller.Tag == view)
-						{
-							return controller;
-						}
-					}
-
-					formsView = view;
-				}
-				else
-				{
-					if (Element.ItemTemplate is DataTemplateSelector selector)
-						formsView = (View)selector.SelectTemplate(bindingContext, Element).CreateContent();
-					else
-						formsView = (View)Element.ItemTemplate.CreateContent();
-
-					formsView.BindingContext = bindingContext;
+					return controller;
 				}
 			}
 
-			// HeightRequest fix
-			formsView.Parent = this.Element;
-
-			// UIScreen.MainScreen.Bounds.Width, UIScreen.MainScreen.Bounds.Height
 			var rect = new CGRect(Element.X, Element.Y, Element.Bounds.Width, Element.Bounds.Height);
 			var nativeConverted = formsView.ToiOS(rect);
 
 			var viewController = new FormsUIViewContainer();
-			viewController.Tag = bindingContext;
+			viewController.Tag = formsView;
 			viewController.View = nativeConverted;
 
 			// Only happens when ItemsSource is List<View>
 			if (ChildViewControllers != null)
 				ChildViewControllers.Add(viewController);
-			
+
 			return viewController;
 		}
 
