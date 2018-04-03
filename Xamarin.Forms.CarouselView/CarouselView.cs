@@ -175,9 +175,22 @@ namespace Xamarin.Forms
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public void SendScrolled(double percent, ScrollDirection direction)
+		public void SendScrolled(double value, ScrollDirection direction)
 		{
-			Scrolled?.Invoke(this, new ScrolledDirectionEventArgs { NewValue = percent, Direction = direction });
+			Scrolled?.Invoke(this, new ScrolledDirectionEventArgs { NewValue = value, Direction = direction });
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public void NotifyPositionChanged(int newPosition)
+		{
+			bool changed = _previousItemSelected != newPosition;
+
+			_previousItemSelected = newPosition;
+			var item = TemplatedItems[newPosition];
+
+			SetValueCore(SelectedItemProperty, item?.BindingContext, SetValueFlags.ClearOneWayBindings | SetValueFlags.ClearDynamicResource | (changed ? SetValueFlags.RaiseOnEqual : 0));
+			SetValueCore(PositionProperty, newPosition);
+			PositionSelectedCommand?.Execute(null);
 		}
 
 		protected override View CreateDefault(object item)
@@ -216,20 +229,6 @@ namespace Xamarin.Forms
 			//SetInheritedBindingContext(view, bc); doesn't work here why?
 			foreach (var view in _viewsWithInherithedBindingContext)
 				view.BindingContext = bc;
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public void NotifyPositionChanged(int newPosition)
-		{
-			bool changed = _previousItemSelected != newPosition;
-
-			_previousItemSelected = newPosition;
-			var group = TemplatedItems.GetGroup(0);
-			var item = group[newPosition];
-
-			SetValueCore(SelectedItemProperty, item?.BindingContext, SetValueFlags.ClearOneWayBindings | SetValueFlags.ClearDynamicResource | (changed ? SetValueFlags.RaiseOnEqual : 0));
-			SetValueCore(PositionProperty, newPosition);
-			PositionSelectedCommand?.Execute(null);
 		}
 
 		static void OnSelectedItemChanged(BindableObject bindable, object oldValue, object newValue)
