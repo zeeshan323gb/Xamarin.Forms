@@ -1,6 +1,6 @@
 ﻿namespace Xamarin.Forms
 {
-	public interface ICarouselViewController
+	public interface ICarouselViewController : IViewController
 	{
 		void NotifyPositionChanged(int newPosition);
 	}
