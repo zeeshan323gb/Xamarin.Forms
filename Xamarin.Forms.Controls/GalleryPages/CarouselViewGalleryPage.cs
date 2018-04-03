@@ -4,6 +4,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.PlatformConfiguration;
+using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
+
 
 namespace Xamarin.Forms.Controls
 {
@@ -258,6 +261,7 @@ namespace Xamarin.Forms.Controls
 
 		public CarouselViewGalleryPage()
 		{
+			On<iOS>().SetUseSafeArea(true);
 			_items = EmptyItems;
 
 			_selector = new MyDataTemplateSelector();
@@ -275,7 +279,7 @@ namespace Xamarin.Forms.Controls
 			_carouselView = new CarouselView
 			{
 				BackgroundColor = Color.Purple,
-				ItemTemplate = dataTemplate,
+				ItemTemplate = _selector,
 				Position = StartPosition,
 				ShowArrows = true,
 				ShowIndicators = true,
@@ -289,19 +293,19 @@ namespace Xamarin.Forms.Controls
 			_selectedPosition = CreateValue("null", "SelectedPosition");
 			_eventLog = CreateValue("", "EventLog");
 
-			//_carouselView.ItemSelected += (s, o) => {
-			//	var selectedItem = (Item)o.SelectedItem;
-			//	var selectedItemId = selectedItem?.Id.ToString() ?? "null";
-			//	if (selectedItem != _carouselView.Item)
-			//		throw new Exception("CarouselView.Item != ItemSelected");
-			//	_selectedItem.Text = $"{selectedItemId}";
-			//	OnEvent("i");
-			//};
+			_carouselView.ItemSelected += (s, o) => {
+				var selectedItem = (Item)o.SelectedItem;
+				var selectedItemId = selectedItem?.Id.ToString() ?? "null";
+				if (selectedItem != _carouselView.SelectedItem)
+					throw new Exception("CarouselView.SelectedItem != ItemSelected");
+				_selectedItem.Text = $"{selectedItemId}";
+				OnEvent("i");
+			};
 
 			_carouselView.PositionSelected += (s, o) => {
 				var selectedPosition = (int)o.SelectedPosition;
-				//if (_items != null && _items.Any() && _items[selectedPosition] != _carouselView.Item)
-				//	throw new Exception("CarouselView.Item != Items[selectedPosition]");
+				if (_items != null && _items.Any() && _items[selectedPosition] != _carouselView.SelectedItem)
+					throw new Exception("CarouselView.Item != Items[selectedPosition]");
 				_selectedPosition.Text = $"{selectedPosition}";
 				OnEvent("p");
 			};
