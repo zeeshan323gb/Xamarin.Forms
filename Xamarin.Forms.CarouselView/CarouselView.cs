@@ -32,6 +32,7 @@ namespace Xamarin.Forms
 	public class CarouselView : ItemsView<View>, ICarouselViewController //, IElementConfiguration<CarouselView>
 	{
 		int _previousItemSelected = -1;
+		List<View> _viewsWithInherithedBindingContext = new List<View>();
 
 		public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
 
@@ -151,7 +152,7 @@ namespace Xamarin.Forms
 			set { SetValue(PositionSelectedCommandProperty, value); }
 		}
 		public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(CarouselView), null, BindingMode.OneWayToSource,
-			propertyChanged: OnSelectedItemChanged);
+		                                                                                       propertyChanged: OnSelectedItemChanged);
 
 		public object SelectedItem
 		{
@@ -164,12 +165,6 @@ namespace Xamarin.Forms
 		public event EventHandler<ScrolledDirectionEventArgs> Scrolled;
 
 		public event EventHandler<SelectedItemChangedEventArgs> ItemSelected;
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public void SendPositionSelected()
-		{
-			PositionSelected?.Invoke(this, new SelectedPositionChangedEventArgs(Position));
-		}
 
 		readonly Lazy<PlatformConfigurationRegistry<CarouselView>> _platformConfigurationRegistry;
 
@@ -187,6 +182,15 @@ namespace Xamarin.Forms
 
 		protected override View CreateDefault(object item)
 		{
+			//user is using an array of views they could or not have a binding context
+			if (item is View view && view.BindingContext == null && ItemTemplate == null)
+			{
+				object bc = BindingContext;
+				SetInheritedBindingContext(view, bc);
+				_viewsWithInherithedBindingContext.Add(view);
+				return view;
+			}
+
 			return new Label { Text = item?.ToString() ?? "" };
 		}
 
@@ -200,6 +204,18 @@ namespace Xamarin.Forms
 		{
 			base.UnhookContent(content);
 			content.Parent = null;
+			if (_viewsWithInherithedBindingContext.Contains(content))
+				_viewsWithInherithedBindingContext.Remove(content);
+		}
+
+		protected override void OnBindingContextChanged()
+		{
+			base.OnBindingContextChanged();
+
+			object bc = BindingContext;
+			//SetInheritedBindingContext(view, bc); doesn't work here why?
+			foreach (var view in _viewsWithInherithedBindingContext)
+				view.BindingContext = bc;
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
