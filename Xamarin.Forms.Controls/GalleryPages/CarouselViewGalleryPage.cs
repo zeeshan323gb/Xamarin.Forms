@@ -13,6 +13,7 @@ namespace Xamarin.Forms.Controls
 	[Preserve(AllMembers = true)]
 	public sealed class CarouselViewGalleryPage : ContentPage
 	{
+		[Preserve(AllMembers = true)]
 		public abstract class Item
 		{
 			static int s_id = 0;

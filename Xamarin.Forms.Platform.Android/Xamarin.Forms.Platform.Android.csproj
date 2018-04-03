@@ -280,8 +280,6 @@
     <Compile Include="FastRenderers\ImageRenderer.cs" />
     <Compile Include="Extensions\ImageViewExtensions.cs" />
     <Compile Include="Extensions\TextViewExtensions.cs" />
-    <Compile Include="CarouselView\PageIndicator.cs" />
-    <Compile Include="CarouselView\CirclePageIndicator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -312,13 +310,6 @@
     <AndroidResource Include="Resources\drawable\Up.png" />
     <AndroidResource Include="Resources\layout\horizontal_viewpager.xml" />
     <AndroidResource Include="Resources\layout\vertical_viewpager.xml" />
-    <AndroidResource Include="Resources\values\vpi__attrs.xml" />
-    <AndroidResource Include="Resources\values\vpi__colors.xml" />
-    <AndroidResource Include="Resources\values\vpi__defaults.xml" />
-    <AndroidResource Include="Resources\values\vpi__styles.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\values\" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\Xamarin.Android.Support.Compat.25.4.0.2\build\MonoAndroid70\Xamarin.Android.Support.Compat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Compat.25.4.0.2\build\MonoAndroid70\Xamarin.Android.Support.Compat.targets')" />

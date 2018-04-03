@@ -821,19 +821,14 @@ namespace Xamarin.Forms.Platform.iOS
 			var rect = new CGRect(Element.X, Element.Y, Element.Bounds.Width, Element.Bounds.Height);
 			var nativeConverted = formsView.ToiOS(rect);
 
-			//if (dt == null && view == null)
-			//formsView.Parent = null;
-
 			var viewController = new FormsUIViewContainer();
 			viewController.Tag = bindingContext;
 			viewController.View = nativeConverted;
 
 			// Only happens when ItemsSource is List<View>
 			if (ChildViewControllers != null)
-			{
 				ChildViewControllers.Add(viewController);
-			}
-
+			
 			return viewController;
 		}
 

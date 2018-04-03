@@ -126,6 +126,8 @@ namespace Xamarin.Forms.Core.UITests
 		private void VerifyEvents()
 		{
 			// check expected events
+			if (_expectedEvents.Count == 0)
+				return;
 			var expectedEvents = string.Join(", ", _expectedEvents.ToArray().Reverse());
 			WaitForValue(Id.EventLog, expectedEvents);
 		}
@@ -321,7 +323,7 @@ namespace Xamarin.Forms.Core.UITests
 			}
 
 			var currentItem = _itemIds[_currentPosition];
-			if (_currentItem != currentItem)
+			if (_currentItem != null && _currentItem != currentItem)
 				ExpectEvent(Event.OnItemSelected);
 			_currentItem = currentItem;
 
