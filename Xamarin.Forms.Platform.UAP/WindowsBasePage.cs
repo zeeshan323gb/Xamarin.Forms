@@ -48,7 +48,7 @@ namespace Xamarin.Forms.Platform.UWP
 			SuspendingDeferral deferral = e.SuspendingOperation.GetDeferral();
 			try
 			{
-				await Application.Current.SendSleepAsync();
+				await Application.Current?.SendSleepAsync();
 			}
 			finally
 			{
