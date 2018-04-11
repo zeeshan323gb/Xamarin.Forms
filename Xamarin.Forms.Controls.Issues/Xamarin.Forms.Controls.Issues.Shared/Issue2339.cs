@@ -2,15 +2,18 @@
 using System.Threading.Tasks;
 using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
+#if UITEST
+using NUnit.Framework;
+#endif
 
 namespace Xamarin.Forms.Controls
 {
 	[Preserve (AllMembers=true)]
-	[Issue (IssueTracker.Github, 2339, "Picker not shown when .Focus() is called", PlatformAffected.WinPhone)]
-	public class Issue2339 : ContentPage
+	[Issue (IssueTracker.Github, 2339, "Picker not shown when .Focus() is called")]
+	public class Issue2339 : TestContentPage
 	{
-		public Issue2339 ()
-		{
+		protected override void Init()
+		{ 
 			var picker = new Picker { Items = {"One", "Two", "Three"} };
 			var pickerBtn = new Button {
 				Text = "Click me to call .Focus on Picker"
@@ -63,5 +66,25 @@ namespace Xamarin.Forms.Controls
 				}
 			};
 		}
+
+
+#if UITEST
+		[Test]
+#if __WINDOWS__
+		[Ignore("Focus Behavior is different on UWP")]
+#endif
+		public void Issue2339_FocusAndUnFocusMultipleTimes ()
+		{
+			RunningApp.WaitForElement("btnFocus");
+			RunningApp.Tap (c => c.Marked ("btnFocus"));
+			RunningApp.WaitForElement(cw => cw.Marked("Picker Focused: 1"));
+			RunningApp.Tap(c => c.Marked("btnUnFocus"));  
+			RunningApp.WaitForElement(cw => cw.Marked("Picker UnFocused: 1")); 
+			RunningApp.Tap (c => c.Marked ("btnFocus"));
+			RunningApp.WaitForElement(cw => cw.Marked("Picker Focused: 2"));
+			RunningApp.Tap(c => c.Marked("btnUnFocus"));  
+			RunningApp.WaitForElement(cw => cw.Marked("Picker UnFocused: 2")); 
+		} 
+#endif
 	}
 }
