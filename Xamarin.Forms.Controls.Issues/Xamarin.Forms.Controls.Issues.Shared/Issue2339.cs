@@ -45,7 +45,8 @@ namespace Xamarin.Forms.Controls.Issues
 					picker.Focus();
 					await Task.Delay(2000);
 					picker.Unfocus();
-				})
+				}),
+				AutomationId = "btnFocusThenUnFocus"
 			};
 
 			var focusFiredCount = 0;
@@ -85,14 +86,12 @@ namespace Xamarin.Forms.Controls.Issues
 #endif
 		public void FocusAndUnFocusMultipleTimes ()
 		{
-			RunningApp.WaitForElement("btnFocus");
-			RunningApp.Tap (c => c.Marked ("btnFocus"));
+			RunningApp.WaitForElement("btnFocusThenUnFocus");
+			RunningApp.Tap (c => c.Marked ("btnFocusThenUnFocus"));
 			RunningApp.WaitForElement(cw => cw.Marked("Picker Focused: 1"));
-			RunningApp.Tap(c => c.Marked("btnUnFocus"));  
 			RunningApp.WaitForElement(cw => cw.Marked("Picker UnFocused: 1")); 
-			RunningApp.Tap (c => c.Marked ("btnFocus"));
+			RunningApp.Tap (c => c.Marked ("btnFocusThenUnFocus"));
 			RunningApp.WaitForElement(cw => cw.Marked("Picker Focused: 2"));
-			RunningApp.Tap(c => c.Marked("btnUnFocus"));  
 			RunningApp.WaitForElement(cw => cw.Marked("Picker UnFocused: 2")); 
 		} 
 #endif
