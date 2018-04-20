@@ -18,6 +18,7 @@ using WApp = Windows.UI.Xaml.Application;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 using Specifics = Xamarin.Forms.PlatformConfiguration.WindowsSpecific.ListView;
+using System.Collections.ObjectModel;
 
 namespace Xamarin.Forms.Platform.UWP
 {
@@ -66,7 +67,7 @@ namespace Xamarin.Forms.Platform.UWP
 				}
 
 				// WinRT throws an exception if you set ItemsSource directly to a CVS, so bind it.
-				List.DataContext = new CollectionViewSource { Source = Element.ItemsSource, IsSourceGrouped = Element.IsGroupingEnabled };
+				List.DataContext = new CollectionViewSource { Source = GetAllSourceItems(), IsSourceGrouped = Element.IsGroupingEnabled };
 
 				if (Element.SelectedItem != null)
 					OnElementItemSelected(null, new SelectedItemChangedEventArgs(Element.SelectedItem));
@@ -79,13 +80,40 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 		}
 
-		void OnCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		ObservableCollection<object> GetAllSourceItems()
 		{
-			if (e.Action == NotifyCollectionChangedAction.Reset)
+			var sourceItems = new ObservableCollection<object>();
+			foreach (var item in Element.ItemsSource)
+				sourceItems.Add(item);
+			return sourceItems;
+		}
+
+		void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			var sourceItems = ((List.DataContext as CollectionViewSource).Source as ObservableCollection<object>);
+			switch (e.Action)
 			{
-				List.DataContext =
-					new CollectionViewSource { Source = Element.ItemsSource, IsSourceGrouped = Element.IsGroupingEnabled };
+				case NotifyCollectionChangedAction.Add:
+					var elementIndex = 0;
+					for (int i = e.NewStartingIndex - e.NewItems.Count; i < e.NewStartingIndex; i++)
+						sourceItems.Insert(i, e.NewItems[elementIndex++]);
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					foreach (var item in e.OldItems)
+						sourceItems.RemoveAt(e.OldStartingIndex);
+					break;				
+				case NotifyCollectionChangedAction.Reset:
+					List.DataContext =
+					new CollectionViewSource { Source = GetAllSourceItems(), IsSourceGrouped = Element.IsGroupingEnabled };
+					break;
+				default:
+					sourceItems = GetAllSourceItems();
+					break;
 			}
+
+			// sinc check
+			if ((Element.ItemsSource as IEnumerable<object>).Count() != sourceItems.Count)
+				sourceItems = GetAllSourceItems();
 
 			List.UpdateLayout();
 		}
