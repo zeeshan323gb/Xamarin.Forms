@@ -228,7 +228,7 @@ namespace Xamarin.Forms
 
 		protected override void OnParentSet()
 		{
-			if (!Application.IsApplicationOrNull(RealParent) && !(RealParent is Page))
+			if (!Application.IsApplicationOrNull(RealParent) && !(RealParent is Page) && !(RealParent is ShellTabItem))
 				throw new InvalidOperationException("Parent of a Page must also be a Page");
 			base.OnParentSet();
 		}
@@ -246,9 +246,10 @@ namespace Xamarin.Forms
 				return;
 
 			var startingLayout = new List<Rectangle>(LogicalChildren.Count);
-			foreach (VisualElement c in LogicalChildren)
+			foreach (Element el in LogicalChildren)
 			{
-				startingLayout.Add(c.Bounds);
+				if (el is VisualElement c)
+					startingLayout.Add(c.Bounds);
 			}
 
 			double x = Padding.Left;
@@ -260,12 +261,14 @@ namespace Xamarin.Forms
 
 			for (var i = 0; i < LogicalChildren.Count; i++)
 			{
-				var c = (VisualElement)LogicalChildren[i];
-
-				if (c.Bounds != startingLayout[i])
+				var element = LogicalChildren[i];
+				if (element is VisualElement c)
 				{
-					LayoutChanged?.Invoke(this, EventArgs.Empty);
-					return;
+					if (c.Bounds != startingLayout[i])
+					{
+						LayoutChanged?.Invoke(this, EventArgs.Empty);
+						return;
+					}
 				}
 			}
 		}
@@ -349,14 +352,24 @@ namespace Xamarin.Forms
 		{
 			if (e.OldItems != null)
 			{
-				foreach (VisualElement item in e.OldItems.OfType<VisualElement>())
-					OnInternalRemoved(item);
+				foreach (Element item in e.OldItems)
+				{
+					if (item is VisualElement visual)
+						OnInternalRemoved(visual);
+					else
+						OnChildRemoved(item);
+				}
 			}
 
 			if (e.NewItems != null)
 			{
-				foreach (VisualElement item in e.NewItems.OfType<VisualElement>())
-					OnInternalAdded(item);
+				foreach (Element item in e.NewItems)
+				{
+					if (item is VisualElement visual)
+						OnInternalAdded(visual);
+					else
+						OnChildAdded(item);
+				}
 			}
 		}
 

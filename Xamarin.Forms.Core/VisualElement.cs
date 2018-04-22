@@ -5,12 +5,8 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
 {
-	public partial class VisualElement : Element, IAnimatable, IVisualElementController, IResourcesProvider, IFlowDirectionController
+	public partial class VisualElement : FrameworkElement, IAnimatable, IVisualElementController, IResourcesProvider, IFlowDirectionController
 	{
-		internal static readonly BindablePropertyKey NavigationPropertyKey = BindableProperty.CreateReadOnly("Navigation", typeof(INavigation), typeof(VisualElement), default(INavigation));
-
-		public static readonly BindableProperty NavigationProperty = NavigationPropertyKey.BindableProperty;
-
 		public static readonly BindableProperty InputTransparentProperty = BindableProperty.Create("InputTransparent", typeof(bool), typeof(VisualElement), default(bool));
 
 		public static readonly BindableProperty IsEnabledProperty = BindableProperty.Create("IsEnabled", typeof(bool),
@@ -116,7 +112,7 @@ namespace Xamarin.Forms
 			{
 				if (value == _effectiveFlowDirection)
 					return;
-
+				
 				_effectiveFlowDirection = value;
 				InvalidateMeasureInternal(InvalidationTrigger.Undefined);
 				OnPropertyChanged(FlowDirectionProperty.PropertyName);
@@ -150,7 +146,6 @@ namespace Xamarin.Forms
 
 		internal VisualElement()
 		{
-			Navigation = new NavigationProxy();
 			_mergedStyle = new MergedStyle(GetType(), this);
 		}
 
@@ -238,12 +233,6 @@ namespace Xamarin.Forms
 		{
 			get { return (double)GetValue(MinimumWidthRequestProperty); }
 			set { SetValue(MinimumWidthRequestProperty, value); }
-		}
-
-		public INavigation Navigation
-		{
-			get { return (INavigation)GetValue(NavigationProperty); }
-			internal set { SetValue(NavigationPropertyKey, value); }
 		}
 
 		public double Opacity
@@ -427,12 +416,6 @@ namespace Xamarin.Forms
 
 				OnIsPlatformEnabledChanged();
 			}
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public NavigationProxy NavigationProxy
-		{
-			get { return Navigation as NavigationProxy; }
 		}
 
 		internal LayoutConstraint SelfConstraint
@@ -657,18 +640,7 @@ namespace Xamarin.Forms
 
 		protected override void OnParentSet()
 		{
-#pragma warning disable 0618 // retain until ParentView removed
 			base.OnParentSet();
-
-			if (ParentView != null)
-			{
-				NavigationProxy.Inner = ParentView.NavigationProxy;
-			}
-			else
-			{
-				NavigationProxy.Inner = null;
-			}
-#pragma warning restore 0618
 
 			FlowController.NotifyFlowDirectionChanged();
 		}
