@@ -46,6 +46,7 @@ using UIKit;
 [assembly: ExportRenderer(typeof(NavigationPage), typeof(NavigationRenderer))]
 [assembly: ExportRenderer(typeof(CarouselPage), typeof(CarouselPageRenderer))]
 [assembly: ExportRenderer(typeof(Page), typeof(PageRenderer))]
+[assembly: ExportRenderer(typeof(Shell), typeof(ShellRenderer))]
 [assembly: ExportRenderer(typeof(MasterDetailPage), typeof(PhoneMasterDetailRenderer), UIUserInterfaceIdiom.Phone)]
 #endif
 

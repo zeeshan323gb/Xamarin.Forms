@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://xamarin.com/schemas/2014/forms"
+		xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+		xmlns:local="clr-namespace:Xamarin.Forms.Controls"
+		x:Class="Xamarin.Forms.Controls.ShellTest"
+		FlyoutHeaderBehavior="Scroll">
+	<Shell.FlyoutHeader>
+		<Grid BackgroundColor="Cyan">
+			<Label Text="FLYOUT HEADER" VerticalOptions="Center" HorizontalOptions="Center" />
+		</Grid>
+	</Shell.FlyoutHeader>
+	<Shell.ItemTemplate>
+		<DataTemplate>
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="50" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Image Source="{Binding Icon}" HorizontalOptions="End"  VerticalOptions="Center" />
+				<Label Grid.Column="1"  Text="{Binding Title}" VerticalOptions="Center" Margin="20, 0, 0, 0" />
+			</Grid>
+		</DataTemplate>
+	</Shell.ItemTemplate>
+	<ShellItem Title="Home" Icon="calculator.png" GroupBehavior="ShowTabs">
+
+		<ShellTabItem Title="Updates" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}">
+			<ShellItem.ShellAppearance>
+				<ShellAppearance ForegroundColor="#ff0000" BackgroundColor="#224477ff" />
+			</ShellItem.ShellAppearance>
+		</ShellTabItem>
+		<ShellTabItem Title="Games" Icon="coffee.png">
+			<ContentPage Title="Testing Games" BackgroundColor="Red" />
+		</ShellTabItem>
+	</ShellItem>
+	<ShellItem Title="Apps" Icon="calculator.png">
+		<ShellTabItem Title="Books" Icon="coffee.png">
+			<ContentPage Title="Testing Apps" BackgroundColor="Purple">
+				<Label Text="Hello World" VerticalOptions="Center" HorizontalOptions="Center" />
+			</ContentPage>
+		</ShellTabItem>
+		<ShellTabItem Title="Movies" Icon="coffee.png">
+			<ContentPage Title="Testing Movies" BackgroundColor="Gray" />
+		</ShellTabItem>
+	</ShellItem>
+</Shell>

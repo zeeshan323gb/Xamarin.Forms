@@ -126,6 +126,25 @@
     <Compile Include="Renderers\AlignmentExtensions.cs" />
     <Compile Include="Forms.cs" />
     <Compile Include="PageExtensions.cs" />
+    <Compile Include="Renderers\ElementSelectedEventArgs.cs" />
+    <Compile Include="Renderers\IShellContext.cs" />
+    <Compile Include="Renderers\IShellFlyoutContentRenderer.cs" />
+    <Compile Include="Renderers\IShellFlyoutRenderer.cs" />
+    <Compile Include="Renderers\IShellFlyoutTransition.cs" />
+    <Compile Include="Renderers\IShellItemController.cs" />
+    <Compile Include="Renderers\IShellItemTransition.cs" />
+    <Compile Include="Renderers\IShellTabItemRenderer.cs" />
+    <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
+    <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
+    <Compile Include="Renderers\ShellItemRenderer.cs" />
+    <Compile Include="Renderers\ShellItemTransition.cs" />
+    <Compile Include="Renderers\ShellRenderer.cs" />
+    <Compile Include="Renderers\ShellTabItemRenderer.cs" />
+    <Compile Include="Renderers\ShellTableViewController.cs" />
+    <Compile Include="Renderers\ShellTableViewSource.cs" />
+    <Compile Include="Renderers\SlideFlyoutTransition.cs" />
+    <Compile Include="Renderers\UIContainerCell.cs" />
+    <Compile Include="Renderers\UIContainerView.cs" />
     <Compile Include="Resources\StringResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

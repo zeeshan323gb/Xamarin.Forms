@@ -1,0 +1,10 @@
+﻿using System;
+using UIKit;
+
+namespace Xamarin.Forms.Platform.iOS
+{
+	public interface IShellFlyoutTransition
+	{
+		void LayoutViews(nfloat openPercent, UIView flyout, UIView shell, nfloat flyoutWidth);
+	}
+}
