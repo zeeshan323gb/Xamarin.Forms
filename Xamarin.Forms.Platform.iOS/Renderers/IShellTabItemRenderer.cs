@@ -5,14 +5,12 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public interface IShellTabItemRenderer : IDisposable
 	{
-		ShellTabItem ShellTabItem { get; set; }
-
 		Page Page { get; }
-
+		ShellTabItem ShellTabItem { get; set; }
 		UIViewController ViewController { get; }
 
-		void SetTintColors(UIColor foreground, UIColor background);
-
 		void ResetTintColors();
+
+		void SetTintColors(UIColor foreground, UIColor background);
 	}
 }

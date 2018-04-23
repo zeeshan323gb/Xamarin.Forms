@@ -6,7 +6,7 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellItemTransition : IShellItemTransition
 	{
-		public Task Transition (IShellItemRenderer oldRenderer, IShellItemRenderer newRenderer)
+		public Task Transition(IShellItemRenderer oldRenderer, IShellItemRenderer newRenderer)
 		{
 			TaskCompletionSource<bool> task = new TaskCompletionSource<bool>();
 			var oldView = oldRenderer.ViewController.View;

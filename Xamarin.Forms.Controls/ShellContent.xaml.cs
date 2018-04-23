@@ -19,6 +19,13 @@ namespace Xamarin.Forms.Controls
 			_pushButton.Clicked += PushClicked;
 			_popButton.Clicked += PopClicked;
 			_popToRootButton.Clicked += PopToRootClicked;
+			_navButton.Clicked += NavClicked;
+		}
+
+		private async void NavClicked(object sender, EventArgs e)
+		{
+			var shell = Application.Current.MainPage as Shell;
+			await shell.GoToAsync("app:///s/apps/movies/absgallery");
 		}
 
 		private async void PopToRootClicked(object sender, EventArgs e)

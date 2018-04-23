@@ -42,7 +42,9 @@
     <Reference Include="Xamarin.iOS" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BundleResource Include="Resources\3bar%402x.png" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ContextActionCell.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ContextScrollViewDelegate.cs" />
@@ -133,11 +135,13 @@
     <Compile Include="Renderers\IShellFlyoutTransition.cs" />
     <Compile Include="Renderers\IShellItemController.cs" />
     <Compile Include="Renderers\IShellItemTransition.cs" />
+    <Compile Include="Renderers\IShellPageRendererTracker.cs" />
     <Compile Include="Renderers\IShellTabItemRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
     <Compile Include="Renderers\ShellItemRenderer.cs" />
     <Compile Include="Renderers\ShellItemTransition.cs" />
+    <Compile Include="Renderers\ShellPageRendererTracker.cs" />
     <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\ShellTabItemRenderer.cs" />
     <Compile Include="Renderers\ShellTableViewController.cs" />
@@ -212,5 +216,8 @@
     <Compile Include="..\Xamarin.Forms.Core\Properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\3bar.png" />
   </ItemGroup>
 </Project>

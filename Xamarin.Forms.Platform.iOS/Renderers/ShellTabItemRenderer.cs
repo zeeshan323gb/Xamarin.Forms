@@ -1,54 +1,50 @@
-﻿using System.ComponentModel;
-using Xamarin.Forms.Internals;
-using UIKit;
-using System;
-using Foundation;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+﻿using Foundation;
 using ObjCRuntime;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
+using UIKit;
+using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer
+	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IUIGestureRecognizerDelegate
 	{
-		private bool _ignorePop;
-		private ShellTabItem _shellTabItem;
-		private IVisualElementRenderer _renderer;
-		private TaskCompletionSource<bool> _popCompletionTask;
-		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks = 
+		private readonly IShellContext _context;
+		private UIView _blurView;
+		private UIView _colorView;
+
+		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
 			new Dictionary<UIViewController, TaskCompletionSource<bool>>();
 
-		private class NavDelegate : UINavigationControllerDelegate
-		{
-			private readonly ShellTabItemRenderer _self;
+		private UIImage _defaultBackgroundImage;
 
-			public NavDelegate(ShellTabItemRenderer renderer)
-			{
-				_self = renderer;
-			}
+		private UIImage _defaultShadowImage;
 
-			public override void DidShowViewController(UINavigationController navigationController, [Transient] UIViewController viewController, bool animated)
-			{
-				var tasks = _self._completionTasks;
-				var popTask = _self._popCompletionTask;
+		private UIColor _defaultTint;
 
-				if (tasks.TryGetValue(viewController, out var source))
-				{
-					source.TrySetResult(true);
-					tasks.Remove(viewController);
-				}
-				else if (popTask != null)
-				{
-					popTask.TrySetResult(true);
-				}
-			}
-		}
+		private bool _disposed;
 
-		public ShellTabItemRenderer()
+		private bool _ignorePop;
+
+		private TaskCompletionSource<bool> _popCompletionTask;
+
+		private IVisualElementRenderer _renderer;
+
+		private ShellTabItem _shellTabItem;
+
+		private Dictionary<Page, IShellPageRendererTracker> _trackers =
+			new Dictionary<Page, IShellPageRendererTracker>();
+
+		public ShellTabItemRenderer(IShellContext context)
 		{
 			Delegate = new NavDelegate(this);
+			_context = context;
 		}
+
+		public Page Page { get; private set; }
 
 		public ShellTabItem ShellTabItem
 		{
@@ -65,6 +61,8 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		public UIViewController ViewController => this;
+
 		public override UIViewController PopViewController(bool animated)
 		{
 			if (!_ignorePop)
@@ -76,25 +74,103 @@ namespace Xamarin.Forms.Platform.iOS
 			return base.PopViewController(animated);
 		}
 
-		private async void SendPoppedOnCompletion (Task popTask)
+		[Export("navigationBar:shouldPopItem:")]
+		public bool ShouldPopItem(UINavigationBar navigationBar, UINavigationItem item)
 		{
-			if (popTask == null)
+			// this means the pop is already done, nothing we can do
+			if (ViewControllers.Length < NavigationBar.Items.Length)
+				return true;
+
+			bool allowPop = ShouldPop();
+
+			if (allowPop)
 			{
-				throw new ArgumentNullException(nameof(popTask));
+				CoreFoundation.DispatchQueue.MainQueue.DispatchAsync(() => PopViewController(true));
+			}
+			else
+			{
+				for (int i = 0; i < NavigationBar.Subviews.Length; i++)
+				{
+					var child = NavigationBar.Subviews[i];
+					if (child.Alpha != 1)
+						UIView.Animate(.2f, () => child.Alpha = 1);
+				}
 			}
 
-			await popTask;
-
-			var poppedPage = _shellTabItem.Stack[_shellTabItem.Stack.Count - 1];
-			((IShellTabItemController)_shellTabItem).SendPopped();
-			DisposePage(poppedPage);
+			return false;
 		}
 
-		private void DisposePage (Page page)
+		public override void ViewDidLayoutSubviews()
 		{
-			var renderer = Platform.GetRenderer(page);
-			renderer.Dispose();
-			page.ClearValue(Platform.RendererProperty);
+			base.ViewDidLayoutSubviews();
+
+			_renderer.Element.Layout(View.Bounds.ToRectangle());
+		}
+
+		public override void ViewDidLoad()
+		{
+			base.ViewDidLoad();
+			InteractivePopGestureRecognizer.Delegate = new GestureDelegate(this, ShouldPop);
+		}
+
+		void IShellTabItemRenderer.ResetTintColors()
+		{
+			ResetTintColors();
+		}
+
+		void IShellTabItemRenderer.SetTintColors(UIColor foreground, UIColor background)
+		{
+			SetTintColors(foreground, background);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing && !_disposed)
+			{
+				_disposed = true;
+				_shellTabItem.PropertyChanged -= HandlePropertyChanged;
+				((IShellTabItemController)_shellTabItem).NavigationRequested -= OnNavigationRequested;
+				DisposePage(Page);
+			}
+
+			_shellTabItem = null;
+			_renderer = null;
+			Page = null;
+		}
+
+		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == ShellTabItem.TitleProperty.PropertyName)
+				UpdateTabBarItem();
+			else if (e.PropertyName == ShellTabItem.IconProperty.PropertyName)
+				UpdateTabBarItem();
+		}
+
+		protected virtual void LoadPages()
+		{
+			var content = ((IShellTabItemController)ShellTabItem).GetOrCreateContent();
+			Page = content;
+
+			_renderer = Platform.CreateRenderer(content);
+			Platform.SetRenderer(content, _renderer);
+
+			var tracker = _context.CreatePageRendererTracker();
+			tracker.IsRootPage = true; // default tracker requires this be set first
+			tracker.Renderer = _renderer;
+
+			_trackers[Page] = tracker;
+
+			_renderer.SetElementSize(View.Bounds.ToRectangle().Size);
+
+			PushViewController(_renderer.ViewController, false);
+
+			var stack = ShellTabItem.Stack;
+			for (int i = 1; i < stack.Count; i++)
+			{
+				PushPage(stack[i], false);
+			}
 		}
 
 		protected virtual void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
@@ -104,17 +180,38 @@ namespace Xamarin.Forms.Platform.iOS
 				case NavigationRequestType.Push:
 					OnPushRequested(e);
 					break;
+
 				case NavigationRequestType.Pop:
 					OnPopRequested(e);
 					break;
+
 				case NavigationRequestType.PopToRoot:
 					OnPopToRootRequested(e);
 					break;
+
 				case NavigationRequestType.Insert:
 					break;
+
 				case NavigationRequestType.Remove:
 					break;
 			}
+		}
+
+		protected virtual async void OnPopRequested(NavigationRequestedEventArgs e)
+		{
+			var page = e.Page;
+			var animated = e.Animated;
+
+			_popCompletionTask = new TaskCompletionSource<bool>();
+			e.Task = _popCompletionTask.Task;
+
+			_ignorePop = true;
+			PopViewController(animated);
+			_ignorePop = false;
+
+			await _popCompletionTask.Task;
+
+			DisposePage(page);
 		}
 
 		protected virtual async void OnPopToRootRequested(NavigationRequestedEventArgs e)
@@ -137,122 +234,35 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual async void OnPopRequested(NavigationRequestedEventArgs e)
-		{
-			var page = e.Page;
-			var animated = e.Animated;
-
-			_popCompletionTask = new TaskCompletionSource<bool>();
-			e.Task = _popCompletionTask.Task;
-
-			_ignorePop = true;
-			PopViewController(animated);
-			_ignorePop = false;
-
-			await _popCompletionTask.Task;
-
-			DisposePage(page);
-		}
-
 		protected virtual void OnPushRequested(NavigationRequestedEventArgs e)
 		{
 			var page = e.Page;
 			var animated = e.Animated;
 
-			var renderer = Platform.CreateRenderer(page);
-			Platform.SetRenderer(page, renderer);
-
-			renderer.SetElementSize(View.Bounds.ToRectangle().Size);
-
 			var taskSource = new TaskCompletionSource<bool>();
-			_completionTasks[renderer.ViewController] = taskSource;
-
-			PushViewController(renderer.ViewController, animated);
+			PushPage(page, animated, taskSource);
 
 			e.Task = taskSource.Task;
 		}
 
-		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == ShellTabItem.TitleProperty.PropertyName)
-				UpdateTabBarItem();
-			else if (e.PropertyName == ShellTabItem.IconProperty.PropertyName)
-				UpdateTabBarItem();
-		}
-
-		public UIViewController ViewController => this;
-
-		public Page Page { get; private set; }
-
-		protected virtual void OnShellTabItemSet ()
+		protected virtual void OnShellTabItemSet()
 		{
 			UpdateTabBarItem();
 		}
 
-		protected virtual void LoadPages ()
+		protected virtual void ResetTintColors()
 		{
-			var content = ((IShellTabItemController)ShellTabItem).GetOrCreateContent();
-			Page = content;
+			if (_blurView == null)
+				return;
 
-			_renderer = Platform.CreateRenderer(content);
-			Platform.SetRenderer(content, _renderer);
+			NavigationBar.ShadowImage = _defaultShadowImage;
+			NavigationBar.SetBackgroundImage(_defaultBackgroundImage, UIBarMetrics.Default);
+			NavigationBar.TintColor = _defaultTint;
 
-			_renderer.SetElementSize(View.Bounds.ToRectangle().Size);
-
-			PushViewController(_renderer.ViewController, false);
+			_blurView.RemoveFromSuperview();
+			_colorView.RemoveFromSuperview();
 		}
 
-		protected virtual async void UpdateTabBarItem()
-		{
-			Title = ShellTabItem.Title;
-			var imageSource = ShellTabItem.Icon;
-			UIImage icon = null;
-			if (imageSource != null)
-			{
-				var source = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(imageSource);
-				icon = await source.LoadImageAsync(imageSource);
-			}
-			TabBarItem = new UITabBarItem(ShellTabItem.Title, icon, null);
-		}
-
-		public override void ViewDidLayoutSubviews()
-		{
-			base.ViewDidLayoutSubviews();
-
-			_renderer.Element.Layout(View.Bounds.ToRectangle());
-		}
-
-		bool _disposed;
-		protected override void Dispose(bool disposing)
-		{
-			base.Dispose(disposing);
-
-			if (disposing && !_disposed)
-			{
-				_shellTabItem.PropertyChanged -= HandlePropertyChanged;
-				_shellTabItem = null;
-				_renderer.Dispose();
-				_renderer = null;
-				_disposed = true;
-				Page = null;
-			}
-		}
-
-		void IShellTabItemRenderer.SetTintColors(UIColor foreground, UIColor background)
-		{
-			SetTintColors(foreground, background);
-		}
-
-		void IShellTabItemRenderer.ResetTintColors()
-		{
-			ResetTintColors();
-		}
-
-		UIColor _defaultTint;
-		UIImage _defaultBackgroundImage;
-		UIImage _defaultShadowImage;
-		UIView _blurView;
-		UIView _colorView;
 		protected virtual void SetTintColors(UIColor foreground, UIColor background)
 		{
 			if (_blurView == null)
@@ -286,17 +296,120 @@ namespace Xamarin.Forms.Platform.iOS
 			NavigationBar.TintColor = foreground;
 		}
 
-		protected virtual void ResetTintColors()
+		protected virtual async void UpdateTabBarItem()
 		{
-			if (_blurView == null)
-				return;
+			Title = ShellTabItem.Title;
+			var imageSource = ShellTabItem.Icon;
+			UIImage icon = null;
+			if (imageSource != null)
+			{
+				var source = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(imageSource);
+				icon = await source.LoadImageAsync(imageSource);
+			}
+			TabBarItem = new UITabBarItem(ShellTabItem.Title, icon, null);
+		}
 
-			NavigationBar.ShadowImage = _defaultShadowImage;
-			NavigationBar.SetBackgroundImage(_defaultBackgroundImage, UIBarMetrics.Default);
-			NavigationBar.TintColor = _defaultTint;
+		private void DisposePage(Page page)
+		{
+			var renderer = Platform.GetRenderer(page);
+			if (renderer != null)
+			{
+				renderer.Dispose();
+				page.ClearValue(Platform.RendererProperty);
+			}
 
-			_blurView.RemoveFromSuperview();
-			_colorView.RemoveFromSuperview();
+			if (_trackers.TryGetValue(page, out var tracker))
+			{
+				tracker.Dispose();
+				_trackers.Remove(page);
+			}
+		}
+
+		private void PushPage(Page page, bool animated, TaskCompletionSource<bool> completionSource = null)
+		{
+			var renderer = Platform.CreateRenderer(page);
+			Platform.SetRenderer(page, renderer);
+
+			var tracker = _context.CreatePageRendererTracker();
+			tracker.Renderer = renderer;
+
+			_trackers[page] = tracker;
+
+			renderer.SetElementSize(View.Bounds.ToRectangle().Size);
+			if (completionSource != null)
+				_completionTasks[renderer.ViewController] = completionSource;
+
+			PushViewController(renderer.ViewController, animated);
+		}
+
+		private async void SendPoppedOnCompletion(Task popTask)
+		{
+			if (popTask == null)
+			{
+				throw new ArgumentNullException(nameof(popTask));
+			}
+
+			await popTask;
+
+			var poppedPage = _shellTabItem.Stack[_shellTabItem.Stack.Count - 1];
+			((IShellTabItemController)_shellTabItem).SendPopped();
+			DisposePage(poppedPage);
+		}
+
+		private bool ShouldPop ()
+		{
+			var shellItem = _context.Shell.CurrentItem;
+			var tab = shellItem?.CurrentItem as ShellTabItem;
+			var stack = tab?.Stack.ToList();
+
+			stack.RemoveAt(stack.Count - 1);
+
+			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.PopEvent, shellItem, tab, stack, true);
+		}
+
+		private class GestureDelegate : UIGestureRecognizerDelegate
+		{
+			private readonly Func<bool> _shouldPop;
+			private readonly UINavigationController _parent;
+
+			public GestureDelegate(UINavigationController parent, Func<bool> shouldPop)
+			{
+				_parent = parent;
+				_shouldPop = shouldPop;
+			}
+
+			public override bool ShouldBegin(UIGestureRecognizer recognizer)
+			{
+				if (_parent.ViewControllers.Length == 1)
+					return false;
+				return _shouldPop();
+			}
+		}
+
+		private class NavDelegate : UINavigationControllerDelegate
+		{
+			private readonly ShellTabItemRenderer _self;
+
+			public NavDelegate(ShellTabItemRenderer renderer)
+			{
+				_self = renderer;
+			}
+
+			public override void DidShowViewController(UINavigationController navigationController, [Transient] UIViewController viewController, bool animated)
+			{
+				var tasks = _self._completionTasks;
+				var popTask = _self._popCompletionTask;
+
+				if (tasks.TryGetValue(viewController, out var source))
+				{
+					source.TrySetResult(true);
+					tasks.Remove(viewController);
+				}
+				else if (popTask != null)
+				{
+					popTask.TrySetResult(true);
+				}
+			}
 		}
 	}
 }

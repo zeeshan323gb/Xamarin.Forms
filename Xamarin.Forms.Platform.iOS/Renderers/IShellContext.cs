@@ -6,12 +6,14 @@ namespace Xamarin.Forms.Platform.iOS
 	{
 		IShellItemRenderer CurrentShellItemRenderer { get; }
 
-		IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem);
-
-		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();
+		Shell Shell { get; }
 
 		UIViewController ViewController { get; }
 
-		Shell Shell { get; }
+		IShellPageRendererTracker CreatePageRendererTracker();
+
+		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();
+
+		IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem);
 	}
 }

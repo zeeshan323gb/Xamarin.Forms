@@ -1,33 +1,51 @@
 ﻿using CoreGraphics;
 using MediaPlayer;
 using System;
+using System.ComponentModel;
 using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-
 	public class ShellFlyoutRenderer : IShellFlyoutRenderer
 	{
-		public IShellFlyoutTransition FlyoutTransition { get; set; }
+		private bool _disposed;
+		private bool _gestureActive;
+		private bool _isOpen;
 		public UIViewAnimationCurve AnimationCurve { get; set; } = UIViewAnimationCurve.EaseOut;
 		public int AnimationDuration { get; set; } = 250;
+		public IShellFlyoutTransition FlyoutTransition { get; set; }
 
-		Shell Shell { get; set; }
-		IShellContext Context { get; set; }
-		IShellFlyoutContentRenderer Flyout { get; set; }
-		UIPanGestureRecognizer PanGestureRecognizer { get; set; }
-		UIViewController Detail => Context.CurrentShellItemRenderer.ViewController;
-		nfloat FlyoutWidth => (nfloat)(Math.Min(Context.ViewController.View.Frame.Width, Context.ViewController.View.Frame.Height) * 0.8);
-		UIView TapoffView { get; set; }
+		private IShellContext Context { get; set; }
 
-		private bool _isOpen;
-		private bool _gestureActive;
-		private bool _disposed;
+		private UIViewController Detail => Context.CurrentShellItemRenderer.ViewController;
+
+		private IShellFlyoutContentRenderer Flyout { get; set; }
+
+		private nfloat FlyoutWidth => (nfloat)(Math.Min(Context.ViewController.View.Frame.Width, Context.ViewController.View.Frame.Height) * 0.8);
+
+		private bool IsOpen
+		{
+			get { return _isOpen; }
+			set
+			{
+				if (_isOpen == value)
+					return;
+
+				_isOpen = value;
+				Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, value);
+			}
+		}
+
+		private UIPanGestureRecognizer PanGestureRecognizer { get; set; }
+		private Shell Shell { get; set; }
+		private UIView TapoffView { get; set; }
 
 		public void AttachFlyout(IShellContext context)
 		{
 			Context = context;
 			Shell = Context.Shell;
+
+			Shell.PropertyChanged += OnShellPropertyChanged;
 
 			Flyout = context.CreateShellFlyoutContentRenderer();
 			context.ViewController.AddChildViewController(Flyout.ViewController);
@@ -36,7 +54,8 @@ namespace Xamarin.Forms.Platform.iOS
 			Flyout.ViewController.View.BackgroundColor = UIColor.Blue;
 
 			PanGestureRecognizer = new UIPanGestureRecognizer(HandlePanGesture);
-			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) => {
+			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) =>
+			{
 				var view = context.ViewController.View;
 				CGPoint loc = touch.LocationInView(context.ViewController.View);
 				if (touch.View is UISlider || touch.View is MPVolumeView || loc.X > view.Frame.Width * 0.1)
@@ -44,7 +63,56 @@ namespace Xamarin.Forms.Platform.iOS
 				return true;
 			};
 
-			Context.ViewController.View.AddGestureRecognizer(PanGestureRecognizer);
+			//Context.ViewController.View.AddGestureRecognizer(PanGestureRecognizer);
+		}
+
+		public void CloseFlyout()
+		{
+			IsOpen = false;
+			LayoutSidebar(true);
+		}
+
+		public void Dispose()
+		{
+			if (_disposed)
+			{
+				_disposed = true;
+
+				Context = null;
+				Shell = null;
+			}
+		}
+
+		public void PerformLayout()
+		{
+			LayoutSidebar(false);
+		}
+
+		protected virtual void OnShellPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == Shell.FlyoutIsPresentedProperty.PropertyName)
+			{
+				var isPresented = Shell.FlyoutIsPresented;
+				if (IsOpen != isPresented)
+				{
+					IsOpen = isPresented;
+					LayoutSidebar(true);
+				}
+			}
+		}
+
+		private void AddTapoffView()
+		{
+			if (TapoffView != null)
+				return;
+
+			TapoffView = new UIView(Context.ViewController.View.Bounds);
+			Context.ViewController.View.InsertSubviewBelow(TapoffView, Flyout.ViewController.View);
+			TapoffView.AddGestureRecognizer(new UITapGestureRecognizer(t =>
+			{
+				IsOpen = false;
+				LayoutSidebar(true);
+			}));
 		}
 
 		private void HandlePanGesture(UIPanGestureRecognizer pan)
@@ -53,7 +121,7 @@ namespace Xamarin.Forms.Platform.iOS
 			double openProgress = 0;
 			double openLimit = Flyout.ViewController.View.Frame.Width;
 
-			if (_isOpen)
+			if (IsOpen)
 			{
 				openProgress = 1 - (-translation / openLimit);
 			}
@@ -71,18 +139,19 @@ namespace Xamarin.Forms.Platform.iOS
 					_gestureActive = true;
 					FlyoutTransition.LayoutViews((nfloat)openProgress, Flyout.ViewController.View, Detail.View, FlyoutWidth);
 					break;
+
 				case UIGestureRecognizerState.Ended:
 					_gestureActive = false;
-					if (_isOpen)
+					if (IsOpen)
 					{
 						if (openProgress < .8)
-							_isOpen = false;
+							IsOpen = false;
 					}
 					else
 					{
 						if (openProgress > 0.2)
 						{
-							_isOpen = true;
+							IsOpen = true;
 						}
 					}
 					LayoutSidebar(true);
@@ -90,34 +159,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		public void PerformLayout ()
-		{
-			LayoutSidebar(false);
-		}
-
-		void AddTapoffView ()
-		{
-			if (TapoffView != null)
-				return;
-
-			TapoffView = new UIView(Context.ViewController.View.Bounds);
-			Context.ViewController.View.InsertSubviewBelow(TapoffView, Flyout.ViewController.View);
-			TapoffView.AddGestureRecognizer(new UITapGestureRecognizer(t => {
-				_isOpen = false;
-				LayoutSidebar(true);
-			}));
-		}
-
-		void RemoveTapoffView ()
-		{
-			if (TapoffView == null)
-				return;
-
-			TapoffView.RemoveFromSuperview();
-			TapoffView = null;
-		}
-
-		void LayoutSidebar (bool animate)
+		private void LayoutSidebar(bool animate)
 		{
 			if (_gestureActive)
 				return;
@@ -126,7 +168,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				UIView.BeginAnimations("Flyout");
 			}
-			FlyoutTransition.LayoutViews(_isOpen ? 1 : 0, Flyout.ViewController.View, Detail.View, FlyoutWidth);
+			FlyoutTransition.LayoutViews(IsOpen ? 1 : 0, Flyout.ViewController.View, Detail.View, FlyoutWidth);
 			if (animate)
 			{
 				UIView.SetAnimationCurve(AnimationCurve);
@@ -135,27 +177,19 @@ namespace Xamarin.Forms.Platform.iOS
 				Context.ViewController.View.LayoutIfNeeded();
 			}
 
-			if (_isOpen)
+			if (IsOpen)
 				AddTapoffView();
 			else
 				RemoveTapoffView();
 		}
 
-		public void Dispose()
+		private void RemoveTapoffView()
 		{
-			if (_disposed)
-			{
-				_disposed = true;
+			if (TapoffView == null)
+				return;
 
-				Context = null;
-				Shell = null;
-			}
-		}
-
-		public void CloseFlyout()
-		{
-			_isOpen = false;
-			LayoutSidebar(true);
+			TapoffView.RemoveFromSuperview();
+			TapoffView = null;
 		}
 	}
 }

@@ -11,5 +11,7 @@ namespace Xamarin.Forms
 		PushEvent = 1 << 2,
 		PopEvent = 1 << 3,
 		PopToRootEvent = 1 << 4,
+		InsertPageInStack = 1 << 5,
+		RemovePageFromStack = 1 << 6,
 	}
 }

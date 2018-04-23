@@ -14,7 +14,18 @@ namespace Xamarin.Forms.Controls
 	{
 		public ShellTest ()
 		{
+			Routing.RegisterRoute("absgallery", typeof(AbsoluteLayoutGallery));
 			InitializeComponent ();
+
+			Navigating += OnNavigating;
+		}
+
+		bool allowPop = false;
+
+		private void OnNavigating(object sender, ShellNavigatingEventArgs e)
+		{
+			if (allowPop = !allowPop)
+				e.Cancel();
 		}
 	}
 }

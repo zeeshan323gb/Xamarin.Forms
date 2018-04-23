@@ -3,16 +3,10 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-
 	public class ShellFlyoutContentRenderer : UIViewController, IShellFlyoutContentRenderer
 	{
-		public UIViewController ViewController => this;
-
-		private ShellTableViewController _tableViewController;
-
 		private UIView _headerView;
-
-		public event EventHandler<ElementSelectedEventArgs> ElementSelected;
+		private ShellTableViewController _tableViewController;
 
 		public ShellFlyoutContentRenderer(IShellContext context)
 		{
@@ -22,13 +16,9 @@ namespace Xamarin.Forms.Platform.iOS
 			AddChildViewController(_tableViewController);
 		}
 
-		public override void ViewDidLoad()
-		{
-			base.ViewDidLoad();
-			
-			View.AddSubview(_tableViewController.View);
-			View.AddSubview(_headerView);
-		}
+		public event EventHandler<ElementSelectedEventArgs> ElementSelected;
+
+		public UIViewController ViewController => this;
 
 		public override void ViewDidLayoutSubviews()
 		{
@@ -37,7 +27,15 @@ namespace Xamarin.Forms.Platform.iOS
 			_tableViewController.LayoutParallax();
 		}
 
-		private void OnElementSelected (Element element)
+		public override void ViewDidLoad()
+		{
+			base.ViewDidLoad();
+
+			View.AddSubview(_tableViewController.View);
+			View.AddSubview(_headerView);
+		}
+
+		private void OnElementSelected(Element element)
 		{
 			ElementSelected?.Invoke(this, new ElementSelectedEventArgs { Element = element });
 		}
