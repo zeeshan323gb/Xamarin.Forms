@@ -4,6 +4,14 @@ namespace Xamarin.Forms
 {
 	public class ShellNavigatingEventArgs : EventArgs
 	{
+		public ShellNavigatingEventArgs(ShellNavigationState current, ShellNavigationState target, ShellNavigationSource source, bool canCancel)
+		{
+			Current = current;
+			Target = target;
+			Source = source;
+			CanCancel = canCancel;
+		}
+
 		public ShellNavigationState Current { get; }
 
 		public ShellNavigationState Target { get; }
@@ -12,6 +20,14 @@ namespace Xamarin.Forms
 
 		public bool CanCancel { get; }
 
-		public bool Cancel() { return false; }
+		public bool Cancel()
+		{
+			if (!CanCancel)
+				return false;
+			Cancelled = true;
+			return true;
+		}
+
+		public bool Cancelled { get; private set; }
 	}
 }

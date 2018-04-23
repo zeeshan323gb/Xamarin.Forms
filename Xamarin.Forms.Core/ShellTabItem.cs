@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
 
@@ -11,8 +11,12 @@ namespace Xamarin.Forms
 	[ContentProperty("Content")]
 	public class ShellTabItem : FrameworkElement, IShellTabItemController
 	{
-		static readonly BindablePropertyKey MenuItemsPropertyKey =
+		#region PropertyKeys
+
+		private static readonly BindablePropertyKey MenuItemsPropertyKey =
 			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellTabItem), null, defaultValueCreator: bo => new MenuItemCollection());
+
+		#endregion PropertyKeys
 
 		public static readonly BindableProperty ContentProperty =
 			BindableProperty.Create(nameof(Content), typeof(object), typeof(ShellTabItem), null, BindingMode.OneTime, propertyChanged: OnContentChanged);
@@ -31,30 +35,13 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty TitleProperty =
 			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellTabItem), null, BindingMode.OneTime);
 
-		private static void OnContentChanged(BindableObject bindable, object oldValue, object newValue)
-		{
-			var shellTabItem = (ShellTabItem)bindable;
-			// This check is wrong but will work for testing
-			if (shellTabItem.ContentTemplate == null)
-			{
-				// deparent old item
-				if (oldValue is Page oldElement)
-					shellTabItem.OnChildRemoved(oldElement);
-
-				// make sure LogicalChildren collection stays consisten
-				shellTabItem._logicalChildren.Clear();
-				if (newValue is Page newElement)
-				{
-					shellTabItem._logicalChildren.Add((Element)newValue);
-					// parent new item
-					shellTabItem.OnChildAdded(newElement);
-				}
-			}	
-		}
 		
-		List<Page> _navStack = new List<Page> { null };
-		IList<Element> _logicalChildren = new List<Element> ();
-		ReadOnlyCollection<Element> _logicalChildrenReadOnly;
+
+		private IList<Element> _logicalChildren = new List<Element>();
+
+		private ReadOnlyCollection<Element> _logicalChildrenReadOnly;
+
+		private List<Page> _navStack = new List<Page> { null };
 
 		public ShellTabItem()
 		{
@@ -62,20 +49,13 @@ namespace Xamarin.Forms
 			Navigation = new NavigationImpl(this);
 		}
 
-		event EventHandler<NavigationRequestedEventArgs> _navigationRequested;
 		event EventHandler<NavigationRequestedEventArgs> IShellTabItemController.NavigationRequested
 		{
 			add { _navigationRequested += value; }
 			remove { _navigationRequested -= value; }
 		}
 
-		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
-
-		public string Route
-		{
-			get { return Router.GetRoute(this); }
-			set { Router.SetRoute(this, value); }
-		}
+		private event EventHandler<NavigationRequestedEventArgs> _navigationRequested;
 
 		public object Content
 		{
@@ -103,7 +83,13 @@ namespace Xamarin.Forms
 
 		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
 
-		public IList<Page> Stack => _navStack;
+		public string Route
+		{
+			get { return Routing.GetRoute(this); }
+			set { Routing.SetRoute(this, value); }
+		}
+
+		public IReadOnlyList<Page> Stack => _navStack;
 
 		public string Title
 		{
@@ -111,23 +97,32 @@ namespace Xamarin.Forms
 			set { SetValue(TitleProperty, value); }
 		}
 
-		private void MenuItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
+
+		public virtual async Task GoToAsync(List<string> routes, string queryString)
 		{
-			foreach (Element el in e.NewItems)
-				OnChildAdded(el);
-			foreach (Element el in e.OldItems)
-				OnChildRemoved(el);
-		}
+			for (int i = 0; i < routes.Count; i++)
+			{
+				var route = routes[i];
+				var navPage = _navStack.Count > i + 1 ? _navStack[i + 1] : null;
 
-		void IShellTabItemController.SendPopped()
-		{
-			if (_navStack.Count <= 1)
-				throw new Exception("Nav Stack consistency error");
+				if (navPage != null)
+				{
+					if (Routing.GetRoute(navPage) == route)
+						continue;
 
-			var last = _navStack[_navStack.Count - 1];
-			_navStack.Remove(last);
+					while (_navStack.Count > i + 1)
+					{
+						await OnPopAsync(false);
+					}
+				}
 
-			RemovePage(last);
+				var content = Routing.GetOrCreateContent(route, queryString) as Page;
+				if (content == null)
+					break;
+
+				await OnPushAsync(content, i == routes.Count - 1);
+			}
 		}
 
 		Page IShellTabItemController.GetOrCreateContent()
@@ -152,21 +147,39 @@ namespace Xamarin.Forms
 			return result;
 		}
 
+		void IShellTabItemController.SendPopped()
+		{
+			if (_navStack.Count <= 1)
+				throw new Exception("Nav Stack consistency error");
+
+			var last = _navStack[_navStack.Count - 1];
+			_navStack.Remove(last);
+
+			RemovePage(last);
+
+			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
+		}
+
 		protected virtual IReadOnlyList<Page> GetNavigationStack()
 		{
 			return _navStack;
 		}
 
-		protected virtual Task OnPushAsync(Page page, bool animated)
+		protected virtual void OnInsertPageBefore(Page page, Page before)
 		{
-			var args = new NavigationRequestedEventArgs(page, animated) {
-				RequestType = NavigationRequestType.Push
-			};
+			var index = _navStack.IndexOf(page);
+			if (index == -1)
+				throw new ArgumentException("Page not found in nav stack");
 
-			_navStack.Add(page);
+			var args = new NavigationRequestedEventArgs(page, before, false)
+			{
+				RequestType = NavigationRequestType.PopToRoot
+			};
+			_navStack.Insert(index, page);
 			AddPage(page);
 			_navigationRequested?.Invoke(this, args);
-			return args.Task;
+
+			SendUpdateCurrentState(ShellNavigationSource.InsertPageInStack);
 		}
 
 		protected async virtual Task<Page> OnPopAsync(bool animated)
@@ -184,6 +197,9 @@ namespace Xamarin.Forms
 			_navigationRequested?.Invoke(this, args);
 			await args.Task;
 			RemovePage(page);
+
+			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
+
 			return page;
 		}
 
@@ -192,12 +208,23 @@ namespace Xamarin.Forms
 			if (_navStack.Count <= 1)
 				return;
 
+			var allow = ((IShellController)Shell).ProposeNavigation(
+				ShellNavigationSource.PopToRootEvent,
+				Parent as ShellItem,
+				this,
+				null,
+				true
+			);
+
+			if (!allow)
+				return;
+
 			var page = _navStack[_navStack.Count - 1];
 			var args = new NavigationRequestedEventArgs(page, animated)
 			{
 				RequestType = NavigationRequestType.PopToRoot
 			};
-			
+
 			_navigationRequested?.Invoke(this, args);
 			var oldStack = _navStack;
 			_navStack = new List<Page> { null };
@@ -208,21 +235,37 @@ namespace Xamarin.Forms
 			{
 				RemovePage(oldStack[i]);
 			}
+
+			SendUpdateCurrentState(ShellNavigationSource.PopToRootEvent);
 		}
 
-		protected virtual void OnInsertPageBefore(Page page, Page before)
+		protected virtual Task OnPushAsync(Page page, bool animated)
 		{
-			var index = _navStack.IndexOf(page);
-			if (index == -1)
-				throw new ArgumentException("Page not found in nav stack");
+			List<Page> stack = _navStack.ToList();
+			stack.Add(page);
+			var allow = ((IShellController)Shell).ProposeNavigation(
+				ShellNavigationSource.PushEvent,
+				Parent as ShellItem,
+				this,
+				stack,
+				true
+			);
 
-			var args = new NavigationRequestedEventArgs(page, before, false)
+			if (!allow)
+				return Task.FromResult(true);
+
+			var args = new NavigationRequestedEventArgs(page, animated)
 			{
-				RequestType = NavigationRequestType.PopToRoot
+				RequestType = NavigationRequestType.Push
 			};
-			_navStack.Insert(index, page);
+
+			_navStack.Add(page);
 			AddPage(page);
 			_navigationRequested?.Invoke(this, args);
+
+			SendUpdateCurrentState(ShellNavigationSource.PushEvent);
+
+			return args.Task;
 		}
 
 		protected virtual void OnRemovePage(Page page)
@@ -236,18 +279,59 @@ namespace Xamarin.Forms
 				RequestType = NavigationRequestType.Remove
 			};
 			_navigationRequested?.Invoke(this, args);
+
+			SendUpdateCurrentState(ShellNavigationSource.RemovePageFromStack);
 		}
 
-		void AddPage(Page page)
+		private Shell Shell => Parent?.Parent as Shell;
+
+		private static void OnContentChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var shellTabItem = (ShellTabItem)bindable;
+			// This check is wrong but will work for testing
+			if (shellTabItem.ContentTemplate == null)
+			{
+				// deparent old item
+				if (oldValue is Page oldElement)
+					shellTabItem.OnChildRemoved(oldElement);
+
+				// make sure LogicalChildren collection stays consisten
+				shellTabItem._logicalChildren.Clear();
+				if (newValue is Page newElement)
+				{
+					shellTabItem._logicalChildren.Add((Element)newValue);
+					// parent new item
+					shellTabItem.OnChildAdded(newElement);
+				}
+			}
+		}
+
+		private void AddPage(Page page)
 		{
 			_logicalChildren.Add(page);
 			OnChildAdded(page);
 		}
 
-		void RemovePage(Page page)
+		private void MenuItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			foreach (Element el in e.NewItems)
+				OnChildAdded(el);
+			foreach (Element el in e.OldItems)
+				OnChildRemoved(el);
+		}
+
+		private void RemovePage(Page page)
 		{
 			if (_logicalChildren.Remove(page))
 				OnChildRemoved(page);
+		}
+
+		private void SendUpdateCurrentState(ShellNavigationSource source)
+		{
+			if (Parent != null && Parent.Parent is IShellController shell)
+			{
+				shell.UpdateCurrentState(source);
+			}
 		}
 
 		public class NavigationImpl : NavigationProxy
@@ -264,9 +348,9 @@ namespace Xamarin.Forms
 				return _owner.GetNavigationStack();
 			}
 
-			protected override Task OnPushAsync(Page page, bool animated)
+			protected override void OnInsertPageBefore(Page page, Page before)
 			{
-				return _owner.OnPushAsync(page, animated);
+				_owner.OnInsertPageBefore(page, before);
 			}
 
 			protected override Task<Page> OnPopAsync(bool animated)
@@ -279,9 +363,9 @@ namespace Xamarin.Forms
 				return _owner.OnPopToRootAsync(animated);
 			}
 
-			protected override void OnInsertPageBefore(Page page, Page before)
+			protected override Task OnPushAsync(Page page, bool animated)
 			{
-				_owner.OnInsertPageBefore(page, before);
+				return _owner.OnPushAsync(page, animated);
 			}
 
 			protected override void OnRemovePage(Page page)

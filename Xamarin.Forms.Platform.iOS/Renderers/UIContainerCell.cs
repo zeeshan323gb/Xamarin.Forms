@@ -2,14 +2,11 @@
 
 namespace Xamarin.Forms.Platform.iOS
 {
-
 	public class UIContainerCell : UITableViewCell
 	{
-		IVisualElementRenderer _renderer;
+		private IVisualElementRenderer _renderer;
 
-		public View View { get; }
-
-		public UIContainerCell(string cellId, View view) : base (UITableViewCellStyle.Default, cellId)
+		public UIContainerCell(string cellId, View view) : base(UITableViewCellStyle.Default, cellId)
 		{
 			View = view;
 
@@ -20,6 +17,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 			AddSubview(_renderer.NativeView);
 		}
+
+		public View View { get; }
 
 		public override void LayoutSubviews()
 		{

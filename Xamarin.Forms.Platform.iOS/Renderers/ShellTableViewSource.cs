@@ -1,5 +1,5 @@
-﻿using System;
-using Foundation;
+﻿using Foundation;
+using System;
 using UIKit;
 using Xamarin.Forms.Internals;
 
@@ -11,18 +11,13 @@ namespace Xamarin.Forms.Platform.iOS
 		private readonly Action<Element> _onElementSelected;
 		private string _cellID = "ShellCell";
 
-		public event EventHandler<UIScrollView> ScrolledEvent;
-
 		public ShellTableViewSource(IShellContext context, Action<Element> onElementSelected)
 		{
 			_context = context;
 			_onElementSelected = onElementSelected;
 		}
 
-		public override nint NumberOfSections(UITableView tableView)
-		{
-			return _context.Shell.Items.Count;
-		}
+		public event EventHandler<UIScrollView> ScrolledEvent;
 
 		public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
 		{
@@ -48,19 +43,9 @@ namespace Xamarin.Forms.Platform.iOS
 			return cell;
 		}
 
-		public override nint RowsInSection(UITableView tableview, nint section)
+		public override nint NumberOfSections(UITableView tableView)
 		{
-			if (section >= _context.Shell.Items.Count)
-				return 0;
-			var shellItem = _context.Shell.Items[(int)section];
-			if (shellItem.GroupBehavior == ShellItemGroupBehavior.HideTabs)
-				return 1;
-			return shellItem.Items.Count;
-		}
-
-		public override void Scrolled(UIScrollView scrollView)
-		{
-			ScrolledEvent?.Invoke(this, scrollView);
+			return _context.Shell.Items.Count;
 		}
 
 		public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
@@ -79,6 +64,21 @@ namespace Xamarin.Forms.Platform.iOS
 				var shellTabItem = shellItem.Items[row];
 				_onElementSelected(shellTabItem);
 			}
+		}
+
+		public override nint RowsInSection(UITableView tableview, nint section)
+		{
+			if (section >= _context.Shell.Items.Count)
+				return 0;
+			var shellItem = _context.Shell.Items[(int)section];
+			if (shellItem.GroupBehavior == ShellItemGroupBehavior.HideTabs)
+				return 1;
+			return shellItem.Items.Count;
+		}
+
+		public override void Scrolled(UIScrollView scrollView)
+		{
+			ScrolledEvent?.Invoke(this, scrollView);
 		}
 	}
 }

@@ -2,20 +2,22 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 
 namespace Xamarin.Forms
 {
-
 	[ContentProperty("Items")]
 	public class ShellItem : FrameworkElement, IShellItemController
 	{
-		static readonly BindablePropertyKey ItemsPropertyKey =
-			BindableProperty.CreateReadOnly(nameof(Items), typeof(ShellTabItemCollection), typeof(ShellItem), null,
+		#region PropertyKeys
+
+		private static readonly BindablePropertyKey ItemsPropertyKey = BindableProperty.CreateReadOnly(nameof(Items), typeof(ShellTabItemCollection), typeof(ShellItem), null,
 				defaultValueCreator: bo => new ShellTabItemCollection { Inner = new ElementCollection<ShellTabItem>(((ShellItem)bo)._children) });
 
+		#endregion PropertyKeys
+
 		public static readonly BindableProperty CurrentItemProperty =
-			BindableProperty.Create(nameof(CurrentItem), typeof(object), typeof(ShellItem), null, BindingMode.TwoWay);
+			BindableProperty.Create(nameof(CurrentItem), typeof(object), typeof(ShellItem), null, BindingMode.TwoWay,
+				propertyChanged: OnCurrentItemChanged);
 
 		public static readonly BindableProperty GroupBehaviorProperty =
 			BindableProperty.Create(nameof(GroupBehavior), typeof(ShellItemGroupBehavior), typeof(ShellItem), ShellItemGroupBehavior.HideTabs, BindingMode.OneTime);
@@ -40,30 +42,12 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty TitleProperty =
 			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellItem), null, BindingMode.OneTime);
 
-		ObservableCollection<Element> _children = new ObservableCollection<Element>();
-		ReadOnlyCollection<Element> _logicalChildren;
-
-		public static ShellAppearance GetShellAppearance(BindableObject obj)
-		{
-			return (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
-		}
-
-		public static void SetShellAppearance(BindableObject obj, ShellAppearance value)
-		{
-			obj.SetValue(ShellAppearanceProperty, value);
-		}
+		private ObservableCollection<Element> _children = new ObservableCollection<Element>();
+		private ReadOnlyCollection<Element> _logicalChildren;
 
 		public ShellItem()
 		{
 			((INotifyCollectionChanged)Items).CollectionChanged += ItemsCollectionChanged;
-		}
-
-		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
-
-		public string Route
-		{
-			get { return Router.GetRoute(this); }
-			set { Router.SetRoute(this, value); }
 		}
 
 		public object CurrentItem
@@ -104,6 +88,12 @@ namespace Xamarin.Forms
 			set { SetValue(ItemTemplateProperty, value); }
 		}
 
+		public string Route
+		{
+			get { return Routing.GetRoute(this); }
+			set { Routing.SetRoute(this, value); }
+		}
+
 		public ShellAppearance ShellAppearance
 		{
 			get { return (ShellAppearance)GetValue(ShellAppearanceProperty); }
@@ -114,6 +104,13 @@ namespace Xamarin.Forms
 		{
 			get { return (string)GetValue(TitleProperty); }
 			set { SetValue(TitleProperty, value); }
+		}
+
+		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
+
+		public static ShellAppearance GetShellAppearance(BindableObject obj)
+		{
+			return (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
 		}
 
 		public static implicit operator ShellItem(ShellTabItem tab)
@@ -129,6 +126,11 @@ namespace Xamarin.Forms
 		public static implicit operator ShellItem(MenuItem menuItem)
 		{
 			throw new NotImplementedException();
+		}
+
+		public static void SetShellAppearance(BindableObject obj, ShellAppearance value)
+		{
+			obj.SetValue(ShellAppearanceProperty, value);
 		}
 
 		protected override void OnChildAdded(Element child)
@@ -147,6 +149,17 @@ namespace Xamarin.Forms
 					ClearValue(CurrentItemProperty);
 				else
 					SetValueFromRenderer(CurrentItemProperty, Items[0]);
+			}
+		}
+
+		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var shellItem = (ShellItem)bindable;
+			var shell = shellItem.Parent as IShellController;
+
+			if (shell != null)
+			{
+				shell.UpdateCurrentState(ShellNavigationSource.ShellTabItemChanged);
 			}
 		}
 

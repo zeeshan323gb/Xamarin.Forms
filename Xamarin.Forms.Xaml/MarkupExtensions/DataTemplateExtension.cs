@@ -10,7 +10,7 @@ namespace Xamarin.Forms.Xaml
 		public DataTemplate ProvideValue(IServiceProvider serviceProvider)
 		{
 			var typeResolver = serviceProvider.GetService<IXamlTypeResolver>();
-			if	(typeResolver.TryResolve(Type, out var type))
+			if (typeResolver.TryResolve(Type, out var type))
 				return new DataTemplate(type);
 			throw new Exception("Could not locate type for " + Type);
 		}

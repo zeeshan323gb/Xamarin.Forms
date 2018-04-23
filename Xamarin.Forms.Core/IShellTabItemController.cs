@@ -5,9 +5,9 @@ namespace Xamarin.Forms
 {
 	public interface IShellTabItemController : IElementController
 	{
-		Page GetOrCreateContent();
-
 		event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
+
+		Page GetOrCreateContent();
 
 		void SendPopped();
 	}
