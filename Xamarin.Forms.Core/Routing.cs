@@ -11,7 +11,7 @@ namespace Xamarin.Forms
 
 		private static Dictionary<string, RouteFactory> _routes = new Dictionary<string, RouteFactory>();
 
-		public static Element GetOrCreateContent(string route, string queryString)
+		public static Element GetOrCreateContent(string route)
 		{
 			Element result = null;
 

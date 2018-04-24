@@ -35,7 +35,8 @@ namespace Xamarin.Forms.Platform.iOS
 			base.ViewDidLoad();
 
 			TableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
-			TableView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never;
+			if (Forms.IsiOS11OrNewer)
+				TableView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never;
 			TableView.ContentInset = new UIEdgeInsets((nfloat)_headerMax, 0, 0, 0);
 			TableView.Source = _source;
 		}

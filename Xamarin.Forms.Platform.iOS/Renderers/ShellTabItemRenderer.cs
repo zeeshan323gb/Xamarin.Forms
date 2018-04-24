@@ -12,6 +12,20 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IUIGestureRecognizerDelegate
 	{
+		#region IShellTabItemRenderer
+
+		void IShellTabItemRenderer.ResetTintColors()
+		{
+			ResetTintColors();
+		}
+
+		void IShellTabItemRenderer.SetTintColors(UIColor foreground, UIColor background)
+		{
+			SetTintColors(foreground, background);
+		}
+
+		#endregion IShellTabItemRenderer
+
 		private readonly IShellContext _context;
 		private UIView _blurView;
 		private UIView _colorView;
@@ -21,13 +35,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private UIImage _defaultBackgroundImage;
 
-		private UIImage _defaultShadowImage;
-
 		private UIColor _defaultTint;
 
 		private bool _disposed;
 
 		private bool _ignorePop;
+
+		private Page _page;
 
 		private TaskCompletionSource<bool> _popCompletionTask;
 
@@ -44,7 +58,15 @@ namespace Xamarin.Forms.Platform.iOS
 			_context = context;
 		}
 
-		public Page Page { get; private set; }
+		public Page Page
+		{
+			get => _page;
+			private set
+			{
+				((IShellTabItemController)_shellTabItem).RootPageProjection = value;
+				_page = value;
+			}
+		}
 
 		public ShellTabItem ShellTabItem
 		{
@@ -62,6 +84,13 @@ namespace Xamarin.Forms.Platform.iOS
 		}
 
 		public UIViewController ViewController => this;
+
+		public override void TraitCollectionDidChange(UITraitCollection previousTraitCollection)
+		{
+			base.TraitCollectionDidChange(previousTraitCollection);
+
+			UpdatePageInsetPadding(PageForViewController(TopViewController));
+		}
 
 		public override UIViewController PopViewController(bool animated)
 		{
@@ -105,22 +134,25 @@ namespace Xamarin.Forms.Platform.iOS
 			base.ViewDidLayoutSubviews();
 
 			_renderer.Element.Layout(View.Bounds.ToRectangle());
+
+			if (_blurView?.Superview == NavigationBar)
+			{
+				NavigationBar.SendSubviewToBack(_colorView);
+				NavigationBar.SendSubviewToBack(_blurView);
+
+				var frame = NavigationBar.Frame;
+				frame.Height += frame.Y;
+				frame.Y = -frame.Y;
+
+				_blurView.Frame = frame;
+				_colorView.Frame = frame;
+			}
 		}
 
 		public override void ViewDidLoad()
 		{
 			base.ViewDidLoad();
 			InteractivePopGestureRecognizer.Delegate = new GestureDelegate(this, ShouldPop);
-		}
-
-		void IShellTabItemRenderer.ResetTintColors()
-		{
-			ResetTintColors();
-		}
-
-		void IShellTabItemRenderer.SetTintColors(UIColor foreground, UIColor background)
-		{
-			SetTintColors(foreground, background);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -135,9 +167,10 @@ namespace Xamarin.Forms.Platform.iOS
 				DisposePage(Page);
 			}
 
+			// must be set null prior to _shellTabItem to ensure weak ref page gets cleared
+			Page = null;
 			_shellTabItem = null;
 			_renderer = null;
-			Page = null;
 		}
 
 		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -255,7 +288,6 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_blurView == null)
 				return;
 
-			NavigationBar.ShadowImage = _defaultShadowImage;
 			NavigationBar.SetBackgroundImage(_defaultBackgroundImage, UIBarMetrics.Default);
 			NavigationBar.TintColor = _defaultTint;
 
@@ -268,32 +300,63 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_blurView == null)
 			{
 				_defaultBackgroundImage = NavigationBar.GetBackgroundImage(UIBarMetrics.Default);
-				_defaultShadowImage = NavigationBar.ShadowImage;
 				_defaultTint = NavigationBar.TintColor;
 
-				var frame = NavigationBar.Bounds;
-				frame.Y -= 20;
-				frame.Height += 20;
+				var frame = NavigationBar.Frame;
+				frame.Height += frame.Y;
+				frame.Y = -frame.Y;
 
 				var effect = UIBlurEffect.FromStyle(UIBlurEffectStyle.Regular);
 				_blurView = new UIVisualEffectView(effect);
+				_blurView.UserInteractionEnabled = false;
 				_blurView.Frame = frame;
 
-				_blurView.Layer.ShadowColor = UIColor.Black.CGColor;
-				_blurView.Layer.ShadowOpacity = 1f;
-				_blurView.Layer.ShadowRadius = 3;
-
 				_colorView = new UIView(frame);
+				_colorView.UserInteractionEnabled = false;
+
+				if (Forms.IsiOS11OrNewer)
+				{
+					_blurView.Layer.ShadowColor = UIColor.Black.CGColor;
+					_blurView.Layer.ShadowOpacity = 1f;
+					_blurView.Layer.ShadowRadius = 3;
+				}
 			}
 
-			NavigationBar.SetBackgroundImage(new UIImage(), UIBarMetrics.Default);
-			NavigationBar.ShadowImage = new UIImage();
+			if (Forms.IsiOS11OrNewer)
+			{
+				NavigationBar.SetBackgroundImage(new UIImage(), UIBarMetrics.Default);
 
-			NavigationBar.InsertSubview(_colorView, 0);
-			NavigationBar.InsertSubview(_blurView, 0);
+				NavigationBar.InsertSubview(_colorView, 0);
+				NavigationBar.InsertSubview(_blurView, 0);
 
-			_colorView.BackgroundColor = background;
+				_colorView.BackgroundColor = background;
+			}
+			else
+			{
+				NavigationBar.SetBackgroundImage(new UIImage(), UIBarMetrics.Default);
+
+				NavigationBar.InsertSubview(_colorView, 0);
+				NavigationBar.InsertSubview(_blurView, 0);
+
+				_colorView.BackgroundColor = background;
+			}
+
 			NavigationBar.TintColor = foreground;
+		}
+
+		protected virtual void UpdatePageInsetPadding(Page page)
+		{
+			var setInsets = Shell.GetSetPaddingInsets(page);
+			if (setInsets)
+			{
+				var navBarFrame = NavigationBar.Frame;
+				var topPadding = navBarFrame.Y + navBarFrame.Height;
+
+				var tabBarFrame = TabBarController.TabBar.Frame;
+				var bottomPadding = View.Frame.Height - tabBarFrame.Top;
+
+				page.Padding = new Thickness(0, topPadding, 0, bottomPadding);
+			}
 		}
 
 		protected virtual async void UpdateTabBarItem()
@@ -323,6 +386,23 @@ namespace Xamarin.Forms.Platform.iOS
 				tracker.Dispose();
 				_trackers.Remove(page);
 			}
+		}
+
+		private Page PageForViewController(UIViewController viewController)
+		{
+			if (_renderer.ViewController == viewController)
+				return Page;
+
+			foreach (var child in ShellTabItem.Stack)
+			{
+				if (child == null)
+					continue;
+				var renderer = Platform.GetRenderer(child);
+				if (viewController == renderer.ViewController)
+					return child;
+			}
+
+			return null;
 		}
 
 		private void PushPage(Page page, bool animated, TaskCompletionSource<bool> completionSource = null)
@@ -356,10 +436,10 @@ namespace Xamarin.Forms.Platform.iOS
 			DisposePage(poppedPage);
 		}
 
-		private bool ShouldPop ()
+		private bool ShouldPop()
 		{
 			var shellItem = _context.Shell.CurrentItem;
-			var tab = shellItem?.CurrentItem as ShellTabItem;
+			var tab = shellItem?.CurrentItem;
 			var stack = tab?.Stack.ToList();
 
 			stack.RemoveAt(stack.Count - 1);
@@ -369,8 +449,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private class GestureDelegate : UIGestureRecognizerDelegate
 		{
-			private readonly Func<bool> _shouldPop;
 			private readonly UINavigationController _parent;
+			private readonly Func<bool> _shouldPop;
 
 			public GestureDelegate(UINavigationController parent, Func<bool> shouldPop)
 			{
@@ -409,6 +489,19 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					popTask.TrySetResult(true);
 				}
+			}
+
+			public override void WillShowViewController(UINavigationController navigationController, [Transient] UIViewController viewController, bool animated)
+			{
+				var page = _self.PageForViewController(viewController);
+
+				bool navBarVisible = ShellAppearance.GetNavBarVisible(page);
+				bool tabBarVisible = ShellAppearance.GetTabBarVisible(page);
+
+				navigationController.SetNavigationBarHidden(!navBarVisible, true);
+				viewController.TabBarController.TabBar.Hidden = !tabBarVisible;
+
+				_self.UpdatePageInsetPadding(page);
 			}
 		}
 	}

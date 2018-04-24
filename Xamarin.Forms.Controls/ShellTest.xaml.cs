@@ -14,7 +14,9 @@ namespace Xamarin.Forms.Controls
 	{
 		public ShellTest ()
 		{
+			Routing.RegisterRoute("buttongallery", typeof(ButtonGallery));
 			Routing.RegisterRoute("absgallery", typeof(AbsoluteLayoutGallery));
+			Routing.RegisterRoute("shellcontent", typeof(ShellContent));
 			InitializeComponent ();
 
 			Navigating += OnNavigating;

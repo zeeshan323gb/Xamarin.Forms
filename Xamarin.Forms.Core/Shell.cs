@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
 
@@ -19,7 +20,10 @@ namespace Xamarin.Forms
 			BindableProperty.CreateAttached("FlyoutBehavior", typeof(FlyoutBehavior), typeof(Shell), FlyoutBehavior.Popover);
 
 		public static readonly BindableProperty SearchHandlerProperty =
-							BindableProperty.CreateAttached("SearchHandler", typeof(SearchHandler), typeof(Shell), null, BindingMode.OneTime);
+			BindableProperty.CreateAttached("SearchHandler", typeof(SearchHandler), typeof(Shell), null, BindingMode.OneTime);
+
+		public static readonly BindableProperty SetPaddingInsetsProperty =
+			BindableProperty.CreateAttached("SetPaddingInsets", typeof(bool), typeof(Shell), false);
 
 		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj)
 		{
@@ -36,6 +40,11 @@ namespace Xamarin.Forms
 			return (SearchHandler)obj.GetValue(SearchHandlerProperty);
 		}
 
+		public static bool GetSetPaddingInsets(BindableObject obj)
+		{
+			return (bool)obj.GetValue(SetPaddingInsetsProperty);
+		}
+
 		public static void SetBackButtonBehavior(BindableObject obj, BackButtonBehavior behavior)
 		{
 			obj.SetValue(BackButtonBehaviorProperty, behavior);
@@ -49,6 +58,11 @@ namespace Xamarin.Forms
 		public static void SetSearchHandler(BindableObject obj, SearchHandler handler)
 		{
 			obj.SetValue(SearchHandlerProperty, handler);
+		}
+
+		public static void SetSetPaddingInsets(BindableObject obj, bool value)
+		{
+			obj.SetValue(SetPaddingInsetsProperty, value);
 		}
 
 		#endregion Attached Properties
@@ -69,11 +83,55 @@ namespace Xamarin.Forms
 
 		#endregion PropertyKeys
 
+		#region IShellController
+
+		event EventHandler IShellController.HeaderChanged
+		{
+			add { _headerChanged += value; }
+			remove { _headerChanged -= value; }
+		}
+
+		private event EventHandler _headerChanged;
+
+		View IShellController.FlyoutHeader
+		{
+			get { return FlyoutHeaderView; }
+		}
+
+		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab)
+		{
+			return GetNavigationState(item, tab, tab.Stack.ToList());
+		}
+
+		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel)
+		{
+			var proposedState = GetNavigationState(item, tab, stack);
+			return ProposeNavigation(source, proposedState, canCancel);
+		}
+
+		void IShellController.UpdateCurrentState(ShellNavigationSource source)
+		{
+			var oldState = CurrentState;
+			var shellItem = CurrentItem;
+			var tab = shellItem?.CurrentItem;
+			var stack = tab?.Stack;
+			var result = GetNavigationState(shellItem, tab, stack.ToList());
+
+			SetValueFromRenderer(CurrentStatePropertyKey, result);
+
+			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
+		}
+
+		#endregion IShellController
+
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
 				propertyChanged: OnCurrentItemChanged);
 
 		public static readonly BindableProperty CurrentStateProperty = CurrentStatePropertyKey.BindableProperty;
+
+		public static readonly BindableProperty FlyoutBackgroundColorProperty =
+				BindableProperty.Create(nameof(FlyoutBackgroundColor), typeof(Color), typeof(Shell), Color.Default, BindingMode.OneTime);
 
 		public static readonly BindableProperty FlyoutHeaderBehaviorProperty =
 			BindableProperty.Create(nameof(FlyoutHeaderBehavior), typeof(FlyoutHeaderBehavior), typeof(Shell), FlyoutHeaderBehavior.Default, BindingMode.OneTime);
@@ -114,14 +172,6 @@ namespace Xamarin.Forms
 
 		public event EventHandler<ShellNavigatingEventArgs> Navigating;
 
-		event EventHandler IShellController.HeaderChanged
-		{
-			add { _headerChanged += value; }
-			remove { _headerChanged -= value; }
-		}
-
-		private event EventHandler _headerChanged;
-
 		public ShellItem CurrentItem
 		{
 			get { return (ShellItem)GetValue(CurrentItemProperty); }
@@ -129,6 +179,12 @@ namespace Xamarin.Forms
 		}
 
 		public ShellNavigationState CurrentState => (ShellNavigationState)GetValue(CurrentStateProperty);
+
+		public Color FlyoutBackgroundColor
+		{
+			get { return (Color)GetValue(FlyoutBackgroundColorProperty); }
+			set { SetValue(FlyoutBackgroundColorProperty, value); }
+		}
 
 		public FlyoutBehavior FlyoutBehavior
 		{
@@ -200,11 +256,6 @@ namespace Xamarin.Forms
 
 		public ShellNavigationState ShellNavigationState => (ShellNavigationState)GetValue(ShellNavigationStateProperty);
 
-		View IShellController.FlyoutHeader
-		{
-			get { return FlyoutHeaderView; }
-		}
-
 		private View FlyoutHeaderView
 		{
 			get { return _flyoutHeaderView; }
@@ -238,6 +289,7 @@ namespace Xamarin.Forms
 
 			var uri = state.Location;
 			var queryString = uri.Query;
+			var queryData = ParseQueryString(queryString);
 			var path = uri.AbsolutePath;
 
 			var parts = path.Substring(1).Split('/');
@@ -252,18 +304,21 @@ namespace Xamarin.Forms
 			if (Routing.GetRoute(this) != shellRoute)
 				throw new NotImplementedException();
 
-			// Find shell item
+			ApplyQueryAttributes(this, queryData, false);
+
+			// Find ShellItem
 			foreach (var shellItem in Items)
 			{
 				if (Routing.GetRoute(shellItem) == shellItemRoute)
 				{
+					ApplyQueryAttributes(shellItem, queryData, parts.Length == 2);
 					if (CurrentItem != shellItem)
 						SetValueFromRenderer(CurrentItemProperty, shellItem);
 					break;
 				}
 			}
 
-			// Find shell tab item
+			// Find ShellTabItem
 			ShellTabItem selectedTabItem = null;
 			if (shellTabItemRoute != null)
 			{
@@ -272,6 +327,7 @@ namespace Xamarin.Forms
 				{
 					if (Routing.GetRoute(tabItem) == shellTabItemRoute)
 					{
+						ApplyQueryAttributes(tabItem, queryData, parts.Length == 3);
 						if (shellItem.CurrentItem != tabItem)
 							shellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
 						selectedTabItem = tabItem;
@@ -288,35 +344,54 @@ namespace Xamarin.Forms
 				{
 					navParts.Add(parts[i]);
 				}
-				await selectedTabItem.GoToAsync(navParts, queryString);
+				await selectedTabItem.GoToAsync(navParts, queryData);
 			}
 
 			_accumulateNavigatedEvents = false;
 			OnNavigated(_accumulatedEvent);
 		}
 
-		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab)
+		internal static void ApplyQueryAttributes(Element element, IDictionary<string, string> query, bool isLastItem)
 		{
-			return GetNavigationState(item, tab, tab.Stack.ToList());
-		}
+			if (query.Count == 0)
+				return;
 
-		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel)
-		{
-			var proposedState = GetNavigationState(item, tab, stack);
-			return ProposeNavigation(source, proposedState, canCancel);
-		}
+			string prefix = "";
+			if (!isLastItem)
+			{
+				var route = Routing.GetRoute(element);
+				if (string.IsNullOrEmpty(route))
+					return;
+				prefix = route + ".";
+			}
 
-		void IShellController.UpdateCurrentState(ShellNavigationSource source)
-		{
-			var oldState = CurrentState;
-			var shellItem = CurrentItem;
-			var tab = shellItem?.CurrentItem as ShellTabItem;
-			var stack = tab?.Stack;
-			var result = GetNavigationState(shellItem, tab, stack.ToList());
+			var typeInfo = element.GetType().GetTypeInfo();
+			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
 
-			SetValueFromRenderer(CurrentStatePropertyKey, result);
+			if (effectAttributes.Length == 0)
+				return;
 
-			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
+			foreach (var a in effectAttributes)
+			{
+				if (a is QueryPropertyAttribute attrib)
+				{
+					if (query.TryGetValue(prefix + attrib.QueryId, out var value))
+					{
+						PropertyInfo prop = null;
+
+						while (prop == null && typeInfo != null)
+						{
+							prop = typeInfo.GetDeclaredProperty(attrib.Name);
+							typeInfo = typeInfo.BaseType.GetTypeInfo();
+						}
+
+						if (prop != null && prop.CanWrite && prop.SetMethod.IsPublic)
+						{
+							prop.SetValue(element, value);
+						}
+					}
+				}
+			}
 		}
 
 		protected override void OnChildAdded(Element child)
@@ -358,6 +433,63 @@ namespace Xamarin.Forms
 			Navigating?.Invoke(this, args);
 		}
 
+		private static string GenerateQueryString(Dictionary<string, string> queryData)
+		{
+			if (queryData.Count == 0)
+				return string.Empty;
+			string result = "?";
+
+			bool addAnd = false;
+			foreach (var kvp in queryData)
+			{
+				if (addAnd)
+					result += "&";
+				result += kvp.Key + "=" + kvp.Value;
+				addAnd = true;
+			}
+
+			return result;
+		}
+
+		private static void GetQueryStringData(Element element, bool isLastItem, Dictionary<string, string> result)
+		{
+			string prefix = string.Empty;
+			if (!isLastItem)
+			{
+				var route = Routing.GetRoute(element);
+				if (string.IsNullOrEmpty(route))
+					return;
+				prefix = route + ".";
+			}
+
+			var typeInfo = element.GetType().GetTypeInfo();
+			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+
+			if (effectAttributes.Length == 0)
+				return;
+
+			foreach (var a in effectAttributes)
+			{
+				if (a is QueryPropertyAttribute attrib)
+				{
+					PropertyInfo prop = null;
+
+					while (prop == null && typeInfo != null)
+					{
+						prop = typeInfo.GetDeclaredProperty(attrib.Name);
+						typeInfo = typeInfo.BaseType.GetTypeInfo();
+					}
+
+					if (prop != null && prop.CanRead && prop.GetMethod.IsPublic)
+					{
+						var val = (string)prop.GetValue(element);
+						var key = isLastItem ? prefix + attrib.QueryId : attrib.QueryId;
+						result[key] = val;
+					}
+				}
+			}
+		}
+
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var shell = (Shell)bindable;
@@ -376,31 +508,60 @@ namespace Xamarin.Forms
 			shell.OnFlyoutHeaderTemplateChanged((DataTemplate)oldValue, (DataTemplate)newValue);
 		}
 
+		private static Dictionary<string, string> ParseQueryString(string query)
+		{
+			if (query.StartsWith("?"))
+				query = query.Substring(1);
+			Dictionary<string, string> lookupDict = new Dictionary<string, string>();
+			if (query == null)
+				return lookupDict;
+			var parts = query.Split('&');
+			foreach (var part in parts)
+			{
+				var p = part.Split('=');
+				if (p.Length != 2)
+					continue;
+				lookupDict[p[0]] = p[1];
+			}
+
+			return lookupDict;
+		}
+
 		private ShellNavigationState GetNavigationState(ShellItem item, ShellTabItem tab, IList<Page> stack)
 		{
 			var state = RouteScheme + "://" + RouteHost + "/" + Route + "/";
+			Dictionary<string, string> queryData = new Dictionary<string, string>();
+
+			GetQueryStringData(this, false, queryData);
 
 			if (item != null)
 			{
 				state += Routing.GetRouteStringForElement(item);
 				state += "/";
 
+				GetQueryStringData(item, tab == null, queryData);
+
 				if (tab != null)
 				{
 					state += Routing.GetRouteStringForElement(tab);
 					state += "/";
 
+					GetQueryStringData(tab, stack.Count <= 1, queryData);
+
 					for (int i = 1; i < stack.Count; i++)
 					{
 						var page = stack[i];
 						state += Routing.GetRouteStringForElement(page);
+						GetQueryStringData(page, i == stack.Count - 1, queryData);
 						if (i < stack.Count - 1)
 							state += "/";
 					}
 				}
 			}
 
-			return state;
+			var queryString = GenerateQueryString(queryData);
+
+			return state + queryString;
 		}
 
 		private void OnFlyoutHeaderChanged(object oldVal, object newVal)

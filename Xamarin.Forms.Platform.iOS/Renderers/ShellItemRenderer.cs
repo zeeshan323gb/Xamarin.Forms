@@ -1,5 +1,4 @@
 ﻿using CoreGraphics;
-using Foundation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -42,8 +41,6 @@ namespace Xamarin.Forms.Platform.iOS
 						break;
 					}
 				}
-
-				UpdateShellAppearance();
 			}
 		}
 
@@ -64,6 +61,14 @@ namespace Xamarin.Forms.Platform.iOS
 		public UIViewController ViewController => this;
 
 		private IShellTabItemRenderer CurrentRenderer { get; set; }
+
+		public override void ViewDidLayoutSubviews()
+		{
+			base.ViewDidLayoutSubviews();
+
+			_blurView.Frame = TabBar.Bounds;
+			_colorView.Frame = _blurView.Frame;
+		}
 
 		public override void ViewDidLoad()
 		{
@@ -106,6 +111,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_tabRenderers.Clear();
 				CurrentRenderer = null;
 				ShellItem.PropertyChanged -= OnElementPropertyChanged;
+				((IShellItemController)ShellItem).CurrentShellAppearanceChanged -= OnShellAppearanceChanged;
 				((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChanged;
 				_shellItem = null;
 			}
@@ -115,7 +121,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
 			{
-				GoTo((ShellTabItem)ShellItem.CurrentItem);
+				GoTo(ShellItem.CurrentItem);
 			}
 		}
 
@@ -127,6 +133,7 @@ namespace Xamarin.Forms.Platform.iOS
 		protected virtual void OnShellItemSet(ShellItem item)
 		{
 			item.PropertyChanged += OnElementPropertyChanged;
+			((IShellItemController)item).CurrentShellAppearanceChanged += OnShellAppearanceChanged;
 			((INotifyCollectionChanged)item.Items).CollectionChanged += OnItemsCollectionChanged;
 		}
 
@@ -170,7 +177,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void UpdateShellAppearance()
 		{
-			var appearance = GetMostRelevantShellAppearance();
+			if (ShellItem == null)
+				return;
+
+			var appearance = ((IShellItemController)ShellItem).CurrentShellAppearance;
 			IShellTabItemRenderer currentRenderer = CurrentRenderer;
 
 			if (appearance == null)
@@ -203,39 +213,6 @@ namespace Xamarin.Forms.Platform.iOS
 			GoTo((ShellTabItem)ShellItem.CurrentItem);
 		}
 
-		private ShellAppearance GetMostRelevantShellAppearance()
-		{
-			var shellItem = ShellItem;
-
-			if (shellItem == null)
-				return null;
-
-			var shellTabItem = (ShellTabItem)shellItem.CurrentItem;
-			Page page = CurrentRenderer?.Page;
-
-			ShellAppearance result = null;
-
-			if (page != null)
-			{
-				result = ShellItem.GetShellAppearance(page);
-				if (result != null)
-					return result;
-			}
-
-			if (shellTabItem != null)
-			{
-				result = ShellItem.GetShellAppearance(shellTabItem);
-				if (result != null)
-					return result;
-			}
-
-			result = shellItem.ShellAppearance;
-			if (result != null)
-				return result;
-
-			return null;
-		}
-
 		private void GoTo(ShellTabItem tabItem)
 		{
 			if (tabItem == null)
@@ -263,6 +240,11 @@ namespace Xamarin.Forms.Platform.iOS
 			UIGraphics.EndImageContext();
 
 			return image;
+		}
+
+		private void OnShellAppearanceChanged(object sender, EventArgs e)
+		{
+			UpdateShellAppearance();
 		}
 	}
 }
