@@ -9,23 +9,43 @@ using Xamarin.Forms.Xaml;
 
 namespace Xamarin.Forms.Controls
 {
+	[QueryProperty("Text", "welcome")]
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ShellContent : ContentPage
 	{
-		public ShellContent ()
+		private string _text;
+
+		public ShellContent()
 		{
-			InitializeComponent ();
+			InitializeComponent();
 
 			_pushButton.Clicked += PushClicked;
 			_popButton.Clicked += PopClicked;
 			_popToRootButton.Clicked += PopToRootClicked;
 			_navButton.Clicked += NavClicked;
+			_queryButton.Clicked += QueryClicked;
+		}
+
+		public string Text
+		{
+			get { return _text; }
+			set
+			{
+				_text = value;
+				_mainLabel.Text = _text;
+			}
+		}
+
+		private async void QueryClicked(object sender, EventArgs e)
+		{
+			var shell = Application.Current.MainPage as Shell;
+			await shell.GoToAsync("app:///s/apps/movies/shellcontent?welcome=helloworld!");
 		}
 
 		private async void NavClicked(object sender, EventArgs e)
 		{
 			var shell = Application.Current.MainPage as Shell;
-			await shell.GoToAsync("app:///s/apps/movies/absgallery");
+			await shell.GoToAsync("app:///s/apps/movies/buttongallery");
 		}
 
 		private async void PopToRootClicked(object sender, EventArgs e)

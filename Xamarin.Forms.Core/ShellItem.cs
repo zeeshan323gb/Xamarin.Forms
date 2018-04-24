@@ -15,8 +15,42 @@ namespace Xamarin.Forms
 
 		#endregion PropertyKeys
 
+		#region IShellItemController
+
+		private ShellAppearance _currentShellAppearance;
+
+		event EventHandler IShellItemController.CurrentShellAppearanceChanged
+		{
+			add { _shellAppearanceChanged += value; }
+			remove { _shellAppearanceChanged -= value; }
+		}
+
+		private event EventHandler _shellAppearanceChanged;
+
+		ShellAppearance IShellItemController.CurrentShellAppearance
+		{
+			get
+			{
+				return _currentShellAppearance;
+			}
+			set
+			{
+				if (_currentShellAppearance == value)
+					return;
+				_currentShellAppearance = value;
+				_shellAppearanceChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
+
+		void IShellItemController.CurrentItemNavigationChanged()
+		{
+			UpdateCurrentShellAppearance();
+		}
+
+		#endregion IShellItemController
+
 		public static readonly BindableProperty CurrentItemProperty =
-			BindableProperty.Create(nameof(CurrentItem), typeof(object), typeof(ShellItem), null, BindingMode.TwoWay,
+			BindableProperty.Create(nameof(CurrentItem), typeof(ShellTabItem), typeof(ShellItem), null, BindingMode.TwoWay,
 				propertyChanged: OnCurrentItemChanged);
 
 		public static readonly BindableProperty GroupBehaviorProperty =
@@ -29,12 +63,6 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(ShellItem), true, BindingMode.OneWay);
 
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
-
-		public static readonly BindableProperty ItemsSourceProperty =
-			BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(ShellItem), null, BindingMode.OneTime);
-
-		public static readonly BindableProperty ItemTemplateProperty =
-			BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(ShellItem), null, BindingMode.OneTime);
 
 		public static readonly BindableProperty ShellAppearanceProperty =
 			BindableProperty.Create(nameof(ShellAppearance), typeof(ShellAppearance), typeof(ShellItem), null, BindingMode.OneTime);
@@ -50,9 +78,9 @@ namespace Xamarin.Forms
 			((INotifyCollectionChanged)Items).CollectionChanged += ItemsCollectionChanged;
 		}
 
-		public object CurrentItem
+		public ShellTabItem CurrentItem
 		{
-			get { return GetValue(CurrentItemProperty); }
+			get { return (ShellTabItem)GetValue(CurrentItemProperty); }
 			set { SetValue(CurrentItemProperty, value); }
 		}
 
@@ -75,18 +103,6 @@ namespace Xamarin.Forms
 		}
 
 		public ShellTabItemCollection Items => (ShellTabItemCollection)GetValue(ItemsProperty);
-
-		public IEnumerable ItemsSource
-		{
-			get { return (IEnumerable)GetValue(ItemsSourceProperty); }
-			set { SetValue(ItemsSourceProperty, value); }
-		}
-
-		public DataTemplate ItemTemplate
-		{
-			get { return (DataTemplate)GetValue(ItemTemplateProperty); }
-			set { SetValue(ItemTemplateProperty, value); }
-		}
 
 		public string Route
 		{
@@ -161,6 +177,8 @@ namespace Xamarin.Forms
 			{
 				shell.UpdateCurrentState(ShellNavigationSource.ShellTabItemChanged);
 			}
+
+			shellItem.UpdateCurrentShellAppearance();
 		}
 
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -172,6 +190,38 @@ namespace Xamarin.Forms
 			if (e.OldItems != null)
 				foreach (Element element in e.OldItems)
 					OnChildRemoved(element);
+		}
+
+		private void UpdateCurrentShellAppearance()
+		{
+			var shellTabItem = CurrentItem;
+			Page page = ((IShellTabItemController)shellTabItem).CurrentPage;
+
+			var controller = (IShellItemController)this;
+
+			ShellAppearance result = null;
+
+			if (page != null)
+			{
+				result = GetShellAppearance(page);
+				if (result != null)
+				{
+					controller.CurrentShellAppearance = result;
+					return;
+				}
+			}
+
+			if (shellTabItem != null)
+			{
+				result = GetShellAppearance(shellTabItem);
+				if (result != null)
+				{
+					controller.CurrentShellAppearance = result;
+					return;
+				}
+			}
+
+			controller.CurrentShellAppearance = ShellAppearance;
 		}
 	}
 }

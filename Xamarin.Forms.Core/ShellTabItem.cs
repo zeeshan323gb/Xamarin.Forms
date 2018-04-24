@@ -18,6 +18,76 @@ namespace Xamarin.Forms
 
 		#endregion PropertyKeys
 
+		#region IShellTabItemController
+
+		private WeakReference<Page> _projectedPage;
+
+		event EventHandler<NavigationRequestedEventArgs> IShellTabItemController.NavigationRequested
+		{
+			add { _navigationRequested += value; }
+			remove { _navigationRequested -= value; }
+		}
+
+		private event EventHandler<NavigationRequestedEventArgs> _navigationRequested;
+
+		Page IShellTabItemController.CurrentPage
+		{
+			get
+			{
+				if (_navStack.Count > 1)
+					return _navStack[_navStack.Count - 1];
+				return ((IShellTabItemController)this).RootPageProjection;
+			}
+		}
+
+		Page IShellTabItemController.RootPageProjection
+		{
+			get
+			{
+				if (_projectedPage != null && _projectedPage.TryGetTarget(out var target))
+					return target;
+				return null;
+			}
+			set { _projectedPage = new WeakReference<Page>(value); }
+		}
+
+		Page IShellTabItemController.GetOrCreateContent()
+		{
+			var template = ContentTemplate;
+			var content = Content;
+
+			Page result = null;
+			if (template == null)
+			{
+				if (content is Page page)
+					result = page;
+			}
+			else
+			{
+				result = (Page)template.CreateContent(content, this);
+			}
+
+			if (result != null)
+				OnChildAdded(result);
+
+			return result;
+		}
+
+		void IShellTabItemController.SendPopped()
+		{
+			if (_navStack.Count <= 1)
+				throw new Exception("Nav Stack consistency error");
+
+			var last = _navStack[_navStack.Count - 1];
+			_navStack.Remove(last);
+
+			RemovePage(last);
+
+			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
+		}
+
+		#endregion IShellTabItemController
+
 		public static readonly BindableProperty ContentProperty =
 			BindableProperty.Create(nameof(Content), typeof(object), typeof(ShellTabItem), null, BindingMode.OneTime, propertyChanged: OnContentChanged);
 
@@ -35,8 +105,6 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty TitleProperty =
 			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellTabItem), null, BindingMode.OneTime);
 
-		
-
 		private IList<Element> _logicalChildren = new List<Element>();
 
 		private ReadOnlyCollection<Element> _logicalChildrenReadOnly;
@@ -48,14 +116,6 @@ namespace Xamarin.Forms
 			((INotifyCollectionChanged)MenuItems).CollectionChanged += MenuItemsCollectionChanged;
 			Navigation = new NavigationImpl(this);
 		}
-
-		event EventHandler<NavigationRequestedEventArgs> IShellTabItemController.NavigationRequested
-		{
-			add { _navigationRequested += value; }
-			remove { _navigationRequested -= value; }
-		}
-
-		private event EventHandler<NavigationRequestedEventArgs> _navigationRequested;
 
 		public object Content
 		{
@@ -99,17 +159,25 @@ namespace Xamarin.Forms
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
 
-		public virtual async Task GoToAsync(List<string> routes, string queryString)
+		private ShellItem ShellItem => Parent as ShellItem;
+
+		private Shell Shell => Parent?.Parent as Shell;
+
+		public virtual async Task GoToAsync(List<string> routes, IDictionary<string, string> queryData)
 		{
 			for (int i = 0; i < routes.Count; i++)
 			{
+				bool isLast = i == routes.Count - 1;
 				var route = routes[i];
 				var navPage = _navStack.Count > i + 1 ? _navStack[i + 1] : null;
 
 				if (navPage != null)
 				{
 					if (Routing.GetRoute(navPage) == route)
+					{
+						Shell.ApplyQueryAttributes(navPage, queryData, isLast);
 						continue;
+					}
 
 					while (_navStack.Count > i + 1)
 					{
@@ -117,47 +185,15 @@ namespace Xamarin.Forms
 					}
 				}
 
-				var content = Routing.GetOrCreateContent(route, queryString) as Page;
+				var content = Routing.GetOrCreateContent(route) as Page;
 				if (content == null)
 					break;
 
+				Shell.ApplyQueryAttributes(content, queryData, isLast);
 				await OnPushAsync(content, i == routes.Count - 1);
 			}
-		}
 
-		Page IShellTabItemController.GetOrCreateContent()
-		{
-			var template = ContentTemplate;
-			var content = Content;
-
-			Page result = null;
-			if (template == null)
-			{
-				if (content is Page page)
-					result = page;
-			}
-			else
-			{
-				result = (Page)template.CreateContent(content, this);
-			}
-
-			if (result != null)
-				OnChildAdded(result);
-
-			return result;
-		}
-
-		void IShellTabItemController.SendPopped()
-		{
-			if (_navStack.Count <= 1)
-				throw new Exception("Nav Stack consistency error");
-
-			var last = _navStack[_navStack.Count - 1];
-			_navStack.Remove(last);
-
-			RemovePage(last);
-
-			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
+			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 		}
 
 		protected virtual IReadOnlyList<Page> GetNavigationStack()
@@ -176,6 +212,7 @@ namespace Xamarin.Forms
 				RequestType = NavigationRequestType.PopToRoot
 			};
 			_navStack.Insert(index, page);
+			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 			AddPage(page);
 			_navigationRequested?.Invoke(this, args);
 
@@ -194,6 +231,7 @@ namespace Xamarin.Forms
 			};
 
 			_navStack.Remove(page);
+			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 			_navigationRequested?.Invoke(this, args);
 			await args.Task;
 			RemovePage(page);
@@ -228,6 +266,7 @@ namespace Xamarin.Forms
 			_navigationRequested?.Invoke(this, args);
 			var oldStack = _navStack;
 			_navStack = new List<Page> { null };
+			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 
 			await args.Task;
 
@@ -245,7 +284,7 @@ namespace Xamarin.Forms
 			stack.Add(page);
 			var allow = ((IShellController)Shell).ProposeNavigation(
 				ShellNavigationSource.PushEvent,
-				Parent as ShellItem,
+				ShellItem,
 				this,
 				stack,
 				true
@@ -260,6 +299,7 @@ namespace Xamarin.Forms
 			};
 
 			_navStack.Add(page);
+			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 			AddPage(page);
 			_navigationRequested?.Invoke(this, args);
 
@@ -273,6 +313,8 @@ namespace Xamarin.Forms
 			if (!_navStack.Remove(page))
 				return;
 
+			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
+
 			RemovePage(page);
 			var args = new NavigationRequestedEventArgs(page, false)
 			{
@@ -282,8 +324,6 @@ namespace Xamarin.Forms
 
 			SendUpdateCurrentState(ShellNavigationSource.RemovePageFromStack);
 		}
-
-		private Shell Shell => Parent?.Parent as Shell;
 
 		private static void OnContentChanged(BindableObject bindable, object oldValue, object newValue)
 		{

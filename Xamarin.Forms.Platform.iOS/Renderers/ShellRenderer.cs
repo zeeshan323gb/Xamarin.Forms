@@ -6,11 +6,47 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellRenderer : UIViewController, IShellContext, IVisualElementRenderer, IEffectControlProvider
 	{
+		#region IShellContext
+
+		bool IShellContext.AllowFlyoutGesture
+		{
+			get
+			{
+				ShellTabItem currentItem = Shell?.CurrentItem?.CurrentItem;
+				if (currentItem == null)
+					return true;
+				return currentItem.Stack.Count <= 1;
+			}
+		}
+
+		IShellItemRenderer IShellContext.CurrentShellItemRenderer => _currentShellItemRenderer;
+
+		IShellPageRendererTracker IShellContext.CreatePageRendererTracker()
+		{
+			return CreatePageRendererTracker();
+		}
+
+		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
+		{
+			var content = CreateShellFlyoutContentRenderer();
+
+			content.ElementSelected += OnFlyoutItemSelected;
+
+			return content;
+		}
+
+		IShellTabItemRenderer IShellContext.CreateShellTabItemRenderer(ShellTabItem tabItem)
+		{
+			return CreateShellTabItemRenderer(tabItem);
+		}
+
+		#endregion IShellContext
+
+		private IShellItemRenderer _currentShellItemRenderer;
 		private bool _disposed;
 
 		public event EventHandler<VisualElementChangedEventArgs> ElementChanged;
 
-		public IShellItemRenderer CurrentShellItemRenderer { get; private set; }
 		public VisualElement Element { get; private set; }
 		public UIView NativeView => View;
 		public Shell Shell => (Shell)Element;
@@ -45,7 +81,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			FlyoutRenderer.PerformLayout();
 
-			CurrentShellItemRenderer.ViewController.View.Frame = View.Bounds;
+			_currentShellItemRenderer.ViewController.View.Frame = View.Bounds;
 		}
 
 		public override void ViewDidLoad()
@@ -68,18 +104,14 @@ namespace Xamarin.Forms.Platform.iOS
 			};
 		}
 
-		IShellPageRendererTracker IShellContext.CreatePageRendererTracker()
+		protected virtual IShellPageRendererTracker CreatePageRendererTracker()
 		{
-			return CreatePageRendererTracker();
+			return new ShellPageRendererTracker(this);
 		}
 
-		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
+		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
 		{
-			var content = CreateShellFlyoutContentRenderer();
-
-			content.ElementSelected += OnFlyoutItemSelected;
-
-			return content;
+			return new ShellFlyoutContentRenderer(this);
 		}
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem item)
@@ -95,9 +127,12 @@ namespace Xamarin.Forms.Platform.iOS
 			return new ShellItemTransition();
 		}
 
-		IShellTabItemRenderer IShellContext.CreateShellTabItemRenderer(ShellTabItem tabItem)
+		protected virtual IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem)
 		{
-			return CreateShellTabItemRenderer(tabItem);
+			return new ShellTabItemRenderer(this)
+			{
+				ShellTabItem = tabItem
+			};
 		}
 
 		protected override void Dispose(bool disposing)
@@ -116,7 +151,7 @@ namespace Xamarin.Forms.Platform.iOS
 		protected virtual void OnCurrentItemChanged()
 		{
 			var currentItem = Shell.CurrentItem;
-			if (CurrentShellItemRenderer?.ShellItem != currentItem)
+			if (_currentShellItemRenderer?.ShellItem != currentItem)
 			{
 				var newController = CreateShellItemRenderer(currentItem);
 				SetCurrentShellItemController(newController);
@@ -141,10 +176,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected async void SetCurrentShellItemController(IShellItemRenderer value)
 		{
-			var oldRenderer = CurrentShellItemRenderer;
+			var oldRenderer = _currentShellItemRenderer;
 			var newRenderer = value;
 
-			CurrentShellItemRenderer = value;
+			_currentShellItemRenderer = value;
 
 			AddChildViewController(newRenderer.ViewController);
 			View.AddSubview(newRenderer.ViewController.View);
@@ -161,24 +196,6 @@ namespace Xamarin.Forms.Platform.iOS
 				oldRenderer.ViewController.View.RemoveFromSuperview();
 				oldRenderer.Dispose();
 			}
-		}
-
-		protected virtual IShellPageRendererTracker CreatePageRendererTracker()
-		{
-			return new ShellPageRendererTracker(this);
-		}
-
-		protected virtual IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem)
-		{
-			return new ShellTabItemRenderer (this)
-			{
-				ShellTabItem = tabItem
-			};
-		}
-
-		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
-		{
-			return new ShellFlyoutContentRenderer(this);
 		}
 
 		protected virtual void UpdateBackgroundColor()
@@ -221,7 +238,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				throw new InvalidOperationException("Shell CurrentItem should not be null");
 			}
-			else if (CurrentShellItemRenderer == null)
+			else if (_currentShellItemRenderer == null)
 			{
 				OnCurrentItemChanged();
 			}

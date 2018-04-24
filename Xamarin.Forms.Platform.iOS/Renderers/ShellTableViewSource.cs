@@ -43,6 +43,11 @@ namespace Xamarin.Forms.Platform.iOS
 			return cell;
 		}
 
+		public override void WillDisplay(UITableView tableView, UITableViewCell cell, NSIndexPath indexPath)
+		{
+			cell.BackgroundColor = UIColor.Clear;
+		}
+
 		public override nint NumberOfSections(UITableView tableView)
 		{
 			return _context.Shell.Items.Count;

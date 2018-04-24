@@ -4,6 +4,8 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public interface IShellContext
 	{
+		bool AllowFlyoutGesture { get; }
+
 		IShellItemRenderer CurrentShellItemRenderer { get; }
 
 		Shell Shell { get; }

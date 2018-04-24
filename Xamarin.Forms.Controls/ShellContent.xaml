@@ -3,14 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			 Title="Welcome"
 			 Routing.Route="shellcontent"
+			 Shell.SetPaddingInsets="true"
              x:Class="Xamarin.Forms.Controls.ShellContent">
 	<Page.ToolbarItems>
 		<ToolbarItem Text="Search" Icon="bank.png" />
 	</Page.ToolbarItems>
     <StackLayout>
-        <Label Text="Welcome to Xamarin.Forms!"
+		<Button Margin="0, 40, 0, 0"  HorizontalOptions="Center"  Text="Foobar" BackgroundColor="Red" />
+        <Label x:Name="_mainLabel"  Text="Welcome to Xamarin.Forms!"
             VerticalOptions="CenterAndExpand" 
             HorizontalOptions="Center" />
+		<Button x:Name="_queryButton" HorizontalOptions="Center"  Text="Query Navigate" BackgroundColor="Red" />
 		<Button x:Name="_navButton" HorizontalOptions="Center"  Text="URI Navigate" BackgroundColor="Red" />
 		<Button x:Name="_popToRootButton" HorizontalOptions="Center"  Text="Pop To Root" BackgroundColor="Red" />
 		<Button x:Name="_popButton" HorizontalOptions="Center"  Text="Pop page" BackgroundColor="Red" />

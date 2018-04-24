@@ -4,9 +4,10 @@
 		xmlns:local="clr-namespace:Xamarin.Forms.Controls"
 		x:Class="Xamarin.Forms.Controls.ShellTest"
 		Route="s"
+		FlyoutBackgroundColor="#bbffffff"
 		FlyoutHeaderBehavior="Scroll">
 	<Shell.FlyoutHeader>
-		<Grid BackgroundColor="Cyan">
+		<Grid BackgroundColor="#330088ff">
 			<Label Text="FLYOUT HEADER" VerticalOptions="Center" HorizontalOptions="Center" />
 		</Grid>
 	</Shell.FlyoutHeader>
@@ -36,6 +37,9 @@
 	<ShellItem Route="apps"  Title="Apps" Icon="calculator.png">
 		<ShellTabItem Route="books"  Title="Books" Icon="coffee.png">
 			<ContentPage Title="Testing Apps" BackgroundColor="Purple">
+				<Shell.BackButtonBehavior>
+					<BackButtonBehavior IconOverride="bank.png" />
+				</Shell.BackButtonBehavior>
 				<Label Text="Hello World" VerticalOptions="Center" HorizontalOptions="Center" />
 			</ContentPage>
 		</ShellTabItem>

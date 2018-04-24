@@ -51,19 +51,21 @@ namespace Xamarin.Forms.Platform.iOS
 			context.ViewController.AddChildViewController(Flyout.ViewController);
 			context.ViewController.View.AddSubview(Flyout.ViewController.View);
 
-			Flyout.ViewController.View.BackgroundColor = UIColor.Blue;
-
 			PanGestureRecognizer = new UIPanGestureRecognizer(HandlePanGesture);
 			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) =>
 			{
+				if (!context.AllowFlyoutGesture)
+					return false;
 				var view = context.ViewController.View;
 				CGPoint loc = touch.LocationInView(context.ViewController.View);
-				if (touch.View is UISlider || touch.View is MPVolumeView || loc.X > view.Frame.Width * 0.1)
+				if (touch.View is UISlider || 
+					touch.View is MPVolumeView || 
+					(loc.X > view.Frame.Width * 0.1 && !IsOpen))
 					return false;
 				return true;
 			};
 
-			//Context.ViewController.View.AddGestureRecognizer(PanGestureRecognizer);
+			Context.ViewController.View.AddGestureRecognizer(PanGestureRecognizer);
 		}
 
 		public void CloseFlyout()
