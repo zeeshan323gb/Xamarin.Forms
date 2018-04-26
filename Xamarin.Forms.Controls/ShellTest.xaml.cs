@@ -20,6 +20,17 @@ namespace Xamarin.Forms.Controls
 			InitializeComponent ();
 
 			Navigating += OnNavigating;
+
+			MenuItem menuItem = _duck;
+			menuItem.Clicked += (s, e) =>
+			{
+				Items[0].Items.Add(new ShellTabItem
+				{
+					Content = new ButtonGallery(),
+					Title = "Show Test",
+					Icon = "bank.png",
+				});
+			};
 		}
 
 		bool allowPop = false;

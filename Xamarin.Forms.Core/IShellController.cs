@@ -7,6 +7,8 @@ namespace Xamarin.Forms
 	{
 		event EventHandler HeaderChanged;
 
+		event EventHandler StructureChanged;
+
 		View FlyoutHeader { get; }
 
 		void UpdateCurrentState(ShellNavigationSource source);

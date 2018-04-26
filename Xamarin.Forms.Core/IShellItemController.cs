@@ -6,6 +6,8 @@ namespace Xamarin.Forms
 	{
 		event EventHandler CurrentShellAppearanceChanged;
 
+		event EventHandler StructureChanged;
+
 		ShellAppearance CurrentShellAppearance { get; set; }
 
 		void CurrentItemNavigationChanged();

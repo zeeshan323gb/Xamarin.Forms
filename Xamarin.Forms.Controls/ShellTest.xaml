@@ -36,7 +36,7 @@
 		</DataTemplate>
 	</Shell.ItemTemplate>
 	<Shell.MenuItems>
-		<MenuItem Text="Click Me!" />
+		<MenuItem x:Name="_duck"  Text="Click Me!" />
 	</Shell.MenuItems>
 	<ShellItem Route="home"  Title="Home" Icon="calculator.png" GroupBehavior="ShowTabs">
 

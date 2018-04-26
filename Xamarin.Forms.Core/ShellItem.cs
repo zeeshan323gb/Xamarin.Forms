@@ -25,7 +25,14 @@ namespace Xamarin.Forms
 			remove { _shellAppearanceChanged -= value; }
 		}
 
+		event EventHandler IShellItemController.StructureChanged
+		{
+			add { _structureChanged += value; }
+			remove { _structureChanged -= value; }
+		}
+
 		private event EventHandler _shellAppearanceChanged;
+		private event EventHandler _structureChanged;
 
 		ShellAppearance IShellItemController.CurrentShellAppearance
 		{
@@ -124,6 +131,15 @@ namespace Xamarin.Forms
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
 
+		internal void SendStructureChanged()
+		{
+			_structureChanged?.Invoke(this, EventArgs.Empty);
+			if (Parent is Shell shell)
+			{
+				shell.SendStructureChanged();
+			}
+		}
+
 		public static ShellAppearance GetShellAppearance(BindableObject obj)
 		{
 			return (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
@@ -205,6 +221,8 @@ namespace Xamarin.Forms
 			if (e.OldItems != null)
 				foreach (Element element in e.OldItems)
 					OnChildRemoved(element);
+
+			SendStructureChanged();
 		}
 
 		private void UpdateCurrentShellAppearance()
@@ -243,7 +261,7 @@ namespace Xamarin.Forms
 		{
 			private readonly MenuItem _menuItem;
 
-			private MenuShellItem(MenuItem menuItem)
+			internal MenuShellItem(MenuItem menuItem)
 			{
 				_menuItem = menuItem;
 
