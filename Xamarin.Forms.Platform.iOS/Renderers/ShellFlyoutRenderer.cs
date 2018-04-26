@@ -6,22 +6,29 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellFlyoutRenderer : IShellFlyoutRenderer
+	public class ShellFlyoutRenderer : UIViewController, IShellFlyoutRenderer
 	{
 		private bool _disposed;
 		private bool _gestureActive;
 		private bool _isOpen;
+
 		public UIViewAnimationCurve AnimationCurve { get; set; } = UIViewAnimationCurve.EaseOut;
+
 		public int AnimationDuration { get; set; } = 250;
+
 		public IShellFlyoutTransition FlyoutTransition { get; set; }
+
+		UIView IShellFlyoutRenderer.View => View;
+
+		UIViewController IShellFlyoutRenderer.ViewController => this;
 
 		private IShellContext Context { get; set; }
 
-		private UIViewController Detail => Context.CurrentShellItemRenderer.ViewController;
+		private UIViewController Detail { get; set; }
 
 		private IShellFlyoutContentRenderer Flyout { get; set; }
 
-		private nfloat FlyoutWidth => (nfloat)(Math.Min(Context.ViewController.View.Frame.Width, Context.ViewController.View.Frame.Height) * 0.8);
+		private nfloat FlyoutWidth => (nfloat)(Math.Min(View.Frame.Width, View.Frame.Height) * 0.8);
 
 		private bool IsOpen
 		{
@@ -37,35 +44,32 @@ namespace Xamarin.Forms.Platform.iOS
 		}
 
 		private UIPanGestureRecognizer PanGestureRecognizer { get; set; }
+
 		private Shell Shell { get; set; }
+
 		private UIView TapoffView { get; set; }
 
-		public void AttachFlyout(IShellContext context)
+		public void AttachFlyout(IShellContext context, UIViewController detail)
 		{
 			Context = context;
 			Shell = Context.Shell;
+			Detail = detail;
 
 			Shell.PropertyChanged += OnShellPropertyChanged;
-
-			Flyout = context.CreateShellFlyoutContentRenderer();
-			context.ViewController.AddChildViewController(Flyout.ViewController);
-			context.ViewController.View.AddSubview(Flyout.ViewController.View);
 
 			PanGestureRecognizer = new UIPanGestureRecognizer(HandlePanGesture);
 			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) =>
 			{
 				if (!context.AllowFlyoutGesture)
 					return false;
-				var view = context.ViewController.View;
-				CGPoint loc = touch.LocationInView(context.ViewController.View);
-				if (touch.View is UISlider || 
-					touch.View is MPVolumeView || 
+				var view = View;
+				CGPoint loc = touch.LocationInView(View);
+				if (touch.View is UISlider ||
+					touch.View is MPVolumeView ||
 					(loc.X > view.Frame.Width * 0.1 && !IsOpen))
 					return false;
 				return true;
 			};
-
-			Context.ViewController.View.AddGestureRecognizer(PanGestureRecognizer);
 		}
 
 		public void CloseFlyout()
@@ -74,20 +78,42 @@ namespace Xamarin.Forms.Platform.iOS
 			LayoutSidebar(true);
 		}
 
-		public void Dispose()
+		public override void ViewDidLayoutSubviews()
 		{
-			if (_disposed)
-			{
-				_disposed = true;
+			base.ViewDidLayoutSubviews();
 
-				Context = null;
-				Shell = null;
-			}
+			Detail.View.Frame = View.Bounds;
+			LayoutSidebar(false);
 		}
 
-		public void PerformLayout()
+		public override void ViewDidLoad()
 		{
-			LayoutSidebar(false);
+			base.ViewDidLoad();
+
+			AddChildViewController(Detail);
+			View.AddSubview(Detail.View);
+
+			Flyout = Context.CreateShellFlyoutContentRenderer();
+			AddChildViewController(Flyout.ViewController);
+			View.AddSubview(Flyout.ViewController.View);
+			View.AddGestureRecognizer(PanGestureRecognizer);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing)
+			{
+				if (!_disposed)
+				{
+					_disposed = true;
+
+					Context = null;
+					Shell = null;
+					Detail = null;
+				}
+			}
 		}
 
 		protected virtual void OnShellPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -108,8 +134,8 @@ namespace Xamarin.Forms.Platform.iOS
 			if (TapoffView != null)
 				return;
 
-			TapoffView = new UIView(Context.ViewController.View.Bounds);
-			Context.ViewController.View.InsertSubviewBelow(TapoffView, Flyout.ViewController.View);
+			TapoffView = new UIView(View.Bounds);
+			View.InsertSubviewBelow(TapoffView, Flyout.ViewController.View);
 			TapoffView.AddGestureRecognizer(new UITapGestureRecognizer(t =>
 			{
 				IsOpen = false;
@@ -119,7 +145,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void HandlePanGesture(UIPanGestureRecognizer pan)
 		{
-			var translation = pan.TranslationInView(Context.ViewController.View).X;
+			var translation = pan.TranslationInView(View).X;
 			double openProgress = 0;
 			double openLimit = Flyout.ViewController.View.Frame.Width;
 
@@ -176,7 +202,7 @@ namespace Xamarin.Forms.Platform.iOS
 				UIView.SetAnimationCurve(AnimationCurve);
 				UIView.SetAnimationDuration(AnimationDuration);
 				UIView.CommitAnimations();
-				Context.ViewController.View.LayoutIfNeeded();
+				View.LayoutIfNeeded();
 			}
 
 			if (IsOpen)

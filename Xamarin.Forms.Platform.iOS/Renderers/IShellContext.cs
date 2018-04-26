@@ -10,8 +10,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 		Shell Shell { get; }
 
-		UIViewController ViewController { get; }
-
 		IShellPageRendererTracker CreatePageRendererTracker();
 
 		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();

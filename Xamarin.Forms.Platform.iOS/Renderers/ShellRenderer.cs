@@ -54,14 +54,27 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private IShellItemRenderer _currentShellItemRenderer;
 		private bool _disposed;
+		private IShellFlyoutRenderer _flyoutRenderer;
 
 		public event EventHandler<VisualElementChangedEventArgs> ElementChanged;
 
 		public VisualElement Element { get; private set; }
-		public UIView NativeView => View;
+		public UIView NativeView => FlyoutRenderer.View;
 		public Shell Shell => (Shell)Element;
-		public UIViewController ViewController => this;
-		private IShellFlyoutRenderer FlyoutRenderer { get; set; }
+		public UIViewController ViewController => FlyoutRenderer.ViewController;
+		private IShellFlyoutRenderer FlyoutRenderer
+		{
+			get
+			{
+				if (_flyoutRenderer == null)
+				{
+					FlyoutRenderer = CreateFlyoutRenderer();
+					FlyoutRenderer.AttachFlyout(this, this);
+				}
+				return _flyoutRenderer;
+			}
+			set { _flyoutRenderer = value; }
+		}
 
 		public SizeRequest GetDesiredSize(double widthConstraint, double heightConstraint) => new SizeRequest(new Size(100, 100));
 
@@ -88,10 +101,9 @@ namespace Xamarin.Forms.Platform.iOS
 		public override void ViewDidLayoutSubviews()
 		{
 			base.ViewDidLayoutSubviews();
-
-			FlyoutRenderer.PerformLayout();
-
 			_currentShellItemRenderer.ViewController.View.Frame = View.Bounds;
+
+			SetElementSize(new Size(View.Bounds.Width, View.Bounds.Height));
 		}
 
 		public override void ViewDidLoad()
@@ -100,14 +112,15 @@ namespace Xamarin.Forms.Platform.iOS
 
 			SetupCurrentShellItem();
 
-			FlyoutRenderer = CreateFlyoutRenderer();
-			FlyoutRenderer.AttachFlyout(this);
-
 			UpdateBackgroundColor();
 		}
 
 		protected virtual IShellFlyoutRenderer CreateFlyoutRenderer()
 		{
+			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad)
+			{
+				return new TabletShellFlyoutRenderer();
+			}
 			return new ShellFlyoutRenderer()
 			{
 				FlyoutTransition = new SlideFlyoutTransition()
@@ -224,7 +237,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (color.IsDefault)
 				color = Color.Black;
 
-			View.BackgroundColor = color.ToUIColor();
+			FlyoutRenderer.View.BackgroundColor = color.ToUIColor();
 		}
 
 		private async void GoTo(ShellItem item, ShellTabItem tab)

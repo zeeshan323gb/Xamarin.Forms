@@ -1,13 +1,16 @@
 ﻿using System;
+using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
 	public interface IShellFlyoutRenderer : IDisposable
 	{
-		void AttachFlyout(IShellContext context);
+		UIViewController ViewController { get; }
+
+		UIView View { get; }
+
+		void AttachFlyout(IShellContext context, UIViewController content);
 
 		void CloseFlyout();
-
-		void PerformLayout();
 	}
 }
