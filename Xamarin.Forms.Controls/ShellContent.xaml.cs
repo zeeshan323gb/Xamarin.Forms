@@ -62,7 +62,7 @@ namespace Xamarin.Forms.Controls
 
 		private async void PushClicked(object sender, EventArgs e)
 		{
-			await Navigation.PushAsync(new ButtonGallery());
+			await Navigation.PushAsync(new ShellContent());
 		}
 	}
 }

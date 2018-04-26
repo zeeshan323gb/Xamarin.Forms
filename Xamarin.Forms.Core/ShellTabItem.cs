@@ -235,6 +235,19 @@ namespace Xamarin.Forms
 			if (_navStack.Count <= 1)
 				throw new InvalidOperationException("Can't pop last page off stack");
 
+			List<Page> stack = _navStack.ToList();
+			stack.Remove(stack.Last());
+			var allow = ((IShellController)Shell).ProposeNavigation(
+				ShellNavigationSource.PopEvent,
+				Parent as ShellItem,
+				this,
+				stack,
+				true
+			);
+
+			if (!allow)
+				return null;
+
 			var page = _navStack[_navStack.Count - 1];
 			var args = new NavigationRequestedEventArgs(page, animated)
 			{
