@@ -88,7 +88,7 @@ namespace Xamarin.Forms.Platform.iOS
 			List<UIBarButtonItem> items = new List<UIBarButtonItem>();
 			foreach (var item in Page.ToolbarItems)
 			{
-				items.Add(item.ToUIBarButtonItem());
+				items.Add(item.ToUIBarButtonItem(false, true));
 			}
 
 			items.Reverse();
