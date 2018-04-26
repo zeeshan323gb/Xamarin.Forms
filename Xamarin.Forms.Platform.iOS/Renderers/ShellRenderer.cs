@@ -26,6 +26,16 @@ namespace Xamarin.Forms.Platform.iOS
 			return CreatePageRendererTracker();
 		}
 
+		IShellNavBarAppearanceTracker IShellContext.CreateNavBarAppearanceTracker()
+		{
+			return CreateNavBarAppearanceTracker();
+		}
+
+		IShellTabBarAppearanceTracker IShellContext.CreateTabBarAppearanceTracker()
+		{
+			return CreateTabBarAppearanceTracker();
+		}
+
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
 		{
 			var content = CreateShellFlyoutContentRenderer();
@@ -102,6 +112,16 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				FlyoutTransition = new SlideFlyoutTransition()
 			};
+		}
+
+		protected virtual IShellNavBarAppearanceTracker CreateNavBarAppearanceTracker()
+		{
+			return new SafeShellNavBarAppearanceTracker();
+		}
+
+		protected virtual IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker()
+		{
+			return new SafeShellTabBarAppearanceTracker();
 		}
 
 		protected virtual IShellPageRendererTracker CreatePageRendererTracker()

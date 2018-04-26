@@ -19,6 +19,8 @@ namespace Xamarin.Forms.Controls
 		{
 			InitializeComponent();
 
+			BackgroundColor = Color.Blue;
+
 			_pushButton.Clicked += PushClicked;
 			_popButton.Clicked += PopClicked;
 			_popToRootButton.Clicked += PopToRootClicked;
@@ -60,7 +62,7 @@ namespace Xamarin.Forms.Controls
 
 		private async void PushClicked(object sender, EventArgs e)
 		{
-			await Navigation.PushAsync(new ShellContent());
+			await Navigation.PushAsync(new ButtonGallery());
 		}
 	}
 }

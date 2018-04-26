@@ -12,10 +12,11 @@ namespace Xamarin.Forms.Platform.iOS
 		private double _headerMax = 200;
 		private double _headerMin = 44;
 		private double _headerOffset = 0;
-		private double _headerSize = 200;
+		private double _headerSize;
 
 		public ShellTableViewController(IShellContext context, UIView headerView, Action<Element> onElementSelected)
 		{
+			_headerSize = _headerMax;
 			_context = context;
 			_headerView = headerView;
 			_source = new ShellTableViewSource(context, onElementSelected);
@@ -39,6 +40,9 @@ namespace Xamarin.Forms.Platform.iOS
 				TableView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never;
 			TableView.ContentInset = new UIEdgeInsets((nfloat)_headerMax, 0, 0, 0);
 			TableView.Source = _source;
+
+			var footerFrame = TableView.Bounds;
+			footerFrame.Height = 100;
 		}
 
 		private void OnScrolled(object sender, UIScrollView e)
@@ -54,7 +58,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 				case FlyoutHeaderBehavior.Scroll:
 					_headerSize = _headerMax;
-					_headerOffset = -(_headerMax + e.ContentOffset.Y);
+					_headerOffset = Math.Min (0, -(_headerMax + e.ContentOffset.Y));
 					break;
 
 				case FlyoutHeaderBehavior.CollapseOnScroll:

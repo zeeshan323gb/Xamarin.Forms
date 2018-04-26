@@ -17,5 +17,9 @@ namespace Xamarin.Forms.Platform.iOS
 		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();
 
 		IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem);
+
+		IShellNavBarAppearanceTracker CreateNavBarAppearanceTracker();
+
+		IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker();
 	}
 }

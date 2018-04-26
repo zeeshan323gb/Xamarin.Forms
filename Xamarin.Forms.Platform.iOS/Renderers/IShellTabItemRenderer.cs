@@ -9,8 +9,8 @@ namespace Xamarin.Forms.Platform.iOS
 		ShellTabItem ShellTabItem { get; set; }
 		UIViewController ViewController { get; }
 
-		void ResetTintColors();
+		void ResetAppearance();
 
-		void SetTintColors(UIColor foreground, UIColor background);
+		void SetAppearance(ShellAppearance appearance);
 	}
 }
