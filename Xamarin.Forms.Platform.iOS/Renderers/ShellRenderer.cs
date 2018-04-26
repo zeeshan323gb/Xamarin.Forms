@@ -229,6 +229,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private async void GoTo(ShellItem item, ShellTabItem tab)
 		{
+			if (tab == null)
+				tab = item.CurrentItem;
 			var state = ((IShellController)Shell).GetNavigationState(item, tab);
 			await Shell.GoToAsync(state);
 		}
@@ -236,9 +238,14 @@ namespace Xamarin.Forms.Platform.iOS
 		private void OnFlyoutItemSelected(object sender, ElementSelectedEventArgs e)
 		{
 			var element = e.Element;
-			ShellItem shellItem = null; ;
+			ShellItem shellItem = null;
 			ShellTabItem shellTabItem = null;
-			if (element is ShellItem item)
+
+			if (element is ShellItem.MenuShellItem menuShellItem)
+			{
+				menuShellItem.MenuItem.Activate();
+			}
+			else if (element is ShellItem item)
 			{
 				shellItem = item;
 			}
@@ -247,9 +254,14 @@ namespace Xamarin.Forms.Platform.iOS
 				shellItem = tab.Parent as ShellItem;
 				shellTabItem = tab;
 			}
+			else if (element is MenuItem menuItem)
+			{
+				menuItem.Activate();
+			}
 
 			FlyoutRenderer.CloseFlyout();
-			GoTo(shellItem, shellTabItem);
+			if (shellItem != null && shellItem.IsEnabled)
+				GoTo(shellItem, shellTabItem);
 		}
 
 		private void SetupCurrentShellItem()

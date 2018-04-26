@@ -1,9 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Windows.Input;
 
 namespace Xamarin.Forms
 {
-
 	public class SearchHandler : BindableObject, ISearchHandlerController
 	{
 		#region ISearchHandlerController
@@ -23,11 +23,13 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ClearIconProperty =
 			BindableProperty.Create(nameof(ClearIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
 
-		public static readonly BindableProperty ClearPlaceholderCommandProperty =
-			BindableProperty.Create(nameof(ClearPlaceholderCommand), typeof(ICommand), typeof(SearchHandler), null, BindingMode.OneTime);
+		public static readonly BindableProperty ClearPlaceholderCommandParameterProperty =
+			BindableProperty.Create(nameof(ClearPlaceholderCommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: OnClearPlaceholderCommandParameterChanged);
 
-		public static readonly BindableProperty ClearPlaceholderCommandParameterProperty = 
-			BindableProperty.Create(nameof(ClearPlaceholderCommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime);
+		public static readonly BindableProperty ClearPlaceholderCommandProperty =
+					BindableProperty.Create(nameof(ClearPlaceholderCommand), typeof(ICommand), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: OnClearPlaceholderCommandChanged);
 
 		public static readonly BindableProperty ClearPlaceholderEnabledProperty =
 			BindableProperty.Create(nameof(ClearPlaceholderEnabled), typeof(bool), typeof(SearchHandler), false, BindingMode.OneWay);
@@ -36,10 +38,12 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(ClearPlaceholderIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
 
 		public static readonly BindableProperty CommandParameterProperty =
-			BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: OnCommandParameterChanged);
 
 		public static readonly BindableProperty CommandProperty =
-			BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(SearchHandler), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: OnCommandChanged);
 
 		public static readonly BindableProperty DisplayMemberNameProperty =
 			BindableProperty.Create(nameof(DisplayMemberName), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime);
@@ -156,6 +160,10 @@ namespace Xamarin.Forms
 			set { SetValue(SearchBoxVisibilityProperty, value); }
 		}
 
+		private bool ClearPlaceholderEnabledCore { set => SetValueCore(ClearPlaceholderEnabledProperty, value); }
+
+		private bool IsSearchEnabledCore { set => SetValueCore(IsSearchEnabledProperty, value); }
+
 		protected virtual void OnClearPlaceholderClicked()
 		{
 			var command = ClearPlaceholderCommand;
@@ -180,10 +188,94 @@ namespace Xamarin.Forms
 			}
 		}
 
+		private static void OnClearPlaceholderCommandChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var self = (SearchHandler)bindable;
+			var oldCommand = (ICommand)oldValue;
+			var newCommand = (ICommand)newValue;
+			self.OnClearPlaceholderCommandChanged(oldCommand, newCommand);
+		}
+
+		private static void OnClearPlaceholderCommandParameterChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			((SearchHandler)bindable).OnClearPlaceholderCommandParameterChanged();
+		}
+
+		private static void OnCommandChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var self = (SearchHandler)bindable;
+			var oldCommand = (ICommand)oldValue;
+			var newCommand = (ICommand)newValue;
+			self.OnCommandChanged(oldCommand, newCommand);
+		}
+
+		private static void OnCommandParameterChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			((SearchHandler)bindable).OnCommandParameterChanged();
+		}
+
 		private static void OnQueryChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var searchHandler = (SearchHandler)bindable;
 			searchHandler.OnQueryChanged((string)oldValue, (string)newValue);
+		}
+
+		private void CanExecuteChanged(object sender, EventArgs e)
+		{
+			IsSearchEnabledCore = Command.CanExecute(CommandParameter);
+		}
+
+		private void ClearPlaceholderCanExecuteChanged(object sender, EventArgs e)
+		{
+			ClearPlaceholderEnabledCore = ClearPlaceholderCommand.CanExecute(ClearPlaceholderCommandParameter);
+		}
+
+		private void OnClearPlaceholderCommandChanged(ICommand oldCommand, ICommand newCommand)
+		{
+			if (oldCommand != null)
+			{
+				oldCommand.CanExecuteChanged -= ClearPlaceholderCanExecuteChanged;
+			}
+
+			if (newCommand != null)
+			{
+				newCommand.CanExecuteChanged += ClearPlaceholderCanExecuteChanged;
+				ClearPlaceholderEnabledCore = ClearPlaceholderCommand.CanExecute(ClearPlaceholderCommandParameter);
+			}
+			else
+			{
+				ClearPlaceholderEnabledCore = true;
+			}
+		}
+
+		private void OnClearPlaceholderCommandParameterChanged()
+		{
+			if (ClearPlaceholderCommand != null)
+				ClearPlaceholderEnabledCore = ClearPlaceholderCommand.CanExecute(CommandParameter);
+		}
+
+		private void OnCommandChanged(ICommand oldCommand, ICommand newCommand)
+		{
+			if (oldCommand != null)
+			{
+				oldCommand.CanExecuteChanged -= CanExecuteChanged;
+			}
+
+			if (newCommand != null)
+			{
+				newCommand.CanExecuteChanged += CanExecuteChanged;
+				IsSearchEnabledCore = Command.CanExecute(CommandParameter);
+			}
+			else
+			{
+				IsSearchEnabledCore = true;
+			}
+		}
+
+		private void OnCommandParameterChanged()
+		{
+			if (Command != null)
+				IsSearchEnabledCore = Command.CanExecute(CommandParameter);
 		}
 	}
 }

@@ -40,9 +40,6 @@ namespace Xamarin.Forms.Platform.iOS
 				TableView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never;
 			TableView.ContentInset = new UIEdgeInsets((nfloat)_headerMax, 0, 0, 0);
 			TableView.Source = _source;
-
-			var footerFrame = TableView.Bounds;
-			footerFrame.Height = 100;
 		}
 
 		private void OnScrolled(object sender, UIScrollView e)

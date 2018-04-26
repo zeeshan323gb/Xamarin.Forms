@@ -129,19 +129,34 @@ namespace Xamarin.Forms
 			return (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
 		}
 
+#if DEBUG
+		[Obsolete ("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
+#endif
 		public static implicit operator ShellItem(ShellTabItem tab)
 		{
-			throw new NotImplementedException();
+			var result = new ShellItem();
+			result.Items.Add(tab);
+			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
+			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+			return result;
 		}
 
+#if DEBUG
+		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
+#endif
 		public static implicit operator ShellItem(TemplatedPage page)
 		{
-			throw new NotImplementedException();
+			// this breaks my brain a bit too much
+			ShellTabItem tab = page;
+			return tab;
 		}
 
+#if DEBUG
+		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
+#endif
 		public static implicit operator ShellItem(MenuItem menuItem)
 		{
-			throw new NotImplementedException();
+			return new MenuShellItem(menuItem);
 		}
 
 		public static void SetShellAppearance(BindableObject obj, ShellAppearance value)
@@ -222,6 +237,21 @@ namespace Xamarin.Forms
 			}
 
 			controller.CurrentShellAppearance = ShellAppearance;
+		}
+
+		public class MenuShellItem : ShellItem
+		{
+			private readonly MenuItem _menuItem;
+
+			private MenuShellItem(MenuItem menuItem)
+			{
+				_menuItem = menuItem;
+
+				SetBinding(TitleProperty, new Binding("Text", BindingMode.OneWay));
+				SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+			}
+
+			public MenuItem MenuItem => _menuItem;
 		}
 	}
 }
