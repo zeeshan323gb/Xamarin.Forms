@@ -27,11 +27,14 @@
 
 		<ShellTabItem Route="updates"  Title="Updates" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}">
 			<ShellItem.ShellAppearance>
-				<ShellAppearance ForegroundColor="#ff0000" BackgroundColor="#224477ff" />
+				<ShellAppearance ForegroundColor="#ff0000" BackgroundColor="#224477ff" UnselectedColor="#99ffff00" TitleColor="#00ff00" />
 			</ShellItem.ShellAppearance>
 		</ShellTabItem>
 		<ShellTabItem Route="games"  Title="Games" Icon="coffee.png">
 			<ContentPage Title="Testing Games" BackgroundColor="Red" />
+		</ShellTabItem>
+		<ShellTabItem Route="buttons"  Title="Buttons" Icon="coffee.png">
+			<local:ButtonGallery />
 		</ShellTabItem>
 	</ShellItem>
 	<ShellItem Route="apps"  Title="Apps" Icon="calculator.png">

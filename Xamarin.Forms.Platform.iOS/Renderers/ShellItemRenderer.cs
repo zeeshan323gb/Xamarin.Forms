@@ -10,12 +10,8 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellItemRenderer : UITabBarController, IShellItemRenderer
 	{
-		private UIView _blurView;
-		private UIView _colorView;
+		private IShellTabBarAppearanceTracker _appearanceTracker;
 		private IShellContext _context;
-		private UIImage _defaultBackgroundImage;
-		private UIImage _defaultShadowImage;
-		private UIColor _defaultTint;
 		private bool _disposed;
 		private ShellItem _shellItem;
 		private List<IShellTabItemRenderer> _tabRenderers = new List<IShellTabItemRenderer>();
@@ -66,8 +62,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			base.ViewDidLayoutSubviews();
 
-			_blurView.Frame = TabBar.Bounds;
-			_colorView.Frame = _blurView.Frame;
+			_appearanceTracker?.UpdateLayout(this);
 		}
 
 		public override void ViewDidLoad()
@@ -132,47 +127,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void OnShellItemSet(ShellItem item)
 		{
+			_appearanceTracker = _context.CreateTabBarAppearanceTracker();
 			item.PropertyChanged += OnElementPropertyChanged;
 			((IShellItemController)item).CurrentShellAppearanceChanged += OnShellAppearanceChanged;
 			((INotifyCollectionChanged)item.Items).CollectionChanged += OnItemsCollectionChanged;
-		}
-
-		protected virtual void ResetTintColors()
-		{
-			if (_blurView == null)
-				return;
-
-			TabBar.ShadowImage = _defaultShadowImage;
-			TabBar.BackgroundImage = _defaultBackgroundImage;
-			TabBar.TintColor = _defaultTint;
-
-			_blurView.RemoveFromSuperview();
-			_colorView.RemoveFromSuperview();
-		}
-
-		protected virtual void SetTintColors(UIColor foreground, UIColor background)
-		{
-			if (_blurView == null)
-			{
-				_defaultBackgroundImage = TabBar.BackgroundImage;
-				_defaultShadowImage = TabBar.ShadowImage;
-				_defaultTint = TabBar.TintColor;
-
-				var effect = UIBlurEffect.FromStyle(UIBlurEffectStyle.Regular);
-				_blurView = new UIVisualEffectView(effect);
-				_blurView.Frame = TabBar.Bounds;
-
-				_colorView = new UIView(_blurView.Frame);
-			}
-
-			TabBar.BackgroundImage = new UIImage();
-			TabBar.ShadowImage = new UIImage();
-
-			TabBar.InsertSubview(_colorView, 0);
-			TabBar.InsertSubview(_blurView, 0);
-
-			_colorView.BackgroundColor = background;
-			TabBar.TintColor = foreground;
 		}
 
 		protected virtual void UpdateShellAppearance()
@@ -185,17 +143,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (appearance == null)
 			{
-				ResetTintColors();
-				currentRenderer?.ResetTintColors();
+				_appearanceTracker.ResetAppearance(this);
+				currentRenderer?.ResetAppearance();
 				return;
 			}
 
-			var background = appearance.BackgroundColor.ToUIColor();
-			var foreground = appearance.ForegroundColor.ToUIColor();
-
-			currentRenderer?.SetTintColors(foreground, background);
-
-			SetTintColors(foreground, background);
+			currentRenderer?.SetAppearance(appearance);
+			_appearanceTracker.SetAppearance(this, appearance);
 		}
 
 		private void CreateTabControllers()
@@ -210,7 +164,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 			ViewControllers = viewControllers;
 
-			GoTo((ShellTabItem)ShellItem.CurrentItem);
+			GoTo(ShellItem.CurrentItem);
 		}
 
 		private void GoTo(ShellTabItem tabItem)

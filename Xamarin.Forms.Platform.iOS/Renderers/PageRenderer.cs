@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Xamarin.Forms.Internals;
 using UIKit;
 using PageUIStatusBarAnimation = Xamarin.Forms.PlatformConfiguration.iOSSpecific.UIStatusBarAnimation;
 using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
@@ -63,9 +62,16 @@ namespace Xamarin.Forms.Platform.iOS
 			Element.Layout(new Rectangle(Element.X, Element.Y, size.Width, size.Height));
 		}
 
+		public override void ViewDidLayoutSubviews()
+		{
+			base.ViewDidLayoutSubviews();
+
+			UpdateShellInsetPadding();
+		}
+
 		public override void ViewSafeAreaInsetsDidChange()
 		{
-
+			UpdateShellInsetPadding();
 			var page = (Element as Page);
 			if (page != null && Forms.IsiOS11OrNewer)
 			{
@@ -212,6 +218,29 @@ namespace Xamarin.Forms.Platform.iOS
 					default:
 						return UIKit.UIStatusBarAnimation.None;
 				}
+			}
+		}
+
+		void UpdateShellInsetPadding()
+		{
+			var setInsets = Shell.GetSetPaddingInsets(Element);
+			if (setInsets)
+			{
+				nfloat topPadding = 0;
+				nfloat bottomPadding = 0;
+
+				if (Forms.IsiOS11OrNewer)
+				{
+					topPadding = View.SafeAreaInsets.Top;
+					bottomPadding = View.SafeAreaInsets.Bottom;
+				}
+				else
+				{
+					topPadding = TopLayoutGuide.Length;
+					bottomPadding = BottomLayoutGuide.Length;
+				}
+
+				(Element as Page).Padding = new Thickness(0, topPadding, 0, bottomPadding);
 			}
 		}
 

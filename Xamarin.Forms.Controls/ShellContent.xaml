@@ -8,6 +8,9 @@
 	<Page.ToolbarItems>
 		<ToolbarItem Text="Search" Icon="bank.png" />
 	</Page.ToolbarItems>
+	<Shell.SearchHandler>
+		<SearchHandler Placeholder="My Placeholder!" />
+	</Shell.SearchHandler>
     <StackLayout>
 		<Button Margin="0, 40, 0, 0"  HorizontalOptions="Center"  Text="Foobar" BackgroundColor="Red" />
         <Label x:Name="_mainLabel"  Text="Welcome to Xamarin.Forms!"
