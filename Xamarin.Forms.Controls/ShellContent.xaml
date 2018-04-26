@@ -4,6 +4,7 @@
 			 Title="Welcome"
 			 Routing.Route="shellcontent"
 			 Shell.SetPaddingInsets="true"
+			 ShellAppearance.TabBarVisible="false"
              x:Class="Xamarin.Forms.Controls.ShellContent">
 	<Page.ToolbarItems>
 		<ToolbarItem Text="Search" Icon="bank.png" />
