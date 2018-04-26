@@ -370,10 +370,12 @@ namespace Xamarin.Forms
 
 		private void MenuItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			foreach (Element el in e.NewItems)
-				OnChildAdded(el);
-			foreach (Element el in e.OldItems)
-				OnChildRemoved(el);
+			if (e.NewItems != null)
+				foreach (Element el in e.NewItems)
+					OnChildAdded(el);
+			if (e.OldItems != null)
+				foreach (Element el in e.OldItems)
+					OnChildRemoved(el);
 		}
 
 		private void RemovePage(Page page)
