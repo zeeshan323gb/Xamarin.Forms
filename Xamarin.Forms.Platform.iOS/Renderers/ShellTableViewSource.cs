@@ -11,7 +11,6 @@ namespace Xamarin.Forms.Platform.iOS
 		private readonly IShellContext _context;
 		private readonly Action<Element> _onElementSelected;
 		private List<List<Element>> _groups;
-		private bool _hasMenuItems;
 
 		public List<List<Element>> Groups
 		{
@@ -43,15 +42,15 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			int section = indexPath.Section;
 			int row = indexPath.Row;
+			var context = Groups[section][row];
 
 			var template = _context.Shell.ItemTemplate;
-			if (section == Groups.Count - 1 && _hasMenuItems)
+			if (context is MenuItem)
 			{
 				template = _context.Shell.MenuItemTemplate;
 			}
-			var context = Groups[indexPath.Section][indexPath.Row];
 
-			var cellId = template.SelectDataTemplate(context, _context.Shell).GetType().FullName;
+			var cellId = ((IDataTemplateController)template.SelectDataTemplate(context, _context.Shell)).IdString;
 
 			var cell = (UIContainerCell)tableView.DequeueReusableCell(cellId);
 
@@ -117,6 +116,7 @@ namespace Xamarin.Forms.Platform.iOS
 			List<Element> section = null;
 			foreach (var shellItem in shell.Items)
 			{
+				bool isCurrentShellItem = _context.Shell.CurrentItem == shellItem;
 				var groupBehavior = shellItem.GroupBehavior;
 				if (section == null ||
 					groupBehavior == ShellItemGroupBehavior.ShowTabs ||
@@ -127,7 +127,16 @@ namespace Xamarin.Forms.Platform.iOS
 					
 					if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
 					{
-						section.AddRange(shellItem.Items);
+						foreach (var tabItem in shellItem.Items)
+						{
+							section.Add(tabItem);
+							// when an item is selected we will display its menu items
+							if (isCurrentShellItem && tabItem == shellItem.CurrentItem)
+							{
+								foreach (var menuItem in tabItem.MenuItems)
+									section.Add(menuItem);
+							}
+						}
 					}
 					else
 					{
@@ -143,11 +152,6 @@ namespace Xamarin.Forms.Platform.iOS
 				section = new List<Element>();
 				groups.Add(section);
 				section.AddRange(shell.MenuItems);
-				_hasMenuItems = true;
-			}
-			else
-			{
-				_hasMenuItems = false;
 			}
 		}
 

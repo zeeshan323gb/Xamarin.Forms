@@ -46,6 +46,9 @@
 			</ShellItem.ShellAppearance>
 		</ShellTabItem>
 		<ShellTabItem Route="games"  Title="Games" Icon="coffee.png">
+			<ShellTabItem.MenuItems>
+				<MenuItem Text="Game Options" Icon="3bar.png" />
+			</ShellTabItem.MenuItems>
 			<ContentPage Title="Testing Games" BackgroundColor="Red" />
 		</ShellTabItem>
 		<ShellTabItem Route="buttons"  Title="Buttons" Icon="coffee.png">

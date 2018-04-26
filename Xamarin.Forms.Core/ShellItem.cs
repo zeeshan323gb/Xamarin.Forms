@@ -210,6 +210,7 @@ namespace Xamarin.Forms
 			}
 
 			shellItem.UpdateCurrentShellAppearance();
+			shellItem.SendStructureChanged();
 		}
 
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
