@@ -156,9 +156,6 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty MenuItemsProperty = MenuItemsPropertyKey.BindableProperty;
 
-		public static readonly BindableProperty MenuItemsSourceProperty =
-			BindableProperty.Create(nameof(MenuItemsSource), typeof(IEnumerable), typeof(Shell), null, BindingMode.OneTime);
-
 		public static readonly BindableProperty MenuItemTemplateProperty =
 			BindableProperty.Create(nameof(MenuItemTemplate), typeof(DataTemplate), typeof(Shell), null, BindingMode.OneTime);
 
@@ -231,12 +228,6 @@ namespace Xamarin.Forms
 		}
 
 		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
-
-		public IEnumerable MenuItemsSource
-		{
-			get { return (IEnumerable)GetValue(MenuItemsSourceProperty); }
-			set { SetValue(MenuItemsSourceProperty, value); }
-		}
 
 		public DataTemplate MenuItemTemplate
 		{

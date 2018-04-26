@@ -196,6 +196,17 @@ namespace Xamarin.Forms
 			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 		}
 
+		public static implicit operator ShellTabItem(TemplatedPage page)
+		{
+			var result = new ShellTabItem();
+
+			result.Content = page;
+			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
+			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+
+			return result;
+		}
+
 		protected virtual IReadOnlyList<Page> GetNavigationStack()
 		{
 			return _navStack;

@@ -11,6 +11,18 @@
 			<Label Text="FLYOUT HEADER" VerticalOptions="Center" HorizontalOptions="Center" />
 		</Grid>
 	</Shell.FlyoutHeader>
+	<Shell.MenuItemTemplate>
+		<DataTemplate>
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="50" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Image Source="{Binding Icon}" HorizontalOptions="End"  VerticalOptions="Center" />
+				<Label Grid.Column="1"  Text="{Binding Text}" VerticalOptions="Center" Margin="20, 0, 0, 0" />
+			</Grid>
+		</DataTemplate>
+	</Shell.MenuItemTemplate>
 	<Shell.ItemTemplate>
 		<DataTemplate>
 			<Grid>
@@ -23,6 +35,9 @@
 			</Grid>
 		</DataTemplate>
 	</Shell.ItemTemplate>
+	<Shell.MenuItems>
+		<MenuItem Text="Click Me!" />
+	</Shell.MenuItems>
 	<ShellItem Route="home"  Title="Home" Icon="calculator.png" GroupBehavior="ShowTabs">
 
 		<ShellTabItem Route="updates"  Title="Updates" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}">
