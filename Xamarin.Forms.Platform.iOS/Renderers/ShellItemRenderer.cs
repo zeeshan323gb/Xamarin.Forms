@@ -49,7 +49,7 @@ namespace Xamarin.Forms.Platform.iOS
 					return;
 				_shellItem = value;
 				OnShellItemSet(_shellItem);
-				CreateTabControllers();
+				CreateTabRenderers();
 				UpdateShellAppearance();
 			}
 		}
@@ -120,9 +120,57 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		IShellTabItemRenderer RendererForShellTabItem (ShellTabItem item, List<IShellTabItemRenderer> renderers)
+		{
+			foreach (var renderer in renderers)
+			{
+				if (renderer.ShellTabItem == item)
+					return renderer;
+			}
+			return null;
+		}
+
 		protected virtual void OnItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			throw new NotImplementedException();
+			if (e.OldItems != null)
+			{
+				foreach (var shellTabItem in e.OldItems)
+				{
+					foreach (var renderer in _tabRenderers)
+					{
+
+						if (renderer.ShellTabItem == shellTabItem)
+						{
+							ViewControllers = ViewControllers.Remove(renderer.ViewController);
+							break;
+						}
+					}
+				}
+			}
+
+			if (e.NewItems != null && e.NewItems.Count > 0)
+			{
+				var oldRenderersList = _tabRenderers;
+				_tabRenderers = new List<IShellTabItemRenderer>();
+
+				UIViewController[] viewControllers = new UIViewController[ShellItem.Items.Count];
+				int i = 0;
+				bool goTo = false; // its possible we are in a transitionary state and should not nav
+				var current = ShellItem.CurrentItem;
+				foreach (var shellTabItem in ShellItem.Items)
+				{
+					var renderer = RendererForShellTabItem(shellTabItem, oldRenderersList) ?? _context.CreateShellTabItemRenderer(shellTabItem);
+					_tabRenderers.Add(renderer);
+					viewControllers[i++] = renderer.ViewController;
+					if (shellTabItem == current)
+						goTo = true;
+				}
+
+				ViewControllers = viewControllers;
+				
+				if (goTo)
+					GoTo(ShellItem.CurrentItem);
+			}
 		}
 
 		protected virtual void OnShellItemSet(ShellItem item)
@@ -152,15 +200,15 @@ namespace Xamarin.Forms.Platform.iOS
 			_appearanceTracker.SetAppearance(this, appearance);
 		}
 
-		private void CreateTabControllers()
+		private void CreateTabRenderers()
 		{
 			UIViewController[] viewControllers = new UIViewController[ShellItem.Items.Count];
 			int i = 0;
 			foreach (var shellTabItem in ShellItem.Items)
 			{
-				var tabController = _context.CreateShellTabItemRenderer(shellTabItem);
-				_tabRenderers.Add(tabController);
-				viewControllers[i++] = tabController.ViewController;
+				var tabRenderer = _context.CreateShellTabItemRenderer(shellTabItem);
+				_tabRenderers.Add(tabRenderer);
+				viewControllers[i++] = tabRenderer.ViewController;
 			}
 			ViewControllers = viewControllers;
 

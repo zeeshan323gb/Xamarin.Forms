@@ -355,6 +355,11 @@ namespace Xamarin.Forms
 					shellTabItem.OnChildAdded(newElement);
 				}
 			}
+
+			if (shellTabItem.Parent is ShellItem shellItem)
+			{
+				shellItem?.SendStructureChanged();
+			}
 		}
 
 		private void AddPage(Page page)

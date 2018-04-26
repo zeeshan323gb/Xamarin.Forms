@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -91,7 +92,15 @@ namespace Xamarin.Forms
 			remove { _headerChanged -= value; }
 		}
 
+		event EventHandler IShellController.StructureChanged
+		{
+			add { _structureChanged += value; }
+			remove { _structureChanged -= value; }
+		}
+
 		private event EventHandler _headerChanged;
+
+		private event EventHandler _structureChanged;
 
 		View IShellController.FlyoutHeader
 		{
@@ -168,6 +177,11 @@ namespace Xamarin.Forms
 		public event EventHandler<ShellNavigatedEventArgs> Navigated;
 
 		public event EventHandler<ShellNavigatingEventArgs> Navigating;
+
+		public Shell()
+		{
+			((INotifyCollectionChanged)Items).CollectionChanged += (s, e) => SendStructureChanged();
+		}
 
 		public ShellItem CurrentItem
 		{
@@ -383,6 +397,11 @@ namespace Xamarin.Forms
 					}
 				}
 			}
+		}
+
+		internal void SendStructureChanged ()
+		{
+			_structureChanged?.Invoke(this, EventArgs.Empty);
 		}
 
 		protected override void OnChildAdded(Element child)

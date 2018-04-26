@@ -21,6 +21,14 @@ namespace Xamarin.Forms.Platform.iOS
 			_headerView = headerView;
 			_source = new ShellTableViewSource(context, onElementSelected);
 			_source.ScrolledEvent += OnScrolled;
+
+			((IShellController)_context.Shell).StructureChanged += OnStructureChanged;
+		}
+
+		private void OnStructureChanged(object sender, EventArgs e)
+		{
+			_source.ClearCache();
+			TableView.ReloadData();
 		}
 
 		public void LayoutParallax()

@@ -13,11 +13,28 @@ namespace Xamarin.Forms.Platform.iOS
 		private List<List<Element>> _groups;
 		private bool _hasMenuItems;
 
+		public List<List<Element>> Groups
+		{
+			get
+			{
+				if (_groups == null)
+				{
+					_groups = new List<List<Element>>();
+					SetVisualGroups(_context.Shell, _groups);
+				}
+				return _groups;
+			}
+		}
+
 		public ShellTableViewSource(IShellContext context, Action<Element> onElementSelected)
 		{
 			_context = context;
 			_onElementSelected = onElementSelected;
-			SetVisualGroups(_context.Shell);
+		}
+		
+		public void ClearCache ()
+		{
+			_groups = null;
 		}
 
 		public event EventHandler<UIScrollView> ScrolledEvent;
@@ -28,11 +45,11 @@ namespace Xamarin.Forms.Platform.iOS
 			int row = indexPath.Row;
 
 			var template = _context.Shell.ItemTemplate;
-			if (section == _groups.Count - 1 && _hasMenuItems)
+			if (section == Groups.Count - 1 && _hasMenuItems)
 			{
 				template = _context.Shell.MenuItemTemplate;
 			}
-			var context = _groups[indexPath.Section][indexPath.Row];
+			var context = Groups[indexPath.Section][indexPath.Row];
 
 			var cellId = template.SelectDataTemplate(context, _context.Shell).GetType().FullName;
 
@@ -60,7 +77,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public override nint NumberOfSections(UITableView tableView)
 		{
-			return _groups.Count;
+			return Groups.Count;
 		}
 
 		public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
@@ -68,18 +85,18 @@ namespace Xamarin.Forms.Platform.iOS
 			int section = indexPath.Section;
 			int row = indexPath.Row;
 
-			var element = _groups[section][row];
+			var element = Groups[section][row];
 			_onElementSelected(element);
 		}
 
 		public override nint RowsInSection(UITableView tableview, nint section)
 		{
-			return _groups[(int)section].Count;
+			return Groups[(int)section].Count;
 		}
 
 		public override nfloat GetHeightForFooter(UITableView tableView, nint section)
 		{
-			if (section < _groups.Count - 1)
+			if (section < Groups.Count - 1)
 				return 1;
 			return 0;
 		}
@@ -94,9 +111,8 @@ namespace Xamarin.Forms.Platform.iOS
 			ScrolledEvent?.Invoke(this, scrollView);
 		}
 
-		private void SetVisualGroups(Shell shell)
+		private void SetVisualGroups(Shell shell, List<List<Element>> groups)
 		{
-			_groups = new List<List<Element>>();
 			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
 			List<Element> section = null;
 			foreach (var shellItem in shell.Items)
@@ -107,7 +123,7 @@ namespace Xamarin.Forms.Platform.iOS
 					previous == ShellItemGroupBehavior.ShowTabs)
 				{
 					section = new List<Element>();
-					_groups.Add(section);
+					groups.Add(section);
 					
 					if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
 					{
@@ -125,7 +141,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (shell.MenuItems.Count > 0)
 			{
 				section = new List<Element>();
-				_groups.Add(section);
+				groups.Add(section);
 				section.AddRange(shell.MenuItems);
 				_hasMenuItems = true;
 			}
