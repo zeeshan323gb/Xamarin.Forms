@@ -14,7 +14,7 @@ namespace Xamarin.Forms.Platform.iOS
 		private IShellContext _context;
 		private bool _disposed;
 		private ShellItem _shellItem;
-		private List<IShellTabItemRenderer> _tabRenderers = new List<IShellTabItemRenderer>();
+		private Dictionary<UIViewController, IShellTabItemRenderer> _tabRenderers = new Dictionary<UIViewController, IShellTabItemRenderer>();
 
 		public ShellItemRenderer(IShellContext context)
 		{
@@ -28,14 +28,11 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				base.SelectedViewController = value;
 
-				foreach (var controller in _tabRenderers)
+				var renderer = RendererForViewController(value);
+				if (renderer != null)
 				{
-					if (controller.ViewController == value)
-					{
-						ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, controller.ShellTabItem);
-						CurrentRenderer = controller;
-						break;
-					}
+					ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, renderer.ShellTabItem);
+					CurrentRenderer = renderer;
 				}
 			}
 		}
@@ -72,18 +69,16 @@ namespace Xamarin.Forms.Platform.iOS
 			ShouldSelectViewController = (tabController, viewController) =>
 			{
 				bool accept = true;
-				foreach (var r in _tabRenderers)
+				var r = RendererForViewController(viewController);
+				if (r != null)
 				{
-					if (r.ViewController == viewController)
-					{
-						var controller = (IShellController)_context.Shell;
-						accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
-							ShellItem,
-							r.ShellTabItem,
-							r.ShellTabItem.Stack.ToList(),
-							true
-						);
-					}
+					var controller = (IShellController)_context.Shell;
+					accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
+						ShellItem,
+						r.ShellTabItem,
+						r.ShellTabItem.Stack.ToList(),
+						true
+					);
 				}
 
 				return accept;
@@ -99,8 +94,10 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
-				foreach (var renderer in _tabRenderers)
+				foreach (var kvp in _tabRenderers.ToList())
 				{
+					var renderer = kvp.Value;
+					RemoveRenderer(renderer);
 					renderer.Dispose();
 				}
 				_tabRenderers.Clear();
@@ -120,54 +117,38 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		IShellTabItemRenderer RendererForShellTabItem (ShellTabItem item, List<IShellTabItemRenderer> renderers)
-		{
-			foreach (var renderer in renderers)
-			{
-				if (renderer.ShellTabItem == item)
-					return renderer;
-			}
-			return null;
-		}
-
 		protected virtual void OnItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			if (e.OldItems != null)
 			{
-				foreach (var shellTabItem in e.OldItems)
+				foreach (ShellTabItem shellTabItem in e.OldItems)
 				{
-					foreach (var renderer in _tabRenderers)
+					var renderer = RendererForShellTabItem(shellTabItem);
+					if (renderer != null)
 					{
-
-						if (renderer.ShellTabItem == shellTabItem)
-						{
-							ViewControllers = ViewControllers.Remove(renderer.ViewController);
-							break;
-						}
+						ViewControllers = ViewControllers.Remove(renderer.ViewController);
+						RemoveRenderer(renderer);
 					}
 				}
 			}
 
 			if (e.NewItems != null && e.NewItems.Count > 0)
 			{
-				var oldRenderersList = _tabRenderers;
-				_tabRenderers = new List<IShellTabItemRenderer>();
-
 				UIViewController[] viewControllers = new UIViewController[ShellItem.Items.Count];
 				int i = 0;
 				bool goTo = false; // its possible we are in a transitionary state and should not nav
 				var current = ShellItem.CurrentItem;
 				foreach (var shellTabItem in ShellItem.Items)
 				{
-					var renderer = RendererForShellTabItem(shellTabItem, oldRenderersList) ?? _context.CreateShellTabItemRenderer(shellTabItem);
-					_tabRenderers.Add(renderer);
+					var renderer = RendererForShellTabItem(shellTabItem) ?? _context.CreateShellTabItemRenderer(shellTabItem);
+					AddRenderer(renderer);
 					viewControllers[i++] = renderer.ViewController;
 					if (shellTabItem == current)
 						goTo = true;
 				}
 
 				ViewControllers = viewControllers;
-				
+
 				if (goTo)
 					GoTo(ShellItem.CurrentItem);
 			}
@@ -179,6 +160,17 @@ namespace Xamarin.Forms.Platform.iOS
 			item.PropertyChanged += OnElementPropertyChanged;
 			((IShellItemController)item).CurrentShellAppearanceChanged += OnShellAppearanceChanged;
 			((INotifyCollectionChanged)item.Items).CollectionChanged += OnItemsCollectionChanged;
+		}
+
+		protected virtual void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == ShellTabItem.IsEnabledProperty.PropertyName)
+			{
+				var tabItem = (ShellTabItem)sender;
+				var renderer = RendererForShellTabItem(tabItem);
+				var index = ViewControllers.ToList().IndexOf(renderer.ViewController);
+				TabBar.Items[index].Enabled = tabItem.IsEnabled;
+			}
 		}
 
 		protected virtual void UpdateShellAppearance()
@@ -200,35 +192,46 @@ namespace Xamarin.Forms.Platform.iOS
 			_appearanceTracker.SetAppearance(this, appearance);
 		}
 
+		private void AddRenderer(IShellTabItemRenderer renderer)
+		{
+			if (_tabRenderers.ContainsKey(renderer.ViewController))
+				return;
+			_tabRenderers[renderer.ViewController] = renderer;
+			renderer.ShellTabItem.PropertyChanged += OnShellTabItemPropertyChanged;
+		}
+
 		private void CreateTabRenderers()
 		{
 			UIViewController[] viewControllers = new UIViewController[ShellItem.Items.Count];
 			int i = 0;
 			foreach (var shellTabItem in ShellItem.Items)
 			{
-				var tabRenderer = _context.CreateShellTabItemRenderer(shellTabItem);
-				_tabRenderers.Add(tabRenderer);
-				viewControllers[i++] = tabRenderer.ViewController;
+				var renderer = _context.CreateShellTabItemRenderer(shellTabItem);
+				AddRenderer(renderer);
+				viewControllers[i++] = renderer.ViewController;
 			}
 			ViewControllers = viewControllers;
-
 			GoTo(ShellItem.CurrentItem);
+
+			// now that they are applied we can set the enabled state of the TabBar items
+			for (i = 0; i < ViewControllers.Length; i++)
+			{
+				var renderer = RendererForViewController(ViewControllers[i]);
+				if (!renderer.ShellTabItem.IsEnabled)
+				{
+					TabBar.Items[i].Enabled = false;
+				}
+			}
 		}
 
 		private void GoTo(ShellTabItem tabItem)
 		{
 			if (tabItem == null)
 				return;
-			foreach (var renderer in _tabRenderers)
-			{
-				if (renderer.ShellTabItem == tabItem)
-				{
-					if (renderer.ViewController != SelectedViewController)
-						SelectedViewController = renderer.ViewController;
-					CurrentRenderer = renderer;
-					break;
-				}
-			}
+			var renderer = RendererForShellTabItem(tabItem);
+			if (renderer?.ViewController != SelectedViewController)
+				SelectedViewController = renderer.ViewController;
+			CurrentRenderer = renderer;
 		}
 
 		private UIImage ImageFromColor(UIColor color)
@@ -247,6 +250,31 @@ namespace Xamarin.Forms.Platform.iOS
 		private void OnShellAppearanceChanged(object sender, EventArgs e)
 		{
 			UpdateShellAppearance();
+		}
+
+		private void RemoveRenderer(IShellTabItemRenderer renderer)
+		{
+			if (_tabRenderers.Remove(renderer.ViewController))
+			{
+				renderer.ShellTabItem.PropertyChanged -= OnShellTabItemPropertyChanged;
+			}
+		}
+
+		private IShellTabItemRenderer RendererForShellTabItem(ShellTabItem tab)
+		{
+			foreach (var item in _tabRenderers)
+			{
+				if (item.Value.ShellTabItem == tab)
+					return item.Value;
+			}
+			return null;
+		}
+
+		private IShellTabItemRenderer RendererForViewController(UIViewController viewController)
+		{
+			if (_tabRenderers.TryGetValue(viewController, out var value))
+				return value;
+			return null;
 		}
 	}
 }
