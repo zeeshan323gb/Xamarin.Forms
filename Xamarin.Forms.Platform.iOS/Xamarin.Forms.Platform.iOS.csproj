@@ -153,6 +153,7 @@
     <Compile Include="Renderers\ShellTableViewController.cs" />
     <Compile Include="Renderers\ShellTableViewSource.cs" />
     <Compile Include="Renderers\SlideFlyoutTransition.cs" />
+    <Compile Include="Renderers\TabletShellFlyoutRenderer.cs" />
     <Compile Include="Renderers\UIContainerCell.cs" />
     <Compile Include="Renderers\UIContainerView.cs" />
     <Compile Include="Resources\StringResources.Designer.cs">
