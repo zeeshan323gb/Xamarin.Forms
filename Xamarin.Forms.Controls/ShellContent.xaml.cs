@@ -18,15 +18,6 @@ namespace Xamarin.Forms.Controls
 			public MySearchHandler()
 			{
 				ShowsResults = true;
-				ItemTemplate = new DataTemplate(() =>
-				{
-					var label = new Label();
-					label.SetBinding(Label.TextProperty, ".");
-					label.HorizontalTextAlignment = TextAlignment.Center;
-					label.VerticalTextAlignment = TextAlignment.Center;
-
-					return label;
-				});
 			}
 
 			protected override void OnQueryChanged(string oldValue, string newValue)
