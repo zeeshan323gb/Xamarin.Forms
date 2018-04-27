@@ -44,10 +44,10 @@ namespace Xamarin.Forms.Platform.Android
 				var groupBehavior = shellItem.GroupBehavior;
 				if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
 				{
-					section = menu.AddSubMenu(null);
+					section = menu.AddSubMenu(new Java.Lang.String(shellItem.Title));
 					foreach (var tabItem in shellItem.Items)
 					{
-						section.Add(new Java.Lang.String(tabItem.Title));
+						var item = section.Add(new Java.Lang.String(tabItem.Title));
 						// when an item is selected we will display its menu items
 						if (isCurrentShellItem && tabItem == shellItem.CurrentItem)
 						{

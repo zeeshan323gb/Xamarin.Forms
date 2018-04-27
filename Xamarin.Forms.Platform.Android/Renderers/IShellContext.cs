@@ -2,6 +2,7 @@
 
 namespace Xamarin.Forms.Platform.Android
 {
+
 	public interface IShellContext
 	{
 		Shell Shell { get; }
@@ -9,5 +10,7 @@ namespace Xamarin.Forms.Platform.Android
 		Context AndroidContext { get; }
 
 		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();
+
+		IShellItemRenderer CreateShellItemRenderer();
 	}
 }
