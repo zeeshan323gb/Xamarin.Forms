@@ -7,6 +7,8 @@ using AView = Android.Views.View;
 namespace Xamarin.Forms.Platform.Android
 {
 
+
+
 	public class ShellRenderer : IVisualElementRenderer, IShellContext
 	{
 		#region IVisualElementRenderer
@@ -76,6 +78,11 @@ namespace Xamarin.Forms.Platform.Android
 			return CreateShellFlyoutContentRenderer();
 		}
 
+		IShellItemRenderer IShellContext.CreateShellItemRenderer()
+		{
+			return CreateShellItemRenderer();
+		}
+
 		#endregion IShellContext
 
 		private event EventHandler<PropertyChangedEventArgs> _elementPropertyChanged;
@@ -113,6 +120,12 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
 		{
 			return new ShellFlyoutContentRenderer(this, AndroidContext);
+		}
+
+		protected virtual IShellItemRenderer CreateShellItemRenderer()
+		{
+			return null;
+			//return new ShellItemRenderer(this, AndroidContext);
 		}
 
 		#region IDisposable Support
