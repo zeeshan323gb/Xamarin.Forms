@@ -5,7 +5,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
 {
-	public partial class VisualElement : FrameworkElement, IAnimatable, IVisualElementController, IResourcesProvider, IFlowDirectionController
+	public partial class VisualElement : NavigableElement, IAnimatable, IVisualElementController, IResourcesProvider, IFlowDirectionController
 	{
 		public static readonly BindableProperty InputTransparentProperty = BindableProperty.Create("InputTransparent", typeof(bool), typeof(VisualElement), default(bool));
 

@@ -3,12 +3,12 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
 {
-	public class FrameworkElement : Element, INavigationProxy
+	public class NavigableElement : Element, INavigationProxy
 	{
 		static readonly BindablePropertyKey NavigationPropertyKey = BindableProperty.CreateReadOnly("Navigation", typeof(INavigation), typeof(VisualElement), default(INavigation));
 		public static readonly BindableProperty NavigationProperty = NavigationPropertyKey.BindableProperty;
 
-		internal FrameworkElement()
+		internal NavigableElement()
 		{
 			Navigation = new NavigationProxy();
 		}
