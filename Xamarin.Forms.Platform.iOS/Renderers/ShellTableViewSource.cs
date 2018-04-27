@@ -143,6 +143,10 @@ namespace Xamarin.Forms.Platform.iOS
 						section.Add(shellItem);
 					}
 				}
+				else
+				{
+					section.Add(shellItem);
+				}
 
 				previous = groupBehavior;
 			}
