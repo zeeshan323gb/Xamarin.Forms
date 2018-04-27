@@ -9,6 +9,7 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellPageRendererTracker : IShellPageRendererTracker
 	{
+		private IShellSearchResultsRenderer _resultsRenderer;
 		private readonly IShellContext _context;
 		private BackButtonBehavior _backButtonBehavior;
 		private bool _disposed = false;
@@ -165,6 +166,12 @@ namespace Xamarin.Forms.Platform.iOS
 
 				if (_searchHandler != null)
 				{
+					if (_resultsRenderer != null)
+					{
+						_resultsRenderer.ItemSelected -= OnSearchItemSelected;
+						_resultsRenderer.Dispose();
+						_resultsRenderer = null;
+					}
 					_searchHandler.PropertyChanged -= OnSearchHandlerPropertyChanged;
 					DettachSearchController();
 				}
@@ -189,7 +196,15 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void AttachSearchController()
 		{
-			_searchController = new UISearchController((UIViewController)null);
+			if (SearchHandler.ShowsResults)
+			{
+				_resultsRenderer = _context.CreateShellSearchResultsRenderer();
+				_resultsRenderer.ItemSelected += OnSearchItemSelected;
+				_resultsRenderer.SearchHandler = _searchHandler;
+				Renderer.ViewController.DefinesPresentationContext = true;
+			}
+
+			_searchController = new UISearchController(_resultsRenderer?.ViewController);
 			var visibility = SearchHandler.SearchBoxVisibility;
 			if (SearchHandler.SearchBoxVisibility != SearchBoxVisiblity.Hidden)
 			{
@@ -236,6 +251,12 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 
 			searchBar.ShowsBookmarkButton = SearchHandler.ClearPlaceholderEnabled;
+		}
+
+		private void OnSearchItemSelected(object sender, object e)
+		{
+			_searchController.Active = false;
+			((ISearchHandlerController)SearchHandler).ItemSelected(e);
 		}
 
 		private void BookmarkButtonClicked(object sender, EventArgs e)

@@ -13,11 +13,55 @@ namespace Xamarin.Forms.Controls
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ShellContent : ContentPage
 	{
+		private class MySearchHandler : SearchHandler
+		{
+			public MySearchHandler()
+			{
+				ShowsResults = true;
+				ItemTemplate = new DataTemplate(() =>
+				{
+					var label = new Label();
+					label.SetBinding(Label.TextProperty, ".");
+					label.HorizontalTextAlignment = TextAlignment.Center;
+					label.VerticalTextAlignment = TextAlignment.Center;
+
+					return label;
+				});
+			}
+
+			protected override void OnQueryChanged(string oldValue, string newValue)
+			{
+				base.OnQueryChanged(oldValue, newValue);
+
+				List<string> results = new List<string>();
+				for (int i = 0; i < 100; i++)
+				{
+					results.Add(newValue + i);
+				}
+
+				ItemsSource = results;
+			}
+
+			protected override void OnQueryConfirmed()
+			{
+				base.OnQueryConfirmed();
+			}
+
+			protected override void OnItemSelected(object item)
+			{
+				base.OnItemSelected(item);
+
+				ItemsSource = null;
+			}
+		}
+
 		private string _text;
 
 		public ShellContent()
 		{
 			InitializeComponent();
+
+			Shell.SetSearchHandler(this, new MySearchHandler());
 
 			BackgroundColor = Color.Blue;
 

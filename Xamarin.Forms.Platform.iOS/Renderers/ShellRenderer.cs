@@ -50,6 +50,11 @@ namespace Xamarin.Forms.Platform.iOS
 			return CreateShellTabItemRenderer(tabItem);
 		}
 
+		IShellSearchResultsRenderer IShellContext.CreateShellSearchResultsRenderer()
+		{
+			return CreateShellSearchResultsRenderer();
+		}
+
 		#endregion IShellContext
 
 		private IShellItemRenderer _currentShellItemRenderer;
@@ -166,6 +171,11 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				ShellTabItem = tabItem
 			};
+		}
+
+		protected virtual IShellSearchResultsRenderer CreateShellSearchResultsRenderer()
+		{
+			return new ShellSearchResultsRenderer(this);
 		}
 
 		protected override void Dispose(bool disposing)
