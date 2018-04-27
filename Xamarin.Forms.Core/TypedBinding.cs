@@ -148,7 +148,7 @@ namespace Xamarin.Forms.Internals
 		internal override object GetSourceValue(object value, Type targetPropertyType)
 		{
 			if (Converter != null)
-				value = Converter.Convert(value, targetPropertyType, ConverterParameter, CultureInfo.CurrentUICulture);
+				value = Converter.Convert(value, targetPropertyType, ConverterParameter, ConvertCulture ?? CultureInfo.CurrentUICulture);
 
 			//return base.GetSourceValue(value, targetPropertyType);
 			if (StringFormat != null)
@@ -160,7 +160,7 @@ namespace Xamarin.Forms.Internals
 		internal override object GetTargetValue(object value, Type sourcePropertyType)
 		{
 			if (Converter != null)
-				value = Converter.ConvertBack(value, sourcePropertyType, ConverterParameter, CultureInfo.CurrentUICulture);
+				value = Converter.ConvertBack(value, sourcePropertyType, ConverterParameter, ConvertCulture ?? CultureInfo.CurrentUICulture);
 
 			//return base.GetTargetValue(value, sourcePropertyType);
 			return value;
@@ -234,7 +234,8 @@ namespace Xamarin.Forms.Internals
 
 			object original = value;
 			try {
-				value = Convert.ChangeType(value, convertTo, CultureInfo.InvariantCulture);
+				var culture = ConvertCulture ?? CultureInfo.InvariantCulture;
+				value = Convert.ChangeType(value, convertTo, culture);
 				return true;
 			} catch (Exception ex ) when (ex is InvalidCastException || ex is FormatException||ex is OverflowException) {
 				value = original;

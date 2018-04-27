@@ -6,6 +6,8 @@ namespace Xamarin.Forms
 {
 	public abstract class BindingBase
 	{
+		public static System.Globalization.CultureInfo ConvertCulture { get; set; }
+
 		static readonly ConditionalWeakTable<IEnumerable, CollectionSynchronizationContext> SynchronizedCollections = new ConditionalWeakTable<IEnumerable, CollectionSynchronizationContext>();
 
 		BindingMode _mode = BindingMode.Default;

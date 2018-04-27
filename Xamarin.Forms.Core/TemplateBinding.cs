@@ -95,7 +95,7 @@ namespace Xamarin.Forms
 		internal override object GetSourceValue(object value, Type targetPropertyType)
 		{
 			if (Converter != null)
-				value = Converter.Convert(value, targetPropertyType, ConverterParameter, CultureInfo.CurrentUICulture);
+				value = Converter.Convert(value, targetPropertyType, ConverterParameter, ConvertCulture ?? CultureInfo.CurrentUICulture);
 
 			return base.GetSourceValue(value, targetPropertyType);
 		}
@@ -103,7 +103,7 @@ namespace Xamarin.Forms
 		internal override object GetTargetValue(object value, Type sourcePropertyType)
 		{
 			if (Converter != null)
-				value = Converter.ConvertBack(value, sourcePropertyType, ConverterParameter, CultureInfo.CurrentUICulture);
+				value = Converter.ConvertBack(value, sourcePropertyType, ConverterParameter, ConvertCulture ?? CultureInfo.CurrentUICulture);
 
 			return base.GetTargetValue(value, sourcePropertyType);
 		}
