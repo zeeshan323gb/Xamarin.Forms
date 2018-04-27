@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class ShellItem : FrameworkElement, IShellItemController
+	public class ShellItem : NavigableElement, IShellItemController
 	{
 		#region PropertyKeys
 

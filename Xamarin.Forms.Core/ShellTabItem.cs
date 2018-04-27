@@ -9,7 +9,7 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Content")]
-	public class ShellTabItem : FrameworkElement, IShellTabItemController
+	public class ShellTabItem : NavigableElement, IShellTabItemController
 	{
 		#region PropertyKeys
 
