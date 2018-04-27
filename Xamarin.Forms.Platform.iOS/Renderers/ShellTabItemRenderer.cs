@@ -53,6 +53,7 @@ namespace Xamarin.Forms.Platform.iOS
 			get => _page;
 			private set
 			{
+				// Be sure to clear when going away!
 				((IShellTabItemController)_shellTabItem).RootPageProjection = value;
 				_page = value;
 			}
@@ -97,6 +98,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (allowPop)
 			{
+				// Do not remove, wonky behavior on some versions of iOS if you dont dispatch
 				CoreFoundation.DispatchQueue.MainQueue.DispatchAsync(() => PopViewController(true));
 			}
 			else
@@ -134,6 +136,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
+				((IShellTabItemController)_shellTabItem).RootPageProjection = null;
 				_appearanceTracker.Dispose();
 				_shellTabItem.PropertyChanged -= HandlePropertyChanged;
 				((IShellTabItemController)_shellTabItem).NavigationRequested -= OnNavigationRequested;

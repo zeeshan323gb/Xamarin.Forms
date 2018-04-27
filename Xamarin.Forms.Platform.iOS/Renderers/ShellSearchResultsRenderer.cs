@@ -25,8 +25,30 @@ namespace Xamarin.Forms.Platform.iOS
 		#endregion IShellSearchResultsRenderer
 
 		private readonly IShellContext _context;
+		private DataTemplate _defaultTemplate;
 
 		public event EventHandler<object> ItemSelected;
+
+		// If data templates were horses, this is a donkey
+		DataTemplate DefaultTemplate
+		{
+			get
+			{
+				if (_defaultTemplate == null)
+				{
+					_defaultTemplate = new DataTemplate(() =>
+					{
+						var label = new Label();
+						label.SetBinding(Label.TextProperty, SearchHandler.DisplayMemberName ?? ".");
+						label.HorizontalTextAlignment = TextAlignment.Center;
+						label.VerticalTextAlignment = TextAlignment.Center;
+
+						return label;
+					});
+				}
+				return _defaultTemplate;
+			}
+		}
 
 		public ShellSearchResultsRenderer(IShellContext context)
 		{
@@ -47,6 +69,10 @@ namespace Xamarin.Forms.Platform.iOS
 			var context = proxy[row];
 
 			var template = SearchHandler.ItemTemplate;
+
+			if (template == null)
+				template = DefaultTemplate;
+
 			var cellId = ((IDataTemplateController)template.SelectDataTemplate(context, _context.Shell)).IdString;
 
 			var cell = (UIContainerCell)tableView.DequeueReusableCell(cellId);

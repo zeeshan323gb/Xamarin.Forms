@@ -73,6 +73,9 @@ namespace Xamarin.Forms.Platform.iOS
 				if (r != null)
 				{
 					var controller = (IShellController)_context.Shell;
+					// This is the part where we get down on one knee and ask the deveoper
+					// to navigate us. If they dont cancel our proposal we will be engaged
+					// to navigate together.
 					accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
 						ShellItem,
 						r.ShellTabItem,
@@ -152,6 +155,8 @@ namespace Xamarin.Forms.Platform.iOS
 				if (goTo)
 					GoTo(ShellItem.CurrentItem);
 			}
+
+			SetTabBarHidden (ViewControllers.Length == 1);
 		}
 
 		protected virtual void OnShellItemSet(ShellItem item)
@@ -211,6 +216,12 @@ namespace Xamarin.Forms.Platform.iOS
 				viewControllers[i++] = renderer.ViewController;
 			}
 			ViewControllers = viewControllers;
+
+			// No sense showing a bar that has a single icon
+			if (ViewControllers.Length == 1)
+				SetTabBarHidden(true);
+
+			// Make sure we are at the right item
 			GoTo(ShellItem.CurrentItem);
 
 			// now that they are applied we can set the enabled state of the TabBar items
@@ -234,19 +245,6 @@ namespace Xamarin.Forms.Platform.iOS
 			CurrentRenderer = renderer;
 		}
 
-		private UIImage ImageFromColor(UIColor color)
-		{
-			CGRect rect = new CGRect(0, 0, 1, 1);
-			UIGraphics.BeginImageContext(rect.Size);
-			CGContext context = UIGraphics.GetCurrentContext();
-			context.SetFillColor(color.CGColor);
-			context.FillRect(rect);
-			UIImage image = UIGraphics.GetImageFromCurrentImageContext();
-			UIGraphics.EndImageContext();
-
-			return image;
-		}
-
 		private void OnShellAppearanceChanged(object sender, EventArgs e)
 		{
 			UpdateShellAppearance();
@@ -262,6 +260,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private IShellTabItemRenderer RendererForShellTabItem(ShellTabItem tab)
 		{
+			// Not Efficient!
 			foreach (var item in _tabRenderers)
 			{
 				if (item.Value.ShellTabItem == tab)
@@ -272,9 +271,28 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private IShellTabItemRenderer RendererForViewController(UIViewController viewController)
 		{
+			// Efficient!
 			if (_tabRenderers.TryGetValue(viewController, out var value))
 				return value;
 			return null;
+		}
+
+		private void SetTabBarHidden (bool hidden)
+		{
+			TabBar.Hidden = hidden;
+
+			if (CurrentRenderer == null)
+				return;
+
+			// now we must do the uikit jiggly dance to make sure the safe area updates. Failure
+			// to perform the jiggle may result in the page not insetting properly when unhiding
+			// the TabBar
+
+			// a devious 1 pixel inset vertically
+			CurrentRenderer.ViewController.View.Frame = View.Bounds.Inset(0, 1);
+
+			// and quick as a whip we return it back to what it was with its insets being all proper
+			CurrentRenderer.ViewController.View.Frame = View.Bounds;
 		}
 	}
 }
