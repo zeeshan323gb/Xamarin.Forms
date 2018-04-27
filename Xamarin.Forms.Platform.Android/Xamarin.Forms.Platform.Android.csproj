@@ -22,14 +22,12 @@
     <AndroidTlsProvider>
     </AndroidTlsProvider>
   </PropertyGroup>
-  
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true'">
     <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-  </PropertyGroup>  
-  
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -191,6 +189,9 @@
     <Compile Include="Renderers\IImageSourceHandler.cs" />
     <Compile Include="Renderers\ImageExtensions.cs" />
     <Compile Include="Renderers\ImageLoaderSourceHandler.cs" />
+    <Compile Include="Renderers\IShellContext.cs" />
+    <Compile Include="Renderers\IShellFlyoutContentRenderer.cs" />
+    <Compile Include="Renderers\IShellFlyoutRenderer.cs" />
     <Compile Include="Renderers\IToolbarButton.cs" />
     <Compile Include="Renderers\KeyboardExtensions.cs" />
     <Compile Include="AppCompat\PickerRenderer.cs" />
@@ -200,6 +201,9 @@
     <Compile Include="Renderers\MotionEventHelper.cs" />
     <Compile Include="Renderers\PageContainer.cs" />
     <Compile Include="Renderers\ScrollViewContainer.cs" />
+    <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
+    <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
+    <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\StreamImagesourceHandler.cs" />
     <Compile Include="Renderers\ToolbarButton.cs" />
     <Compile Include="Renderers\ToolbarImageButton.cs" />

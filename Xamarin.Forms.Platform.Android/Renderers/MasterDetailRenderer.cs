@@ -10,6 +10,7 @@ using AColor = Android.Graphics.Drawables.ColorDrawable;
 
 namespace Xamarin.Forms.Platform.Android
 {
+
 	public class MasterDetailRenderer : DrawerLayout, IVisualElementRenderer, DrawerLayout.IDrawerListener
 	{
 		//from Android source code
