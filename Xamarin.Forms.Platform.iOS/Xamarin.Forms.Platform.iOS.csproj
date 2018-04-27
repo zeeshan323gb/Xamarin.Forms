@@ -137,6 +137,7 @@
     <Compile Include="Renderers\IShellItemTransition.cs" />
     <Compile Include="Renderers\IShellNavBarAppearanceTracker.cs" />
     <Compile Include="Renderers\IShellPageRendererTracker.cs" />
+    <Compile Include="Renderers\IShellSearchResultsRenderer.cs" />
     <Compile Include="Renderers\IShellTabBarAppearanceTracker.cs" />
     <Compile Include="Renderers\IShellTabItemRenderer.cs" />
     <Compile Include="Renderers\SafeShellNavBarAppearanceTracker.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Renderers\ShellNavBarAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellPageRendererTracker.cs" />
     <Compile Include="Renderers\ShellRenderer.cs" />
+    <Compile Include="Renderers\ShellSearchResultsRenderer.cs" />
     <Compile Include="Renderers\ShellTabBarAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellTabItemRenderer.cs" />
     <Compile Include="Renderers\ShellTableViewController.cs" />

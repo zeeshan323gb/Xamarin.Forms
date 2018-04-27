@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace Xamarin.Forms
@@ -7,6 +8,29 @@ namespace Xamarin.Forms
 	public class SearchHandler : BindableObject, ISearchHandlerController
 	{
 		#region ISearchHandlerController
+
+		event EventHandler<ListProxyChangedEventArgs> ISearchHandlerController.ListProxyChanged
+		{
+			add { _listProxyChanged += value; }
+			remove { _listProxyChanged -= value; }
+		}
+
+		private event EventHandler<ListProxyChangedEventArgs> _listProxyChanged;
+
+		IReadOnlyList<object> ISearchHandlerController.ListProxy => ListProxy;
+
+		private ListProxy ListProxy
+		{
+			get { return _listProxy; }
+			set
+			{
+				if (_listProxy == value)
+					return;
+				var oldProxy = _listProxy;
+				_listProxy = value;
+				_listProxyChanged?.Invoke(this, new ListProxyChangedEventArgs(oldProxy, value));
+			}
+		}
 
 		void ISearchHandlerController.ClearPlaceholderClicked()
 		{
@@ -16,6 +40,11 @@ namespace Xamarin.Forms
 		void ISearchHandlerController.QueryConfirmed()
 		{
 			OnQueryConfirmed();
+		}
+
+		void ISearchHandlerController.ItemSelected(object obj)
+		{
+			OnItemSelected(obj);
 		}
 
 		#endregion ISearchHandlerController
@@ -52,7 +81,8 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(IsSearchEnabled), typeof(bool), typeof(SearchHandler), true, BindingMode.OneWay);
 
 		public static readonly BindableProperty ItemsSourceProperty =
-			BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(SearchHandler), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: OnItemsSourceChanged);
 
 		public static readonly BindableProperty ItemTemplateProperty =
 			BindableProperty.Create(nameof(ItemTemplate), typeof(DataTemplate), typeof(SearchHandler), null, BindingMode.OneTime);
@@ -69,6 +99,11 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty SearchBoxVisibilityProperty =
 			BindableProperty.Create(nameof(SearchBoxVisibility), typeof(SearchBoxVisiblity), typeof(SearchHandler), SearchBoxVisiblity.Expanded, BindingMode.OneWay);
+
+		public static readonly BindableProperty ShowsResultsProperty =
+			BindableProperty.Create(nameof(ShowsResults), typeof(bool), typeof(SearchHandler), false, BindingMode.OneTime);
+
+		private ListProxy _listProxy;
 
 		public ImageSource ClearIcon
 		{
@@ -160,6 +195,12 @@ namespace Xamarin.Forms
 			set { SetValue(SearchBoxVisibilityProperty, value); }
 		}
 
+		public bool ShowsResults
+		{
+			get { return (bool)GetValue(ShowsResultsProperty); }
+			set { SetValue(ShowsResultsProperty, value); }
+		}
+
 		private bool ClearPlaceholderEnabledCore { set => SetValueCore(ClearPlaceholderEnabledProperty, value); }
 
 		private bool IsSearchEnabledCore { set => SetValueCore(IsSearchEnabledProperty, value); }
@@ -172,6 +213,11 @@ namespace Xamarin.Forms
 			{
 				command.Execute(commandParameter);
 			}
+		}
+
+		protected virtual void OnItemSelected(object item)
+		{
+
 		}
 
 		protected virtual void OnQueryChanged(string oldValue, string newValue)
@@ -212,6 +258,15 @@ namespace Xamarin.Forms
 		private static void OnCommandParameterChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			((SearchHandler)bindable).OnCommandParameterChanged();
+		}
+
+		private static void OnItemsSourceChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var self = (SearchHandler)bindable;
+			if (newValue == null)
+				self.ListProxy = null;
+			else
+				self.ListProxy = new ListProxy((IEnumerable)newValue);
 		}
 
 		private static void OnQueryChanged(BindableObject bindable, object oldValue, object newValue)

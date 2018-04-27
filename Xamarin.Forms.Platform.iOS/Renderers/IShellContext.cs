@@ -19,5 +19,7 @@ namespace Xamarin.Forms.Platform.iOS
 		IShellNavBarAppearanceTracker CreateNavBarAppearanceTracker();
 
 		IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker();
+
+		IShellSearchResultsRenderer CreateShellSearchResultsRenderer();
 	}
 }
