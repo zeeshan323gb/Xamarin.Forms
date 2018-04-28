@@ -204,12 +204,14 @@
     <Compile Include="Renderers\ScrollViewContainer.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
+    <Compile Include="Renderers\ShellItemRenderer.cs" />
     <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\StreamImagesourceHandler.cs" />
     <Compile Include="Renderers\ToolbarButton.cs" />
     <Compile Include="Renderers\ToolbarImageButton.cs" />
     <Compile Include="Renderers\ViewCellExtensions.cs" />
     <Compile Include="Renderers\ViewGroupExtensions.cs" />
+    <AndroidResource Include="Resources\Layout\RootLayout.axml" />
     <Compile Include="TapGestureHandler.cs" />
     <Compile Include="TextColorSwitcher.cs" />
     <Compile Include="ViewInitializedEventArgs.cs" />
