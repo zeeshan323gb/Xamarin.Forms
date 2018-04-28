@@ -2,6 +2,7 @@
 using Android.Support.V4.Widget;
 using Android.Views;
 using AView = Android.Views.View;
+using LP = Android.Views.ViewGroup.LayoutParams;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -43,6 +44,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		private readonly IShellContext _shellContext;
 
+		private AView _content;
 		private IShellFlyoutContentRenderer _flyoutContent;
 
 		public ShellFlyoutRenderer(IShellContext shellContext, Context context) : base (context)
@@ -55,23 +57,27 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void AttachFlyout(IShellContext context, AView content)
 		{
+			_content = content;
+
 			_flyoutContent = context.CreateShellFlyoutContentRenderer();
 			_flyoutContent.AndroidView.LayoutParameters =
-				new LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) { Gravity = (int)GravityFlags.Start };
+				new LayoutParams(LP.MatchParent, LP.MatchParent) { Gravity = (int)GravityFlags.Start };
 
 			content.SetBackgroundColor(Color.Gray.ToAndroid());
 
-			AddView(content, new ViewGroup.LayoutParams (ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.MatchParent));
+			AddView(content);
 			AddView(_flyoutContent.AndroidView);
 
 			AddDrawerListener(this);
 
 			OpenDrawer(_flyoutContent.AndroidView);
+
+			
 		}
 
-		protected override void OnLayout(bool changed, int left, int top, int right, int bottom)
+		protected override void OnLayout(bool changed, int l, int t, int r, int b)
 		{
-			base.OnLayout(changed, left, top, right, bottom);
+			base.OnLayout(changed, l, t, r, b);
 		}
 	}
 }
