@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Android.Animation;
 using Android.Content;
 using Android.Graphics;
+using Android.Support.V4.Widget;
 using Android.Views;
 using Android.Widget;
 using Xamarin.Forms.Internals;
@@ -12,7 +13,7 @@ using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ScrollViewRenderer : AScrollView, IVisualElementRenderer, IEffectControlProvider
+	public class ScrollViewRenderer : NestedScrollView, IVisualElementRenderer, IEffectControlProvider
 	{
 		ScrollViewContainer _container;
 		HorizontalScrollView _hScrollView;
@@ -190,7 +191,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		protected override void OnAttachedToWindow()
+		public override void OnAttachedToWindow()
 		{
 			base.OnAttachedToWindow();
 

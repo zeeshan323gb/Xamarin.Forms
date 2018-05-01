@@ -109,6 +109,7 @@
     <Compile Include="AndroidApplicationLifecycleState.cs" />
     <Compile Include="AndroidTitleBarVisibility.cs" />
     <Compile Include="AppCompat\FrameRenderer.cs" />
+    <Compile Include="AppCompat\ShellFragmentContainer.cs" />
     <Compile Include="ButtonBackgroundTracker.cs" />
     <Compile Include="Elevation.cs" />
     <Compile Include="Extensions\EntryRendererExtensions.cs" />
@@ -123,7 +124,6 @@
     <Compile Include="AppCompat\IManageFragments.cs" />
     <Compile Include="AppCompat\MasterDetailContainer.cs" />
     <Compile Include="AppCompat\Platform.cs" />
-    <Compile Include="AppCompat\Resource.cs" />
     <Compile Include="CellAdapter.cs" />
     <Compile Include="Cells\EntryCellEditText.cs" />
     <Compile Include="Cells\EntryCellView.cs" />
@@ -204,7 +204,9 @@
     <Compile Include="Renderers\ScrollViewContainer.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
+    <Compile Include="Renderers\ShellFragmentPagerAdapter.cs" />
     <Compile Include="Renderers\ShellItemRenderer.cs" />
+    <Compile Include="Renderers\ShellPageContainer.cs" />
     <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\StreamImagesourceHandler.cs" />
     <Compile Include="Renderers\ToolbarButton.cs" />
@@ -212,6 +214,7 @@
     <Compile Include="Renderers\ViewCellExtensions.cs" />
     <Compile Include="Renderers\ViewGroupExtensions.cs" />
     <AndroidResource Include="Resources\Layout\RootLayout.axml" />
+    <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="TapGestureHandler.cs" />
     <Compile Include="TextColorSwitcher.cs" />
     <Compile Include="ViewInitializedEventArgs.cs" />

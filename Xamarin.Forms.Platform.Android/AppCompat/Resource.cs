@@ -36,9 +36,11 @@ namespace Xamarin.Forms.Platform.Android
 
 			public static int main_collapsing = 2131165337;
 
-			public static int main_toolbar = 2131165339;
+			public static int main_scrollview = 2131165341;
 
-			public static int main_scrollview = 2131165340;
+			public static int main_tablayout = 2131165340;
+
+			public static int main_toolbar = 2131165339;
 
 			static Id()
 			{
