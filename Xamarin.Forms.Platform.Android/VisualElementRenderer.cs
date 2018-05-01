@@ -216,6 +216,8 @@ namespace Xamarin.Forms.Platform.Android
 				SetOnClickListener(null);
 				SetOnTouchListener(null);
 
+				EffectUtilities.UnregisterEffectControlProvider(this, Element);
+
 				if (Tracker != null)
 				{
 					Tracker.Dispose();

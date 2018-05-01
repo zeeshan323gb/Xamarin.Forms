@@ -1,4 +1,5 @@
 using System;
+using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
@@ -43,6 +44,11 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			_onCreateCallback = callback;
 		}
 
+		protected virtual PageContainer CreatePageContainer (Context context, IVisualElementRenderer child, bool inFragment)
+		{
+			return new PageContainer(context, child, inFragment);
+		}
+
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			if (Page != null)
@@ -50,7 +56,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 				_visualElementRenderer = Android.Platform.CreateRenderer(Page, ChildFragmentManager, inflater.Context);
 				Android.Platform.SetRenderer(Page, _visualElementRenderer);
 
-				_pageContainer = new PageContainer(inflater.Context, _visualElementRenderer, true);
+				_pageContainer = CreatePageContainer(inflater.Context, _visualElementRenderer, true);
 
 				_onCreateCallback?.Invoke(_pageContainer);
 

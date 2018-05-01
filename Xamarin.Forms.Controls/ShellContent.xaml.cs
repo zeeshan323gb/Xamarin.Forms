@@ -5,10 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 using Xamarin.Forms.Xaml;
 
 namespace Xamarin.Forms.Controls
 {
+	[Preserve]
 	[QueryProperty("Text", "welcome")]
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ShellContent : ContentPage

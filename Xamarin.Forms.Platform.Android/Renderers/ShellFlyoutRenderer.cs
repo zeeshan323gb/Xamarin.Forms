@@ -69,15 +69,6 @@ namespace Xamarin.Forms.Platform.Android
 			AddView(_flyoutContent.AndroidView);
 
 			AddDrawerListener(this);
-
-			OpenDrawer(_flyoutContent.AndroidView);
-
-			
-		}
-
-		protected override void OnLayout(bool changed, int l, int t, int r, int b)
-		{
-			base.OnLayout(changed, l, t, r, b);
 		}
 	}
 }

@@ -67,7 +67,7 @@ namespace Xamarin.Forms
 				result = (Page)template.CreateContent(content, this);
 			}
 
-			if (result != null)
+			if (result != null && result.Parent != this)
 				OnChildAdded(result);
 
 			return result;
