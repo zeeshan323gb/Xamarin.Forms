@@ -63,6 +63,7 @@ namespace Xamarin.Forms.Controls
 			_popToRootButton.Clicked += PopToRootClicked;
 			_navButton.Clicked += NavClicked;
 			_queryButton.Clicked += QueryClicked;
+			_toggleButton.Clicked += ToggleClicked;
 		}
 
 		public string Text
@@ -73,6 +74,12 @@ namespace Xamarin.Forms.Controls
 				_text = value;
 				_mainLabel.Text = _text;
 			}
+		}
+
+		private void ToggleClicked(object sender, EventArgs e)
+		{
+			var shell = Application.Current.MainPage as Shell;
+			shell.FlyoutIsPresented = !shell.FlyoutIsPresented;
 		}
 
 		private async void QueryClicked(object sender, EventArgs e)

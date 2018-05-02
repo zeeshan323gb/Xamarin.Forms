@@ -128,6 +128,8 @@ namespace Xamarin.Forms.Platform.Android
 			};
 
 			_flyoutRenderer.AttachFlyout(this, _frameLayout);
+			_frameLayout.SetFitsSystemWindows(true);
+			_flyoutRenderer.AndroidView.SetBackgroundColor(Color.FromHex("#03A9F4").ToAndroid());
 
 			SwitchFragment(FragmentManager, _frameLayout, shell.CurrentItem, false);
 		}
