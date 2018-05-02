@@ -177,6 +177,7 @@
     <Compile Include="Renderers\ButtonDrawable.cs" />
     <Compile Include="Renderers\AlignmentExtensions.cs" />
     <Compile Include="Renderers\ConditionalFocusLayout.cs" />
+    <Compile Include="Renderers\ContainerView.cs" />
     <Compile Include="Renderers\DescendantFocusToggler.cs" />
     <Compile Include="Renderers\ElementSelectedEventArgs.cs" />
     <Compile Include="Renderers\FormsEditText.cs" />

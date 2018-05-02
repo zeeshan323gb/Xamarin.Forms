@@ -37,8 +37,8 @@ namespace Xamarin.Forms.Controls
 
 		private void OnNavigating(object sender, ShellNavigatingEventArgs e)
 		{
-			if (allowPop = !allowPop)
-				e.Cancel();
+			//if (allowPop = !allowPop)
+			//	e.Cancel();
 		}
 	}
 }
