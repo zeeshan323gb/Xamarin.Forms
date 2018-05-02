@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Android.Content;
 using Android.Support.V4.App;
+using Android.Support.V4.Widget;
 using Android.Views;
 using Android.Widget;
 using AView = Android.Views.View;
@@ -57,7 +58,7 @@ namespace Xamarin.Forms.Platform.Android
 		void IVisualElementRenderer.UpdateLayout()
 		{
 			_flyoutRenderer.AndroidView.Layout(0, 0, 
-				(int)_androidContext.ToPixels(Element.Width), (int)_androidContext.ToPixels(Element.Height));
+				(int)AndroidContext.ToPixels(Element.Width), (int)AndroidContext.ToPixels(Element.Height));
 		}
 		#endregion IVisualElementRenderer
 
@@ -69,13 +70,22 @@ namespace Xamarin.Forms.Platform.Android
 
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
 		{
-			return CreateShellFlyoutContentRenderer();
+			var content = CreateShellFlyoutContentRenderer();
+
+			content.ElementSelected += OnFlyoutItemSelected;
+
+			return content;
 		}
 
 		IShellItemRenderer IShellContext.CreateShellItemRenderer()
 		{
 			return CreateShellItemRenderer();
 		}
+
+		// This is very bad, FIXME.
+		// This assumes all flyouts will implement via DrawerLayout which is PROBABLY true but
+		// I dont want to back us into a corner this time.
+		DrawerLayout IShellContext.CurrentDrawerLayout => (DrawerLayout)_flyoutRenderer.AndroidView;
 
 		#endregion IShellContext
 
@@ -96,35 +106,50 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected Context AndroidContext => _androidContext;
 
+		private FragmentManager FragmentManager => ((FormsAppCompatActivity)AndroidContext).SupportFragmentManager;
+
 		protected virtual void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
+			if (e.PropertyName == Shell.CurrentItemProperty.PropertyName)
+			{
+				SwitchFragment(FragmentManager, _frameLayout, Element.CurrentItem);
+			}
+
 			_elementPropertyChanged?.Invoke(sender, e);
 		}
 
 		protected virtual void OnElementSet (Shell shell)
 		{
 			_flyoutRenderer = CreateShellFlyoutRenderer();
-			_frameLayout = new FrameLayout(_androidContext)
+			_frameLayout = new FrameLayout(AndroidContext)
 			{
 				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
 				Id = Platform.GenerateViewId (),
 			};
 
-			var shellItemRenderer = CreateShellItemRenderer();
-			shellItemRenderer.ShellItem = shell.CurrentItem;
-
 			_flyoutRenderer.AttachFlyout(this, _frameLayout);
 
-			var fragManager = (_androidContext as FormsAppCompatActivity).SupportFragmentManager;
+			SwitchFragment(FragmentManager, _frameLayout, shell.CurrentItem, false);
+		}
 
-			var fragment = shellItemRenderer.Fragment;
+		protected virtual void SwitchFragment (FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
+		{
+			var route = newItem.Route ?? newItem.GetHashCode().ToString();
 
-			FragmentTransaction transaction = fragManager.BeginTransaction();
+			var fragment = manager.FindFragmentByTag(route);
+			if (fragment == null)
+			{
+				var shellItemRenderer = CreateShellItemRenderer();
+				shellItemRenderer.ShellItem = newItem;
+				fragment = shellItemRenderer.Fragment;
+			}
 
-			//transaction.SetTransition((int)global::Android.App.FragmentTransit.FragmentOpen);
+			FragmentTransaction transaction = manager.BeginTransaction();
 
-			transaction.Add(_frameLayout.Id, fragment);
+			if (animate)
+				transaction.SetTransition((int)global::Android.App.FragmentTransit.FragmentFade);
 
+			transaction.Replace(_frameLayout.Id, fragment);
 			transaction.CommitAllowingStateLoss();
 		}
 
@@ -141,6 +166,43 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual IShellItemRenderer CreateShellItemRenderer()
 		{
 			return new ShellItemRenderer(this, AndroidContext);
+		}
+
+		private async void GoTo(ShellItem item, ShellTabItem tab)
+		{
+			if (tab == null)
+				tab = item.CurrentItem;
+			var state = ((IShellController)Element).GetNavigationState(item, tab);
+			await Element.GoToAsync(state);
+		}
+
+		private void OnFlyoutItemSelected(object sender, ElementSelectedEventArgs e)
+		{
+			var element = e.Element;
+			ShellItem shellItem = null;
+			ShellTabItem shellTabItem = null;
+
+			if (element is ShellItem.MenuShellItem menuShellItem)
+			{
+				menuShellItem.MenuItem.Activate();
+			}
+			else if (element is ShellItem item)
+			{
+				shellItem = item;
+			}
+			else if (element is ShellTabItem tab)
+			{
+				shellItem = tab.Parent as ShellItem;
+				shellTabItem = tab;
+			}
+			else if (element is MenuItem menuItem)
+			{
+				menuItem.Activate();
+			}
+
+			_flyoutRenderer.CloseFlyout();
+			if (shellItem != null && shellItem.IsEnabled)
+				GoTo(shellItem, shellTabItem);
 		}
 
 		private void OnElementSizeChanged(object sender, EventArgs e)
@@ -161,8 +223,10 @@ namespace Xamarin.Forms.Platform.Android
 				if (disposing)
 				{
 					Element.PropertyChanged -= OnElementPropertyChanged;
+					Element.SizeChanged -= OnElementSizeChanged;
 				}
 
+				Element = null;
 				// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
 				// TODO: set large fields to null.
 
