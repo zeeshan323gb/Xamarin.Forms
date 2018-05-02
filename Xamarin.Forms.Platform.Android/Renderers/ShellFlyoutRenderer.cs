@@ -19,7 +19,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void IShellFlyoutRenderer.CloseFlyout()
 		{
-			
+			CloseDrawers();
 		}
 
 		#endregion IShellFlyoutRenderer
