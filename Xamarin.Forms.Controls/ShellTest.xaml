@@ -7,7 +7,7 @@
 		FlyoutBackgroundColor="#bbffffff"
 		FlyoutHeaderBehavior="Scroll">
 	<Shell.FlyoutHeader>
-		<Grid BackgroundColor="#330088ff">
+		<Grid BackgroundColor="#330088ff" HeightRequest="170">
 			<Label Text="FLYOUT HEADER" VerticalOptions="Center" HorizontalOptions="Center" />
 		</Grid>
 	</Shell.FlyoutHeader>

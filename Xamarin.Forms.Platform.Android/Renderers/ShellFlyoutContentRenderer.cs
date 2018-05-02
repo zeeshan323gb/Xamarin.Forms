@@ -18,6 +18,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IShellFlyoutContentRenderer
 
+		private readonly AView _headerView;
 		private readonly IShellContext _shellContext;
 		private readonly Dictionary<AV.IMenuItem, Element> _lookupTable = new Dictionary<AV.IMenuItem, Element>();
 
@@ -28,6 +29,10 @@ namespace Xamarin.Forms.Platform.Android
 			SetNavigationItemSelectedListener(this);
 
 			BuildMenu();
+
+			_headerView = new ContainerView(context, ((IShellController)shellContext.Shell).FlyoutHeader);
+
+			AddHeaderView(_headerView);
 		}
 
 		bool IOnNavigationItemSelectedListener.OnNavigationItemSelected(AV.IMenuItem menuItem)

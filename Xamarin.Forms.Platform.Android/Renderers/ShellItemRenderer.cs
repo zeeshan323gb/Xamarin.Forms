@@ -111,6 +111,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			_tablayout.SetupWithViewPager(_viewPager);
 
+			// this is the wrong title, this should be the CurrentItem.CurrentPage title
 			_toolbar.Title = shellItem.Title;
 
 			var currentIndex = _shellItem.Items.IndexOf(_shellItem.CurrentItem);
