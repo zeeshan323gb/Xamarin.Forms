@@ -8,8 +8,8 @@ namespace Xamarin.Forms.Platform.Android
 {
 	public class ContainerView : ViewGroup
 	{
-		private readonly Context _context;
-		private readonly View _view;
+		private Context _context;
+		private View _view;
 		private IVisualElementRenderer _renderer;
 
 		public ContainerView(Context context, View view) : base(context)
@@ -56,6 +56,19 @@ namespace Xamarin.Forms.Platform.Android
 			var sizeReq = _view.Measure(_context.FromPixels(width), double.PositiveInfinity);
 
 			SetMeasuredDimension(width, (int)_context.ToPixels(sizeReq.Request.Height));
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing)
+			{
+				_renderer.Dispose();
+				_renderer = null;
+				_view = null;
+				_context = null;
+			}
 		}
 	}
 }

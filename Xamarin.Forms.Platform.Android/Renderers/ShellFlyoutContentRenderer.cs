@@ -1,9 +1,10 @@
 ﻿using Android.Content;
+using Android.Graphics.Drawables;
 using Android.Support.Design.Widget;
+using Android.Views;
 using System;
 using System.Collections.Generic;
 using static Android.Support.Design.Widget.NavigationView;
-using AV = Android.Views;
 using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
@@ -18,13 +19,16 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IShellFlyoutContentRenderer
 
-		private readonly AView _headerView;
-		private readonly IShellContext _shellContext;
-		private readonly Dictionary<AV.IMenuItem, Element> _lookupTable = new Dictionary<AV.IMenuItem, Element>();
+		private AView _headerView;
+		private readonly Dictionary<IMenuItem, Element> _lookupTable = new Dictionary<IMenuItem, Element>();
+		private IShellContext _shellContext;
+		private bool _disposed;
 
 		public ShellFlyoutContentRenderer(IShellContext shellContext, Context context) : base(context)
 		{
 			_shellContext = shellContext;
+
+			((IShellController)_shellContext.Shell).StructureChanged += OnShellStructureChanged;
 
 			SetNavigationItemSelectedListener(this);
 
@@ -35,7 +39,7 @@ namespace Xamarin.Forms.Platform.Android
 			AddHeaderView(_headerView);
 		}
 
-		bool IOnNavigationItemSelectedListener.OnNavigationItemSelected(AV.IMenuItem menuItem)
+		bool IOnNavigationItemSelectedListener.OnNavigationItemSelected(IMenuItem menuItem)
 		{
 			if (_lookupTable.TryGetValue(menuItem, out var element))
 			{
@@ -43,6 +47,22 @@ namespace Xamarin.Forms.Platform.Android
 				return true;
 			}
 			return false;
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing && !_disposed)
+			{
+				_disposed = true;
+
+				((IShellController)_shellContext.Shell).StructureChanged -= OnShellStructureChanged;
+				_lookupTable.Clear();
+				_headerView.Dispose();
+				_headerView = null;
+				_shellContext = null;
+			}
 		}
 
 		protected override void OnLayout(bool changed, int left, int top, int right, int bottom)
@@ -59,7 +79,7 @@ namespace Xamarin.Forms.Platform.Android
 			var shell = _shellContext.Shell;
 
 			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
-			AV.ISubMenu section = null;
+			ISubMenu section = null;
 			foreach (var shellItem in shell.Items)
 			{
 				bool isCurrentShellItem = shell.CurrentItem == shellItem;
@@ -70,6 +90,11 @@ namespace Xamarin.Forms.Platform.Android
 					foreach (var tabItem in shellItem.Items)
 					{
 						var item = section.Add(new Java.Lang.String(tabItem.Title));
+						item.SetEnabled(tabItem.IsEnabled);
+						if (tabItem.Icon != null)
+						{
+							SetMenuItemIcon(item, tabItem.Icon);
+						}
 						item.SetCheckable(true);
 						_lookupTable[item] = tabItem;
 						// when an item is selected we will display its menu items
@@ -78,6 +103,11 @@ namespace Xamarin.Forms.Platform.Android
 							foreach (var menuItem in tabItem.MenuItems)
 							{
 								var subItem = section.Add(new Java.Lang.String(menuItem.Text));
+								subItem.SetEnabled(menuItem.IsEnabled);
+								if (menuItem.Icon != null)
+								{
+									SetMenuItemIcon(subItem, menuItem.Icon);
+								}
 								_lookupTable[subItem] = menuItem;
 							}
 						}
@@ -86,22 +116,46 @@ namespace Xamarin.Forms.Platform.Android
 				else
 				{
 					var subItem = menu.Add(new Java.Lang.String(shellItem.Title));
+					subItem.SetEnabled(shellItem.IsEnabled);
+					if (shellItem.Icon != null)
+					{
+						SetMenuItemIcon(subItem, shellItem.Icon);
+					}
 					subItem.SetCheckable(true);
 					_lookupTable[subItem] = shellItem;
 				}
 
 				previous = groupBehavior;
 			}
-			
+
 			if (shell.MenuItems.Count > 0)
 			{
 				section = menu.AddSubMenu(null);
 				foreach (var menuItem in shell.MenuItems)
 				{
 					var subItem = section.Add(new Java.Lang.String(menuItem.Text));
+					subItem.SetEnabled(menuItem.IsEnabled);
+					if (menuItem.Icon != null)
+					{
+						SetMenuItemIcon(subItem, menuItem.Icon);
+					}
 					_lookupTable[subItem] = menuItem;
 				}
 			}
+		}
+
+		private void OnShellStructureChanged(object sender, EventArgs e)
+		{
+			BuildMenu();
+		}
+
+		private async void SetMenuItemIcon(IMenuItem menuItem, ImageSource source)
+		{
+			var handler = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(source);
+			var icon = await handler.LoadImageAsync(source, Context);
+			var drawable = new BitmapDrawable(icon);
+
+			menuItem.SetIcon(drawable);
 		}
 	}
 }

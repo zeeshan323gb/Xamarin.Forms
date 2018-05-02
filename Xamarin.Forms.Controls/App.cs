@@ -61,6 +61,8 @@ namespace Xamarin.Forms.Controls
 			//	Detail = CoreGallery.GetMainPage()
 			//};
 
+
+
 			return new ShellTest();
 		}
 

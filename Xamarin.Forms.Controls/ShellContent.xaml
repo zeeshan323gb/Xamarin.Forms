@@ -13,7 +13,7 @@
 		<SearchHandler Placeholder="My Placeholder!" />
 	</Shell.SearchHandler>-->
     <StackLayout>
-		<Button Margin="0, 40, 0, 0"  HorizontalOptions="Center"  Text="Foobar" BackgroundColor="Red" />
+		<Button x:Name="_toggleButton"  Margin="0, 40, 0, 0"  HorizontalOptions="Center"  Text="Toggle" BackgroundColor="Red" />
         <Label x:Name="_mainLabel"  Text="Welcome to Xamarin.Forms!"
             VerticalOptions="CenterAndExpand" 
             HorizontalOptions="Center" />
