@@ -11,7 +11,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 {
 	internal class FragmentContainer : Fragment
 	{
-		readonly WeakReference _pageReference;
+		readonly WeakReference _pageRenderer;
 
 		Action<PageContainer> _onCreateCallback;
 		PageContainer _pageContainer;
@@ -23,14 +23,14 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 		public FragmentContainer(Page page) : this()
 		{
-			_pageReference = new WeakReference(page);
+			_pageRenderer = new WeakReference(page);
 		}
 
 		protected FragmentContainer(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
 		{
 		}
 
-		public Page Page => (Page)_pageReference?.Target;
+		public virtual Page Page => (Page)_pageRenderer?.Target;
 
 		IPageController PageController => Page as IPageController;
 

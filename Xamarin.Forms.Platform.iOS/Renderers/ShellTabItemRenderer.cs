@@ -53,8 +53,6 @@ namespace Xamarin.Forms.Platform.iOS
 			get => _page;
 			private set
 			{
-				// Be sure to clear when going away!
-				((IShellTabItemController)_shellTabItem).RootPageProjection = value;
 				_page = value;
 			}
 		}
@@ -136,7 +134,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
-				((IShellTabItemController)_shellTabItem).RootPageProjection = null;
+				((IShellTabItemController)_shellTabItem).RecyclePage(Page);
 				_appearanceTracker.Dispose();
 				_shellTabItem.PropertyChanged -= HandlePropertyChanged;
 				((IShellTabItemController)_shellTabItem).NavigationRequested -= OnNavigationRequested;

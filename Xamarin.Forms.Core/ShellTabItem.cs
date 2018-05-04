@@ -20,7 +20,7 @@ namespace Xamarin.Forms
 
 		#region IShellTabItemController
 
-		private WeakReference<Page> _projectedPage;
+		private Page _contentCache;
 
 		event EventHandler<NavigationRequestedEventArgs> IShellTabItemController.NavigationRequested
 		{
@@ -36,20 +36,11 @@ namespace Xamarin.Forms
 			{
 				if (_navStack.Count > 1)
 					return _navStack[_navStack.Count - 1];
-				return ((IShellTabItemController)this).RootPageProjection;
+				return ((IShellTabItemController)this).RootPage;
 			}
 		}
 
-		Page IShellTabItemController.RootPageProjection
-		{
-			get
-			{
-				if (_projectedPage != null && _projectedPage.TryGetTarget(out var target))
-					return target;
-				return null;
-			}
-			set { _projectedPage = new WeakReference<Page>(value); }
-		}
+		Page IShellTabItemController.RootPage => _contentCache ?? (Content as Page);
 
 		Page IShellTabItemController.GetOrCreateContent()
 		{
@@ -64,13 +55,22 @@ namespace Xamarin.Forms
 			}
 			else
 			{
-				result = (Page)template.CreateContent(content, this);
+				result = _contentCache ?? (Page)template.CreateContent(content, this);
+				_contentCache = result;
 			}
 
 			if (result != null && result.Parent != this)
 				OnChildAdded(result);
 
 			return result;
+		}
+
+		void IShellTabItemController.RecyclePage(Page page)
+		{
+			if (_contentCache == page)
+			{
+				_contentCache = null;
+			}
 		}
 
 		void IShellTabItemController.SendPopped()

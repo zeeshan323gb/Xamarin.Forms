@@ -126,9 +126,9 @@ namespace Xamarin.Forms.Platform.Android
 				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
 				Id = Platform.GenerateViewId (),
 			};
+			_frameLayout.SetFitsSystemWindows(true);
 
 			_flyoutRenderer.AttachFlyout(this, _frameLayout);
-			_frameLayout.SetFitsSystemWindows(true);
 			_flyoutRenderer.AndroidView.SetBackgroundColor(Color.FromHex("#03A9F4").ToAndroid());
 
 			SwitchFragment(FragmentManager, _frameLayout, shell.CurrentItem, false);
@@ -167,7 +167,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer()
 		{
-			return new ShellItemRenderer(this, AndroidContext);
+			return new ShellNavigationFragment(this);
 		}
 
 		private async void GoTo(ShellItem item, ShellTabItem tab)

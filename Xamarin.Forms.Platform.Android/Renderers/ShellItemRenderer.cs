@@ -1,15 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using Android.App;
-using Android.Content;
-using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
-using Android.Support.V4.App;
 using Android.Support.V4.View;
 using Android.Support.V4.Widget;
-using Android.Support.V7.Widget;
 using Android.Views;
 using Xamarin.Forms.Platform.Android.AppCompat;
 using AView = Android.Views.View;
@@ -17,29 +13,13 @@ using LP = Android.Views.ViewGroup.LayoutParams;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
 using Fragment = Android.Support.V4.App.Fragment;
 using ActionBarDrawerToggle = Android.Support.V7.App.ActionBarDrawerToggle;
+using System.Linq;
 
 namespace Xamarin.Forms.Platform.Android
 {
 
-	public class ShellItemRenderer : Fragment, IShellItemRenderer, ViewPager.IOnPageChangeListener, AView.IOnClickListener
+	public class ShellItemRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener
 	{
-		#region IShellItemRenderer
-
-		Fragment IShellItemRenderer.Fragment => this;
-
-		ShellItem IShellItemRenderer.ShellItem
-		{
-			get { return _shellItem; }
-			set
-			{
-				_shellItem = value;
-
-				_shellItem.PropertyChanged += OnShellItemPropertyChanged;
-			}
-		}
-
-		#endregion IShellItemRenderer
-
 		#region IOnPageChangeListener
 
 		void ViewPager.IOnPageChangeListener.OnPageScrollStateChanged(int state)
@@ -52,6 +32,15 @@ namespace Xamarin.Forms.Platform.Android
 
 		void ViewPager.IOnPageChangeListener.OnPageSelected(int position)
 		{
+			// TODO : Find a way to make this cancellable
+			var shellitem = ShellItem;
+			var tab = shellitem.Items[position];
+			var stack = tab.Stack.ToList();
+			ShellController.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged, shellitem, tab, stack, false);
+
+			ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tab);
+
+			_toolbarTracker.Page = ((IShellTabItemController)ShellItem.CurrentItem).CurrentPage;
 		}
 
 		#endregion IOnPageChangeListener
@@ -67,36 +56,40 @@ namespace Xamarin.Forms.Platform.Android
 		private Toolbar _toolbar;
 		private TabLayout _tablayout;
 		private AView _rootView = null;
-		private ShellItem _shellItem;
 		private ViewPager _viewPager;
 		private IShellContext _shellContext;
-		private Context _androidContext;
-		private ActionBarDrawerToggle _drawerToggle;
+		private ShellToolbarTracker _toolbarTracker;
 
-		public ShellItemRenderer(IShellContext shellContext, Context androidContext)
+		public ShellItemRenderer(IShellContext shellContext)
 		{
 			_shellContext = shellContext;
-			_androidContext = androidContext;
 		}
 
 		protected ShellItemRenderer(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
 		{
 		}
 
+		public ShellItem ShellItem { get; set; }
+
+		private IShellItemController ShellItemController => ShellItem;
+
+		private IShellController ShellController => _shellContext.Shell;
+
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			var shellItem = ((IShellItemRenderer)this).ShellItem;
+			var shellItem = ShellItem;
 			if (shellItem == null)
 				return null;
 
-			var inflator = LayoutInflater.From(_androidContext);
-			var root = inflator.Inflate(Resource.Layout.RootLayout, null).JavaCast<CoordinatorLayout>();
+			HookEvents();
+			
+			var root = inflater.Inflate(Resource.Layout.RootLayout, null).JavaCast<CoordinatorLayout>();
 
 			_toolbar = root.FindViewById<Toolbar>(Resource.Id.main_toolbar);
 			var scrollview = root.FindViewById<NestedScrollView>(Resource.Id.main_scrollview);
 			_tablayout = root.FindViewById<TabLayout>(Resource.Id.main_tablayout);
 
-			_viewPager = new FormsViewPager(_androidContext)
+			_viewPager = new FormsViewPager(Context)
 			{
 				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
 			};
@@ -111,61 +104,80 @@ namespace Xamarin.Forms.Platform.Android
 
 			_tablayout.SetupWithViewPager(_viewPager);
 
-			// this is the wrong title, this should be the CurrentItem.CurrentPage title
-			_toolbar.Title = shellItem.Title;
+			var currentPage = ((IShellTabItemController)shellItem.CurrentItem).GetOrCreateContent();
 
-			var currentIndex = _shellItem.Items.IndexOf(_shellItem.CurrentItem);
+			var currentIndex = ShellItem.Items.IndexOf(ShellItem.CurrentItem);
 			_viewPager.CurrentItem = currentIndex;
 
-			scrollview.FillViewport = true;
 			scrollview.AddView(_viewPager);
 
-			SetupDrawerButton();
+			_toolbarTracker = new ShellToolbarTracker(_shellContext, _toolbar, _shellContext.CurrentDrawerLayout);
+			_toolbarTracker.Page = currentPage;
 
 			return _rootView = root;
 		}
 
-		private void SetupDrawerButton ()
+		protected virtual void OnShellAppearanceChanged(object sender, EventArgs e)
 		{
-			_drawerToggle = new ActionBarDrawerToggle((Activity)_androidContext, 
-				_shellContext.CurrentDrawerLayout, _toolbar, 
-				global::Android.Resource.String.Ok, 
-				global::Android.Resource.String.Ok)
-			{
-				ToolbarNavigationClickListener = this
-			};
-
-			_drawerToggle.DrawerIndicatorEnabled = true;
-			_shellContext.CurrentDrawerLayout.AddDrawerListener(_drawerToggle);
-
-			_drawerToggle.SyncState();
+			var appearance = ShellItemController.CurrentShellAppearance;
+			
+			if (appearance != null)
+				ApplyAppearance(appearance);
+			else
+				ResetAppearance();
 		}
 
-		public override void OnDestroyView()
+		protected virtual void ApplyAppearance(ShellAppearance appearance)
 		{
-			base.OnDestroyView();
+			var foreground = appearance.ForegroundColor;
+			var background = appearance.BackgroundColor;
+			var disabledColor = appearance.DisabledColor; //unused currently
+			var titleColor = appearance.TitleColor;
+			var unselectedColor = appearance.UnselectedColor;
 
-			if (_shellItem != null)
+			var titleArgb = titleColor.ToAndroid(Color.White).ToArgb();
+			var unselectedArgb = unselectedColor.ToAndroid(Color.White).ToArgb();
+			
+			_toolbar.SetTitleTextColor(titleArgb);
+			_tablayout.SetTabTextColors(titleArgb, unselectedArgb);
+		}
+
+		protected virtual void ResetAppearance()
+		{
+			// no idea what to do here for some of this shit
+		}
+
+		void HookEvents ()
+		{
+			ShellItemController.CurrentShellAppearanceChanged += OnShellAppearanceChanged;
+			ShellItem.PropertyChanged += OnShellItemPropertyChanged;
+		}
+
+		void UnhookEvents ()
+		{
+			ShellItemController.CurrentShellAppearanceChanged -= OnShellAppearanceChanged;
+			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
+		}
+
+		// Use OnDestroy instead of OnDestroyView because OnDestroyView will be 
+		// called before the animation completes. This causes tons of tiny issues.
+		public override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			if (_rootView != null)
 			{
+				UnhookEvents();
 				_viewPager.RemoveOnPageChangeListener(this);
-				_shellItem.PropertyChanged -= OnShellItemPropertyChanged;
-
 				_rootView.Dispose();
+				_toolbarTracker.Dispose();
 			}
 
-			if (_drawerToggle != null)
-			{
-				_drawerToggle.Dispose();
-				_drawerToggle = null;
-			}
-
+			_toolbarTracker = null;
 			_toolbar = null;
 			_tablayout = null;
 			_rootView = null;
-			_shellItem = null;
 			_viewPager = null;
-			_shellContext = null;
-			_androidContext = null;
 		}
 
 		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -175,7 +187,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
 			{
-				var newIndex = _shellItem.Items.IndexOf(_shellItem.CurrentItem);
+				var newIndex = ShellItem.Items.IndexOf(ShellItem.CurrentItem);
 
 				if (newIndex >= 0)
 				{

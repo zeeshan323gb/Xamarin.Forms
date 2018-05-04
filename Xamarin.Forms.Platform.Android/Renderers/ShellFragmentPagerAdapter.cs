@@ -21,14 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 		public override Fragment GetItem(int position)
 		{
 			var shellTabItem = _shellitem.Items[position];
-			var controller = (IShellTabItemController)shellTabItem;
-			var page = controller.RootPageProjection;
-			if (page == null)
-			{
-				page = controller.GetOrCreateContent();
-				controller.RootPageProjection = page;
-			}
-			return new ShellFragmentContainer(page) { Arguments = new Bundle() };
+			return new ShellFragmentContainer(shellTabItem) { Arguments = new Bundle() };
 		}
 
 		public override long GetItemId(int position)
@@ -38,8 +31,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override int GetItemPosition(Object objectValue)
 		{
-			var fragContainer = objectValue as AppCompat.FragmentContainer;
-			var shellTabItem = fragContainer?.Page?.Parent as ShellTabItem;
+			var fragContainer = objectValue as ShellFragmentContainer;
+			var shellTabItem = fragContainer?.ShellTabItem;
 			if (shellTabItem != null)
 			{
 				int index = _shellitem.Items.IndexOf(shellTabItem);
@@ -64,11 +57,6 @@ namespace Xamarin.Forms.Platform.Android
 			base.Dispose(disposing);
 			if (disposing && !_disposed)
 			{
-				foreach (IShellTabItemController item in _shellitem.Items)
-				{
-					item.RootPageProjection = null;
-				}
-
 				_shellitem = null;
 				_disposed = true;
 
