@@ -105,14 +105,14 @@ namespace Xamarin.Forms.Platform.Android
 			_tablayout.SetupWithViewPager(_viewPager);
 
 			var currentPage = ((IShellTabItemController)shellItem.CurrentItem).GetOrCreateContent();
-
 			var currentIndex = ShellItem.Items.IndexOf(ShellItem.CurrentItem);
-			_viewPager.CurrentItem = currentIndex;
-
-			scrollview.AddView(_viewPager);
 
 			_toolbarTracker = new ShellToolbarTracker(_shellContext, _toolbar, _shellContext.CurrentDrawerLayout);
 			_toolbarTracker.Page = currentPage;
+
+			_viewPager.CurrentItem = currentIndex;
+			scrollview.AddView(_viewPager);
+
 
 			return _rootView = root;
 		}

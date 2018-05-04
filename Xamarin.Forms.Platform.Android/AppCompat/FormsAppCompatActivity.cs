@@ -164,7 +164,6 @@ namespace Xamarin.Forms.Platform.Android
 			SetSupportActionBar(bar);
 
 			_layout = new ARelativeLayout(BaseContext);
-			_layout.SetBackgroundColor(Color.Red.ToAndroid());
 			SetContentView(_layout);
 
 			Xamarin.Forms.Application.ClearCurrent();
