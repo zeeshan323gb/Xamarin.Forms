@@ -1,4 +1,5 @@
-﻿using Android.OS;
+﻿using Android.Content;
+using Android.OS;
 using Android.Support.V4.App;
 using Android.Views;
 using Android.Widget;
@@ -66,7 +67,30 @@ namespace Xamarin.Forms.Platform.Android
 
 			_rootFragment = new ShellItemRenderer(_shellContext) { ShellItem = _shellItem };
 
-			PushFragment(_rootFragment, false);
+			var stack = CurrentTabItem.Stack;
+			if (stack.Count > 1)
+			{
+				_fragmentStack.Add(_rootFragment);
+				for (int i = 1; i < stack.Count; i++)
+				{
+					var page = stack[i];
+					var fragment = CreateFragmentForPage(page);
+					if (i == stack.Count - 1)
+					{
+						// last page actually push it
+						PushFragment(fragment.Fragment, false);
+					}
+					else
+					{
+						// add to the stack
+						_fragmentStack.Add(fragment.Fragment);
+					}
+				}
+			}
+			else
+			{
+				PushFragment(_rootFragment, false);
+			}
 
 			return _navigationTarget;
 		}
@@ -87,7 +111,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellObservableFragment CreateFragmentForPage(Page page)
 		{
-			return new ShellContentFragment(page);
+			return new ShellContentFragment(_shellContext, page);
 		}
 
 		protected virtual void HookEvents(ShellItem shellItem)
@@ -156,8 +180,17 @@ namespace Xamarin.Forms.Platform.Android
 			if (_fragmentStack.Count > 0)
 				fragmentToShow = _fragmentStack[_fragmentStack.Count - 2];
 
-			transaction.Remove(fragmentToRemove);
-			transaction.Show(fragmentToShow);
+			if (fragmentToShow.IsAdded)
+			{
+				transaction.Remove(fragmentToRemove);
+				transaction.Show(fragmentToShow);
+			}
+			else
+			{
+				transaction.Replace(_navigationTarget.Id, fragmentToShow);
+				transaction.Show(fragmentToShow);
+			}
+
 			transaction.CommitAllowingStateLoss();
 
 			_fragmentStack.Remove(fragmentToRemove);
@@ -167,6 +200,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual Task<bool> PushFragment(Fragment fragment, bool animated = true)
 		{
+			animated = false;
 			var tcs = new TaskCompletionSource<bool>();
 			var transaction = ChildFragmentManager.BeginTransaction();
 

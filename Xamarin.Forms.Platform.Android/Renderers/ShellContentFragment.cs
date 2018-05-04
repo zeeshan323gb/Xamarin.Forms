@@ -9,6 +9,7 @@ using AView = Android.Views.View;
 using AndroidAnimation = Android.Views.Animations.Animation;
 using AnimationSet = Android.Views.Animations.AnimationSet;
 using Android.Views.Animations;
+using Android.Support.V7.Widget;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -17,16 +18,20 @@ namespace Xamarin.Forms.Platform.Android
 		private Page _page;
 		private IVisualElementRenderer _renderer;
 		private AView _root;
+		private readonly IShellContext _shellContext;
 		private ShellTabItem _shellTabItem;
 		private ShellPageContainer _shellPageContainer;
+		private ShellToolbarTracker _toolbarTracker;
 
-		public ShellContentFragment(ShellTabItem shellTabItem)
+		public ShellContentFragment(IShellContext shellContext, ShellTabItem shellTabItem)
 		{
+			_shellContext = shellContext;
 			_shellTabItem = shellTabItem;
 		}
 
-		public ShellContentFragment(Page page)
+		public ShellContentFragment(IShellContext shellContext, Page page)
 		{
+			_shellContext = shellContext;
 			_page = page;
 		}
 
@@ -42,6 +47,9 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				result = AnimationUtils.LoadAnimation(Context, nextAnim);
 			}
+
+			if (result == null)
+				return result;
 
 			result.SetAnimationListener(this);
 			var animSet = new AnimationSet(true);
@@ -59,6 +67,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			_root = inflater.Inflate(Resource.Layout.ShellContent, null).JavaCast<CoordinatorLayout>();
 			var scrollview = _root.FindViewById<NestedScrollView>(Resource.Id.shellcontent_scrollview);
+			var toolbar = _root.FindViewById<Toolbar>(Resource.Id.shellcontent_toolbar);
 
 			_renderer = Platform.CreateRenderer(_page, Context);
 			Platform.SetRenderer(_page, _renderer);
@@ -66,6 +75,11 @@ namespace Xamarin.Forms.Platform.Android
 			_shellPageContainer = new ShellPageContainer(Context, _renderer);
 
 			scrollview.AddView(_shellPageContainer);
+
+			_toolbarTracker = new ShellToolbarTracker(_shellContext, toolbar, _shellContext.CurrentDrawerLayout);
+			_toolbarTracker.Page = _page;
+			// this is probably not the most ideal way to do that
+			_toolbarTracker.CanNavigateBack = _shellTabItem == null;
 
 			return _root;
 		}
@@ -79,6 +93,7 @@ namespace Xamarin.Forms.Platform.Android
 			_shellPageContainer.RemoveAllViews();
 			_renderer?.Dispose();
 			_root?.Dispose();
+			_toolbarTracker.Dispose();
 
 			if (_shellTabItem != null)
 			{
@@ -87,6 +102,7 @@ namespace Xamarin.Forms.Platform.Android
 				_page = null;
 			}
 
+			_toolbarTracker = null;
 			_root = null;
 			_renderer = null;
 		}

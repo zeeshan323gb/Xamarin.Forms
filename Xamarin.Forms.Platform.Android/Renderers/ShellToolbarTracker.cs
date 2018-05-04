@@ -80,6 +80,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void OnDrawerToggleClicked()
 		{
+			Page.Navigation.PopAsync();
 		}
 
 		protected virtual void OnPageChanged(Page oldPage, Page newPage)

@@ -257,7 +257,8 @@ namespace Xamarin.Forms
 			_navStack.Remove(page);
 			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 			_navigationRequested?.Invoke(this, args);
-			await args.Task;
+			if (args.Task != null)
+				await args.Task;
 			RemovePage(page);
 
 			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
@@ -292,7 +293,8 @@ namespace Xamarin.Forms
 			_navStack = new List<Page> { null };
 			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
 
-			await args.Task;
+			if (args.Task != null)
+				await args.Task;
 
 			for (int i = 1; i < oldStack.Count; i++)
 			{
@@ -329,6 +331,8 @@ namespace Xamarin.Forms
 
 			SendUpdateCurrentState(ShellNavigationSource.PushEvent);
 
+			if (args.Task == null)
+				return Task.FromResult(true);
 			return args.Task;
 		}
 
