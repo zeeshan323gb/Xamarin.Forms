@@ -556,15 +556,18 @@ namespace Xamarin.Forms
 					state += Routing.GetRouteStringForElement(tab);
 					state += "/";
 
-					GetQueryStringData(tab, stack.Count <= 1, queryData);
+					GetQueryStringData(tab, stack == null || stack.Count <= 1, queryData);
 
-					for (int i = 1; i < stack.Count; i++)
+					if (stack != null)
 					{
-						var page = stack[i];
-						state += Routing.GetRouteStringForElement(page);
-						GetQueryStringData(page, i == stack.Count - 1, queryData);
-						if (i < stack.Count - 1)
-							state += "/";
+						for (int i = 1; i < stack.Count; i++)
+						{
+							var page = stack[i];
+							state += Routing.GetRouteStringForElement(page);
+							GetQueryStringData(page, i == stack.Count - 1, queryData);
+							if (i < stack.Count - 1)
+								state += "/";
+						}
 					}
 				}
 			}

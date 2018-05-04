@@ -130,6 +130,27 @@ namespace Xamarin.Forms.Platform.Android
 			return PopFragment(animated);
 		}
 
+		protected virtual Task<bool> OnPopToRootRequested(bool animated)
+		{
+			// The general idea here is to clear out all the fragments between the current fragment and the 
+			// root one, and then call OnPopRequested to perform the final pop. Its like doing a remove page on
+			// everything in the middle.
+
+			if (_fragmentStack.Count > 2)
+			{
+				var transaction = ChildFragmentManager.BeginTransaction();
+				for (int i = _fragmentStack.Count - 2; i > 0; i--)
+				{
+					var fragment = _fragmentStack[i];
+					transaction.Remove(fragment);
+					_fragmentStack.RemoveAt(i);
+				}
+				transaction.CommitAllowingStateLoss();
+			}
+
+			return OnPopRequested(animated);
+		}
+
 		protected virtual Task<bool> OnPushRequested(Page page, bool animated)
 		{
 			var fragment = CreateFragmentForPage(page);
@@ -200,7 +221,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual Task<bool> PushFragment(Fragment fragment, bool animated = true)
 		{
-			animated = false;
 			var tcs = new TaskCompletionSource<bool>();
 			var transaction = ChildFragmentManager.BeginTransaction();
 
@@ -256,23 +276,17 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			switch (e.RequestType)
 			{
-				case Internals.NavigationRequestType.Unknown:
-					return;
-
 				case Internals.NavigationRequestType.Push:
 					e.Task = OnPushRequested(e.Page, e.Animated);
 					break;
-
 				case Internals.NavigationRequestType.Pop:
 					e.Task = OnPopRequested(e.Animated);
 					break;
-
 				case Internals.NavigationRequestType.PopToRoot:
+					e.Task = OnPopToRootRequested(e.Animated);
 					break;
-
 				case Internals.NavigationRequestType.Insert:
 					break;
-
 				case Internals.NavigationRequestType.Remove:
 					break;
 			}
