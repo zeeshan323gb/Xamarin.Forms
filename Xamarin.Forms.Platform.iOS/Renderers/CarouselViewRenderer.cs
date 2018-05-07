@@ -63,30 +63,28 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (disposing && !_disposed)
 			{
-				// CarouselViewRenderer.Dispose Null reference Unhandled Exception: #210
-				// Exception thrown on Dispose #233
-				try
+				foreach (var view in _pageController?.View?.Subviews)
 				{
-					_pageController.DidFinishAnimating -= PageController_DidFinishAnimating;
-					_pageController.GetPreviousViewController = null;
-					_pageController.GetNextViewController = null;
-
-					CleanUpPageController();
-
-					_pageController?.View?.RemoveFromSuperview();
-					_pageController?.View.Dispose();
-
-					_pageController?.Dispose();
-					_pageController = null;
-
-					_pageControl?.Dispose();
-					_pageControl = null;
-
+					if (view is UIScrollView scroller)
+					{
+						scroller.Scrolled -= Scroller_Scrolled;
+					}
 				}
-				catch (Exception ex)
-				{
-					Console.Write(ex.Message);
-				}
+				_pageController.DidFinishAnimating -= PageController_DidFinishAnimating;
+				_pageController.GetPreviousViewController = null;
+				_pageController.GetNextViewController = null;
+
+				CleanUpPageController();
+
+				_pageController?.View?.RemoveFromSuperview();
+				_pageController?.View.Dispose();
+
+				_pageController?.Dispose();
+				_pageController = null;
+
+				_pageControl?.Dispose();
+				_pageControl = null;
+
 
 				if (TemplatedItemsView != null)
 				{
@@ -123,70 +121,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (Control == null)
 				{
-					var interPageSpacing = (float)Element.InterPageSpacing;
-
-					// Orientation BP
-					var orientation = (UIPageViewControllerNavigationOrientation)Element.Orientation;
-
-					// InterPageSpacing BP
-					_pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll, orientation, UIPageViewControllerSpineLocation.None, interPageSpacing)
-					{
-						GetPreviousViewController = (pageViewController, referenceViewController) =>
-						{
-							var controller = (FormsUIViewContainer)referenceViewController;
-
-							if (controller != null)
-							{
-								var position = Source.IndexOf(controller.Tag);
-
-								// Determine if we are on the first page
-								if (position == 0)
-								{
-									// We are on the first page, so there is no need for a controller before that
-									return null;
-								}
-								else
-								{
-									int previousPageIndex = position - 1;
-									return CreateViewController(previousPageIndex);
-								}
-							}
-							else
-							{
-								return null;
-							}
-						},
-
-						GetNextViewController = (pageViewController, referenceViewController) =>
-						{
-							var controller = (FormsUIViewContainer)referenceViewController;
-
-							if (controller != null)
-							{
-								var position = Source.IndexOf(controller.Tag);
-
-								// Determine if we are on the last page
-								if (position == Count - 1)
-								{
-									// We are on the last page, so there is no need for a controller after that
-									return null;
-								}
-								else
-								{
-									int nextPageIndex = position + 1;
-									return CreateViewController(nextPageIndex);
-								}
-							}
-							else
-							{
-								return null;
-							}
-						}
-					};
-
-					_pageController.DidFinishAnimating += PageController_DidFinishAnimating;
-
-					_pageController.View.ClipsToBounds = true;
+					_pageController = CreatePageController();
 					SetNativeControl(_pageController.View);
 				}
 
@@ -262,6 +197,73 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		UIPageViewController CreatePageController()
+		{
+			var interPageSpacing = (float)Element.InterPageSpacing;
+			var orientation = (UIPageViewControllerNavigationOrientation)Element.Orientation;
+
+			var pageController = new UIPageViewController(UIPageViewControllerTransitionStyle.Scroll, orientation, UIPageViewControllerSpineLocation.None, interPageSpacing)
+			{
+				GetPreviousViewController = (pageViewController, referenceViewController) =>
+				{
+					var controller = (FormsUIViewContainer)referenceViewController;
+
+					if (controller != null)
+					{
+						var position = Source.IndexOf(controller.Tag);
+
+						// Determine if we are on the first page
+						if (position == 0)
+						{
+							// We are on the first page, so there is no need for a controller before that
+							return null;
+						}
+						else
+						{
+							int previousPageIndex = position - 1;
+							return CreateViewController(previousPageIndex);
+						}
+					}
+					else
+					{
+						return null;
+					}
+				},
+
+				GetNextViewController = (pageViewController, referenceViewController) =>
+				{
+					var controller = (FormsUIViewContainer)referenceViewController;
+
+					if (controller != null)
+					{
+						var position = Source.IndexOf(controller.Tag);
+
+						// Determine if we are on the last page
+						if (position == Count - 1)
+						{
+							// We are on the last page, so there is no need for a controller after that
+							return null;
+						}
+						else
+						{
+							int nextPageIndex = position + 1;
+							return CreateViewController(nextPageIndex);
+						}
+					}
+					else
+					{
+						return null;
+					}
+				}
+			};
+
+			pageController.DidFinishAnimating += PageController_DidFinishAnimating;
+
+			pageController.View.ClipsToBounds = true;
+
+			return pageController;
+		}
+
 		void UpdateBackgroundColor()
 		{
 			if (Element == null || Control == null)
@@ -300,9 +302,7 @@ namespace Xamarin.Forms.Platform.iOS
 		void UpdatePosition()
 		{
 			if (!_isChangingPosition)
-			{
 				SetCurrentPage(Element.Position, Element.AnimateTransition);
-			}
 		}
 
 		void UpdateItemsSource()
@@ -787,11 +787,22 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 
 			var rect = new CGRect(Element.X, Element.Y, Element.Bounds.Width, Element.Bounds.Height);
-			var nativeConverted = formsView.ToiOS(rect);
+
+			if (Platform.GetRenderer(formsView) == null)
+				Platform.SetRenderer(formsView, Platform.CreateRenderer(formsView));
+
+			var vRenderer = Platform.GetRenderer(formsView);
+
+			vRenderer.NativeView.Frame = rect;
+
+			vRenderer.NativeView.AutoresizingMask = UIViewAutoresizing.All;
+			vRenderer.NativeView.ContentMode = UIViewContentMode.ScaleToFill;
+
+			vRenderer.Element?.Layout(rect.ToRectangle());
 
 			var viewController = new FormsUIViewContainer();
 			viewController.Tag = formsView;
-			viewController.View = nativeConverted;
+			viewController.View = vRenderer.NativeView;
 
 			// Only happens when ItemsSource is List<View>
 			if (ChildViewControllers != null)

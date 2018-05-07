@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using CoreGraphics;
-using UIKit;
 using System.Linq;
 
 namespace Xamarin.Forms.Platform.iOS
@@ -19,27 +17,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 			return result;
 		}
-
-        public static UIView ToiOS(this Xamarin.Forms.View view, CGRect size)
-        {
-            if (Platform.GetRenderer(view) == null)
-                Platform.SetRenderer(view, Platform.CreateRenderer(view));
-
-            var vRenderer = Platform.GetRenderer(view);
-
-            vRenderer.NativeView.Frame = size;
-
-            vRenderer.NativeView.AutoresizingMask = UIViewAutoresizing.All;
-            vRenderer.NativeView.ContentMode = UIViewContentMode.ScaleToFill;
-
-            vRenderer.Element?.Layout(size.ToRectangle());
-
-            var nativeView = vRenderer.NativeView;
-
-            nativeView.SetNeedsLayout();
-
-            return nativeView;
-        }
 
 		internal static T FindParentOfType<T>(this VisualElement element)
 		{
