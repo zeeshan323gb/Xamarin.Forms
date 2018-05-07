@@ -11,41 +11,6 @@ using Android.Content;
 using Android.Widget;
 using Android.App;
 
-/*
-The MIT License(MIT)
-
-Copyright(c) 2017 Alexander Reyes(alexrainman1975 @gmail.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the "Software"), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial
-portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
- */
-
-/*
- * Save state in Android:
- * 
- * It is not possible in Xamarin.Forms.
- * Everytime you create a view in Forms, its Id and each widget Id is generated when the native view is rendered,
- * so its not possible to restore state from a SparseArray.
- * 
- * Workaround:
- * 
- * Use two way bindings to your ViewModel, so for example when a value is entered in a Text field,
- * it will be saved to ViewModel and when the view is destroyed and recreated by ViewPager, its state will be restored.
- * 
- */
-
 namespace Xamarin.Forms.Platform.Android
 {
 	public class CarouselViewRenderer : ViewRenderer<CarouselView, AViews.View>
@@ -101,7 +66,7 @@ namespace Xamarin.Forms.Platform.Android
 					var inflater = AViews.LayoutInflater.From(_context);
 
 					// Orientation BP
-					if (Element.Orientation == CarouselViewOrientation.Horizontal)
+					if (Element.Orientation == CarouselOrientation.Horizontal)
 						_nativeView = inflater.Inflate(Resource.Layout.horizontal_viewpager, null);
 					else
 						_nativeView = inflater.Inflate(Resource.Layout.vertical_viewpager, null);
@@ -272,7 +237,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateIndicatorPosition()
 		{
-			
+
 		}
 
 		void UpdateItemsSource()
@@ -314,12 +279,12 @@ namespace Xamarin.Forms.Platform.Android
 				if (e.Position < Element.Position)
 				{
 					percentCompleted = Math.Floor((1 - e.PositionOffset) * 100);
-					_direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
+					_direction = Element.Orientation == CarouselOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
 				}
 				else
 				{
 					percentCompleted = Math.Floor(e.PositionOffset * 100);
-					_direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
+					_direction = Element.Orientation == CarouselOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
 				}
 			}
 
@@ -398,7 +363,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (Element.Position > 0)
 			{
 				UpdatePositionFromRenderer(Element.Position - 1);
-				_direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
+				_direction = Element.Orientation == CarouselOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
 			}
 		}
 
@@ -407,7 +372,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (Element.Position < GetItemCount() - 1)
 			{
 				UpdatePositionFromRenderer(Element.Position + 1);
-				_direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
+				_direction = Element.Orientation == CarouselOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
 			}
 		}
 
@@ -453,7 +418,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (_indicators == null || Element == null)
 				return;
-			
+
 			_indicators.Visibility = Element.ShowIndicators ? AViews.ViewStates.Visible : AViews.ViewStates.Gone;
 		}
 
@@ -650,28 +615,6 @@ namespace Xamarin.Forms.Platform.Android
 				return position != -1 ? position : PositionNone;
 			}
 
-			/*public override IParcelable SaveState()
-			{
-				var count = mViewPager.ChildCount;
-				for (int i = 0; i < count; i++)
-				{
-					var c = mViewPager.GetChildAt(i);
-					if (c.SaveFromParentEnabled)
-					{
-						c.SaveHierarchyState(mViewStates);
-					}
-				}
-				var bundle = new Bundle();
-				bundle.PutSparseParcelableArray(TAG_VIEWS, mViewStates);
-				return bundle;
-			}
-
-			public override void RestoreState(IParcelable state, Java.Lang.ClassLoader loader)
-			{
-				var bundle = (Bundle)state;
-				bundle.SetClassLoader(loader);
-				mViewStates = (SparseArray<Parcelable>)bundle.GetSparseParcelableArray(TAG_VIEWS);
-			}*/
 		}
 
 		protected override void Dispose(bool disposing)

@@ -86,7 +86,7 @@ namespace Xamarin.Forms.Platform.Tizen
 
 		void OnScrolled(object sender, EventArgs e)
 		{
-			var isHorizontal = Element.Orientation == CarouselViewOrientation.Horizontal;
+			var isHorizontal = Element.Orientation == CarouselOrientation.Horizontal;
 			var region = _scroller.CurrentRegion;
 			var pageSize = isHorizontal ? region.Width : region.Height;
 			var currentPosition = isHorizontal ? region.X : region.Y;
@@ -149,7 +149,7 @@ namespace Xamarin.Forms.Platform.Tizen
 
 		void UpdateOrientation(bool init)
 		{
-			_indicator.IsHorizontal = Element.Orientation == CarouselViewOrientation.Horizontal;
+			_indicator.IsHorizontal = Element.Orientation == CarouselOrientation.Horizontal;
 			if (!init)
 			{
 				Control.MarkChanged();
@@ -172,7 +172,7 @@ namespace Xamarin.Forms.Platform.Tizen
 		{
 			int x = 0;
 			int y = 0;
-			var unused = (Element.Orientation == CarouselViewOrientation.Horizontal ? x = position : y = position);
+			var unused = (Element.Orientation == CarouselOrientation.Horizontal ? x = position : y = position);
 			_scroller.ScrollTo(x, y, Element.AnimateTransition);
 		}
 
@@ -297,7 +297,7 @@ namespace Xamarin.Forms.Platform.Tizen
 			var bound = Control.Geometry;
 			_scroller.Geometry = bound;
 
-			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+			if (Element.Orientation == CarouselOrientation.Horizontal)
 			{
 				bound.Y = (bound.Y + bound.Height - 100);
 				bound.Height = 100;
@@ -325,7 +325,7 @@ namespace Xamarin.Forms.Platform.Tizen
 				int index = 0;
 				foreach (var nativeView in _innerLayout.Children)
 				{
-					if (Element.Orientation == CarouselViewOrientation.Horizontal)
+					if (Element.Orientation == CarouselOrientation.Horizontal)
 					{
 						bound.X = baseX + index * bound.Width;
 					}
@@ -338,7 +338,7 @@ namespace Xamarin.Forms.Platform.Tizen
 					nativeView.Geometry = bound;
 					index++;
 				}
-				if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				if (Element.Orientation == CarouselOrientation.Horizontal)
 				{
 					_innerLayout.MinimumWidth = _innerLayout.Children.Count * bound.Width;
 					_innerLayout.MinimumHeight = bound.Height;
@@ -351,7 +351,7 @@ namespace Xamarin.Forms.Platform.Tizen
 
 				int x = 0;
 				int y = 0;
-				var unused = (Element.Orientation == CarouselViewOrientation.Horizontal ? x = Element.Position : y = Element.Position);
+				var unused = (Element.Orientation == CarouselOrientation.Horizontal ? x = Element.Position : y = Element.Position);
 				_scroller.ScrollTo(x, y, false);
 			}
 			_isLayouting--;
@@ -364,7 +364,7 @@ namespace Xamarin.Forms.Platform.Tizen
 
 			_changedByScroll++;
 			{
-				var index = Element.Orientation == CarouselViewOrientation.Horizontal ? _scroller.HorizontalPageIndex : _scroller.VerticalPageIndex;
+				var index = Element.Orientation == CarouselOrientation.Horizontal ? _scroller.HorizontalPageIndex : _scroller.VerticalPageIndex;
 				Element.NotifyPositionChanged(index);
 				_indicatorItems[index].Select(true);
 			}

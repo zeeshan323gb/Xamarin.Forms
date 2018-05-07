@@ -187,7 +187,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void UpdateOrientation()
 		{
-			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+			if (Element.Orientation == CarouselOrientation.Horizontal)
 				_flipView.ItemsPanel = _nativeView.Resources[HPanel] as ItemsPanelTemplate;
 			else
 				_flipView.ItemsPanel = _nativeView.Resources[VPanel] as ItemsPanelTemplate;
@@ -203,18 +203,18 @@ namespace Xamarin.Forms.Platform.UWP
 			ScrollDirection direction;
 
 			// Get Horizontal or Vertical Offset depending on carousel orientation
-			var currentOffset = Element.Orientation == CarouselViewOrientation.Horizontal ? scrollView.HorizontalOffset : scrollView.VerticalOffset;
+			var currentOffset = Element.Orientation == CarouselOrientation.Horizontal ? scrollView.HorizontalOffset : scrollView.VerticalOffset;
 
 			// Scrolling to the right
 			if (currentOffset > _lastOffset)
 			{
 				percentCompleted = Math.Floor((currentOffset - (int)currentOffset) * 100);
-				direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
+				direction = Element.Orientation == CarouselOrientation.Horizontal ? ScrollDirection.Right : ScrollDirection.Down;
 			}
 			else
 			{
 				percentCompleted = Math.Floor((_lastOffset - currentOffset) * 100);
-				direction = Element.Orientation == CarouselViewOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
+				direction = Element.Orientation == CarouselOrientation.Horizontal ? ScrollDirection.Left : ScrollDirection.Up;
 			}
 
 			if (percentCompleted <= 100)
@@ -226,7 +226,7 @@ namespace Xamarin.Forms.Platform.UWP
 			if (!e.IsIntermediate)
 			{
 				var scrollView = (ScrollViewer)sender;
-				_lastOffset = Element.Orientation == CarouselViewOrientation.Horizontal ? scrollView.HorizontalOffset : scrollView.VerticalOffset;
+				_lastOffset = Element.Orientation == CarouselOrientation.Horizontal ? scrollView.HorizontalOffset : scrollView.VerticalOffset;
 			}
 		}
 
@@ -313,7 +313,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void SetArrows()
 		{
-			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+			if (Element.Orientation == CarouselOrientation.Horizontal)
 			{
 				_prevBtn = FindVisualChild<Windows.UI.Xaml.Controls.Button>(_flipView, PreviousButtonHorizontal);
 				_nextBtn = FindVisualChild<Windows.UI.Xaml.Controls.Button>(_flipView, NextButtonHorizontal);
@@ -342,7 +342,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 			if (Element.ShowIndicators)
 			{
-				if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				if (Element.Orientation == CarouselOrientation.Horizontal)
 				{
 					indicators.HorizontalAlignment = HorizontalAlignment.Stretch;
 					indicators.VerticalAlignment = VerticalAlignment.Bottom;

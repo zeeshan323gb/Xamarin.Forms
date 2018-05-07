@@ -417,7 +417,7 @@ namespace Xamarin.Forms.Platform.iOS
 			double currentPercentCompleted;
 			ScrollDirection direction;
 
-			if (Element.Orientation == CarouselViewOrientation.Horizontal)
+			if (Element.Orientation == CarouselOrientation.Horizontal)
 			{
 				currentPercentCompleted = Math.Floor((Math.Abs(point.X - _pageController.View.Frame.Size.Width) / _pageController.View.Frame.Size.Width) * 100);
 				direction = _prevPoint > point.X ? ScrollDirection.Left : ScrollDirection.Right;
@@ -473,8 +473,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (Element.ShowArrows)
 			{
-				var o = Element.Orientation == CarouselViewOrientation.Horizontal ? "H" : "V";
-				var formatOptions = Element.Orientation == CarouselViewOrientation.Horizontal ? NSLayoutFormatOptions.AlignAllCenterY : NSLayoutFormatOptions.AlignAllCenterX;
+				var o = Element.Orientation == CarouselOrientation.Horizontal ? "H" : "V";
+				var formatOptions = Element.Orientation == CarouselOrientation.Horizontal ? NSLayoutFormatOptions.AlignAllCenterY : NSLayoutFormatOptions.AlignAllCenterX;
 
 				var elementCount = TemplatedItemsView.TemplatedItems.Count;
 
@@ -485,7 +485,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_prevBtn.TranslatesAutoresizingMaskIntoConstraints = false;
 
 				var prevArrow = new UIImageView();
-				var prevArrowImage = new UIImage(Element.Orientation == CarouselViewOrientation.Horizontal ? "Prev.png" : "Up.png");
+				var prevArrowImage = new UIImage(Element.Orientation == CarouselOrientation.Horizontal ? "Prev.png" : "Up.png");
 				prevArrow.Image = prevArrowImage.ImageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate);
 				prevArrow.TranslatesAutoresizingMaskIntoConstraints = false;
 				prevArrow.TintColor = Element.ArrowsTintColor.ToUIColor();
@@ -508,7 +508,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_nextBtn.TranslatesAutoresizingMaskIntoConstraints = false;
 
 				var nextArrow = new UIImageView();
-				var nextArrowImage = new UIImage(Element.Orientation == CarouselViewOrientation.Horizontal ? "Next.png" : "Down.png");
+				var nextArrowImage = new UIImage(Element.Orientation == CarouselOrientation.Horizontal ? "Next.png" : "Down.png");
 				nextArrow.Image = nextArrowImage.ImageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate);
 				nextArrow.TranslatesAutoresizingMaskIntoConstraints = false;
 				nextArrow.TintColor = Element.ArrowsTintColor.ToUIColor();
@@ -526,8 +526,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 				var btnsDictionary = NSDictionary.FromObjectsAndKeys(new NSObject[] { _pageController.View, _prevBtn, _nextBtn }, new NSObject[] { new NSString("superview"), new NSString("prevBtn"), new NSString("nextBtn") });
 
-				var w = Element.Orientation == CarouselViewOrientation.Horizontal ? 20 : 36;
-				var h = Element.Orientation == CarouselViewOrientation.Horizontal ? 36 : 20;
+				var w = Element.Orientation == CarouselOrientation.Horizontal ? 20 : 36;
+				var h = Element.Orientation == CarouselOrientation.Horizontal ? 36 : 20;
 
 				_pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:[prevBtn(==" + w + ")]", 0, new NSDictionary(), btnsDictionary));
 				_pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:[prevBtn(==" + h + ")]", 0, new NSDictionary(), btnsDictionary));
@@ -570,7 +570,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_pageControl.Enabled = false;
 				_pageController.View.AddSubview(_pageControl);
 				var viewsDictionary = NSDictionary.FromObjectsAndKeys(new NSObject[] { _pageControl }, new NSObject[] { new NSString("pageControl") });
-				if (Element.Orientation == CarouselViewOrientation.Horizontal)
+				if (Element.Orientation == CarouselOrientation.Horizontal)
 				{
 					_pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("H:|[pageControl]|", NSLayoutFormatOptions.AlignAllCenterX, new NSDictionary(), viewsDictionary));
 					_pageController.View.AddConstraints(NSLayoutConstraint.FromVisualFormat("V:[pageControl]|", 0, new NSDictionary(), viewsDictionary));

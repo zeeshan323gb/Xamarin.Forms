@@ -1,30 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform;
-
-/*
-The MIT License(MIT)
-
-Copyright(c) 2017 Alexander Reyes (alexrainman1975@gmail.com)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the "Software"), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial
-portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
- */
 
 namespace Xamarin.Forms
 {
@@ -34,11 +12,11 @@ namespace Xamarin.Forms
 		int _previousItemSelected = -1;
 		List<View> _viewsWithInherithedBindingContext = new List<View>();
 
-		public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselViewOrientation), typeof(CarouselView), CarouselViewOrientation.Horizontal);
+		public static readonly BindableProperty OrientationProperty = BindableProperty.Create(nameof(Orientation), typeof(CarouselOrientation), typeof(CarouselView), CarouselOrientation.Horizontal);
 
-		public CarouselViewOrientation Orientation
+		public CarouselOrientation Orientation
 		{
-			get { return (CarouselViewOrientation)GetValue(OrientationProperty); }
+			get { return (CarouselOrientation)GetValue(OrientationProperty); }
 			set { SetValue(OrientationProperty, value); }
 		}
 
@@ -92,8 +70,7 @@ namespace Xamarin.Forms
 		}
 
 		public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(int), typeof(CarouselView), 0, BindingMode.TwoWay,
-		                                                                                   propertyChanged: OnPositionChanged);
-
+																						   propertyChanged: OnPositionChanged);
 		public int Position
 		{
 			get { return (int)GetValue(PositionProperty); }
@@ -152,7 +129,7 @@ namespace Xamarin.Forms
 			set { SetValue(PositionSelectedCommandProperty, value); }
 		}
 		public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(nameof(SelectedItem), typeof(object), typeof(CarouselView), null, BindingMode.OneWayToSource,
-		                                                                                       propertyChanged: OnSelectedItemChanged);
+																							   propertyChanged: OnSelectedItemChanged);
 
 		public object SelectedItem
 		{
