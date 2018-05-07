@@ -13,7 +13,7 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty InputTransparentProperty = BindableProperty.Create("InputTransparent", typeof(bool), typeof(VisualElement), default(bool));
 
-		public static readonly BindableProperty IsEnabledProperty = BindableProperty.Create("IsEnabled", typeof(bool), 
+		public static readonly BindableProperty IsEnabledProperty = BindableProperty.Create("IsEnabled", typeof(bool),
 			typeof(VisualElement), true, propertyChanged: OnIsEnabledPropertyChanged);
 
 		static readonly BindablePropertyKey XPropertyKey = BindableProperty.CreateReadOnly("X", typeof(double), typeof(VisualElement), default(double));
@@ -48,7 +48,11 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty RotationYProperty = BindableProperty.Create("RotationY", typeof(double), typeof(VisualElement), default(double));
 
-		public static readonly BindableProperty ScaleProperty = BindableProperty.Create("Scale", typeof(double), typeof(VisualElement), 1d);
+		public static readonly BindableProperty ScaleProperty = BindableProperty.Create(nameof(Scale), typeof(double), typeof(VisualElement), 1d);
+
+		public static readonly BindableProperty ScaleXProperty = BindableProperty.Create(nameof(ScaleX), typeof(double), typeof(VisualElement), 1d);
+
+		public static readonly BindableProperty ScaleYProperty = BindableProperty.Create(nameof(ScaleY), typeof(double), typeof(VisualElement), 1d);
 
 		public static readonly BindableProperty IsVisibleProperty = BindableProperty.Create("IsVisible", typeof(bool), typeof(VisualElement), true,
 			propertyChanged: (bindable, oldvalue, newvalue) => ((VisualElement)bindable).OnIsVisibleChanged((bool)oldvalue, (bool)newvalue));
@@ -89,7 +93,7 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty MinimumHeightRequestProperty = BindableProperty.Create("MinimumHeightRequest", typeof(double), typeof(VisualElement), -1d, propertyChanged: OnRequestChanged);
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static readonly BindablePropertyKey IsFocusedPropertyKey = BindableProperty.CreateReadOnly("IsFocused", 
+		public static readonly BindablePropertyKey IsFocusedPropertyKey = BindableProperty.CreateReadOnly("IsFocused",
 			typeof(bool), typeof(VisualElement), default(bool), propertyChanged: OnIsFocusedPropertyChanged);
 
 		public static readonly BindableProperty IsFocusedProperty = IsFocusedPropertyKey.BindableProperty;
@@ -266,10 +270,19 @@ namespace Xamarin.Forms
 			set { SetValue(RotationYProperty, value); }
 		}
 
-		public double Scale
-		{
-			get { return (double)GetValue(ScaleProperty); }
-			set { SetValue(ScaleProperty, value); }
+		public double Scale {
+			get => (double)GetValue(ScaleProperty);
+			set => SetValue(ScaleProperty, value);
+		}
+
+		public double ScaleX {
+			get => (double)GetValue(ScaleXProperty);
+			set => SetValue(ScaleXProperty, value);
+		}
+
+		public double ScaleY {
+			get => (double)GetValue(ScaleYProperty);
+			set => SetValue(ScaleYProperty, value);
 		}
 
 		public Style Style
@@ -278,15 +291,17 @@ namespace Xamarin.Forms
 			set { SetValue(StyleProperty, value); }
 		}
 
-		
+
 		[TypeConverter(typeof(ListStringTypeConverter))]
-		public IList<string> StyleClass {
+		public IList<string> StyleClass
+		{
 			get { return @class; }
 			set { @class = value; }
 		}
 
 		[TypeConverter(typeof(ListStringTypeConverter))]
-		public IList<string> @class {
+		public IList<string> @class
+		{
 			get { return _mergedStyle.StyleClass; }
 			set { _mergedStyle.StyleClass = value; }
 		}
@@ -455,7 +470,8 @@ namespace Xamarin.Forms
 
 		public ResourceDictionary Resources
 		{
-			get {
+			get
+			{
 				if (_resources != null)
 					return _resources;
 				_resources = new ResourceDictionary();
@@ -789,6 +805,22 @@ namespace Xamarin.Forms
 				focus(this, new FocusEventArgs(this, true));
 		}
 
+		protected internal virtual void ChangeVisualState()
+		{
+			if (!IsEnabled)
+			{
+				VisualStateManager.GoToState(this, VisualStateManager.CommonStates.Disabled);
+			}
+			else if (IsFocused)
+			{
+				VisualStateManager.GoToState(this, VisualStateManager.CommonStates.Focused);
+			}
+			else
+			{
+				VisualStateManager.GoToState(this, VisualStateManager.CommonStates.Normal);
+			}
+		}
+
 		static void FlowDirectionChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var self = bindable as IFlowDirectionController;
@@ -814,9 +846,7 @@ namespace Xamarin.Forms
 
 			var isEnabled = (bool)newValue;
 
-			VisualStateManager.GoToState(element, isEnabled 
-				? VisualStateManager.CommonStates.Normal 
-				: VisualStateManager.CommonStates.Disabled);
+			element.ChangeVisualState();
 		}
 
 		static void OnIsFocusedPropertyChanged(BindableObject bindable, object oldvalue, object newvalue)
@@ -838,9 +868,7 @@ namespace Xamarin.Forms
 				element.OnUnfocus();
 			}
 
-			VisualStateManager.GoToState(element, isFocused
-				? VisualStateManager.CommonStates.Focused
-				: VisualStateManager.CommonStates.Normal);
+			element.ChangeVisualState();
 		}
 
 		static void OnRequestChanged(BindableObject bindable, object oldvalue, object newvalue)
@@ -903,7 +931,8 @@ namespace Xamarin.Forms
 		{
 			public override object ConvertFromInvariantString(string value)
 			{
-				if (value != null) {
+				if (value != null)
+				{
 					if (value.Equals("true", StringComparison.OrdinalIgnoreCase))
 						return true;
 					if (value.Equals("visible", StringComparison.OrdinalIgnoreCase))

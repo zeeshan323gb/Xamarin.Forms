@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CoreGraphics;
 using UIKit;
+using System.Linq;
 
 namespace Xamarin.Forms.Platform.iOS
 {
@@ -39,5 +40,24 @@ namespace Xamarin.Forms.Platform.iOS
 
             return nativeView;
         }
+
+		internal static T FindParentOfType<T>(this VisualElement element)
+		{
+			var navPage = element.GetParentsPath()
+										.OfType<T>()
+										.FirstOrDefault();
+			return navPage;
+		}
+
+		internal static IEnumerable<Element> GetParentsPath(this VisualElement self)
+		{
+			Element current = self;
+
+			while (!Application.IsApplicationOrNull(current.RealParent))
+			{
+				current = current.RealParent;
+				yield return current;
+			}
+		}
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,7 +50,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 				if (List == null)
 				{
-					List = new WListView 
+					List = new WListView
 					{
 						IsSynchronizedWithCurrentItem = false,
 						ItemTemplate = (Windows.UI.Xaml.DataTemplate)WApp.Current.Resources["CellTemplate"],
@@ -80,7 +82,13 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void OnCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
 		{
-			List.DataContext = new CollectionViewSource { Source = Element.ItemsSource, IsSourceGrouped = Element.IsGroupingEnabled };
+			if (e.Action == NotifyCollectionChangedAction.Reset)
+			{
+				List.DataContext =
+					new CollectionViewSource { Source = Element.ItemsSource, IsSourceGrouped = Element.IsGroupingEnabled };
+			}
+
+			List.UpdateLayout();
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -139,6 +147,11 @@ namespace Xamarin.Forms.Platform.UWP
 			{
 				if (List != null)
 				{
+					foreach (ViewToRendererConverter.WrapperControl wrapperControl in FindDescendants<ViewToRendererConverter.WrapperControl>(List))
+					{
+						wrapperControl.CleanUp();
+					}
+
 					if (_subscribedToTapped)
 					{
 						_subscribedToTapped = false;
@@ -344,7 +357,7 @@ namespace Xamarin.Forms.Platform.UWP
 			if (viewer == null)
 			{
 				RoutedEventHandler loadedHandler = null;
-				loadedHandler = async (o, e) => 
+				loadedHandler = async (o, e) =>
 				{
 					List.Loaded -= loadedHandler;
 
@@ -537,7 +550,7 @@ namespace Xamarin.Forms.Platform.UWP
 			{
 				var templatedItems = TemplatedItemsView.TemplatedItems;
 				var selectedItemIndex = templatedItems.GetGlobalIndexOfItem(e.ClickedItem);
-				
+
 				OnListItemClicked(selectedItemIndex);
 			}
 		}
