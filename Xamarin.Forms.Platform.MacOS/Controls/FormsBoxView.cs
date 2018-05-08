@@ -15,7 +15,7 @@ namespace Xamarin.Forms.Platform.macOS.Controls
 
 		public override void DrawRect (CGRect dirtyRect)
 		{
-			_colorToRenderer.SetFill ();
+			_colorToRenderer?.SetFill();
 
 			var innerRect = NSBezierPath.FromRoundedRect(Bounds, 0, 0);
 
