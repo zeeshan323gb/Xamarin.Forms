@@ -77,7 +77,11 @@ namespace Xamarin.Forms.Platform.Android
 
 		void AView.IOnClickListener.OnClick(AView v)
 		{
-			OnNavigateBack();
+			var backButtonHandler = Shell.GetBackButtonBehavior(Page);
+			if (backButtonHandler?.Command != null)
+				backButtonHandler.Command.Execute(backButtonHandler.CommandParameter);
+			else
+				OnNavigateBack();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -139,34 +143,47 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateToolbarItems(_toolbar, Page);
 		}
 
-		protected virtual void UpdateLeftBarButtonItem(Context context, Toolbar toolbar, DrawerLayout drawerLayout, Page page)
+		protected virtual async void UpdateLeftBarButtonItem(Context context, Toolbar toolbar, DrawerLayout drawerLayout, Page page)
 		{
-			var activity = (FormsAppCompatActivity)context;
-			if (_drawerToggle == null)
-			{
-				_drawerToggle = new ActionBarDrawerToggle((Activity)context, drawerLayout, toolbar,
-					R.String.Ok, R.String.Ok)
-				{
-					ToolbarNavigationClickListener = this,
-				};
-				drawerLayout.AddDrawerListener(_drawerToggle);
-			}
+			var backButtonHandler = Shell.GetBackButtonBehavior(page);
 
-			if (CanNavigateBack)
+			if (backButtonHandler != null)
 			{
-				_drawerToggle.DrawerIndicatorEnabled = false;
-				var icon = new DrawerArrowDrawable(activity.SupportActionBar.ThemedContext);
+				var icon = await context.GetFormsDrawable(backButtonHandler.IconOverride);
+				icon = icon.GetConstantState().NewDrawable().Mutate();
 				icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-				icon.Progress = 1;
+				toolbar.SetNavigationOnClickListener(this);
 				toolbar.NavigationIcon = icon;
 			}
 			else
 			{
-				toolbar.NavigationIcon = null;
-				_drawerToggle.DrawerArrowDrawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-				_drawerToggle.DrawerIndicatorEnabled = true;
+				var activity = (FormsAppCompatActivity)context;
+				if (_drawerToggle == null)
+				{
+					_drawerToggle = new ActionBarDrawerToggle((Activity)context, drawerLayout, toolbar,
+						R.String.Ok, R.String.Ok)
+					{
+						ToolbarNavigationClickListener = this,
+					};
+					drawerLayout.AddDrawerListener(_drawerToggle);
+				}
+
+				if (CanNavigateBack)
+				{
+					_drawerToggle.DrawerIndicatorEnabled = false;
+					var icon = new DrawerArrowDrawable(activity.SupportActionBar.ThemedContext);
+					icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+					icon.Progress = 1;
+					toolbar.NavigationIcon = icon;
+				}
+				else
+				{
+					toolbar.NavigationIcon = null;
+					_drawerToggle.DrawerArrowDrawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+					_drawerToggle.DrawerIndicatorEnabled = true;
+				}
+				_drawerToggle.SyncState();
 			}
-			_drawerToggle.SyncState();
 		}
 
 		protected virtual void UpdateMenuItemIcon(Context context, IMenuItem menuItem, ToolbarItem toolBarItem)

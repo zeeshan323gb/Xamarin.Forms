@@ -10,22 +10,8 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IUIGestureRecognizerDelegate
+	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IUIGestureRecognizerDelegate, IAppearanceObserver
 	{
-		#region IShellTabItemRenderer
-
-		void IShellTabItemRenderer.ResetAppearance()
-		{
-			_appearanceTracker.ResetAppearance(this);
-		}
-
-		void IShellTabItemRenderer.SetAppearance(ShellAppearance appearance)
-		{
-			_appearanceTracker.SetAppearance(this, appearance);
-		}
-
-		#endregion IShellTabItemRenderer
-
 		private readonly IShellContext _context;
 
 		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
@@ -138,6 +124,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_appearanceTracker.Dispose();
 				_shellTabItem.PropertyChanged -= HandlePropertyChanged;
 				((IShellTabItemController)_shellTabItem).NavigationRequested -= OnNavigationRequested;
+				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
 				DisposePage(Page);
 			}
 
@@ -300,6 +287,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			_appearanceTracker = _context.CreateNavBarAppearanceTracker();
 			UpdateTabBarItem();
+			((IShellController)_context.Shell).AddAppearanceObserver(this, ShellTabItem);
 		}
 
 		protected virtual async void UpdateTabBarItem()
@@ -391,6 +379,14 @@ namespace Xamarin.Forms.Platform.iOS
 			stack.RemoveAt(stack.Count - 1);
 
 			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.PopEvent, shellItem, tab, stack, true);
+		}
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
+		{
+			if (appearance == null)
+				_appearanceTracker.ResetAppearance(this);
+			else
+				_appearanceTracker.SetAppearance(this, appearance);
 		}
 
 		private class GestureDelegate : UIGestureRecognizerDelegate

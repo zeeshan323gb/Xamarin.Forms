@@ -228,7 +228,7 @@ namespace Xamarin.Forms
 		{
 			var command = Command;
 			var commandParameter = CommandParameter;
-			if (command != null && command.CanExecute(commandParameter))
+			if (command?.CanExecute(commandParameter) == true)
 			{
 				command.Execute(commandParameter);
 			}

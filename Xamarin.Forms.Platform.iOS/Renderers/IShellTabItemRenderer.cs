@@ -8,9 +8,5 @@ namespace Xamarin.Forms.Platform.iOS
 		Page Page { get; }
 		ShellTabItem ShellTabItem { get; set; }
 		UIViewController ViewController { get; }
-
-		void ResetAppearance();
-
-		void SetAppearance(ShellAppearance appearance);
 	}
 }

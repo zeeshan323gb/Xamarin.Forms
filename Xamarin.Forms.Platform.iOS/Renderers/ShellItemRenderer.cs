@@ -8,7 +8,7 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellItemRenderer : UITabBarController, IShellItemRenderer
+	public class ShellItemRenderer : UITabBarController, IShellItemRenderer, IAppearanceObserver
 	{
 		private IShellTabBarAppearanceTracker _appearanceTracker;
 		private IShellContext _context;
@@ -47,7 +47,6 @@ namespace Xamarin.Forms.Platform.iOS
 				_shellItem = value;
 				OnShellItemSet(_shellItem);
 				CreateTabRenderers();
-				UpdateShellAppearance();
 			}
 		}
 
@@ -86,8 +85,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 				return accept;
 			};
-
-			UpdateShellAppearance();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -106,7 +103,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_tabRenderers.Clear();
 				CurrentRenderer = null;
 				ShellItem.PropertyChanged -= OnElementPropertyChanged;
-				((IShellItemController)ShellItem).CurrentShellAppearanceChanged -= OnShellAppearanceChanged;
+				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
 				((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChanged;
 				_shellItem = null;
 			}
@@ -163,7 +160,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			_appearanceTracker = _context.CreateTabBarAppearanceTracker();
 			item.PropertyChanged += OnElementPropertyChanged;
-			((IShellItemController)item).CurrentShellAppearanceChanged += OnShellAppearanceChanged;
+			((IShellController)_context.Shell).AddAppearanceObserver(this, item);
 			((INotifyCollectionChanged)item.Items).CollectionChanged += OnItemsCollectionChanged;
 		}
 
@@ -178,22 +175,13 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual void UpdateShellAppearance()
+		protected virtual void UpdateShellAppearance(ShellAppearance appearance)
 		{
-			if (ShellItem == null)
-				return;
-
-			var appearance = ((IShellItemController)ShellItem).CurrentShellAppearance;
-			IShellTabItemRenderer currentRenderer = CurrentRenderer;
-
 			if (appearance == null)
 			{
 				_appearanceTracker.ResetAppearance(this);
-				currentRenderer?.ResetAppearance();
 				return;
 			}
-
-			currentRenderer?.SetAppearance(appearance);
 			_appearanceTracker.SetAppearance(this, appearance);
 		}
 
@@ -245,9 +233,9 @@ namespace Xamarin.Forms.Platform.iOS
 			CurrentRenderer = renderer;
 		}
 
-		private void OnShellAppearanceChanged(object sender, EventArgs e)
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
 		{
-			UpdateShellAppearance();
+			UpdateShellAppearance(appearance);
 		}
 
 		private void RemoveRenderer(IShellTabItemRenderer renderer)

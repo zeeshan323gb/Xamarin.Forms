@@ -9,7 +9,7 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Content")]
-	public class ShellTabItem : NavigableElement, IShellTabItemController
+	public class ShellTabItem : NavigableElement, IShellTabItemController, IShellAppearanceTracker
 	{
 		#region PropertyKeys
 
@@ -17,6 +17,15 @@ namespace Xamarin.Forms
 			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellTabItem), null, defaultValueCreator: bo => new MenuItemCollection());
 
 		#endregion PropertyKeys
+
+		#region IShellAppearanceTracker
+
+		void IShellAppearanceTracker.AppearanceChanged(Element source)
+		{
+			AppearanceTrackerUtils.AppearanceChanged(this, source);
+		}
+
+		#endregion
 
 		#region IShellTabItemController
 
@@ -193,7 +202,12 @@ namespace Xamarin.Forms
 				await OnPushAsync(content, i == routes.Count - 1);
 			}
 
-			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
+			SendAppearanceChanged();
+		}
+
+		private void SendAppearanceChanged()
+		{
+			(this as IShellAppearanceTracker).AppearanceChanged(this);
 		}
 
 		public static implicit operator ShellTabItem(TemplatedPage page)
@@ -223,7 +237,7 @@ namespace Xamarin.Forms
 				RequestType = NavigationRequestType.Insert
 			};
 			_navStack.Insert(index, page);
-			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
+			SendAppearanceChanged();
 			AddPage(page);
 			_navigationRequested?.Invoke(this, args);
 
@@ -255,7 +269,7 @@ namespace Xamarin.Forms
 			};
 
 			_navStack.Remove(page);
-			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
+			SendAppearanceChanged();
 			_navigationRequested?.Invoke(this, args);
 			if (args.Task != null)
 				await args.Task;
@@ -291,7 +305,7 @@ namespace Xamarin.Forms
 			_navigationRequested?.Invoke(this, args);
 			var oldStack = _navStack;
 			_navStack = new List<Page> { null };
-			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
+			SendAppearanceChanged();
 
 			if (args.Task != null)
 				await args.Task;
@@ -325,7 +339,7 @@ namespace Xamarin.Forms
 			};
 
 			_navStack.Add(page);
-			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
+			SendAppearanceChanged();
 			AddPage(page);
 			_navigationRequested?.Invoke(this, args);
 
@@ -341,8 +355,7 @@ namespace Xamarin.Forms
 			if (!_navStack.Remove(page))
 				return;
 
-			((IShellItemController)ShellItem).CurrentItemNavigationChanged();
-
+			SendAppearanceChanged();
 			RemovePage(page);
 			var args = new NavigationRequestedEventArgs(page, false)
 			{

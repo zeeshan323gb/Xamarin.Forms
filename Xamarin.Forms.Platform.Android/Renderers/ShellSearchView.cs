@@ -62,6 +62,7 @@ namespace Xamarin.Forms.Platform.Android
 				v.HideKeyboard();
 				SearchConfirmed?.Invoke(this, EventArgs.Empty);
 				Controller.QueryConfirmed();
+				_textBlock.Text = "";
 			}
 
 			return true;
@@ -299,34 +300,6 @@ namespace Xamarin.Forms.Platform.Android
 					Color = AColor.LightGray
 				};
 				canvas.DrawLine(0, 0, canvas.Width, 0, paint);
-			}
-		}
-
-		private class TestDrawable : Drawable
-		{
-			public override int Opacity => 0;
-
-			public override void Draw(Canvas canvas)
-			{
-				var width = Bounds.Width();
-				var height = Bounds.Height();
-				var paint = new Paint
-				{
-					Color = Color.White.ToAndroid()
-				};
-
-				canvas.DrawRect(0, 0, width, height, paint);
-
-				paint.Color = AColor.LightGray;
-				canvas.DrawLine(0, 0, width, 0, paint);
-			}
-
-			public override void SetAlpha(int alpha)
-			{
-			}
-
-			public override void SetColorFilter(ColorFilter colorFilter)
-			{
 			}
 		}
 	}

@@ -10,7 +10,7 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class Shell : Page, IShellController
+	public class Shell : Page, IShellController, IShellAppearanceTracker
 	{
 		#region Attached Properties
 
@@ -131,7 +131,55 @@ namespace Xamarin.Forms
 			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
 		}
 
+		List<Tuple<IAppearanceObserver, Element>> _observers = new List<Tuple<IAppearanceObserver, Element>>();
+
+		void IShellController.AddAppearanceObserver(IAppearanceObserver observer, Element pivot)
+		{
+			_observers.Add(Tuple.Create(observer, pivot));
+			observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
+		}
+
+		bool IShellController.RemoveAppearanceObserver(IAppearanceObserver observer)
+		{
+			for (int i = 0; i < _observers.Count; i++)
+			{
+				if (_observers[i].Item1 == observer)
+				{
+					_observers.RemoveAt(i);
+					return true;
+				}
+			}
+			return false;
+		}
+
 		#endregion IShellController
+
+		#region IShellAppearanceTracker
+
+		void IShellAppearanceTracker.AppearanceChanged(Element source)
+		{
+			// here we wish to notify every element whose pivot can find the source by
+			// walking up the parent tree as these elements may need to change their
+			// appearance
+
+			foreach (var t in _observers)
+			{
+				var observer = t.Item1;
+				var pivot = t.Item2;
+
+				while (!Application.IsApplicationOrNull(pivot))
+				{
+					if (pivot == source)
+					{
+						observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
+						break;
+					}
+					pivot = pivot.Parent;
+				}
+			}
+		}
+
+		#endregion
 
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
@@ -619,6 +667,43 @@ namespace Xamarin.Forms
 			OnNavigating(navArgs);
 			System.Diagnostics.Debug.WriteLine("Proposed: " + proposedState.Location);
 			return !navArgs.Cancelled;
+		}
+
+		ShellAppearance GetShellAppearanceForPivot(Element pivot)
+		{
+			// this algorithm is pretty simple
+			// 1) Get the "CurrentPage" by walking down from the pivot
+			//		Walking down goes Shell -> ShellItem -> ShellTabItem -> ShellTabItem.Stack.Last
+			// 2) Walk up from the pivot to the root Shell. Stop walking as soon as you find a ShellAppearance and return
+			// 3) If nothing found, return null
+
+			if (pivot is Shell shell)
+			{
+				pivot = shell.CurrentItem;
+			}
+			if (pivot is ShellItem shellItem)
+			{
+				pivot = shellItem.CurrentItem;
+			}
+			if (pivot is IShellTabItemController shellTabItem)
+			{
+				// this is the same as .Last but easier and will add in the root if not null
+				// it generally wont be null but this is just in case
+				pivot = shellTabItem.CurrentPage ?? pivot;
+			}
+
+			// Now we walk up
+			while (!Application.IsApplicationOrNull(pivot))
+			{
+				var appearance = ShellItem.GetShellAppearance(pivot);
+
+				if (appearance != null)
+					return appearance;
+
+				pivot = pivot.Parent;
+			}
+
+			return null;
 		}
 	}
 }
