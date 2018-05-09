@@ -121,10 +121,7 @@ namespace Xamarin.Forms
 			}
 		}
 
-		public static ShellAppearance GetShellAppearance(BindableObject obj)
-		{
-			return (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
-		}
+		public static ShellAppearance GetShellAppearance(BindableObject obj) => (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
 
 #if DEBUG
 		[Obsolete ("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
@@ -141,23 +138,14 @@ namespace Xamarin.Forms
 #if DEBUG
 		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
 #endif
-		public static implicit operator ShellItem(TemplatedPage page)
-		{
-			return (ShellTabItem)page;
-		}
+		public static implicit operator ShellItem(TemplatedPage page) => (ShellTabItem)page;
 
 #if DEBUG
 		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
 #endif
-		public static implicit operator ShellItem(MenuItem menuItem)
-		{
-			return new MenuShellItem(menuItem);
-		}
+		public static implicit operator ShellItem(MenuItem menuItem) => new MenuShellItem(menuItem);
 
-		public static void SetShellAppearance(BindableObject obj, ShellAppearance value)
-		{
-			obj.SetValue(ShellAppearanceProperty, value);
-		}
+		public static void SetShellAppearance(BindableObject obj, ShellAppearance value) => obj.SetValue(ShellAppearanceProperty, value);
 
 		protected override void OnChildAdded(Element child)
 		{
@@ -217,17 +205,15 @@ namespace Xamarin.Forms
 
 		public class MenuShellItem : ShellItem
 		{
-			private readonly MenuItem _menuItem;
-
 			internal MenuShellItem(MenuItem menuItem)
 			{
-				_menuItem = menuItem;
+				MenuItem = menuItem;
 
 				SetBinding(TitleProperty, new Binding("Text", BindingMode.OneWay));
 				SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
 			}
 
-			public MenuItem MenuItem => _menuItem;
+			public MenuItem MenuItem { get; }
 		}
 	}
 }
