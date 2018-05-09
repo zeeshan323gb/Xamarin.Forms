@@ -358,6 +358,7 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\test.jpg" />
+    <AndroidResource Include="Resources\drawable\grid.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -63,7 +63,7 @@ namespace Xamarin.Forms.Controls
 
 
 
-			return new ShellTest();
+			return new XamStore.StoreShell();
 		}
 
 		protected override void OnAppLinkRequestReceived(Uri uri)
