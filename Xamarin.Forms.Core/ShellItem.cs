@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class ShellItem : NavigableElement, IShellItemController
+	public class ShellItem : NavigableElement, IShellItemController, IShellAppearanceTracker
 	{
 		#region PropertyKeys
 
@@ -15,15 +15,16 @@ namespace Xamarin.Forms
 
 		#endregion PropertyKeys
 
-		#region IShellItemController
+		#region IShellAppearanceTracker
 
-		private ShellAppearance _currentShellAppearance;
-
-		event EventHandler IShellItemController.CurrentShellAppearanceChanged
+		void IShellAppearanceTracker.AppearanceChanged(Element source)
 		{
-			add { _shellAppearanceChanged += value; }
-			remove { _shellAppearanceChanged -= value; }
+			AppearanceTrackerUtils.AppearanceChanged(this, source);
 		}
+
+		#endregion
+
+		#region IShellItemController
 
 		event EventHandler IShellItemController.StructureChanged
 		{
@@ -31,28 +32,7 @@ namespace Xamarin.Forms
 			remove { _structureChanged -= value; }
 		}
 
-		private event EventHandler _shellAppearanceChanged;
 		private event EventHandler _structureChanged;
-
-		ShellAppearance IShellItemController.CurrentShellAppearance
-		{
-			get
-			{
-				return _currentShellAppearance;
-			}
-			set
-			{
-				if (_currentShellAppearance == value)
-					return;
-				_currentShellAppearance = value;
-				_shellAppearanceChanged?.Invoke(this, EventArgs.Empty);
-			}
-		}
-
-		void IShellItemController.CurrentItemNavigationChanged()
-		{
-			UpdateCurrentShellAppearance();
-		}
 
 		#endregion IShellItemController
 
@@ -72,7 +52,8 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
 
 		public static readonly BindableProperty ShellAppearanceProperty =
-			BindableProperty.Create(nameof(ShellAppearance), typeof(ShellAppearance), typeof(ShellItem), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(ShellAppearance), typeof(ShellAppearance), typeof(ShellItem), null, BindingMode.OneTime,
+				propertyChanged: OnShellAppearanceChanged);
 
 		public static readonly BindableProperty TitleProperty =
 			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellItem), null, BindingMode.OneTime);
@@ -162,9 +143,7 @@ namespace Xamarin.Forms
 #endif
 		public static implicit operator ShellItem(TemplatedPage page)
 		{
-			// this breaks my brain a bit too much
-			ShellTabItem tab = page;
-			return tab;
+			return (ShellTabItem)page;
 		}
 
 #if DEBUG
@@ -209,8 +188,18 @@ namespace Xamarin.Forms
 				shell.UpdateCurrentState(ShellNavigationSource.ShellTabItemChanged);
 			}
 
-			shellItem.UpdateCurrentShellAppearance();
 			shellItem.SendStructureChanged();
+			(shellItem as IShellAppearanceTracker).AppearanceChanged(shellItem);
+		}
+
+		private static void OnShellAppearanceChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var item = (Element)bindable;
+
+			if (item.Parent is IShellAppearanceTracker tracker)
+			{
+				tracker.AppearanceChanged(item);
+			}
 		}
 
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -224,38 +213,6 @@ namespace Xamarin.Forms
 					OnChildRemoved(element);
 
 			SendStructureChanged();
-		}
-
-		private void UpdateCurrentShellAppearance()
-		{
-			var shellTabItem = CurrentItem;
-			Page page = ((IShellTabItemController)shellTabItem).CurrentPage;
-
-			var controller = (IShellItemController)this;
-
-			ShellAppearance result = null;
-
-			if (page != null)
-			{
-				result = GetShellAppearance(page);
-				if (result != null)
-				{
-					controller.CurrentShellAppearance = result;
-					return;
-				}
-			}
-
-			if (shellTabItem != null)
-			{
-				result = GetShellAppearance(shellTabItem);
-				if (result != null)
-				{
-					controller.CurrentShellAppearance = result;
-					return;
-				}
-			}
-
-			controller.CurrentShellAppearance = ShellAppearance;
 		}
 
 		public class MenuShellItem : ShellItem

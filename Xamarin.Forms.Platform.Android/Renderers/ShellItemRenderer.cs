@@ -16,7 +16,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellItemRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener
+	public class ShellItemRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IAppearanceObserver
 	{
 		#region IOnPageChangeListener
 
@@ -43,6 +43,18 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IOnPageChangeListener
 
+		#region IAppearanceObserver
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
+		{
+			if (appearance == null)
+				ResetAppearance();
+			else
+				ApplyAppearance(appearance);
+		}
+
+		#endregion
+
 		#region IOnClickListener
 
 		void AView.IOnClickListener.OnClick(AView v)
@@ -51,10 +63,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IOnClickListener
 
-		private readonly Color _defaultBackgroundColor = Color.FromRgb(33, 150, 243);
-		private readonly Color _defaultForegroundColor = Color.White;
-		private readonly Color _defaultTitleColor = Color.White;
-		private readonly Color _defaultUnselectedColor = Color.FromRgba(255, 255, 255, 180);
+		public static readonly Color DefaultBackgroundColor = Color.FromRgb(33, 150, 243);
+		public static readonly Color DefaultForegroundColor = Color.White;
+		public static readonly Color DefaultTitleColor = Color.White;
+		public static readonly Color DefaultUnselectedColor = Color.FromRgba(255, 255, 255, 180);
 		private AView _rootView;
 		private readonly IShellContext _shellContext;
 		private TabLayout _tablayout;
@@ -81,8 +93,6 @@ namespace Xamarin.Forms.Platform.Android
 			var shellItem = ShellItem;
 			if (shellItem == null)
 				return null;
-
-			HookEvents();
 
 			var root = inflater.Inflate(Resource.Layout.RootLayout, null).JavaCast<CoordinatorLayout>();
 
@@ -112,9 +122,7 @@ namespace Xamarin.Forms.Platform.Android
 			_viewPager.CurrentItem = currentIndex;
 			scrollview.AddView(_viewPager);
 
-			var appearance = ShellItemController.CurrentShellAppearance;
-			if (appearance != null)
-				ApplyAppearance(appearance);
+			HookEvents();
 
 			return _rootView = root;
 		}
@@ -150,16 +158,6 @@ namespace Xamarin.Forms.Platform.Android
 			SetColors(foreground, background, titleColor, unselectedColor);
 		}
 
-		protected virtual void OnShellAppearanceChanged(object sender, EventArgs e)
-		{
-			var appearance = ShellItemController.CurrentShellAppearance;
-
-			if (appearance != null)
-				ApplyAppearance(appearance);
-			else
-				ResetAppearance();
-		}
-
 		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (_rootView == null)
@@ -178,32 +176,32 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void ResetAppearance()
 		{
-			SetColors(_defaultForegroundColor, _defaultBackgroundColor, _defaultTitleColor, _defaultUnselectedColor);
+			SetColors(DefaultForegroundColor, DefaultBackgroundColor, DefaultTitleColor, DefaultUnselectedColor);
 		}
 
 		private void HookEvents()
 		{
-			ShellItemController.CurrentShellAppearanceChanged += OnShellAppearanceChanged;
+			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, ShellItem);
 			ShellItem.PropertyChanged += OnShellItemPropertyChanged;
 		}
 
 		private void SetColors(Color foreground, Color background, Color title, Color unselected)
 		{
-			var titleArgb = title.ToAndroid(_defaultTitleColor).ToArgb();
-			var unselectedArgb = unselected.ToAndroid(_defaultUnselectedColor).ToArgb();
+			var titleArgb = title.ToAndroid(DefaultTitleColor).ToArgb();
+			var unselectedArgb = unselected.ToAndroid(DefaultUnselectedColor).ToArgb();
 
 			_toolbar.SetTitleTextColor(titleArgb);
 			_tablayout.SetTabTextColors(unselectedArgb, titleArgb);
 
-			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(_defaultBackgroundColor)));
-			_tablayout.SetBackground(new ColorDrawable(background.ToAndroid(_defaultBackgroundColor)));
+			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(DefaultBackgroundColor)));
+			_tablayout.SetBackground(new ColorDrawable(background.ToAndroid(DefaultBackgroundColor)));
 
-			_toolbarTracker.TintColor = foreground.IsDefault ? _defaultForegroundColor : foreground;
+			_toolbarTracker.TintColor = foreground.IsDefault ? DefaultForegroundColor : foreground;
 		}
 
 		private void UnhookEvents()
 		{
-			ShellItemController.CurrentShellAppearanceChanged -= OnShellAppearanceChanged;
+			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
 			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
 		}
 	}
