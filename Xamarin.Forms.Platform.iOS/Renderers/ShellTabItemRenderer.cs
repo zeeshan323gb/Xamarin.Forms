@@ -19,13 +19,12 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private bool _disposed;
 		private bool _ignorePop;
-		private Page _page;
 		private TaskCompletionSource<bool> _popCompletionTask;
 		private IVisualElementRenderer _renderer;
 		private ShellTabItem _shellTabItem;
 		private IShellNavBarAppearanceTracker _appearanceTracker;
 
-		private Dictionary<Page, IShellPageRendererTracker> _trackers =
+		private readonly Dictionary<Page, IShellPageRendererTracker> _trackers =
 			new Dictionary<Page, IShellPageRendererTracker>();
 
 		public ShellTabItemRenderer(IShellContext context)
@@ -34,14 +33,7 @@ namespace Xamarin.Forms.Platform.iOS
 			_context = context;
 		}
 
-		public Page Page
-		{
-			get => _page;
-			private set
-			{
-				_page = value;
-			}
-		}
+		public Page Page { get; private set; }
 
 		public ShellTabItem ShellTabItem
 		{
