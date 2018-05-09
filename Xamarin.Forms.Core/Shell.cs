@@ -166,15 +166,16 @@ namespace Xamarin.Forms
 			{
 				var observer = t.Item1;
 				var pivot = t.Item2;
+				var parent = pivot;
 
-				while (!Application.IsApplicationOrNull(pivot))
+				while (!Application.IsApplicationOrNull(parent))
 				{
-					if (pivot == source)
+					if (parent == source)
 					{
 						observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
 						break;
 					}
-					pivot = pivot.Parent;
+					parent = parent.Parent;
 				}
 			}
 		}

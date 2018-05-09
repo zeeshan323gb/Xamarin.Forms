@@ -78,6 +78,7 @@ namespace Xamarin.Forms
 		{
 			if (_contentCache == page)
 			{
+				OnChildRemoved(page);
 				_contentCache = null;
 			}
 		}
@@ -237,8 +238,8 @@ namespace Xamarin.Forms
 				RequestType = NavigationRequestType.Insert
 			};
 			_navStack.Insert(index, page);
-			SendAppearanceChanged();
 			AddPage(page);
+			SendAppearanceChanged();
 			_navigationRequested?.Invoke(this, args);
 
 			SendUpdateCurrentState(ShellNavigationSource.InsertPageInStack);
@@ -339,8 +340,8 @@ namespace Xamarin.Forms
 			};
 
 			_navStack.Add(page);
-			SendAppearanceChanged();
 			AddPage(page);
+			SendAppearanceChanged();
 			_navigationRequested?.Invoke(this, args);
 
 			SendUpdateCurrentState(ShellNavigationSource.PushEvent);
