@@ -30,7 +30,7 @@ namespace Xamarin.Forms.Platform.Android
 		private ShellTabItem _currentTabItem;
 		private List<Fragment> _fragmentStack = new List<Fragment>();
 		private FrameLayout _navigationTarget;
-		private ShellItemRenderer _rootFragment;
+		private Fragment _rootFragment;
 		private ShellItem _shellItem;
 
 		public ShellNavigationFragment(IShellContext shellContext)
@@ -135,7 +135,10 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (_rootFragment == null)
 			{
-				_rootFragment = new ShellItemRenderer(_shellContext) { ShellItem = _shellItem };
+				//if (_shellItem.Items.Count > 1)
+					_rootFragment = new ShellItemRenderer(_shellContext) { ShellItem = _shellItem };
+				//else
+				//	_rootFragment = new ShellContentFragment(_shellContext, _shellItem.CurrentItem);
 			}
 
 			if (_currentFragment == _rootFragment && stack.Count == 1)

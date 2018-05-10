@@ -6,8 +6,16 @@ namespace Xamarin.Forms
 {
 	public static class Routing
 	{
+		private static int routeCount = 0;
+
 		public static readonly BindableProperty RouteProperty =
-			BindableProperty.CreateAttached("Route", typeof(string), typeof(Routing), null);
+			BindableProperty.CreateAttached("Route", typeof(string), typeof(Routing), null, 
+				defaultValueCreator: CreateDefaultRoute);
+
+		private static object CreateDefaultRoute(BindableObject bindable)
+		{
+			return bindable.GetType().Name + ++routeCount;
+		}
 
 		private static Dictionary<string, RouteFactory> _routes = new Dictionary<string, RouteFactory>();
 

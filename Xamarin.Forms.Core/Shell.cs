@@ -346,6 +346,8 @@ namespace Xamarin.Forms
 			var queryData = ParseQueryString(queryString);
 			var path = uri.AbsolutePath;
 
+			path = path.TrimEnd('/');
+
 			var parts = path.Substring(1).Split('/');
 
 			if (path.Length < 2)
@@ -355,7 +357,8 @@ namespace Xamarin.Forms
 			var shellItemRoute = parts[1];
 			var shellTabItemRoute = parts.Length > 2 ? parts[2] : null;
 
-			if (Routing.GetRoute(this) != shellRoute)
+			var expectedShellRoute = Routing.GetRoute(this) ?? string.Empty;
+			if (expectedShellRoute != shellRoute)
 				throw new NotImplementedException();
 
 			ApplyQueryAttributes(this, queryData, false);
