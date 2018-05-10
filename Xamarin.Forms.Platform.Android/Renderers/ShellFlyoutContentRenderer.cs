@@ -73,18 +73,30 @@ namespace Xamarin.Forms.Platform.Android
 			menu.Clear();
 			var shell = _shellContext.Shell;
 
+			int gid = 0;
+			int id = 0;
+
 			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
-			ISubMenu section = null;
 			foreach (var shellItem in shell.Items)
 			{
 				bool isCurrentShellItem = shell.CurrentItem == shellItem;
 				var groupBehavior = shellItem.GroupBehavior;
 				if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
 				{
-					section = menu.AddSubMenu(new Java.Lang.String(shellItem.Title));
+					IMenu section = null;
+					if (string.IsNullOrEmpty(shellItem.Title))
+					{
+						gid++;
+						section = menu;
+					}
+					else
+					{
+						section = menu.AddSubMenu(new Java.Lang.String(shellItem.Title));
+					}
+
 					foreach (var tabItem in shellItem.Items)
 					{
-						var item = section.Add(new Java.Lang.String(tabItem.Title));
+						var item = section.Add(gid, id, 0, new Java.Lang.String(tabItem.Title));
 						item.SetEnabled(tabItem.IsEnabled);
 						if (tabItem.Icon != null)
 						{
@@ -107,10 +119,11 @@ namespace Xamarin.Forms.Platform.Android
 							}
 						}
 					}
+					gid++;
 				}
 				else
 				{
-					var subItem = menu.Add(new Java.Lang.String(shellItem.Title));
+					var subItem = menu.Add(gid, id, 0, new Java.Lang.String(shellItem.Title));
 					subItem.SetEnabled(shellItem.IsEnabled);
 					if (shellItem.Icon != null)
 					{
@@ -125,10 +138,10 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (shell.MenuItems.Count > 0)
 			{
-				section = menu.AddSubMenu(null);
+				gid++;
 				foreach (var menuItem in shell.MenuItems)
 				{
-					var subItem = section.Add(new Java.Lang.String(menuItem.Text));
+					var subItem = menu.Add(gid, id, 0, new Java.Lang.String(menuItem.Text));
 					subItem.SetEnabled(menuItem.IsEnabled);
 					if (menuItem.Icon != null)
 					{
