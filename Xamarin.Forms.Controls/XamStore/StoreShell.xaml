@@ -17,10 +17,10 @@
 	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 
 	<ShellItem GroupBehavior="ShowTabs">
-		<ShellTabItem Title="Home" Icon="home.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Games" Icon="games.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 		<ShellTabItem Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Books" Icon="books.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 		<ShellTabItem Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 		<ShellTabItem Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 	</ShellItem>
