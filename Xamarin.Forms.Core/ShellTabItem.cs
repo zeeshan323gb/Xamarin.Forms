@@ -25,7 +25,7 @@ namespace Xamarin.Forms
 			AppearanceTrackerUtils.AppearanceChanged(this, source);
 		}
 
-		#endregion
+		#endregion IShellAppearanceTracker
 
 		#region IShellTabItemController
 
@@ -104,8 +104,11 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ContentTemplateProperty =
 			BindableProperty.Create(nameof(ContentTemplate), typeof(DataTemplate), typeof(ShellTabItem), null, BindingMode.OneTime);
 
+		public static readonly BindableProperty FlyoutIconProperty =
+			BindableProperty.Create(nameof(FlyoutIcon), typeof(ImageSource), typeof(ShellTabItem), null, BindingMode.OneTime);
+
 		public static readonly BindableProperty IconProperty =
-			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellTabItem), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellTabItem), null, BindingMode.OneTime, propertyChanged: OnIconChanged);
 
 		public static readonly BindableProperty IsEnabledProperty =
 			BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(ShellTabItem), true, BindingMode.OneWay);
@@ -139,6 +142,12 @@ namespace Xamarin.Forms
 			set { SetValue(ContentTemplateProperty, value); }
 		}
 
+		public ImageSource FlyoutIcon
+		{
+			get { return (ImageSource)GetValue(FlyoutIconProperty); }
+			set { SetValue(FlyoutIconProperty, value); }
+		}
+
 		public ImageSource Icon
 		{
 			get { return (ImageSource)GetValue(IconProperty); }
@@ -169,9 +178,20 @@ namespace Xamarin.Forms
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
 
+		private Shell Shell => Parent?.Parent as Shell;
+
 		private ShellItem ShellItem => Parent as ShellItem;
 
-		private Shell Shell => Parent?.Parent as Shell;
+		public static implicit operator ShellTabItem(TemplatedPage page)
+		{
+			var result = new ShellTabItem();
+
+			result.Content = page;
+			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
+			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+
+			return result;
+		}
 
 		public virtual async Task GoToAsync(List<string> routes, IDictionary<string, string> queryData)
 		{
@@ -204,22 +224,6 @@ namespace Xamarin.Forms
 			}
 
 			SendAppearanceChanged();
-		}
-
-		private void SendAppearanceChanged()
-		{
-			(this as IShellAppearanceTracker).AppearanceChanged(this);
-		}
-
-		public static implicit operator ShellTabItem(TemplatedPage page)
-		{
-			var result = new ShellTabItem();
-
-			result.Content = page;
-			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
-			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
-
-			return result;
 		}
 
 		protected virtual IReadOnlyList<Page> GetNavigationStack()
@@ -393,6 +397,15 @@ namespace Xamarin.Forms
 			}
 		}
 
+		private static void OnIconChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			if (newValue == null || bindable.IsSet(FlyoutIconProperty))
+				return;
+
+			var shellTabItem = (ShellTabItem)bindable;
+			shellTabItem.FlyoutIcon = (ImageSource)newValue;
+		}
+
 		private void AddPage(Page page)
 		{
 			_logicalChildren.Add(page);
@@ -413,6 +426,11 @@ namespace Xamarin.Forms
 		{
 			if (_logicalChildren.Remove(page))
 				OnChildRemoved(page);
+		}
+
+		private void SendAppearanceChanged()
+		{
+			(this as IShellAppearanceTracker).AppearanceChanged(this);
 		}
 
 		private void SendUpdateCurrentState(ShellNavigationSource source)

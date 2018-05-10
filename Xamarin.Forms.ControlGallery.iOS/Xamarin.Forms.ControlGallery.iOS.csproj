@@ -170,6 +170,17 @@
     <BundleResource Include="oasissmall.jpg" />
     <Content Include="coffee%402x.png" />
     <BundleResource Include="Resources\invalidimage.jpg" />
+    <BundleResource Include="Resources\games-flyout.png" />
+    <BundleResource Include="Resources\games-flyout%402x.png" />
+    <BundleResource Include="Resources\games.png" />
+    <BundleResource Include="Resources\games%402x.png" />
+    <BundleResource Include="Resources\books-flyout.png" />
+    <BundleResource Include="Resources\books-flyout%402x.png" />
+    <BundleResource Include="Resources\books.png" />
+    <BundleResource Include="Resources\books%402x.png" />
+    <BundleResource Include="Resources\home-flyout.png" />
+    <BundleResource Include="Resources\home-flyout%402x.png" />
+    <BundleResource Include="Resources\home%402x.png" />
     <Content Include="settings%402x.png" />
     <Content Include="menuIcon%402x.png" />
     <Content Include="crimsonsmall.jpg" />
@@ -246,6 +257,7 @@
     <BundleResource Include="Resources\xamarinlogo.png" />
     <BundleResource Include="coffee.png" />
     <Content Include="Default-812h%403x.png" />
+    <Content Include="xamarinstore.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AdvancedColorPicker, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">

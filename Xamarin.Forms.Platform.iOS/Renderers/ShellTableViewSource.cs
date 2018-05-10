@@ -10,7 +10,17 @@ namespace Xamarin.Forms.Platform.iOS
 	{
 		private readonly IShellContext _context;
 		private readonly Action<Element> _onElementSelected;
+		private DataTemplate _defaultItemTemplate;
+		private DataTemplate _defaultMenuItemTemplate;
 		private List<List<Element>> _groups;
+
+		public ShellTableViewSource(IShellContext context, Action<Element> onElementSelected)
+		{
+			_context = context;
+			_onElementSelected = onElementSelected;
+		}
+
+		public event EventHandler<UIScrollView> ScrolledEvent;
 
 		public List<List<Element>> Groups
 		{
@@ -25,18 +35,16 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		public ShellTableViewSource(IShellContext context, Action<Element> onElementSelected)
-		{
-			_context = context;
-			_onElementSelected = onElementSelected;
-		}
-		
-		public void ClearCache ()
+		protected virtual DataTemplate DefaultItemTemplate =>
+			_defaultItemTemplate ?? (_defaultItemTemplate = new DataTemplate(() => GenerateDefaultCell("Title", "FlyoutIcon")));
+
+		protected virtual DataTemplate DefaultMenuItemTemplate =>
+			_defaultMenuItemTemplate ?? (_defaultMenuItemTemplate = new DataTemplate(() => GenerateDefaultCell("Text", "Icon")));
+
+		public void ClearCache()
 		{
 			_groups = null;
 		}
-
-		public event EventHandler<UIScrollView> ScrolledEvent;
 
 		public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
 		{
@@ -44,10 +52,14 @@ namespace Xamarin.Forms.Platform.iOS
 			int row = indexPath.Row;
 			var context = Groups[section][row];
 
-			var template = _context.Shell.ItemTemplate;
+			DataTemplate template = null;
 			if (context is MenuItem)
 			{
-				template = _context.Shell.MenuItemTemplate;
+				template = _context.Shell.MenuItemTemplate ?? DefaultMenuItemTemplate;
+			}
+			else
+			{
+				template = _context.Shell.ItemTemplate ?? DefaultItemTemplate;
 			}
 
 			var cellId = ((IDataTemplateController)template.SelectDataTemplate(context, _context.Shell)).IdString;
@@ -69,9 +81,16 @@ namespace Xamarin.Forms.Platform.iOS
 			return cell;
 		}
 
-		public override void WillDisplay(UITableView tableView, UITableViewCell cell, NSIndexPath indexPath)
+		public override nfloat GetHeightForFooter(UITableView tableView, nint section)
 		{
-			cell.BackgroundColor = UIColor.Clear;
+			if (section < Groups.Count - 1)
+				return 1;
+			return 0;
+		}
+
+		public override UIView GetViewForFooter(UITableView tableView, nint section)
+		{
+			return new SeparatorView();
 		}
 
 		public override nint NumberOfSections(UITableView tableView)
@@ -93,21 +112,37 @@ namespace Xamarin.Forms.Platform.iOS
 			return Groups[(int)section].Count;
 		}
 
-		public override nfloat GetHeightForFooter(UITableView tableView, nint section)
-		{
-			if (section < Groups.Count - 1)
-				return 1;
-			return 0;
-		}
-
-		public override UIView GetViewForFooter(UITableView tableView, nint section)
-		{
-			return new SeparatorView();
-		}
-
 		public override void Scrolled(UIScrollView scrollView)
 		{
 			ScrolledEvent?.Invoke(this, scrollView);
+		}
+
+		public override void WillDisplay(UITableView tableView, UITableViewCell cell, NSIndexPath indexPath)
+		{
+			cell.BackgroundColor = UIColor.Clear;
+		}
+
+		private View GenerateDefaultCell(string textBinding, string iconBinding)
+		{
+			var grid = new Grid();
+			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = 50 });
+			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+
+			var image = new Image();
+			image.VerticalOptions = image.HorizontalOptions = LayoutOptions.Center;
+			image.HeightRequest = image.WidthRequest = 22;
+			image.SetBinding(Image.SourceProperty, iconBinding);
+			grid.Children.Add(image);
+
+			var label = new Label();
+			label.VerticalTextAlignment = TextAlignment.Center;
+			label.SetBinding(Label.TextProperty, textBinding);
+			grid.Children.Add(label, 1, 0);
+
+			label.FontSize = Device.GetNamedSize(NamedSize.Small, label);
+			label.FontAttributes = FontAttributes.Bold;
+
+			return grid;
 		}
 
 		private void SetVisualGroups(Shell shell, List<List<Element>> groups)
@@ -124,7 +159,7 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					section = new List<Element>();
 					groups.Add(section);
-					
+
 					if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
 					{
 						foreach (var tabItem in shellItem.Items)
@@ -161,7 +196,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private class SeparatorView : UIView
 		{
-			UIView _line;
+			private UIView _line;
+
 			public SeparatorView()
 			{
 				_line = new UIView
