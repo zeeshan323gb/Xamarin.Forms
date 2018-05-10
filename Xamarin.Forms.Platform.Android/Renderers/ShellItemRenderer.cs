@@ -6,6 +6,7 @@ using Android.Support.V4.View;
 using Android.Support.V4.Widget;
 using Android.Views;
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Xamarin.Forms.Platform.Android.AppCompat;
@@ -86,7 +87,6 @@ namespace Xamarin.Forms.Platform.Android
 		public ShellItem ShellItem { get; set; }
 
 		private IShellController ShellController => _shellContext.Shell;
-		private IShellItemController ShellItemController => ShellItem;
 
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -121,6 +121,11 @@ namespace Xamarin.Forms.Platform.Android
 
 			_viewPager.CurrentItem = currentIndex;
 			scrollview.AddView(_viewPager);
+
+			if (shellItem.Items.Count == 1)
+			{
+				_tablayout.Visibility = ViewStates.Gone;
+			}
 
 			HookEvents();
 
@@ -181,9 +186,13 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void HookEvents()
 		{
+			((INotifyCollectionChanged)ShellItem.Items).CollectionChanged += OnItemsCollectionChagned;
 			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, ShellItem);
 			ShellItem.PropertyChanged += OnShellItemPropertyChanged;
 		}
+
+		protected virtual void OnItemsCollectionChagned(object sender, NotifyCollectionChangedEventArgs e) =>
+			_tablayout.Visibility = (ShellItem.Items.Count > 1) ? ViewStates.Visible : ViewStates.Gone;
 
 		private void SetColors(Color foreground, Color background, Color title, Color unselected)
 		{
@@ -201,6 +210,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void UnhookEvents()
 		{
+			((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChagned;
 			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
 			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
 		}

@@ -44,7 +44,7 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(GroupBehavior), typeof(ShellItemGroupBehavior), typeof(ShellItem), ShellItemGroupBehavior.HideTabs, BindingMode.OneTime);
 
 		public static readonly BindableProperty IconProperty =
-			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneWay);
 
 		public static readonly BindableProperty IsEnabledProperty =
 			BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(ShellItem), true, BindingMode.OneWay);
@@ -130,8 +130,8 @@ namespace Xamarin.Forms
 		{
 			var result = new ShellItem();
 			result.Items.Add(tab);
-			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
-			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay, source: tab));
+			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay, source: tab));
 			return result;
 		}
 
@@ -209,8 +209,8 @@ namespace Xamarin.Forms
 			{
 				MenuItem = menuItem;
 
-				SetBinding(TitleProperty, new Binding("Text", BindingMode.OneWay));
-				SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+				SetBinding(TitleProperty, new Binding("Text", BindingMode.OneWay, source: menuItem));
+				SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay, source: menuItem));
 			}
 
 			public MenuItem MenuItem { get; }

@@ -8,5 +8,37 @@
 	</Shell.FlyoutHeader>
 	<ShellItem Title="My apps &amp; games" Icon="grid.png">
 		<ShellTabItem Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Installed" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Library" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 	</ShellItem>
+
+	<ShellTabItem Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+
+	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+
+	<ShellItem Title="Store" GroupBehavior="ShowTabs">
+		<ShellTabItem Title="Home" Icon="home.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Games" Icon="games.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Books" Icon="books.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	</ShellItem>
+
+	<ShellTabItem Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+
+	<MenuItem Text="Redeem" Icon="card.png" />
+	
+	<ShellTabItem Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	
+	<MenuItem Text="Xam Protect" Icon="jet.png" />
+	
+	<ShellTabItem Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+
+
+	<Shell.MenuItems>
+		<MenuItem Text="Help &amp; feedback" />
+		<MenuItem Text="Parent Guide" />
+		<MenuItem Text="About Xam Store" />
+	</Shell.MenuItems>
 </Shell>
