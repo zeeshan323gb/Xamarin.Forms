@@ -15,6 +15,8 @@ namespace Xamarin.Forms.Controls.XamStore
 		public UpdatesPage ()
 		{
 			InitializeComponent ();
+
+			Shell.SetSearchHandler(this, new SearchHandler());
 		}
 	}
 }

@@ -57,8 +57,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		void IVisualElementRenderer.UpdateLayout()
 		{
-			_flyoutRenderer.AndroidView.Layout(0, 0,
-				(int)AndroidContext.ToPixels(Element.Width), (int)AndroidContext.ToPixels(Element.Height));
+			var width = (int)AndroidContext.ToPixels(Element.Width);
+			var height = (int)AndroidContext.ToPixels(Element.Height);
+			_flyoutRenderer.AndroidView.Layout(0, 0, width, height);
 		}
 		#endregion IVisualElementRenderer
 
@@ -171,7 +172,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer()
 		{
-			return new ShellNavigationFragment(this);
+			return new ShellBottomTabFragment(this);
 		}
 
 		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)
