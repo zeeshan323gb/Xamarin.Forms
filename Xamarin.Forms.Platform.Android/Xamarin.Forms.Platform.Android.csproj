@@ -207,6 +207,7 @@
     <Compile Include="Renderers\MotionEventHelper.cs" />
     <Compile Include="Renderers\PageContainer.cs" />
     <Compile Include="Renderers\ScrollViewContainer.cs" />
+    <Compile Include="Renderers\ShellBottomTabFragment.cs" />
     <Compile Include="Renderers\ShellContentFragment.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
@@ -318,7 +319,11 @@
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\Layout\BottomTabLayout.axml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\anim\EnterFromLeft.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>

@@ -28,7 +28,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		private readonly IShellContext _shellContext;
 		private ShellTabItem _currentTabItem;
-		private List<Fragment> _fragmentStack = new List<Fragment>();
 		private FrameLayout _navigationTarget;
 		private Fragment _rootFragment;
 		private ShellItem _shellItem;
