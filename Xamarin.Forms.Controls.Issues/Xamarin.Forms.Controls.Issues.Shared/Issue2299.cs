@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.PlatformConfiguration;
+using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
 
 namespace Xamarin.Forms.Controls.Issues
 {
@@ -11,6 +13,8 @@ namespace Xamarin.Forms.Controls.Issues
 		static Label _label = new Label { Text = "Scroll the list. If you touch one of the Labels marked 'Pan', this label will change." };
 		protected override void Init()
 		{
+			Application.Current.On<iOS>().SetPanGestureRecognizerShouldRecognizeSimultaneously(true);
+
 			Content = new StackLayout
 			{
 				Children = {
