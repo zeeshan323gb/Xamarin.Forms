@@ -5,8 +5,8 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms.Controls.Issues
 {
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Github, 2296, "[iOS] ListView does not work inside a container which has a gesture recognizer", PlatformAffected.iOS)]
-	public class Issue2296 : TestContentPage
+	[Issue(IssueTracker.Github, 2299, "[iOS] ListView does not scroll when a control in listview has a PanGestureRecognizer", PlatformAffected.iOS)]
+	public class Issue2299 : TestContentPage
 	{
 		static Label _label = new Label { Text = "Scroll the list. If you touch one of the Labels marked 'Pan', this label will change." };
 		protected override void Init()
