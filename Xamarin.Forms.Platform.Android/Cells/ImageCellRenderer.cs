@@ -31,7 +31,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (cell.ImageSource != null)
 			{
 				View.SetImageVisible(true);
-				View.SetImageSource(cell.ImageSource);
+				View.SetImageSource(cell);
 			}
 			else
 				View.SetImageVisible(false);

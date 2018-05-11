@@ -97,10 +97,6 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				Log.Warning(nameof(ImageRenderer), "Error loading image: {0}", ex);
 			}
-			finally
-			{
-				((IImageController)Element)?.SetIsLoading(false);
-			}
 		}
 
 		protected async Task UpdateBitmap(Image previous = null)

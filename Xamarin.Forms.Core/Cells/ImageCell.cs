@@ -1,12 +1,16 @@
 using System;
+using System.ComponentModel;
 
 namespace Xamarin.Forms
 {
-	public class ImageCell : TextCell
+	public class ImageCell : TextCell, IImageController
 	{
 		public static readonly BindableProperty ImageSourceProperty = BindableProperty.Create("ImageSource", typeof(ImageSource), typeof(ImageCell), null,
 			propertyChanging: (bindable, oldvalue, newvalue) => ((ImageCell)bindable).OnSourcePropertyChanging((ImageSource)oldvalue, (ImageSource)newvalue),
 			propertyChanged: (bindable, oldvalue, newvalue) => ((ImageCell)bindable).OnSourcePropertyChanged((ImageSource)oldvalue, (ImageSource)newvalue));
+
+		internal static readonly BindablePropertyKey IsLoadingPropertyKey = BindableProperty.CreateReadOnly(nameof(IsLoading), typeof(bool), typeof(Image), default(bool));
+		public static readonly BindableProperty IsLoadingProperty = IsLoadingPropertyKey.BindableProperty;
 
 		public ImageCell()
 		{
@@ -24,6 +28,8 @@ namespace Xamarin.Forms
 			get { return (ImageSource)GetValue(ImageSourceProperty); }
 			set { SetValue(ImageSourceProperty, value); }
 		}
+
+		public bool IsLoading => (bool)GetValue(IsLoadingProperty);
 
 		protected override void OnBindingContextChanged()
 		{
@@ -52,5 +58,13 @@ namespace Xamarin.Forms
 			if (oldvalue != null)
 				oldvalue.SourceChanged -= OnSourceChanged;
 		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		void IImageController.SetIsLoading(bool isLoading)
+		{
+			SetValue(IsLoadingPropertyKey, isLoading);
+		}
+
+		ImageSource IImageController.Source => ImageSource;
 	}
 }

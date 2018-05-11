@@ -12,6 +12,7 @@ using AColorDraw = Android.Graphics.Drawables.ColorDrawable;
 using Xamarin.Forms.Internals;
 using Android.Support.V4.Widget;
 using Android.OS;
+using System;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -156,10 +157,31 @@ namespace Xamarin.Forms.Platform.Android
 			_detailText.SetTextColor(color.ToAndroid(_defaultDetailColor));
 		}
 
-		public void SetImageSource(ImageSource source)
+		public async void SetImageSource(ImageSource source)
 		{
-			UpdateBitmap(source, _imageSource);
-			_imageSource = source;
+
+			try
+			{
+				_imageSource = source;
+				await _imageView.UpdateBitmap(source, null);
+			}
+			catch (Exception ex)
+			{
+				Log.Warning(nameof(BaseCellView), "Error loading image: {0}", ex);
+			}
+		}
+
+		internal async void SetImageSource(IImageController source)
+		{
+			try
+			{
+				_imageSource = source?.Source;
+				await _imageView.UpdateBitmap(source);
+			}
+			catch (Exception ex)
+			{
+				Log.Warning(nameof(BaseCellView), "Error loading image: {0}", ex);
+			}
 		}
 
 		public void SetImageVisible(bool visible)
@@ -185,39 +207,6 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			height = Context.ToPixels(height);
 			LayoutParameters = new LayoutParams(ViewGroup.LayoutParams.MatchParent, (int)(height == -1 ? ViewGroup.LayoutParams.WrapContent : height));
-		}
-
-		async void UpdateBitmap(ImageSource source, ImageSource previousSource = null)
-		{
-			if (Equals(source, previousSource))
-				return;
-
-			_imageView.SetImageResource(global::Android.Resource.Color.Transparent);
-
-			Bitmap bitmap = null;
-			IImageSourceHandler handler;
-
-			if (source != null && (handler = Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(source)) != null)
-			{
-				try
-				{
-					bitmap = await handler.LoadImageAsync(source, Context);
-				}
-				catch (TaskCanceledException)
-				{
-				}
-				catch (IOException ex)
-				{
-					Log.Warning("Xamarin.Forms.Platform.Android.BaseCellView", "Error updating bitmap: {0}", ex);
-				}
-			}
-
-			if (bitmap == null && source is FileImageSource)
-				_imageView.SetImageResource(ResourceManager.GetDrawableByName(((FileImageSource)source).File));
-			else
-				_imageView.SetImageBitmap(bitmap);
-
-			bitmap?.Dispose();
 		}
 	}
 }
