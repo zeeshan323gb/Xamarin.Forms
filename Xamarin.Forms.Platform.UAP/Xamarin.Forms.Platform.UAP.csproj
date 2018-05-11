@@ -54,6 +54,8 @@
     <Compile Include="FormsSlider.cs" />
     <Compile Include="FormsTextBox.cs" />
     <Compile Include="FormsComboBox.cs" />
+    <Compile Include="IImageVisualElementRenderer.cs" />
+    <Compile Include="ImageElementManager.cs" />
     <Compile Include="InterceptVisualStateManager.cs" />
     <Compile Include="HorizontalTextAlignmentConverter.cs" />
     <Compile Include="ITitleProvider.cs" />

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
 {
@@ -60,9 +61,13 @@ namespace Xamarin.Forms
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		void IImageController.SetIsLoading(bool isLoading)
+		void IImageController.SetIsLoading(bool isLoading) => SetValue(IsLoadingPropertyKey, isLoading);
+
+		void IImageController.NativeSizeChanged()
 		{
-			SetValue(IsLoadingPropertyKey, isLoading);
+		}
+		void IImageController.InvalidateMeasure(InvalidationTrigger trigger)
+		{
 		}
 
 		ImageSource IImageController.Source => ImageSource;

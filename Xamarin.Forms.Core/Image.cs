@@ -10,7 +10,7 @@ namespace Xamarin.Forms
 	[RenderWith(typeof(_ImageRenderer))]
 	public class Image : View, IImageController, IElementConfiguration<Image>
 	{
-		public static readonly BindableProperty SourceProperty = BindableProperty.Create("Source", typeof(ImageSource), typeof(Image), default(ImageSource), 
+		public static readonly BindableProperty SourceProperty = BindableProperty.Create("Source", typeof(ImageSource), typeof(Image), default(ImageSource),
 			propertyChanging: OnSourcePropertyChanging, propertyChanged: OnSourcePropertyChanged);
 
 		public static readonly BindableProperty AspectProperty = BindableProperty.Create("Aspect", typeof(Aspect), typeof(Image), Aspect.AspectFit);
@@ -51,6 +51,8 @@ namespace Xamarin.Forms
 			get { return (ImageSource)GetValue(SourceProperty); }
 			set { SetValue(SourceProperty, value); }
 		}
+
+		ImageSource IImageController.Source => throw new NotImplementedException();
 
 		protected override void OnBindingContextChanged()
 		{
@@ -149,14 +151,14 @@ namespace Xamarin.Forms
 		{
 			if (oldvalue == null)
 				return;
-			
+
 			oldvalue.SourceChanged -= OnSourceChanged;
 			try
 			{
 				await oldvalue.Cancel();
 			}
-			catch(ObjectDisposedException)
-			{ 
+			catch (ObjectDisposedException)
+			{
 				// Workaround bugzilla 37792 https://bugzilla.xamarin.com/show_bug.cgi?id=37792
 			}
 		}
@@ -170,6 +172,10 @@ namespace Xamarin.Forms
 		public IPlatformElementConfiguration<T, Image> On<T>() where T : IConfigPlatform
 		{
 			return _platformConfigurationRegistry.Value.On<T>();
+		}
+		void IImageController.InvalidateMeasure(InvalidationTrigger trigger)
+		{
+			((IVisualElementController)(this)).InvalidateMeasure(trigger);
 		}
 	}
 }

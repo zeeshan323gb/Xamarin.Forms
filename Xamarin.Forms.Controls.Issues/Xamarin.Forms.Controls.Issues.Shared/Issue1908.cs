@@ -75,22 +75,22 @@ namespace Xamarin.Forms.Controls.Issues
 				{
 					AutomationId = "ListViewScrollMe",
 					ItemsSource = list,
-					ItemTemplate = new DataTemplate(() => new ImageCell { ImageSource = "oasis" })
+					ItemTemplate = new DataTemplate(() => new ImageCell { ImageSource = "oasis.jpg" })
 				};
 				Content = listView;
 
 				listView.ItemAppearing += async (_, args) =>
 				{
 					await Task.Delay(1000);
-					if(args.Item == list[0])
-					{
-						listView.ScrollTo(list[list.Count - 1], ScrollToPosition.End, true);
-					}
-					else if(args.Item == list[list.Count - 1])
-					{
-						await Task.Delay(1000);
-						Content = new Label() { Text = "Success" };
-					}
+					//if(args.Item == list[0])
+					//{
+					//	listView.ScrollTo(list[list.Count - 1], ScrollToPosition.End, true);
+					//}
+					//else if(args.Item == list[list.Count - 1])
+					//{
+					//	await Task.Delay(1000);
+					//	Content = new Label() { Text = "Success" };
+					//}
 				};
 			}
 		}

@@ -8,7 +8,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.UWP
 {
-	public class ImageRenderer : ViewRenderer<Image, Windows.UI.Xaml.Controls.Image>
+	public class ImageRenderer : ViewRenderer<Image, Windows.UI.Xaml.Controls.Image>, IImageVisualElementRenderer
 	{
 		bool _measured;
 		bool _disposed;
@@ -93,7 +93,7 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			if (_measured)
 			{
-				RefreshImage();
+				ImageElementManager.RefreshImage(Element);
 			}
 
 			Element?.SetIsLoading(false);
@@ -101,7 +101,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		protected virtual void OnImageFailed(object sender, ExceptionRoutedEventArgs exceptionRoutedEventArgs)
 		{
-			Log.Warning("Image Loading", $"Image failed to load: {exceptionRoutedEventArgs.ErrorMessage}" );
+			Log.Warning("Image Loading", $"Image failed to load: {exceptionRoutedEventArgs.ErrorMessage}");
 			Element?.SetIsLoading(false);
 		}
 
@@ -152,42 +152,19 @@ namespace Xamarin.Forms.Platform.UWP
 
 		protected async Task UpdateSource()
 		{
-			if (_disposed || Element == null || Control == null)
-			{
-				return;
-			}
-
-			Element.SetIsLoading(true);
-
-			ImageSource source = Element.Source;
-			IImageSourceHandler handler;
-			if (source != null && (handler = Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(source)) != null)
-			{
-				Windows.UI.Xaml.Media.ImageSource imagesource;
-
-				try
-				{
-					imagesource = await handler.LoadImageAsync(source);
-				}
-				catch (OperationCanceledException)
-				{
-					imagesource = null;
-				}
-
-				// In the time it takes to await the imagesource, some zippy little app
-				// might have disposed of this Image already.
-				if (Control != null)
-				{
-					Control.Source = imagesource;
-				}
-
-				RefreshImage();
-			}
-			else
-			{
-				Control.Source = null;
-				Element.SetIsLoading(false);
-			}
+			await ImageElementManager.UpdateSource(this);
 		}
+
+		bool IImageVisualElementRenderer.IsDisposed => _disposed;
+
+		void IImageVisualElementRenderer.SetImage(Windows.UI.Xaml.Media.ImageSource image)
+		{
+			// In the time it takes to await the imagesource, some zippy little app
+			// might have disposed of this Image already.
+			if (Control != null)
+				Control.Source = image;
+		}
+
+		Windows.UI.Xaml.Controls.Image IImageVisualElementRenderer.GetImage() => Control;
 	}
 }

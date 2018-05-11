@@ -22,7 +22,7 @@ namespace Xamarin.Forms.Platform.MacOS
 	{
 	}
 
-	public abstract class ViewRenderer<TView, TNativeView> : VisualElementRenderer<TView> where TView : View where TNativeView : NativeView
+	public abstract class ViewRenderer<TView, TNativeView> : VisualElementRenderer<TView>, IVisualNativeElementRenderer where TView : View where TNativeView : NativeView
 	{
 #if __MOBILE__
 		string _defaultAccessibilityLabel;
@@ -37,6 +37,7 @@ namespace Xamarin.Forms.Platform.MacOS
 		}
 
 		public TNativeView Control { get; private set; }
+		NativeView IVisualNativeElementRenderer.Control => Control;
 #if __MOBILE__
 		public override void LayoutSubviews()
 		{

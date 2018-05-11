@@ -7,16 +7,8 @@ namespace Xamarin.Forms.Platform.UWP
 	{
 		public object Convert(object value, Type targetType, object parameter, string language)
 		{
-			var source = (ImageSource)value;
-			IImageSourceHandler handler;
-
-			if (source != null && (handler = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(source)) != null)
-			{
-				Task<Windows.UI.Xaml.Media.ImageSource> task = handler.LoadImageAsync(source);
-				return new AsyncValue<Windows.UI.Xaml.Media.ImageSource>(task, null);
-			}
-
-			return null;
+			var controller = (IImageController)value;
+			return new AsyncValue<Windows.UI.Xaml.Media.ImageSource>(ImageElementManager.GetImage(controller), null);
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, string language)

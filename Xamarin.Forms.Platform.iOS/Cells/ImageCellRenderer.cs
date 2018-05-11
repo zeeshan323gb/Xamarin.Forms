@@ -31,39 +31,9 @@ namespace Xamarin.Forms.Platform.iOS
 				SetImage(imageCell, tvc);
 		}
 
-		async void SetImage(ImageCell cell, CellTableViewCell target)
+		protected async void SetImage(ImageCell cell, CellTableViewCell target)
 		{
-			var source = cell.ImageSource;
-
-			target.ImageView.Image = null;
-
-			IImageSourceHandler handler;
-
-			if (source != null && (handler = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(source)) != null)
-			{
-				UIImage uiimage;
-				try
-				{
-					uiimage = await handler.LoadImageAsync(source).ConfigureAwait(false);
-				}
-				catch (TaskCanceledException)
-				{
-					uiimage = null;
-				}
-
-				NSRunLoop.Main.BeginInvokeOnMainThread(() =>
-				{
-					if (target.Cell != null)
-					{
-						target.ImageView.Image = uiimage;
-						target.SetNeedsLayout();
-					}
-					else
-						uiimage?.Dispose();
-				});
-			}
-			else
-				target.ImageView.Image = null;
+			await ImageElementManager.SetImage(cell, target);
 		}
 	}
 }
