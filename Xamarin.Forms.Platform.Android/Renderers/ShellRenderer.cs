@@ -172,7 +172,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer()
 		{
-			return new ShellNavigationFragment(this);
+			return new ShellBottomTabItemRenderer(this);
 		}
 
 		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)

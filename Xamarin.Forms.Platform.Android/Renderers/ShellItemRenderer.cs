@@ -2,6 +2,7 @@
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
+using Android.Support.V4.App;
 using Android.Support.V4.View;
 using Android.Support.V4.Widget;
 using Android.Views;
@@ -17,7 +18,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellItemRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IAppearanceObserver
+	public class ShellItemRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
 	{
 		#region IOnPageChangeListener
 
@@ -84,9 +85,13 @@ namespace Xamarin.Forms.Platform.Android
 		{
 		}
 
+		public event EventHandler AnimationFinished;
+
 		public ShellItem ShellItem { get; set; }
 
 		private IShellController ShellController => _shellContext.Shell;
+
+		Fragment IShellObservableFragment.Fragment => this;
 
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -213,6 +218,11 @@ namespace Xamarin.Forms.Platform.Android
 			((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChagned;
 			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
 			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
+		}
+
+		protected virtual void OnAnimationFinished(EventArgs e)
+		{
+			AnimationFinished?.Invoke(this, e);
 		}
 	}
 }
