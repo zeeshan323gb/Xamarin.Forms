@@ -148,16 +148,16 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void ResetAppearance()
 		{
-			SetColors(ShellItemRenderer.DefaultForegroundColor, ShellItemRenderer.DefaultBackgroundColor, ShellItemRenderer.DefaultTitleColor);
+			SetColors(ShellTopTabFragment.DefaultForegroundColor, ShellTopTabFragment.DefaultBackgroundColor, ShellTopTabFragment.DefaultTitleColor);
 		}
 
 		private void SetColors(Color foreground, Color background, Color title)
 		{
-			var titleArgb = title.ToAndroid(ShellItemRenderer.DefaultTitleColor).ToArgb();
+			var titleArgb = title.ToAndroid(ShellTopTabFragment.DefaultTitleColor).ToArgb();
 
 			_toolbar.SetTitleTextColor(titleArgb);
-			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(ShellItemRenderer.DefaultBackgroundColor)));
-			_toolbarTracker.TintColor = foreground.IsDefault ? ShellItemRenderer.DefaultForegroundColor : foreground;
+			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(ShellTopTabFragment.DefaultBackgroundColor)));
+			_toolbarTracker.TintColor = foreground.IsDefault ? ShellTopTabFragment.DefaultForegroundColor : foreground;
 		}
 
 		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)

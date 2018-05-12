@@ -213,13 +213,13 @@
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
     <Compile Include="Renderers\ShellFragmentPagerAdapter.cs" />
-    <Compile Include="Renderers\ShellItemRenderer.cs" />
     <Compile Include="Renderers\ShellItemRendererBase.cs" />
     <Compile Include="Renderers\ShellPageContainer.cs" />
     <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\ShellSearchView.cs" />
     <Compile Include="Renderers\ShellSearchViewAdapter.cs" />
     <Compile Include="Renderers\ShellToolbarTracker.cs" />
+    <Compile Include="Renderers\ShellTopTabFragment.cs" />
     <Compile Include="Renderers\ShellTopTabItemRenderer.cs" />
     <Compile Include="Renderers\StreamImagesourceHandler.cs" />
     <Compile Include="Renderers\ToolbarButton.cs" />

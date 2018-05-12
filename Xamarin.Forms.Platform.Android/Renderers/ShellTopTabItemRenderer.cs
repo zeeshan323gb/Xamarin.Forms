@@ -49,7 +49,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected override IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab)
 		{
-			return _rootFragment ?? (_rootFragment = new ShellItemRenderer(ShellContext) { ShellItem = ShellItem });
+			return _rootFragment ?? (_rootFragment = new ShellTopTabFragment(ShellContext) { ShellItem = ShellItem });
 		}
 	}
 }
