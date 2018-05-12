@@ -20,7 +20,8 @@
 		public static readonly BindableProperty TabBarVisibleProperty =
 			BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(ShellAppearance), true);
 
-		public static readonly BindableProperty UnselectedColorProperty = BindableProperty.Create(nameof(UnselectedColor), typeof(Color), typeof(ShellAppearance), Color.Default, BindingMode.OneTime);
+		public static readonly BindableProperty UnselectedColorProperty =
+			BindableProperty.Create(nameof(UnselectedColor), typeof(Color), typeof(ShellAppearance), Color.Default, BindingMode.OneTime);
 
 		public Color BackgroundColor
 		{
