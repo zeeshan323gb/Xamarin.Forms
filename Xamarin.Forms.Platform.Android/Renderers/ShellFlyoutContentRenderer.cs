@@ -107,6 +107,7 @@ namespace Xamarin.Forms.Platform.Android
 						// when an item is selected we will display its menu items
 						if (isCurrentShellItem && tabItem == shellItem.CurrentItem)
 						{
+							item.SetChecked(true);
 							foreach (var menuItem in tabItem.MenuItems)
 							{
 								var subItem = section.Add(new Java.Lang.String(menuItem.Text));
@@ -114,6 +115,7 @@ namespace Xamarin.Forms.Platform.Android
 								if (menuItem.Icon != null)
 								{
 									SetMenuItemIcon(subItem, menuItem.Icon);
+									subItem.SetCheckable(false);
 								}
 								_lookupTable[subItem] = menuItem;
 							}
@@ -130,6 +132,8 @@ namespace Xamarin.Forms.Platform.Android
 						SetMenuItemIcon(subItem, shellItem.Icon);
 					}
 					subItem.SetCheckable(true);
+					if (isCurrentShellItem)
+						subItem.SetChecked(true);
 					_lookupTable[subItem] = shellItem;
 				}
 
@@ -143,6 +147,7 @@ namespace Xamarin.Forms.Platform.Android
 				{
 					var subItem = menu.Add(gid, id, 0, new Java.Lang.String(menuItem.Text));
 					subItem.SetEnabled(menuItem.IsEnabled);
+					subItem.SetCheckable(false);
 					if (menuItem.Icon != null)
 					{
 						SetMenuItemIcon(subItem, menuItem.Icon);

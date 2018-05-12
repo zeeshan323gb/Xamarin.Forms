@@ -27,7 +27,7 @@ namespace Xamarin.Forms.Platform.Android
 		private IShellObservableFragment _currentFragment;
 		private ShellTabItem _currentTabItem;
 
-		public ShellItemRendererBase(IShellContext shellContext)
+		protected ShellItemRendererBase(IShellContext shellContext)
 		{
 			ShellContext = shellContext;
 		}
