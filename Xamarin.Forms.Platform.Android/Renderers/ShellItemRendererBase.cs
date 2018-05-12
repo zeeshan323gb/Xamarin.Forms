@@ -55,56 +55,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected abstract IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab);
 
-		protected virtual void HookEvents(ShellItem shellItem)
-		{
-			shellItem.PropertyChanged += OnShellItemPropertyChanged;
-			((INotifyCollectionChanged)shellItem.Items).CollectionChanged += OnItemsChanged;
-			CurrentTabItem = shellItem.CurrentItem;
-
-			foreach (var shellTabItem in shellItem.Items)
-			{
-				HookTabEvents(shellTabItem);
-			}
-		}
-
-		protected virtual void HookTabEvents(ShellTabItem shellTabItem)
-		{
-			((IShellTabItemController)shellTabItem).NavigationRequested += OnNavigationRequested;
-		}
-
-		protected virtual void OnCurrentTabItemChanged()
-		{
-			EnsureNavigationState(ShellNavigationSource.ShellTabItemChanged, CurrentTabItem, null, false);
-		}
-
-		protected virtual void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
-		{
-			e.Task = EnsureNavigationState((ShellNavigationSource)e.RequestType, (ShellTabItem)sender, e.Page, e.Animated);
-		}
-
-		protected virtual void OnShellItemPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
-				CurrentTabItem = ShellItem.CurrentItem;
-		}
-
-		protected virtual void UnhookEvents(ShellItem shellItem)
-		{
-			foreach (var shellTabItem in shellItem.Items)
-			{
-				UnhookTabEvents(shellTabItem);
-			}
-
-			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
-			CurrentTabItem = null;
-		}
-
-		protected virtual void UnhookTabEvents(ShellTabItem shellTabItem)
-		{
-			((IShellTabItemController)shellTabItem).NavigationRequested -= OnNavigationRequested;
-		}
-
-		private Task<bool> EnsureNavigationState(ShellNavigationSource navSource, ShellTabItem item, Page page, bool animated)
+		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellTabItem item, Page page, bool animated)
 		{
 			TaskCompletionSource<bool> result = new TaskCompletionSource<bool>();
 
@@ -231,13 +182,80 @@ namespace Xamarin.Forms.Platform.Android
 			return result.Task;
 		}
 
-		private void OnItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		protected virtual void HookEvents(ShellItem shellItem)
+		{
+			shellItem.PropertyChanged += OnShellItemPropertyChanged;
+			((INotifyCollectionChanged)shellItem.Items).CollectionChanged += OnShellTabItemsChanged;
+			CurrentTabItem = shellItem.CurrentItem;
+
+			foreach (var shellTabItem in shellItem.Items)
+			{
+				HookTabEvents(shellTabItem);
+			}
+		}
+
+		protected virtual void HookTabEvents(ShellTabItem shellTabItem)
+		{
+			((IShellTabItemController)shellTabItem).NavigationRequested += OnNavigationRequested;
+		}
+
+		protected virtual void OnCurrentTabItemChanged()
+		{
+			HandleFragmentUpdate(ShellNavigationSource.ShellTabItemChanged, CurrentTabItem, null, false);
+		}
+
+		protected virtual void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
+		{
+			e.Task = HandleFragmentUpdate((ShellNavigationSource)e.RequestType, (ShellTabItem)sender, e.Page, e.Animated);
+		}
+
+		protected virtual void OnShellItemPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
+				CurrentTabItem = ShellItem.CurrentItem;
+		}
+
+		protected virtual void OnShellTabItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			foreach (ShellTabItem tab in e.OldItems)
 				UnhookTabEvents(tab);
 
 			foreach (ShellTabItem tab in e.NewItems)
 				HookTabEvents(tab);
+		}
+
+		protected virtual void SetupAnimation(ShellNavigationSource navSource, FragmentTransaction t, Page page)
+		{
+			switch (navSource)
+			{
+				case ShellNavigationSource.Push:
+					t.SetCustomAnimations(Resource.Animation.EnterFromRight, Resource.Animation.ExitToLeft);
+					break;
+
+				case ShellNavigationSource.Pop:
+				case ShellNavigationSource.PopToRoot:
+					t.SetCustomAnimations(Resource.Animation.EnterFromLeft, Resource.Animation.ExitToRight);
+					break;
+
+				case ShellNavigationSource.ShellTabItemChanged:
+					break;
+			}
+		}
+
+		protected virtual void UnhookEvents(ShellItem shellItem)
+		{
+			foreach (var shellTabItem in shellItem.Items)
+			{
+				UnhookTabEvents(shellTabItem);
+			}
+
+			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
+			CurrentTabItem = null;
+		}
+
+		protected virtual void UnhookTabEvents(ShellTabItem shellTabItem)
+		{
+			((IShellTabItemController)shellTabItem).NavigationRequested -= OnNavigationRequested;
 		}
 
 		private void RemoveAllButCurrent(Fragment skip)
@@ -281,24 +299,6 @@ namespace Xamarin.Forms.Platform.Android
 			var t = ChildFragmentManager.BeginTransaction();
 			t.Remove(fragment);
 			t.CommitAllowingStateLoss();
-		}
-
-		private void SetupAnimation(ShellNavigationSource navSource, FragmentTransaction t, Page page)
-		{
-			switch (navSource)
-			{
-				case ShellNavigationSource.Push:
-					t.SetCustomAnimations(Resource.Animation.EnterFromRight, Resource.Animation.ExitToLeft);
-					break;
-
-				case ShellNavigationSource.Pop:
-				case ShellNavigationSource.PopToRoot:
-					t.SetCustomAnimations(Resource.Animation.EnterFromLeft, Resource.Animation.ExitToRight);
-					break;
-
-				case ShellNavigationSource.ShellTabItemChanged:
-					break;
-			}
 		}
 	}
 }
