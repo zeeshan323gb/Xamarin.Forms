@@ -5,6 +5,7 @@ using Android.Views;
 using Android.Widget;
 using AView = Android.Views.View;
 using IMenu = Android.Views.IMenu;
+using R = Android.Resource;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -125,8 +126,10 @@ namespace Xamarin.Forms.Platform.Android
 			if (showMore)
 			{
 				var menuItem = menu.Add(0, MoreTabId, 0, new Java.Lang.String("More"));
-				SetMenuItemIcon(menuItem, "grid.png");
+				menuItem.SetIcon(Resource.Drawable.abc_ic_menu_overflow_material);
 			}
+
+			_bottomView.Visibility = end == 1 ? ViewStates.Gone : ViewStates.Visible;
 
 			_bottomView.SetShiftMode(false, false);
 		}
