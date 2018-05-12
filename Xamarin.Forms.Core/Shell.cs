@@ -335,7 +335,7 @@ namespace Xamarin.Forms
 		public async Task GoToAsync(ShellNavigationState state, bool animate = true)
 		{
 			// FIXME: This should not be none, we need to compute the delta and set flags correctly
-			var accept = ProposeNavigation(ShellNavigationSource.None, state, true);
+			var accept = ProposeNavigation(ShellNavigationSource.Unknown, state, true);
 			if (!accept)
 				return;
 

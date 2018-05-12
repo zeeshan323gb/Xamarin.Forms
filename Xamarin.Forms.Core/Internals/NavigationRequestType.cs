@@ -5,7 +5,7 @@ namespace Xamarin.Forms.Internals
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	public enum NavigationRequestType
 	{
-		Unknown,
+		Unknown = 0,
 		Push,
 		Pop,
 		PopToRoot,

@@ -370,7 +370,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			stack.RemoveAt(stack.Count - 1);
 
-			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.PopEvent, shellItem, tab, stack, true);
+			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, tab, stack, true);
 		}
 
 		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
