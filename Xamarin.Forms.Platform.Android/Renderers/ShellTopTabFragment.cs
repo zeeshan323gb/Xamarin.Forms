@@ -18,7 +18,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellItemRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
+	public class ShellTopTabFragment : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
 	{
 		#region IOnPageChangeListener
 
@@ -76,12 +76,12 @@ namespace Xamarin.Forms.Platform.Android
 		private IShellToolbarTracker _toolbarTracker;
 		private ViewPager _viewPager;
 
-		public ShellItemRenderer(IShellContext shellContext)
+		public ShellTopTabFragment(IShellContext shellContext)
 		{
 			_shellContext = shellContext;
 		}
 
-		protected ShellItemRenderer(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+		protected ShellTopTabFragment(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
 		{
 		}
 
