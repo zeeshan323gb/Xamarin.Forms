@@ -49,8 +49,6 @@ namespace Xamarin.Forms.Platform.Android
 			PopupManager.Subscribe(this);
 		}
 
-		IApplicationController Controller => _application;
-
 		public event EventHandler ConfigurationChanged;
 
 		public override void OnBackPressed()

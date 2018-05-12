@@ -93,7 +93,7 @@ namespace Xamarin.Forms
 
 			RemovePage(last);
 
-			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
+			SendUpdateCurrentState(ShellNavigationSource.Pop);
 		}
 
 		#endregion IShellTabItemController
@@ -246,7 +246,7 @@ namespace Xamarin.Forms
 			SendAppearanceChanged();
 			_navigationRequested?.Invoke(this, args);
 
-			SendUpdateCurrentState(ShellNavigationSource.InsertPageInStack);
+			SendUpdateCurrentState(ShellNavigationSource.Insert);
 		}
 
 		protected async virtual Task<Page> OnPopAsync(bool animated)
@@ -257,7 +257,7 @@ namespace Xamarin.Forms
 			List<Page> stack = _navStack.ToList();
 			stack.Remove(stack.Last());
 			var allow = ((IShellController)Shell).ProposeNavigation(
-				ShellNavigationSource.PopEvent,
+				ShellNavigationSource.Pop,
 				Parent as ShellItem,
 				this,
 				stack,
@@ -280,7 +280,7 @@ namespace Xamarin.Forms
 				await args.Task;
 			RemovePage(page);
 
-			SendUpdateCurrentState(ShellNavigationSource.PopEvent);
+			SendUpdateCurrentState(ShellNavigationSource.Pop);
 
 			return page;
 		}
@@ -291,7 +291,7 @@ namespace Xamarin.Forms
 				return;
 
 			var allow = ((IShellController)Shell).ProposeNavigation(
-				ShellNavigationSource.PopToRootEvent,
+				ShellNavigationSource.PopToRoot,
 				Parent as ShellItem,
 				this,
 				null,
@@ -320,7 +320,7 @@ namespace Xamarin.Forms
 				RemovePage(oldStack[i]);
 			}
 
-			SendUpdateCurrentState(ShellNavigationSource.PopToRootEvent);
+			SendUpdateCurrentState(ShellNavigationSource.PopToRoot);
 		}
 
 		protected virtual Task OnPushAsync(Page page, bool animated)
@@ -328,7 +328,7 @@ namespace Xamarin.Forms
 			List<Page> stack = _navStack.ToList();
 			stack.Add(page);
 			var allow = ((IShellController)Shell).ProposeNavigation(
-				ShellNavigationSource.PushEvent,
+				ShellNavigationSource.Push,
 				ShellItem,
 				this,
 				stack,
@@ -348,7 +348,7 @@ namespace Xamarin.Forms
 			SendAppearanceChanged();
 			_navigationRequested?.Invoke(this, args);
 
-			SendUpdateCurrentState(ShellNavigationSource.PushEvent);
+			SendUpdateCurrentState(ShellNavigationSource.Push);
 
 			if (args.Task == null)
 				return Task.FromResult(true);
@@ -368,7 +368,7 @@ namespace Xamarin.Forms
 			};
 			_navigationRequested?.Invoke(this, args);
 
-			SendUpdateCurrentState(ShellNavigationSource.RemovePageFromStack);
+			SendUpdateCurrentState(ShellNavigationSource.Remove);
 		}
 
 		private static void OnContentChanged(BindableObject bindable, object oldValue, object newValue)

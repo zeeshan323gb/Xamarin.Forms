@@ -8,56 +8,23 @@ using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
 using AView = Android.Views.View;
 using LP = Android.Views.ViewGroup.LayoutParams;
-using R = Android.Resource;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellNavigationFragment : Fragment, IShellItemRenderer
+	public class ShellNavigationFragment : ShellItemRendererBase
 	{
-		#region IShellItemRenderer
-
-		Fragment IShellItemRenderer.Fragment => this;
-
-		ShellItem IShellItemRenderer.ShellItem
-		{
-			get { return _shellItem; }
-			set { _shellItem = value; }
-		}
-
-		#endregion IShellItemRenderer
-
-		private readonly IShellContext _shellContext;
-		private ShellTabItem _currentTabItem;
+		private Fragment _currentFragment;
+		private readonly Dictionary<Page, IShellObservableFragment> _fragmentMap = new Dictionary<Page, IShellObservableFragment>();
+		private ShellTabItem _lastEnsuredItem;
 		private FrameLayout _navigationTarget;
 		private Fragment _rootFragment;
-		private ShellItem _shellItem;
 
-		public ShellNavigationFragment(IShellContext shellContext)
+		public ShellNavigationFragment(IShellContext shellContext) : base(shellContext)
 		{
-			_shellContext = shellContext;
-		}
-
-		public ShellTabItem CurrentTabItem
-		{
-			get { return _currentTabItem; }
-			set
-			{
-				if (_currentTabItem != null)
-				{
-					UnhookTabEvents(_currentTabItem);
-				}
-				_currentTabItem = value;
-				if (value != null)
-				{
-					HookTabEvents(value);
-					EnsureNavigationState(NavigationRequestType.Push, null, false);
-				}
-			}
 		}
 
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-
 			_navigationTarget = new FrameLayout(Context)
 			{
 				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
@@ -65,7 +32,7 @@ namespace Xamarin.Forms.Platform.Android
 			};
 			_navigationTarget.SetBackgroundColor(global::Android.Graphics.Color.Black);
 
-			HookEvents(_shellItem);
+			HookEvents(ShellItem);
 
 			return _navigationTarget;
 		}
@@ -73,12 +40,9 @@ namespace Xamarin.Forms.Platform.Android
 		public override void OnDestroy()
 		{
 			base.OnDestroy();
-			UnhookEvents(_shellItem);
+			UnhookEvents(ShellItem);
 
-			if (_navigationTarget != null)
-			{
-				_navigationTarget.Dispose();
-			}
+			_navigationTarget?.Dispose();
 
 			_navigationTarget = null;
 			CurrentTabItem = null;
@@ -86,45 +50,27 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellObservableFragment CreateFragmentForPage(Page page)
 		{
-			return new ShellContentFragment(_shellContext, page);
+			return new ShellContentFragment(ShellContext, page);
 		}
 
-		protected virtual void HookEvents(ShellItem shellItem)
+		protected override void OnCurrentTabItemChanged()
 		{
-			_shellItem.PropertyChanged += OnShellItemPropertyChanged;
-			CurrentTabItem = shellItem.CurrentItem;
+			EnsureNavigationState(NavigationRequestType.Push, null, false);
 		}
 
-		protected virtual void HookTabEvents(ShellTabItem shellTabItem)
+		protected override void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
 		{
-			((IShellTabItemController)shellTabItem).NavigationRequested += OnNavigationRequested;
+			if (sender == CurrentTabItem)
+				e.Task = EnsureNavigationState(e.RequestType, e.Page, e.Animated);
 		}
 
-		protected virtual void OnShellItemPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		protected virtual void SetupAnimation(NavigationRequestType navType, FragmentTransaction transaction, Page operativePage)
 		{
-			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
-				CurrentTabItem = _shellItem.CurrentItem;
+			if (navType == NavigationRequestType.Push)
+				transaction.SetCustomAnimations(Resource.Animation.EnterFromRight, Resource.Animation.ExitToLeft);
+			else
+				transaction.SetCustomAnimations(Resource.Animation.EnterFromLeft, Resource.Animation.ExitToRight);
 		}
-
-		protected virtual void UnhookEvents(ShellItem shellItem)
-		{
-			_shellItem.PropertyChanged -= OnShellItemPropertyChanged;
-			CurrentTabItem = null;
-		}
-
-		protected virtual void UnhookTabEvents(ShellTabItem shellTabItem)
-		{
-			((IShellTabItemController)shellTabItem).NavigationRequested -= OnNavigationRequested;
-		}
-
-		private void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
-		{
-			EnsureNavigationState(e.RequestType, e.Page, e.Animated);
-		}
-
-		private Dictionary<Page, IShellObservableFragment> _fragmentMap = new Dictionary<Page, IShellObservableFragment>();
-		private ShellTabItem _lastEnsuredItem;
-		private Fragment _currentFragment;
 
 		private Task<bool> EnsureNavigationState(NavigationRequestType navType, Page page, bool animated)
 		{
@@ -133,12 +79,7 @@ namespace Xamarin.Forms.Platform.Android
 			var stack = CurrentTabItem.Stack;
 
 			if (_rootFragment == null)
-			{
-				//if (_shellItem.Items.Count > 1)
-					_rootFragment = new ShellItemRenderer(_shellContext) { ShellItem = _shellItem };
-				//else
-				//	_rootFragment = new ShellContentFragment(_shellContext, _shellItem.CurrentItem);
-			}
+				_rootFragment = new ShellItemRenderer(ShellContext) { ShellItem = ShellItem };
 
 			if (_currentFragment == _rootFragment && stack.Count == 1)
 			{
@@ -149,6 +90,18 @@ namespace Xamarin.Forms.Platform.Android
 			if (_lastEnsuredItem != CurrentTabItem)
 			{
 				// we switched tabs, we need to clear out the old fragments
+				var clearTrans = ChildFragmentManager.BeginTransaction();
+
+				foreach (var kvp in _fragmentMap)
+				{
+					var frag = kvp.Value.Fragment;
+					// only clear out hidden fragments as the currently visible one will be wiped away in the nav transaction
+					if (frag.IsAdded && _currentFragment != frag)
+						clearTrans.Remove(kvp.Value.Fragment);
+				}
+
+				clearTrans.CommitAllowingStateLoss();
+
 				_fragmentMap.Clear();
 
 				foreach (var p in stack)
@@ -156,8 +109,7 @@ namespace Xamarin.Forms.Platform.Android
 					if (p == null)
 						continue;
 
-					var fragment = CreateFragmentForPage(p);
-					_fragmentMap[p] = fragment;
+					_fragmentMap[p] = CreateFragmentForPage(p);
 				}
 
 				_lastEnsuredItem = CurrentTabItem;
@@ -171,10 +123,12 @@ namespace Xamarin.Forms.Platform.Android
 						if (page != null)
 							_fragmentMap[page] = CreateFragmentForPage(page);
 						break;
+						// this is borked, removed pages never get removed from the view
 					case NavigationRequestType.Pop:
 					case NavigationRequestType.Remove:
 						_fragmentMap.Remove(page);
 						break;
+
 					case NavigationRequestType.PopToRoot:
 						_fragmentMap.Clear();
 						break;
@@ -202,12 +156,7 @@ namespace Xamarin.Forms.Platform.Android
 			var t = ChildFragmentManager.BeginTransaction();
 
 			if (animated)
-			{
-				if (navType == NavigationRequestType.Push)
-					t.SetCustomAnimations(Resource.Animation.EnterFromRight, Resource.Animation.ExitToLeft);
-				else
-					t.SetCustomAnimations(Resource.Animation.EnterFromLeft, Resource.Animation.ExitToRight);
-			}
+				SetupAnimation(navType, t, page);
 
 			Fragment animationTrackFragment = null;
 			switch (navType)
@@ -217,7 +166,7 @@ namespace Xamarin.Forms.Platform.Android
 
 					if (_currentFragment != null)
 						t.Hide(_currentFragment);
-						
+
 					t.Add(_navigationTarget.Id, targetFragment);
 					t.Show(targetFragment);
 
@@ -237,27 +186,19 @@ namespace Xamarin.Forms.Platform.Android
 					break;
 			}
 
-			if (animated)
+			if (animated && animationTrackFragment is IShellObservableFragment observableFragment)
 			{
-				if (animationTrackFragment is IShellObservableFragment observableFragment)
+				void callback(object s, EventArgs e)
 				{
-					void callback(object s, EventArgs e)
-					{
-						observableFragment.AnimationFinished -= callback;
-						result.TrySetResult(true);
-					}
-					observableFragment.AnimationFinished += callback;
-				}
-				else
-				{
+					observableFragment.AnimationFinished -= callback;
 					result.TrySetResult(true);
 				}
+				observableFragment.AnimationFinished += callback;
 			}
 			else
 			{
 				result.TrySetResult(true);
 			}
-
 
 			t.CommitAllowingStateLoss();
 

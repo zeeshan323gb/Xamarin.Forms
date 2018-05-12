@@ -43,7 +43,7 @@ namespace Xamarin.Forms.Platform.UWP
 			_propertyChangedHandler = OnCellPropertyChanged;
 		}
 
-		public Cell Cell		
+		public Cell Cell
 		{
 			get { return (Cell)GetValue(CellProperty); }
 			set { SetValue(CellProperty, value); }

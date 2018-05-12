@@ -8,32 +8,32 @@
 	</Shell.FlyoutHeader>
 	<ShellItem Title="My apps &amp; games" Icon="grid.png">
 		<ShellTabItem Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Installed" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Library" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Installed" ContentTemplate="{DataTemplate local:InstalledPage}" />
+		<ShellTabItem Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />
 	</ShellItem>
 
-	<ShellTabItem Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	<ShellTabItem Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:NotificationsPage}" />
 
-	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
 	<ShellItem GroupBehavior="ShowTabs">
-		<ShellTabItem Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
+		<ShellTabItem Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
+		<ShellTabItem Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:MoviesPage}" />
+		<ShellTabItem Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}" />
+		<ShellTabItem Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:MusicPage}" />
+		<ShellTabItem Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:NewsPage}" />
 	</ShellItem>
 
-	<ShellTabItem Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	<ShellTabItem Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />
 
 	<MenuItem Text="Redeem" Icon="card.png" />
 	
-	<ShellTabItem Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	<ShellTabItem Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:WishlistPage}" />
 	
 	<MenuItem Text="Xam Protect" Icon="jet.png" />
 	
-	<ShellTabItem Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+	<ShellTabItem Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:SettingsPage}" />
 
 
 	<Shell.MenuItems>
