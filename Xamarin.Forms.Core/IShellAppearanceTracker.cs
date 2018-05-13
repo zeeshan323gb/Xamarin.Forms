@@ -2,6 +2,6 @@
 {
 	public interface IShellAppearanceTracker
 	{
-		void AppearanceChanged(Element source);
+		void AppearanceChanged(Element source, bool appearanceSet);
 	}
 }

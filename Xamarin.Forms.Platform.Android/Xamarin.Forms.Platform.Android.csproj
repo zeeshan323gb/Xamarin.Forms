@@ -177,6 +177,7 @@
     <Compile Include="Renderers\BottomNavigationViewUtils.cs" />
     <Compile Include="Renderers\ButtonDrawable.cs" />
     <Compile Include="Renderers\AlignmentExtensions.cs" />
+    <Compile Include="Renderers\ColorChangeRevealDrawable.cs" />
     <Compile Include="Renderers\ConditionalFocusLayout.cs" />
     <Compile Include="Renderers\ContainerView.cs" />
     <Compile Include="Renderers\DescendantFocusToggler.cs" />

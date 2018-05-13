@@ -156,26 +156,57 @@ namespace Xamarin.Forms
 
 		#region IShellAppearanceTracker
 
-		void IShellAppearanceTracker.AppearanceChanged(Element source)
+		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
 		{
-			// here we wish to notify every element whose pivot can find the source by
-			// walking up the parent tree as these elements may need to change their
-			// appearance
+			// here we wish to notify every element whose "pivot line" contains the source
+			// To do that we first need to find the leaf node in the line, and then walk up
+			// to see if we find the source on the way up.
+
+			// If this is not an appearanceSet event but just a structural change, then we only
+			// need walk up from the source to look for the pivot as items below the change
+			// can't be affected by it
 
 			foreach (var t in _observers)
 			{
 				var observer = t.Item1;
 				var pivot = t.Item2;
-				var parent = pivot;
 
-				while (!Application.IsApplicationOrNull(parent))
+				Element target;
+				Element leaf;
+				if (appearanceSet)
 				{
-					if (parent == source)
+					leaf = pivot;
+					if (leaf is Shell shell)
+					{
+						leaf = shell.CurrentItem;
+					}
+					if (leaf is ShellItem shellItem)
+					{
+						leaf = shellItem.CurrentItem;
+					}
+					if (leaf is IShellTabItemController shellTabItem)
+					{
+						// this is the same as .Last but easier and will add in the root if not null
+						// it generally wont be null but this is just in case
+						leaf = shellTabItem.CurrentPage ?? leaf;
+					}
+
+					target = source;
+				}
+				else
+				{
+					leaf = source;
+					target = pivot;
+				}
+
+				while (!Application.IsApplicationOrNull(leaf))
+				{
+					if (leaf == source)
 					{
 						observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
 						break;
 					}
-					parent = parent.Parent;
+					leaf = leaf.Parent;
 				}
 			}
 		}
@@ -555,6 +586,7 @@ namespace Xamarin.Forms
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var shell = (Shell)bindable;
+			((IShellAppearanceTracker)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
 		}
 
@@ -577,8 +609,7 @@ namespace Xamarin.Forms
 			Dictionary<string, string> lookupDict = new Dictionary<string, string>();
 			if (query == null)
 				return lookupDict;
-			var parts = query.Split('&');
-			foreach (var part in parts)
+			foreach (var part in query.Split('&'))
 			{
 				var p = part.Split('=');
 				if (p.Length != 2)

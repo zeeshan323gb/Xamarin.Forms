@@ -11,7 +11,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellRenderer : IVisualElementRenderer, IShellContext
+	public class ShellRenderer : IVisualElementRenderer, IShellContext, IAppearanceObserver
 	{
 		#region IVisualElementRenderer
 		VisualElement IVisualElementRenderer.Element => Element;
@@ -95,6 +95,15 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IShellContext
 
+		#region IAppearanceObserver
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
+		{
+			UpdateStatusBarColor(appearance);
+		}
+
+		#endregion
+
 		private event EventHandler<PropertyChangedEventArgs> _elementPropertyChanged;
 		private event EventHandler<VisualElementChangedEventArgs> _elementChanged;
 
@@ -134,9 +143,24 @@ namespace Xamarin.Forms.Platform.Android
 			_frameLayout.SetFitsSystemWindows(true);
 
 			_flyoutRenderer.AttachFlyout(this, _frameLayout);
-			_flyoutRenderer.AndroidView.SetBackgroundColor(Color.FromHex("#03A9F4").ToAndroid());
+			
+
+			((IShellController)shell).AddAppearanceObserver(this, shell);
 
 			SwitchFragment(FragmentManager, _frameLayout, shell.CurrentItem, false);
+		}
+
+		private void UpdateStatusBarColor(ShellAppearance appearance)
+		{
+			if (appearance != null)
+			{
+				var color = appearance.BackgroundColor.ToAndroid(Color.FromHex("#03A9F4"));
+				_flyoutRenderer.AndroidView.SetBackgroundColor(color);
+			}
+			else
+			{
+				_flyoutRenderer.AndroidView.SetBackgroundColor(Color.FromHex("#03A9F4").ToAndroid());
+			}
 		}
 
 		protected virtual void SwitchFragment (FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
@@ -225,8 +249,7 @@ namespace Xamarin.Forms.Platform.Android
 			_flyoutRenderer.AndroidView.Layout(0, 0, (int)width, (int)height);
 		}
 
-		#region IDisposable Support
-
+		#region IDisposable
 
 		protected virtual void Dispose(bool disposing)
 		{
@@ -250,6 +273,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			Dispose(true);
 		}
+
 		#endregion
 
 	}
