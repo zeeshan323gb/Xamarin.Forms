@@ -272,6 +272,8 @@ namespace Xamarin.Forms.Platform.Android
 
 			int end = showMore ? maxBottomItems - 1 : ShellItem.Items.Count;
 
+			var currentIndex = shellItem.Items.IndexOf(CurrentTabItem);
+
 			for (int i = 0; i < end; i++)
 			{
 				var item = shellItem.Items[i];
@@ -287,6 +289,9 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				var menuItem = menu.Add(0, MoreTabId, 0, new Java.Lang.String("More"));
 				menuItem.SetIcon(Resource.Drawable.abc_ic_menu_overflow_material);
+				if (currentIndex >= maxBottomItems)
+					menuItem.SetChecked(true);
+				
 			}
 
 			_bottomView.Visibility = end == 1 ? ViewStates.Gone : ViewStates.Visible;
