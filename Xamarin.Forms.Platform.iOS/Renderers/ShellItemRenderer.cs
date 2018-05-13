@@ -134,16 +134,30 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (e.NewItems != null && e.NewItems.Count > 0)
 			{
-				UIViewController[] viewControllers = new UIViewController[ShellItem.Items.Count];
+				var count = ShellItem.Items.Count;
+				UIViewController[] viewControllers = new UIViewController[count];
+
+				int maxTabs = 5; // fetch this a better way
+				bool willUseMore = count > maxTabs;
+
 				int i = 0;
 				bool goTo = false; // its possible we are in a transitionary state and should not nav
 				var current = ShellItem.CurrentItem;
-				foreach (var shellTabItem in ShellItem.Items)
+				for (int j = 0; j < ShellItem.Items.Count; j++)
 				{
-					var renderer = RendererForShellTabItem(shellTabItem) ?? _context.CreateShellTabItemRenderer(shellTabItem);
+					var tabItem = ShellItem.Items[j];
+					var renderer = RendererForShellTabItem(tabItem) ?? _context.CreateShellTabItemRenderer(tabItem);
+
+					if (willUseMore && j >= maxTabs - 1)
+						renderer.IsInMoreTab = true;
+					else
+						renderer.IsInMoreTab = false;
+
+					renderer.ShellTabItem = tabItem;
+
 					AddRenderer(renderer);
 					viewControllers[i++] = renderer.ViewController;
-					if (shellTabItem == current)
+					if (tabItem == current)
 						goTo = true;
 				}
 
@@ -195,11 +209,22 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void CreateTabRenderers()
 		{
-			UIViewController[] viewControllers = new UIViewController[ShellItem.Items.Count];
+			var count = ShellItem.Items.Count;
+			int maxTabs = 5; // fetch this a better way
+			bool willUseMore = count > maxTabs;
+
+			UIViewController[] viewControllers = new UIViewController[count];
 			int i = 0;
 			foreach (var shellTabItem in ShellItem.Items)
 			{
 				var renderer = _context.CreateShellTabItemRenderer(shellTabItem);
+
+				if (willUseMore && i >= maxTabs - 1)
+					renderer.IsInMoreTab = true;
+				else
+					renderer.IsInMoreTab = false;
+
+				renderer.ShellTabItem = shellTabItem;
 				AddRenderer(renderer);
 				viewControllers[i++] = renderer.ViewController;
 			}

@@ -33,10 +33,10 @@
 	<ShellItem GroupBehavior="ShowTabs">
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:MoviesPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" Icon="film.png" FlyoutIcon="film-flyout.png" ContentTemplate="{DataTemplate local:MoviesPage}" />
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:MusicPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:NewsPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" Icon="headphone.png" FlyoutIcon="headphone-flyout.png" ContentTemplate="{DataTemplate local:MusicPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" Icon="newspaper.png" FlyoutIcon="newspaper-flyout.png" ContentTemplate="{DataTemplate local:NewsPage}" />
 	</ShellItem>
 
 	<ShellTabItem Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />

@@ -35,6 +35,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public Page Page { get; private set; }
 
+		public bool IsInMoreTab { get; set; }
+
 		public ShellTabItem ShellTabItem
 		{
 			get { return _shellTabItem; }
@@ -147,7 +149,7 @@ namespace Xamarin.Forms.Platform.iOS
 			Platform.SetRenderer(content, _renderer);
 
 			var tracker = _context.CreatePageRendererTracker();
-			tracker.IsRootPage = true; // default tracker requires this be set first
+			tracker.IsRootPage = !IsInMoreTab; // default tracker requires this be set first
 			tracker.Renderer = _renderer;
 
 			_trackers[Page] = tracker;
