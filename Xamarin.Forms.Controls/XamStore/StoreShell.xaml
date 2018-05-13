@@ -30,7 +30,7 @@
 
 	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
-	<ShellItem GroupBehavior="ShowTabs">
+	<ShellItem x:Name="_storeItem" GroupBehavior="ShowTabs">
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" Icon="film.png" FlyoutIcon="film-flyout.png" ContentTemplate="{DataTemplate local:MoviesPage}" />

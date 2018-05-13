@@ -15,6 +15,8 @@ namespace Xamarin.Forms.Controls.XamStore
 		public StoreShell ()
 		{
 			InitializeComponent ();
+
+			CurrentItem = _storeItem;
 		}
 	}
 }

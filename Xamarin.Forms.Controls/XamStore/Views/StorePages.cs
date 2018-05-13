@@ -55,6 +55,15 @@ namespace Xamarin.Forms.Controls.XamStore
 
 			Content = new ScrollView { Content = stack };
 		}
+
+		protected void AddSearchHandler(string placeholder, SearchBoxVisiblity visibility)
+		{
+			var searchHandler = new SearchHandler();
+			searchHandler.Placeholder = placeholder;
+			searchHandler.SearchBoxVisibility = visibility;
+
+			Shell.SetSearchHandler(this, searchHandler);
+		}
 	}
 
 	public class InstalledPage : BasePage
@@ -79,32 +88,50 @@ namespace Xamarin.Forms.Controls.XamStore
 
 	public class HomePage : BasePage
 	{
-		public HomePage() : base("Store Home", Color.Default) { }
+		public HomePage() : base("Store Home", Color.Default)
+		{
+			AddSearchHandler("Search Apps", SearchBoxVisiblity.Expanded);
+		}
 	}
 
 	public class GamesPage : BasePage
 	{
-		public GamesPage() : base("Games", Color.Default) { }
+		public GamesPage() : base("Games", Color.Default)
+		{
+			AddSearchHandler("Search Games", SearchBoxVisiblity.Expanded);
+		}
 	}
 
 	public class MoviesPage : BasePage
 	{
-		public MoviesPage() : base("Hot Movies", Color.Default) { }
+		public MoviesPage() : base("Hot Movies", Color.Default)
+		{
+			AddSearchHandler("Search Movies", SearchBoxVisiblity.Expanded);
+		}
 	}
 
 	public class BooksPage : BasePage
 	{
-		public BooksPage() : base("Bookstore", Color.Default) { }
+		public BooksPage() : base("Bookstore", Color.Default)
+		{
+			AddSearchHandler("Search Books", SearchBoxVisiblity.Expanded);
+		}
 	}
 
 	public class MusicPage : BasePage
 	{
-		public MusicPage() : base("Music", Color.Default) { }
+		public MusicPage() : base("Music", Color.Default)
+		{
+			AddSearchHandler("Search Music", SearchBoxVisiblity.Expanded);
+		}
 	}
 
 	public class NewsPage : BasePage
 	{
-		public NewsPage() : base("Newspapers", Color.Default) { }
+		public NewsPage() : base("Newspapers", Color.Default)
+		{
+			AddSearchHandler("Search Papers", SearchBoxVisiblity.Expanded);
+		}
 	}
 
 	public class AccountsPage : BasePage
