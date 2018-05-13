@@ -3,6 +3,20 @@
 			xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			xmlns:local="clr-namespace:Xamarin.Forms.Controls.XamStore"
 			x:Class="Xamarin.Forms.Controls.XamStore.StoreShell">
+	<Shell.Resources>
+		<ShellAppearance x:Key="defaultAppearance" BackgroundColor="#455A64" ForegroundColor="White" 
+						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
+		<ShellAppearance x:Key="greenAppearance" BackgroundColor="#689F39" ForegroundColor="White" 
+						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
+		<ShellAppearance x:Key="moviesAppearance" BackgroundColor="#ED3B3B" ForegroundColor="White" 
+						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
+		<ShellAppearance x:Key="musicAppearance" BackgroundColor="#EF6C00" ForegroundColor="White" 
+						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
+		<ShellAppearance x:Key="booksAppearance" BackgroundColor="#039BE6" ForegroundColor="White" 
+						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
+		<ShellAppearance x:Key="newsAppearance" BackgroundColor="#546DFE" ForegroundColor="White" 
+						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
+	</Shell.Resources>
 	<Shell.FlyoutHeader>
 		<local:FlyoutHeader />
 	</Shell.FlyoutHeader>
@@ -17,12 +31,12 @@
 	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
 	<ShellItem GroupBehavior="ShowTabs">
-		<ShellTabItem Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
-		<ShellTabItem Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
-		<ShellTabItem Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:MoviesPage}" />
-		<ShellTabItem Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}" />
-		<ShellTabItem Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:MusicPage}" />
-		<ShellTabItem Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:NewsPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" Icon="film.png" ContentTemplate="{DataTemplate local:MoviesPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" Icon="headphone.png" ContentTemplate="{DataTemplate local:MusicPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" Icon="newspaper.png" ContentTemplate="{DataTemplate local:NewsPage}" />
 	</ShellItem>
 
 	<ShellTabItem Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />

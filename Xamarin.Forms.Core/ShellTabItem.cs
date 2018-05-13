@@ -20,9 +20,9 @@ namespace Xamarin.Forms
 
 		#region IShellAppearanceTracker
 
-		void IShellAppearanceTracker.AppearanceChanged(Element source)
+		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
 		{
-			AppearanceTrackerUtils.AppearanceChanged(this, source);
+			AppearanceTrackerUtils.AppearanceChanged(this, source, appearanceSet);
 		}
 
 		#endregion IShellAppearanceTracker
@@ -430,7 +430,7 @@ namespace Xamarin.Forms
 
 		private void SendAppearanceChanged()
 		{
-			(this as IShellAppearanceTracker).AppearanceChanged(this);
+			(this as IShellAppearanceTracker).AppearanceChanged(this, false);
 		}
 
 		private void SendUpdateCurrentState(ShellNavigationSource source)

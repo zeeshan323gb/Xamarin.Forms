@@ -17,9 +17,9 @@ namespace Xamarin.Forms
 
 		#region IShellAppearanceTracker
 
-		void IShellAppearanceTracker.AppearanceChanged(Element source)
+		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
 		{
-			AppearanceTrackerUtils.AppearanceChanged(this, source);
+			AppearanceTrackerUtils.AppearanceChanged(this, source, appearanceSet);
 		}
 
 		#endregion
@@ -177,7 +177,7 @@ namespace Xamarin.Forms
 			}
 
 			shellItem.SendStructureChanged();
-			(shellItem as IShellAppearanceTracker).AppearanceChanged(shellItem);
+			(shellItem as IShellAppearanceTracker).AppearanceChanged(shellItem, false);
 		}
 
 		private static void OnShellAppearanceChanged(BindableObject bindable, object oldValue, object newValue)
@@ -186,7 +186,7 @@ namespace Xamarin.Forms
 
 			if (item.Parent is IShellAppearanceTracker tracker)
 			{
-				tracker.AppearanceChanged(item);
+				tracker.AppearanceChanged(item, true);
 			}
 		}
 
