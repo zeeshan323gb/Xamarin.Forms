@@ -167,10 +167,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem)
 		{
-			return new ShellTabItemRenderer(this)
-			{
-				ShellTabItem = tabItem
-			};
+			return new ShellTabItemRenderer(this);
 		}
 
 		protected virtual IShellSearchResultsRenderer CreateShellSearchResultsRenderer()

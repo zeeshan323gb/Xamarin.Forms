@@ -40,11 +40,15 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellTabItem), typeof(ShellItem), null, BindingMode.TwoWay,
 				propertyChanged: OnCurrentItemChanged);
 
+		public static readonly BindableProperty FlyoutIconProperty =
+			BindableProperty.Create(nameof(FlyoutIcon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneTime);
+
 		public static readonly BindableProperty GroupBehaviorProperty =
 			BindableProperty.Create(nameof(GroupBehavior), typeof(ShellItemGroupBehavior), typeof(ShellItem), ShellItemGroupBehavior.HideTabs, BindingMode.OneTime);
 
 		public static readonly BindableProperty IconProperty =
-			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneWay);
+			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneWay,
+				propertyChanged: OnIconChanged);
 
 		public static readonly BindableProperty IsEnabledProperty =
 			BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(ShellItem), true, BindingMode.OneWay);
@@ -70,6 +74,12 @@ namespace Xamarin.Forms
 		{
 			get { return (ShellTabItem)GetValue(CurrentItemProperty); }
 			set { SetValue(CurrentItemProperty, value); }
+		}
+
+		public ImageSource FlyoutIcon
+		{
+			get { return (ImageSource)GetValue(FlyoutIconProperty); }
+			set { SetValue(FlyoutIconProperty, value); }
 		}
 
 		public ShellItemGroupBehavior GroupBehavior
@@ -178,6 +188,15 @@ namespace Xamarin.Forms
 
 			shellItem.SendStructureChanged();
 			(shellItem as IShellAppearanceTracker).AppearanceChanged(shellItem, false);
+		}
+
+		private static void OnIconChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			if (newValue == null || bindable.IsSet(FlyoutIconProperty))
+				return;
+
+			var shellItem = (ShellItem)bindable;
+			shellItem.FlyoutIcon = (ImageSource)newValue;
 		}
 
 		private static void OnShellAppearanceChanged(BindableObject bindable, object oldValue, object newValue)

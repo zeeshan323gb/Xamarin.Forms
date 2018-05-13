@@ -53,7 +53,7 @@ namespace Xamarin.Forms.Controls.XamStore
 			};
 			stack.Children.Add(popToRootButton);
 
-			Content = stack;
+			Content = new ScrollView { Content = stack };
 		}
 	}
 
