@@ -93,11 +93,12 @@ namespace Xamarin.Forms.Platform.Android
 					_drawerToggle.Dispose();
 					if (_searchView != null)
 					{
+						_searchView.View.RemoveFromParent();
 						_searchView.View.ViewAttachedToWindow -= OnSearchViewAttachedToWindow;
 						_searchView.SearchConfirmed -= OnSearchConfirmed;
 						_searchView.Dispose();
-
 					}
+
 				}
 
 				_shellContext = null;
@@ -139,6 +140,10 @@ namespace Xamarin.Forms.Platform.Android
 			if (e.PropertyName == Page.TitleProperty.PropertyName)
 			{
 				UpdatePageTitle(_toolbar, Page);
+			}
+			else if (e.PropertyName == Shell.SearchHandlerProperty.PropertyName)
+			{
+				UpdateToolbarItems();
 			}
 		}
 
@@ -232,28 +237,38 @@ namespace Xamarin.Forms.Platform.Android
 			var searchHandler = Shell.GetSearchHandler(page);
 			if (searchHandler != null)
 			{
-				if (_searchView != null)
-				{
-					_searchView.View.ViewAttachedToWindow -= OnSearchViewAttachedToWindow;
-					_searchView.SearchConfirmed -= OnSearchConfirmed;
-					_searchView.Dispose();
-				}
-				var item = menu.Add(new Java.Lang.String(searchHandler.Placeholder));
-				item.SetIcon(Resource.Drawable.abc_ic_search_api_material);
-				item.Icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-				item.SetShowAsAction(ShowAsAction.IfRoom | ShowAsAction.CollapseActionView);
 				var context = _shellContext.AndroidContext;
+				if (_searchView == null)
+				{
+					_searchView = GetSearchView(context);
+					_searchView.SearchHandler = searchHandler;
 
-				_searchView = GetSearchView(context);
-				_searchView.SearchHandler = searchHandler;
+					_searchView.LoadView();
+					_searchView.View.ViewAttachedToWindow += OnSearchViewAttachedToWindow;
 
-				_searchView.LoadView();
-				_searchView.View.ViewAttachedToWindow += OnSearchViewAttachedToWindow;
+					_searchView.View.LayoutParameters = new LP(LP.MatchParent, LP.MatchParent);
+					_searchView.SearchConfirmed += OnSearchConfirmed;
+				}
 
-				_searchView.View.LayoutParameters = new LP(LP.MatchParent, LP.MatchParent);
-				item.SetActionView(_searchView.View);
+				if (searchHandler.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
+				{
+					var item = menu.Add(new Java.Lang.String(searchHandler.Placeholder));
+					item.SetIcon(Resource.Drawable.abc_ic_search_api_material);
+					item.Icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+					item.SetShowAsAction(ShowAsAction.IfRoom | ShowAsAction.CollapseActionView);
 
-				_searchView.SearchConfirmed += OnSearchConfirmed;
+					if (_searchView.View.Parent != null)
+						_searchView.View.RemoveFromParent();
+
+					_searchView.ShowKeyboardOnAttached = true;
+					item.SetActionView(_searchView.View);
+				}
+				else if (searchHandler.SearchBoxVisibility == SearchBoxVisiblity.Expanded)
+				{
+					_searchView.ShowKeyboardOnAttached = false;
+					if (_searchView.View.Parent != _toolbar)
+						_toolbar.AddView(_searchView.View);
+				}
 			}
 		}
 

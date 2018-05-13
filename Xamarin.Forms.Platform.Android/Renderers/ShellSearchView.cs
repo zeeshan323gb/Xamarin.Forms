@@ -22,6 +22,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		public SearchHandler SearchHandler { get; set; }
 
+		public bool ShowKeyboardOnAttached { get; set; }
+
 		AView IShellSearchView.View
 		{
 			get
@@ -45,6 +47,7 @@ namespace Xamarin.Forms.Platform.Android
 		private ImageButton _clearPlaceholderButton;
 		private ImageButton _searchButton;
 		private AppCompatAutoCompleteTextView _textBlock;
+		bool _disposed;
 
 		public ShellSearchView(Context context, IShellContext shellContext) : base(context)
 		{
@@ -66,6 +69,13 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			return true;
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			_disposed = true;
 		}
 
 		protected virtual Task<Bitmap> LoadImage(ImageSource source)
@@ -146,8 +156,14 @@ namespace Xamarin.Forms.Platform.Android
 			Alpha = 0;
 			Animate().Alpha(1).SetDuration(200).SetListener(null);
 
+			if (!ShowKeyboardOnAttached)
+				return;
+
 			// need to wait so keyboard will show
 			await Task.Delay(200);
+
+			if (_disposed)
+				return;
 
 			_textBlock.RequestFocus();
 			Context.ShowKeyboard(_textBlock);
