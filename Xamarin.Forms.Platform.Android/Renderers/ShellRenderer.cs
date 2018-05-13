@@ -78,9 +78,9 @@ namespace Xamarin.Forms.Platform.Android
 			return content;
 		}
 
-		IShellItemRenderer IShellContext.CreateShellItemRenderer()
+		IShellItemRenderer IShellContext.CreateShellItemRenderer(ShellItem shellItem)
 		{
-			return CreateShellItemRenderer();
+			return CreateShellItemRenderer(shellItem);
 		}
 
 		IShellToolbarTracker IShellContext.CreateTrackerForToolbar(Toolbar toolbar)
@@ -170,7 +170,7 @@ namespace Xamarin.Forms.Platform.Android
 			var fragment = manager.FindFragmentByTag(route);
 			if (fragment == null)
 			{
-				var shellItemRenderer = CreateShellItemRenderer();
+				var shellItemRenderer = CreateShellItemRenderer(newItem);
 				shellItemRenderer.ShellItem = newItem;
 				fragment = shellItemRenderer.Fragment;
 			}
@@ -194,9 +194,11 @@ namespace Xamarin.Forms.Platform.Android
 			return new ShellFlyoutContentRenderer(this, AndroidContext);
 		}
 
-		protected virtual IShellItemRenderer CreateShellItemRenderer()
+		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
 		{
-			return new ShellBottomTabItemRenderer(this);
+			if (shellItem is MaterialShellItem materialShellItem && materialShellItem.TabLocation == ShellTabLocation.Bottom)
+				return new ShellBottomTabItemRenderer(this);
+			return new ShellTopTabItemRenderer(this);
 		}
 
 		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)

@@ -20,34 +20,54 @@
 	<Shell.FlyoutHeader>
 		<local:FlyoutHeader />
 	</Shell.FlyoutHeader>
-	<ShellItem Title="My apps &amp; games" Icon="grid.png">
+	<ShellItem Title="My apps &amp; games" Icon="grid.png" ShellAppearance="{StaticResource greenAppearance}">
 		<ShellTabItem Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 		<ShellTabItem Title="Installed" ContentTemplate="{DataTemplate local:InstalledPage}" />
 		<ShellTabItem Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />
 	</ShellItem>
 
-	<ShellTabItem Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:NotificationsPage}" />
+	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:NotificationsPage}" />
 
-	<ShellTabItem Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
+	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
-	<ShellItem x:Name="_storeItem" GroupBehavior="ShowTabs">
+	<MaterialShellItem x:Name="_storeItem" TabLocation="Bottom" GroupBehavior="ShowTabs">
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" Icon="film.png" FlyoutIcon="film-flyout.png" ContentTemplate="{DataTemplate local:MoviesPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" Icon="headphone.png" FlyoutIcon="headphone-flyout.png" ContentTemplate="{DataTemplate local:MusicPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" Icon="newspaper.png" FlyoutIcon="newspaper-flyout.png" ContentTemplate="{DataTemplate local:NewsPage}" />
-	</ShellItem>
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" 
+					  Icon="film.png" FlyoutIcon="film-flyout.png" ContentTemplate="{DataTemplate local:MoviesPage}">
+			<ShellTabItem.MenuItems>
+				<MenuItem Icon="film.png" Text="Open Movies App" />
+			</ShellTabItem.MenuItems>
+		</ShellTabItem>
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" 
+					  Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}">
+			<ShellTabItem.MenuItems>
+				<MenuItem Icon="books.png" Text="Open Reader" />
+			</ShellTabItem.MenuItems>
+		</ShellTabItem>
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" 
+					  Icon="headphone.png" FlyoutIcon="headphone-flyout.png" ContentTemplate="{DataTemplate local:MusicPage}">
+			<ShellTabItem.MenuItems>
+				<MenuItem Icon="headphone.png" Text="Open Music App" />
+			</ShellTabItem.MenuItems>
+		</ShellTabItem>
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" 
+					  Icon="newspaper.png" FlyoutIcon="newspaper-flyout.png" ContentTemplate="{DataTemplate local:NewsPage}">
+			<ShellTabItem.MenuItems>
+				<MenuItem Icon="newspaper.png" Text="Open News App" />
+			</ShellTabItem.MenuItems>
+		</ShellTabItem>
+	</MaterialShellItem>
 
-	<ShellTabItem Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />
+	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />
 
 	<MenuItem Text="Redeem" Icon="card.png" />
-	
-	<ShellTabItem Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:WishlistPage}" />
+
+	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:WishlistPage}" />
 	
 	<MenuItem Text="Xam Protect" Icon="jet.png" />
-	
-	<ShellTabItem Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:SettingsPage}" />
+
+	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:SettingsPage}" />
 
 
 	<Shell.MenuItems>

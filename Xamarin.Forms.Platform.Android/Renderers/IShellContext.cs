@@ -14,7 +14,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();
 
-		IShellItemRenderer CreateShellItemRenderer();
+		IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem);
 
 		IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar);
 	}

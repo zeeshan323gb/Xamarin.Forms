@@ -78,12 +78,6 @@ namespace Xamarin.Forms.Platform.Android
 			_disposed = true;
 		}
 
-		protected virtual Task<Bitmap> LoadImage(ImageSource source)
-		{
-			var handler = Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(source);
-			return handler.LoadImageAsync(source, Context);
-		}
-
 		protected virtual void LoadView(SearchHandler searchHandler)
 		{
 			var searchImage = searchHandler.QueryIcon;
@@ -153,11 +147,11 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			base.OnAttachedToWindow();
 
-			Alpha = 0;
-			Animate().Alpha(1).SetDuration(200).SetListener(null);
-
 			if (!ShowKeyboardOnAttached)
 				return;
+
+			Alpha = 0;
+			Animate().Alpha(1).SetDuration(200).SetListener(null);
 
 			// need to wait so keyboard will show
 			await Task.Delay(200);
@@ -242,7 +236,7 @@ namespace Xamarin.Forms.Platform.Android
 			result.SetPadding(0, 0, 0, 0);
 			result.SetFocusable(ViewFocusability.NotFocusable);
 			SetImage(result, image, defaultImage);
-			result.LayoutParameters = new LinearLayout.LayoutParams(LP.WrapContent, LP.MatchParent)
+			result.LayoutParameters = new LinearLayout.LayoutParams((int)Context.ToPixels(22), LP.MatchParent)
 			{
 				LeftMargin = leftMargin,
 				RightMargin = rightMargin
@@ -265,8 +259,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		private async void SetImage(ImageButton button, ImageSource image, int defaultValue)
 		{
+			button.SetScaleType(ImageView.ScaleType.FitCenter);
 			if (image != null)
-				button.SetImageBitmap(await LoadImage(image).ConfigureAwait(false));
+				button.SetImageDrawable(await Context.GetFormsDrawable(image).ConfigureAwait(false));
 			else if (defaultValue > 0)
 				button.SetImageResource(defaultValue);
 			else
@@ -278,7 +273,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (string.IsNullOrEmpty(_textBlock.Text))
 			{
 				_clearButton.Visibility = ViewStates.Gone;
-				if (SearchHandler.ClearPlaceholderIcon != null)
+				if (SearchHandler.ClearPlaceholderIcon != null && SearchHandler.ClearPlaceholderEnabled)
 					_clearPlaceholderButton.Visibility = ViewStates.Visible;
 				else
 					_clearPlaceholderButton.Visibility = ViewStates.Gone;

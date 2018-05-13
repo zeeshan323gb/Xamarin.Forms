@@ -210,6 +210,9 @@ namespace Xamarin.Forms.Platform.Android
 			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(DefaultBackgroundColor)));
 			_tablayout.SetBackground(new ColorDrawable(background.ToAndroid(DefaultBackgroundColor)));
 
+
+			_tablayout.SetSelectedTabIndicatorColor(foreground.ToAndroid(DefaultForegroundColor));
+
 			_toolbarTracker.TintColor = foreground.IsDefault ? DefaultForegroundColor : foreground;
 		}
 

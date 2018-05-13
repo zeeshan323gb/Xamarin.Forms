@@ -114,9 +114,6 @@
     <EmbeddedResource Update="XamStore\StoreShell.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="XamStore\Views\UpdatesPage.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
   </ItemGroup>
   
   <Target Name="CreateControllGalleryConfig" BeforeTargets="Build">
