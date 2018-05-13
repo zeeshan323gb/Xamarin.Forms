@@ -110,7 +110,7 @@ namespace Xamarin.Forms.Platform.Android
 							item.SetChecked(true);
 							foreach (var menuItem in tabItem.MenuItems)
 							{
-								var subItem = section.Add(new Java.Lang.String(menuItem.Text));
+								var subItem = section.Add(gid, id, 0, new Java.Lang.String(menuItem.Text));
 								subItem.SetEnabled(menuItem.IsEnabled);
 								if (menuItem.Icon != null)
 								{

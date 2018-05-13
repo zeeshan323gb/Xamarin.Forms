@@ -62,18 +62,35 @@ namespace Xamarin.Forms.Controls.XamStore
 			searchHandler.Placeholder = placeholder;
 			searchHandler.SearchBoxVisibility = visibility;
 
+			searchHandler.ClearPlaceholderEnabled = true;
+			searchHandler.ClearPlaceholderIcon = "search.png";
+
 			Shell.SetSearchHandler(this, searchHandler);
+		}
+	}
+
+	public class UpdatesPage : BasePage
+	{
+		public UpdatesPage() : base("Available Updates", Color.Default)
+		{
+			AddSearchHandler("Search Updates", SearchBoxVisiblity.Collapsable);
 		}
 	}
 
 	public class InstalledPage : BasePage
 	{
-		public InstalledPage() : base("Installed Items", Color.Default) {}
+		public InstalledPage() : base("Installed Items", Color.Default)
+		{
+			AddSearchHandler("Search Installed", SearchBoxVisiblity.Collapsable);
+		}
 	}
 
 	public class LibraryPage : BasePage
 	{
-		public LibraryPage() : base("My Library", Color.Default) { }
+		public LibraryPage() : base("My Library", Color.Default)
+		{
+			AddSearchHandler("Search Apps", SearchBoxVisiblity.Collapsable);
+		}
 	}
 
 	public class NotificationsPage : BasePage

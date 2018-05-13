@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace Xamarin.Forms
 {
@@ -62,7 +63,7 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty TitleProperty =
 			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellItem), null, BindingMode.OneTime);
 
-		private ObservableCollection<Element> _children = new ObservableCollection<Element>();
+		private readonly ObservableCollection<Element> _children = new ObservableCollection<Element>();
 		private ReadOnlyCollection<Element> _logicalChildren;
 
 		public ShellItem()
@@ -179,15 +180,14 @@ namespace Xamarin.Forms
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var shellItem = (ShellItem)bindable;
-			var shell = shellItem.Parent as IShellController;
 
-			if (shell != null)
+			if (shellItem.Parent is IShellController shell)
 			{
 				shell.UpdateCurrentState(ShellNavigationSource.ShellTabItemChanged);
 			}
 
 			shellItem.SendStructureChanged();
-			(shellItem as IShellAppearanceTracker).AppearanceChanged(shellItem, false);
+			((IShellAppearanceTracker)shellItem).AppearanceChanged(shellItem, false);
 		}
 
 		private static void OnIconChanged(BindableObject bindable, object oldValue, object newValue)
@@ -212,12 +212,16 @@ namespace Xamarin.Forms
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			if (e.NewItems != null)
+			{
 				foreach (Element element in e.NewItems)
 					OnChildAdded(element);
+			}
 
 			if (e.OldItems != null)
+			{
 				foreach (Element element in e.OldItems)
 					OnChildRemoved(element);
+			}
 
 			SendStructureChanged();
 		}
