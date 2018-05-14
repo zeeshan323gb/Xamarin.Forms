@@ -175,10 +175,7 @@ namespace Xamarin.Forms
 			SendAppearanceChanged();
 		}
 
-		protected virtual IReadOnlyList<Page> GetNavigationStack()
-		{
-			return _navStack;
-		}
+		protected virtual IReadOnlyList<Page> GetNavigationStack() => _navStack;
 
 		protected virtual void OnInsertPageBefore(Page page, Page before)
 		{
@@ -368,10 +365,7 @@ namespace Xamarin.Forms
 				OnChildRemoved(page);
 		}
 
-		private void SendAppearanceChanged()
-		{
-			(this as IShellAppearanceTracker).AppearanceChanged(this, false);
-		}
+		private void SendAppearanceChanged() => (this as IShellAppearanceTracker).AppearanceChanged(this, false);
 
 		private void SendUpdateCurrentState(ShellNavigationSource source)
 		{
@@ -385,40 +379,19 @@ namespace Xamarin.Forms
 		{
 			private readonly ShellTabItem _owner;
 
-			public NavigationImpl(ShellTabItem owner)
-			{
-				_owner = owner;
-			}
+			public NavigationImpl(ShellTabItem owner) => _owner = owner;
 
-			protected override IReadOnlyList<Page> GetNavigationStack()
-			{
-				return _owner.GetNavigationStack();
-			}
+			protected override IReadOnlyList<Page> GetNavigationStack() => _owner.GetNavigationStack();
 
-			protected override void OnInsertPageBefore(Page page, Page before)
-			{
-				_owner.OnInsertPageBefore(page, before);
-			}
+			protected override void OnInsertPageBefore(Page page, Page before) => _owner.OnInsertPageBefore(page, before);
 
-			protected override Task<Page> OnPopAsync(bool animated)
-			{
-				return _owner.OnPopAsync(animated);
-			}
+			protected override Task<Page> OnPopAsync(bool animated) => _owner.OnPopAsync(animated);
 
-			protected override Task OnPopToRootAsync(bool animated)
-			{
-				return _owner.OnPopToRootAsync(animated);
-			}
+			protected override Task OnPopToRootAsync(bool animated) => _owner.OnPopToRootAsync(animated);
 
-			protected override Task OnPushAsync(Page page, bool animated)
-			{
-				return _owner.OnPushAsync(page, animated);
-			}
+			protected override Task OnPushAsync(Page page, bool animated) => _owner.OnPushAsync(page, animated);
 
-			protected override void OnRemovePage(Page page)
-			{
-				_owner.OnRemovePage(page);
-			}
+			protected override void OnRemovePage(Page page) => _owner.OnRemovePage(page);
 		}
 	}
 }
