@@ -2,6 +2,9 @@
 <Shell xmlns="http://xamarin.com/schemas/2014/forms"
 			xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			xmlns:local="clr-namespace:Xamarin.Forms.Controls.XamStore"
+			Route="xamstore"
+			RouteHost="www.xamarin.com"
+			RouteScheme="http"
 			x:Class="Xamarin.Forms.Controls.XamStore.StoreShell">
 	<Shell.Resources>
 		<ShellAppearance x:Key="defaultAppearance" BackgroundColor="#455A64" ForegroundColor="White" 
@@ -17,41 +20,43 @@
 		<ShellAppearance x:Key="newsAppearance" BackgroundColor="#546DFE" ForegroundColor="White" 
 						 TitleColor="White" DisabledColor="#B4FFFFFF" UnselectedColor="#95FFFFFF" />
 	</Shell.Resources>
+	
 	<Shell.FlyoutHeader>
 		<local:FlyoutHeader />
 	</Shell.FlyoutHeader>
-	<ShellItem Title="My apps &amp; games" Icon="grid.png" ShellAppearance="{StaticResource greenAppearance}">
-		<ShellTabItem Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
-		<ShellTabItem Title="Installed" ContentTemplate="{DataTemplate local:InstalledPage}" />
-		<ShellTabItem Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />
+	
+	<ShellItem Route="apps" Title="My apps &amp; games" Icon="grid.png" ShellAppearance="{StaticResource greenAppearance}">
+		<ShellTabItem Route="updates" Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+		<ShellTabItem Route="installed" Title="Installed" ContentTemplate="{DataTemplate local:InstalledPage}" />
+		<ShellTabItem Route="library" Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />
 	</ShellItem>
 
-	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:NotificationsPage}" />
+	<ShellTabItem Route="notifications" ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:NotificationsPage}" />
 
-	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
+	<ShellTabItem Route="subs" ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
-	<MaterialShellItem x:Name="_storeItem" TabLocation="Bottom" GroupBehavior="ShowTabs">
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="homeflyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="gamesflyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" 
+	<MaterialShellItem Route="store" x:Name="_storeItem" TabLocation="Bottom" GroupBehavior="ShowTabs">
+		<ShellTabItem Route="home" ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="homeflyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
+		<ShellTabItem Route="games" ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="gamesflyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
+		<ShellTabItem Route="movies" ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" 
 					  Icon="film.png" FlyoutIcon="filmflyout.png" ContentTemplate="{DataTemplate local:MoviesPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="film.png" Text="Open Movies App" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" 
+		<ShellTabItem Route="books" ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" 
 					  Icon="books.png" FlyoutIcon="booksflyout.png" ContentTemplate="{DataTemplate local:BooksPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="books.png" Text="Open Reader" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" 
+		<ShellTabItem Route="music" ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" 
 					  Icon="headphone.png" FlyoutIcon="headphoneflyout.png" ContentTemplate="{DataTemplate local:MusicPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="headphone.png" Text="Open Music App" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" 
+		<ShellTabItem Route="news" ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" 
 					  Icon="newspaper.png" FlyoutIcon="newspaperflyout.png" ContentTemplate="{DataTemplate local:NewsPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="newspaper.png" Text="Open News App" />
@@ -59,15 +64,15 @@
 		</ShellTabItem>
 	</MaterialShellItem>
 
-	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />
+	<ShellTabItem Route="account" ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />
 
 	<MenuItem Text="Redeem" Icon="card.png" />
 
-	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:WishlistPage}" />
+	<ShellTabItem Route="wishlist" ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Wishlist" Icon="star.png" ContentTemplate="{DataTemplate local:WishlistPage}" />
 	
 	<MenuItem Text="Xam Protect" Icon="jet.png" />
 
-	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:SettingsPage}" />
+	<ShellTabItem Route="settings" ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:SettingsPage}" />
 
 	<Shell.MenuItems>
 		<MenuItem Text="Help &amp; feedback" />

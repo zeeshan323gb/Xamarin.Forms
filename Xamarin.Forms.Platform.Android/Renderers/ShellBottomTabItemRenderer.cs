@@ -6,6 +6,9 @@ using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
 using System;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Linq;
 using AColor = Android.Graphics.Color;
 using AView = Android.Views.View;
 using ColorStateList = Android.Content.Res.ColorStateList;
@@ -67,6 +70,15 @@ namespace Xamarin.Forms.Platform.Android
 			((IShellController)ShellContext.Shell).AddAppearanceObserver(this, ShellItem);
 
 			return outerLayout;
+		}
+
+		private void UpdateTabBarVisibility()
+		{
+			if (DisplayedPage == null)
+				return;
+
+			bool visible = ShellAppearance.GetTabBarVisible(DisplayedPage);
+			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
 		}
 
 		// Use OnDestory become OnDestroyView may fire before events are completed.
@@ -197,6 +209,13 @@ namespace Xamarin.Forms.Platform.Android
 			menuItem.SetChecked(true);
 		}
 
+		protected override void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			base.OnShellItemsChanged(sender, e);
+			
+			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
+		}
+
 		protected virtual bool OnItemSelected(IMenuItem item)
 		{
 			var id = item.ItemId;
@@ -211,16 +230,49 @@ namespace Xamarin.Forms.Platform.Android
 				if (!item.IsChecked)
 				{
 					var shellTabItem = ShellItem.Items[id];
-					ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellTabItem);
+					ChangeTabItem(shellTabItem);
 				}
 			}
 
 			return true;
 		}
 
+		protected virtual void ChangeTabItem(ShellTabItem tabItem)
+		{
+			var controller = (IShellController)ShellContext.Shell;
+			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
+				ShellItem,
+				tabItem,
+				tabItem.Stack.ToList(),
+				true
+			);
+
+			if (accept)
+				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
+		}
+
+		protected override void OnDisplayedPageChanged(Page newPage, Page oldPage)
+		{
+			base.OnDisplayedPageChanged(newPage, oldPage);
+
+			if (oldPage != null)
+				oldPage.PropertyChanged -= OnDisplayedPagePropertyChanged;
+
+			if (newPage != null)
+				newPage.PropertyChanged += OnDisplayedPagePropertyChanged;
+
+			UpdateTabBarVisibility();
+		}
+
+		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == ShellAppearance.TabBarVisibleProperty.PropertyName)
+				UpdateTabBarVisibility();
+		}
+
 		protected virtual void OnMoreItemSelected(ShellTabItem tabItem, BottomSheetDialog dialog)
 		{
-			ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
+			ChangeTabItem(tabItem);
 
 			dialog.Dismiss();
 			dialog.Dispose();
@@ -268,6 +320,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void SetupMenu(IMenu menu, int maxBottomItems, ShellItem shellItem)
 		{
+			menu.Clear();
 			bool showMore = ShellItem.Items.Count > maxBottomItems;
 
 			int end = showMore ? maxBottomItems - 1 : ShellItem.Items.Count;

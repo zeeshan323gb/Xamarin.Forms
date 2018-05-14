@@ -132,19 +132,18 @@ namespace Xamarin.Forms.Platform.Android
 				UpdatePageTitle(_toolbar, newPage);
 				UpdateLeftBarButtonItem();
 				UpdateToolbarItems();
+				UpdateNavBarVisible(_toolbar, newPage);
 			}
 		}
 
 		protected virtual void OnPagePropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == Page.TitleProperty.PropertyName)
-			{
 				UpdatePageTitle(_toolbar, Page);
-			}
 			else if (e.PropertyName == Shell.SearchHandlerProperty.PropertyName)
-			{
 				UpdateToolbarItems();
-			}
+			else if (e.PropertyName == ShellAppearance.NavBarVisibleProperty.PropertyName)
+				UpdateNavBarVisible(_toolbar, Page);
 		}
 
 		protected virtual void OnPageToolbarItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -210,6 +209,12 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
+		protected virtual void UpdateNavBarVisible(Toolbar toolbar, Page page)
+		{
+			var navBarVisible = ShellAppearance.GetNavBarVisible(page);
+			toolbar.Visibility = navBarVisible ? ViewStates.Visible : ViewStates.Gone;
+		}
+
 		protected virtual void UpdatePageTitle(Toolbar toolbar, Page page)
 		{
 			_toolbar.Title = page.Title;
@@ -270,10 +275,26 @@ namespace Xamarin.Forms.Platform.Android
 						_toolbar.AddView(_searchView.View);
 				}
 			}
+			else
+			{
+				if (_searchView != null)
+				{
+					_searchView.View.RemoveFromParent();
+					_searchView.View.ViewAttachedToWindow -= OnSearchViewAttachedToWindow;
+					_searchView.SearchConfirmed -= OnSearchConfirmed;
+					_searchView.Dispose();
+					_searchView = null;
+				}
+			}
 		}
 
 		private void OnSearchViewAttachedToWindow(object sender, AView.ViewAttachedToWindowEventArgs e)
 		{
+			var searchHandler = Shell.GetSearchHandler(Page);
+			// We only need to do this tint hack when using collapsed search handlers
+			if (searchHandler.SearchBoxVisibility != SearchBoxVisiblity.Collapsable)
+				return;
+
 			for (int i = 0; i < _toolbar.ChildCount; i++)
 			{
 				var child = _toolbar.GetChildAt(i);
