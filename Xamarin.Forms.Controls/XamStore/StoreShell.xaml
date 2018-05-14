@@ -31,28 +31,28 @@
 	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
 	<MaterialShellItem x:Name="_storeItem" TabLocation="Bottom" GroupBehavior="ShowTabs">
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="home-flyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
-		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="games-flyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Home" Icon="home.png" FlyoutIcon="homeflyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
+		<ShellTabItem ShellItem.ShellAppearance="{StaticResource greenAppearance}" Title="Games" Icon="games.png" FlyoutIcon="gamesflyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource moviesAppearance}" Title="Movies &amp; TV" 
-					  Icon="film.png" FlyoutIcon="film-flyout.png" ContentTemplate="{DataTemplate local:MoviesPage}">
+					  Icon="film.png" FlyoutIcon="filmflyout.png" ContentTemplate="{DataTemplate local:MoviesPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="film.png" Text="Open Movies App" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource booksAppearance}" Title="Books" 
-					  Icon="books.png" FlyoutIcon="books-flyout.png" ContentTemplate="{DataTemplate local:BooksPage}">
+					  Icon="books.png" FlyoutIcon="booksflyout.png" ContentTemplate="{DataTemplate local:BooksPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="books.png" Text="Open Reader" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource musicAppearance}" Title="Music" 
-					  Icon="headphone.png" FlyoutIcon="headphone-flyout.png" ContentTemplate="{DataTemplate local:MusicPage}">
+					  Icon="headphone.png" FlyoutIcon="headphoneflyout.png" ContentTemplate="{DataTemplate local:MusicPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="headphone.png" Text="Open Music App" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
 		<ShellTabItem ShellItem.ShellAppearance="{StaticResource newsAppearance}" Title="Newsstand" 
-					  Icon="newspaper.png" FlyoutIcon="newspaper-flyout.png" ContentTemplate="{DataTemplate local:NewsPage}">
+					  Icon="newspaper.png" FlyoutIcon="newspaperflyout.png" ContentTemplate="{DataTemplate local:NewsPage}">
 			<ShellTabItem.MenuItems>
 				<MenuItem Icon="newspaper.png" Text="Open News App" />
 			</ShellTabItem.MenuItems>
@@ -68,7 +68,6 @@
 	<MenuItem Text="Xam Protect" Icon="jet.png" />
 
 	<ShellTabItem ShellItem.ShellAppearance="{StaticResource defaultAppearance}" Title="Settings" Icon="gear.png" ContentTemplate="{DataTemplate local:SettingsPage}" />
-
 
 	<Shell.MenuItems>
 		<MenuItem Text="Help &amp; feedback" />

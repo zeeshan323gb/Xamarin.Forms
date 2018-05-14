@@ -9,7 +9,7 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Content")]
-	public class ShellTabItem : NavigableElement, IShellTabItemController, IShellAppearanceTracker
+	public class ShellTabItem : BaseShellItem, IShellTabItemController
 	{
 		#region PropertyKeys
 
@@ -17,15 +17,6 @@ namespace Xamarin.Forms
 			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellTabItem), null, defaultValueCreator: bo => new MenuItemCollection());
 
 		#endregion PropertyKeys
-
-		#region IShellAppearanceTracker
-
-		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
-		{
-			AppearanceTrackerUtils.AppearanceChanged(this, source, appearanceSet);
-		}
-
-		#endregion IShellAppearanceTracker
 
 		#region IShellTabItemController
 
@@ -104,19 +95,7 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ContentTemplateProperty =
 			BindableProperty.Create(nameof(ContentTemplate), typeof(DataTemplate), typeof(ShellTabItem), null, BindingMode.OneTime);
 
-		public static readonly BindableProperty FlyoutIconProperty =
-			BindableProperty.Create(nameof(FlyoutIcon), typeof(ImageSource), typeof(ShellTabItem), null, BindingMode.OneTime);
-
-		public static readonly BindableProperty IconProperty =
-			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellTabItem), null, BindingMode.OneTime, propertyChanged: OnIconChanged);
-
-		public static readonly BindableProperty IsEnabledProperty =
-			BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(ShellTabItem), true, BindingMode.OneWay);
-
 		public static readonly BindableProperty MenuItemsProperty = MenuItemsPropertyKey.BindableProperty;
-
-		public static readonly BindableProperty TitleProperty =
-			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellTabItem), null, BindingMode.OneTime);
 
 		private IList<Element> _logicalChildren = new List<Element>();
 
@@ -142,39 +121,9 @@ namespace Xamarin.Forms
 			set { SetValue(ContentTemplateProperty, value); }
 		}
 
-		public ImageSource FlyoutIcon
-		{
-			get { return (ImageSource)GetValue(FlyoutIconProperty); }
-			set { SetValue(FlyoutIconProperty, value); }
-		}
-
-		public ImageSource Icon
-		{
-			get { return (ImageSource)GetValue(IconProperty); }
-			set { SetValue(IconProperty, value); }
-		}
-
-		public bool IsEnabled
-		{
-			get { return (bool)GetValue(IsEnabledProperty); }
-			set { SetValue(IsEnabledProperty, value); }
-		}
-
 		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
 
-		public string Route
-		{
-			get { return Routing.GetRoute(this); }
-			set { Routing.SetRoute(this, value); }
-		}
-
 		public IReadOnlyList<Page> Stack => _navStack;
-
-		public string Title
-		{
-			get { return (string)GetValue(TitleProperty); }
-			set { SetValue(TitleProperty, value); }
-		}
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
 
@@ -395,15 +344,6 @@ namespace Xamarin.Forms
 			{
 				shellItem?.SendStructureChanged();
 			}
-		}
-
-		private static void OnIconChanged(BindableObject bindable, object oldValue, object newValue)
-		{
-			if (newValue == null || bindable.IsSet(FlyoutIconProperty))
-				return;
-
-			var shellTabItem = (ShellTabItem)bindable;
-			shellTabItem.FlyoutIcon = (ImageSource)newValue;
 		}
 
 		private void AddPage(Page page)

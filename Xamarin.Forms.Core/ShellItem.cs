@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class ShellItem : NavigableElement, IShellItemController, IShellAppearanceTracker
+	public class ShellItem : BaseShellItem, IShellItemController
 	{
 		#region PropertyKeys
 
@@ -16,21 +16,30 @@ namespace Xamarin.Forms
 
 		#endregion PropertyKeys
 
-		#region IShellAppearanceTracker
-
-		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
-		{
-			AppearanceTrackerUtils.AppearanceChanged(this, source, appearanceSet);
-		}
-
-		#endregion
-
 		#region IShellItemController
 
 		event EventHandler IShellItemController.StructureChanged
 		{
 			add { _structureChanged += value; }
 			remove { _structureChanged -= value; }
+		}
+
+		void IShellItemController.UpdateChecked()
+		{
+			var shell = Parent as Shell;
+			bool isChecked = shell?.CurrentItem == this;
+			if (isChecked)
+			{
+				SetValue(IsCheckedPropertyKey, true);
+				foreach (var tab in Items)
+					tab.SetValue(IsCheckedPropertyKey, tab == CurrentItem);
+			}
+			else
+			{
+				SetValue(IsCheckedPropertyKey, false);
+				foreach (var tab in Items)
+					tab.SetValue(IsCheckedPropertyKey, false);
+			}
 		}
 
 		private event EventHandler _structureChanged;
@@ -41,27 +50,14 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellTabItem), typeof(ShellItem), null, BindingMode.TwoWay,
 				propertyChanged: OnCurrentItemChanged);
 
-		public static readonly BindableProperty FlyoutIconProperty =
-			BindableProperty.Create(nameof(FlyoutIcon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneTime);
-
 		public static readonly BindableProperty GroupBehaviorProperty =
 			BindableProperty.Create(nameof(GroupBehavior), typeof(ShellItemGroupBehavior), typeof(ShellItem), ShellItemGroupBehavior.HideTabs, BindingMode.OneTime);
-
-		public static readonly BindableProperty IconProperty =
-			BindableProperty.Create(nameof(Icon), typeof(ImageSource), typeof(ShellItem), null, BindingMode.OneWay,
-				propertyChanged: OnIconChanged);
-
-		public static readonly BindableProperty IsEnabledProperty =
-			BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(ShellItem), true, BindingMode.OneWay);
 
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
 
 		public static readonly BindableProperty ShellAppearanceProperty =
 			BindableProperty.Create(nameof(ShellAppearance), typeof(ShellAppearance), typeof(ShellItem), null, BindingMode.OneTime,
 				propertyChanged: OnShellAppearanceChanged);
-
-		public static readonly BindableProperty TitleProperty =
-			BindableProperty.Create(nameof(Title), typeof(string), typeof(ShellItem), null, BindingMode.OneTime);
 
 		private readonly ObservableCollection<Element> _children = new ObservableCollection<Element>();
 		private ReadOnlyCollection<Element> _logicalChildren;
@@ -77,12 +73,6 @@ namespace Xamarin.Forms
 			set { SetValue(CurrentItemProperty, value); }
 		}
 
-		public ImageSource FlyoutIcon
-		{
-			get { return (ImageSource)GetValue(FlyoutIconProperty); }
-			set { SetValue(FlyoutIconProperty, value); }
-		}
-
 		public ShellItemGroupBehavior GroupBehavior
 		{
 			get { return (ShellItemGroupBehavior)GetValue(GroupBehaviorProperty); }
@@ -95,30 +85,12 @@ namespace Xamarin.Forms
 			set { SetValue(IconProperty, value); }
 		}
 
-		public bool IsEnabled
-		{
-			get { return (bool)GetValue(IsEnabledProperty); }
-			set { SetValue(IsEnabledProperty, value); }
-		}
-
 		public ShellTabItemCollection Items => (ShellTabItemCollection)GetValue(ItemsProperty);
-
-		public string Route
-		{
-			get { return Routing.GetRoute(this); }
-			set { Routing.SetRoute(this, value); }
-		}
 
 		public ShellAppearance ShellAppearance
 		{
 			get { return (ShellAppearance)GetValue(ShellAppearanceProperty); }
 			set { SetValue(ShellAppearanceProperty, value); }
-		}
-
-		public string Title
-		{
-			get { return (string)GetValue(TitleProperty); }
-			set { SetValue(TitleProperty, value); }
 		}
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
@@ -186,17 +158,9 @@ namespace Xamarin.Forms
 				shell.UpdateCurrentState(ShellNavigationSource.ShellTabItemChanged);
 			}
 
+			((IShellItemController)bindable).UpdateChecked();
 			shellItem.SendStructureChanged();
 			((IShellAppearanceTracker)shellItem).AppearanceChanged(shellItem, false);
-		}
-
-		private static void OnIconChanged(BindableObject bindable, object oldValue, object newValue)
-		{
-			if (newValue == null || bindable.IsSet(FlyoutIconProperty))
-				return;
-
-			var shellItem = (ShellItem)bindable;
-			shellItem.FlyoutIcon = (ImageSource)newValue;
 		}
 
 		private static void OnShellAppearanceChanged(BindableObject bindable, object oldValue, object newValue)

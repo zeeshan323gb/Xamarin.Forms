@@ -132,6 +132,28 @@ namespace Xamarin.Forms.Platform.Android
 		private View GenerateDefaultCell(string textBinding, string iconBinding)
 		{
 			var grid = new Grid();
+			var groups = new VisualStateGroupList();
+			
+			var commonGroup = new VisualStateGroup();
+			commonGroup.Name = "CommonStates";
+			groups.Add(commonGroup);
+
+			var normalState = new VisualState();
+			normalState.Name = "Normal";
+			commonGroup.States.Add(normalState);
+
+			var selectedState = new VisualState();
+			selectedState.Name = "Selected";
+			selectedState.Setters.Add(new Setter
+			{
+				Property = VisualElement.BackgroundColorProperty,
+				Value = new Color(0.95)
+			});
+
+			commonGroup.States.Add(selectedState);
+
+			VisualStateManager.SetVisualStateGroups(grid, groups);
+
 			grid.HeightRequest = 40;
 			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = 50 });
 			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
@@ -194,8 +216,39 @@ namespace Xamarin.Forms.Platform.Android
 				get { return _element; }
 				set
 				{
+					if (_element == value)
+						return;
+
+					if (_element != null && _element is BaseShellItem)
+						_element.PropertyChanged -= OnElementPropertyChanged;
+
 					_element = value;
 					View.BindingContext = value;
+
+					if (_element != null)
+					{
+						_element.PropertyChanged += OnElementPropertyChanged;
+						UpdateVisualState();
+					}
+				}
+			}
+
+			private void UpdateVisualState()
+			{
+				if (Element is BaseShellItem baseShellItem && baseShellItem != null)
+				{
+					if (baseShellItem.IsChecked)
+						VisualStateManager.GoToState(View, "Selected");
+					else
+						VisualStateManager.GoToState(View, "Normal");
+				}
+			}
+
+			private void OnElementPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+			{
+				if (e.PropertyName == BaseShellItem.IsCheckedProperty.PropertyName)
+				{
+					UpdateVisualState();
 				}
 			}
 		}
