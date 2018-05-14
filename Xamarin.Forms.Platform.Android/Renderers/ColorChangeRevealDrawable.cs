@@ -11,25 +11,38 @@ namespace Xamarin.Forms.Platform.Android
 		private readonly Point _center;
 		private readonly AColor _endColor;
 		private readonly AColor _startColor;
-		private float progress;
+		private float _progress;
 
 		public ColorChangeRevealDrawable(AColor startColor, AColor endColor, Point center) : base()
 		{
 			_startColor = startColor;
 			_endColor = endColor;
 
-			ValueAnimator animator = ValueAnimator.OfFloat(0, 1);
-			animator.SetInterpolator(new global::Android.Views.Animations.DecelerateInterpolator());
-			animator.SetDuration(500);
-			animator.Update += OnUpdate;
-			animator.Start();
-			_center = center;
+			if (_startColor != _endColor)
+			{
+				ValueAnimator animator = ValueAnimator.OfFloat(0, 1);
+				animator.SetInterpolator(new global::Android.Views.Animations.DecelerateInterpolator());
+				animator.SetDuration(500);
+				animator.Update += OnUpdate;
+				animator.Start();
+				_center = center;
+			}
+			else
+			{
+				_progress = 1;
+			}
 		}
 
 		public override void Draw(Canvas canvas)
 		{
-			var bounds = Bounds;
+			if (_progress == 1)
+			{
+				canvas.DrawColor(_endColor);
+				return;
+			}
+
 			canvas.DrawColor(_startColor);
+			var bounds = Bounds;
 			float centerX = (float)_center.X;
 			float centerY = (float)_center.Y;
 
@@ -37,14 +50,16 @@ namespace Xamarin.Forms.Platform.Android
 			float distanceFromCenter = (float)Math.Abs(width / 2 - _center.X);
 			float radius = (width / 2 + distanceFromCenter) * 1.1f;
 
-			var paint = new Paint();
-			paint.Color = _endColor;
-			canvas.DrawCircle(centerX, centerY, radius * progress, paint);
+			var paint = new Paint
+			{
+				Color = _endColor
+			};
+			canvas.DrawCircle(centerX, centerY, radius * _progress, paint);
 		}
 
 		private void OnUpdate(object sender, ValueAnimator.AnimatorUpdateEventArgs e)
 		{
-			progress = (float)e.Animation.AnimatedValue;
+			_progress = (float)e.Animation.AnimatedValue;
 			InvalidateSelf();
 		}
 	}

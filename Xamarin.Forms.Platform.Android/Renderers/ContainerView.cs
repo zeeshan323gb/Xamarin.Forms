@@ -9,20 +9,23 @@ namespace Xamarin.Forms.Platform.Android
 	public class ContainerView : ViewGroup
 	{
 		private Context _context;
-		private View _view;
 		private IVisualElementRenderer _renderer;
+		private View _view;
 
-		public View View => _view;
+		public View View
+		{
+			get { return _view; }
+			set
+			{
+				_view = value;
+				OnViewSet(value);
+			}
+		}
 
 		public ContainerView(Context context, View view) : base(context)
 		{
 			_context = context;
-			_view = view;
-
-			_renderer = Platform.CreateRenderer(view, context);
-			Platform.SetRenderer(view, _renderer);
-
-			AddView(_renderer.View);
+			View = view;
 		}
 
 		public ContainerView(Context context, IAttributeSet attribs) : base(context, attribs)
@@ -37,6 +40,14 @@ namespace Xamarin.Forms.Platform.Android
 		{
 		}
 
+		protected virtual void OnViewSet(View view)
+		{
+			_renderer = Platform.CreateRenderer(view, Context);
+			Platform.SetRenderer(view, _renderer);
+
+			AddView(_renderer.View);
+		}
+
 		protected override void OnLayout(bool changed, int l, int t, int r, int b)
 		{
 			if (_renderer == null)
@@ -45,7 +56,7 @@ namespace Xamarin.Forms.Platform.Android
 			var width = _context.FromPixels(r - l);
 			var height = _context.FromPixels(b - t);
 
-			_view.Layout(new Rectangle (0, 0, width, height));
+			View.Layout(new Rectangle (0, 0, width, height));
 			_renderer.UpdateLayout();
 		}
 
@@ -55,7 +66,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			var width = MeasureSpecFactory.GetSize(widthMeasureSpec);
 
-			var sizeReq = _view.Measure(_context.FromPixels(width), double.PositiveInfinity);
+			var sizeReq = View.Measure(_context.FromPixels(width), double.PositiveInfinity);
 
 			SetMeasuredDimension(width, (int)_context.ToPixels(sizeReq.Request.Height));
 		}
