@@ -221,7 +221,9 @@
     <Compile Include="Renderers\ShellBottomTabItemRenderer.cs" />
     <Compile Include="Renderers\ShellContentFragment.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
+    <Compile Include="Renderers\ShellFlyoutRecyclerAdapter.cs" />
     <Compile Include="Renderers\ShellFlyoutRenderer.cs" />
+    <Compile Include="Renderers\ShellFlyoutTemplatedContentRenderer.cs" />
     <Compile Include="Renderers\ShellFragmentPagerAdapter.cs" />
     <Compile Include="Renderers\ShellItemRendererBase.cs" />
     <Compile Include="Renderers\ShellPageContainer.cs" />
@@ -358,6 +360,11 @@
   <ItemGroup>
     <AndroidResource Include="Resources\anim\ExitToRight.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\Layout\FlyoutContent.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

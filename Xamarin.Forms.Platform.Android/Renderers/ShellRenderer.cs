@@ -191,7 +191,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
 		{
-			return new ShellFlyoutContentRenderer(this, AndroidContext);
+			return new ShellFlyoutTemplatedContentRenderer(this);
+			//return new ShellFlyoutContentRenderer(this, AndroidContext);
 		}
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
