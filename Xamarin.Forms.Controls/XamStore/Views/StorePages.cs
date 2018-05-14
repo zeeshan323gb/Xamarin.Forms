@@ -6,54 +6,115 @@ namespace Xamarin.Forms.Controls.XamStore
 {
     public class BasePage : ContentPage
 	{
+		private Button MakeButton (string title, Action callback)
+		{
+			var result = new Button();
+			result.Text = title;
+			result.Clicked += (s, e) => callback();
+			return result;
+		}
+
 		public BasePage(string title, Color tint)
 		{
 			Title = title;
 
-			var stack = new StackLayout();
-			stack.Padding = 40;
-
-			stack.Children.Add(new Label
+			var grid = new Grid()
 			{
-				Text = "Welcome to the " + title + " page!",
+				Padding = 20,
+				ColumnDefinitions =
+				{
+					new ColumnDefinition {Width = GridLength.Star},
+					new ColumnDefinition {Width = GridLength.Star},
+					new ColumnDefinition {Width = GridLength.Star},
+				}
+			};
+
+			grid.Children.Add(new Label
+			{
 				VerticalTextAlignment = TextAlignment.Center,
-				HorizontalTextAlignment = TextAlignment.Center
+				HorizontalTextAlignment = TextAlignment.Center,
+				Text = "Welcome to the " + GetType().Name
+			}, 0, 3, 0, 1);
+
+			grid.Children.Add(MakeButton("Push",
+					() => Navigation.PushAsync((Page)Activator.CreateInstance(GetType()))),
+				0, 1);
+
+			grid.Children.Add(MakeButton("Pop",
+					() => Navigation.PopAsync()),
+				1, 1);
+
+			grid.Children.Add(MakeButton("Pop To Root",
+					() => Navigation.PopToRootAsync()),
+				2, 1);
+
+			grid.Children.Add(MakeButton("Insert",
+					() => Navigation.InsertPageBefore((Page)Activator.CreateInstance(GetType()), this)),
+				0, 2);
+
+			grid.Children.Add(MakeButton("Remove",
+					() => Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 2])),
+				1, 2);
+
+			grid.Children.Add(MakeButton("Add Search",
+					() => AddSearchHandler("Added Search", SearchBoxVisiblity.Expanded)),
+				2, 2);
+
+			grid.Children.Add(MakeButton("Add Toolbar",
+					() => ToolbarItems.Add(new ToolbarItem("Test", "calculator.png", () => { }))),
+				0, 3);
+
+			grid.Children.Add(MakeButton("Remove Toolbar",
+					() => ToolbarItems.RemoveAt(0)),
+				1, 3);
+
+			grid.Children.Add(MakeButton("Remove Search",
+					RemoveSearchHandler),
+				2, 3);
+
+			grid.Children.Add(MakeButton("Add Tab",
+					AddTabItem),
+				0, 4);
+
+			grid.Children.Add(MakeButton("Remove Tab",
+					RemoveTabItem),
+				1, 4);
+
+			grid.Children.Add(MakeButton("Hide Tabs",
+					() => ShellAppearance.SetTabBarVisible(this, false)),
+				2, 4);
+
+			grid.Children.Add(MakeButton("Show Tabs",
+					() => ShellAppearance.SetTabBarVisible(this, true)),
+				0, 5);
+
+			grid.Children.Add(MakeButton("Hide Nav",
+					() => ShellAppearance.SetNavBarVisible(this, false)),
+				1, 5);
+
+			grid.Children.Add(MakeButton("Show Nav",
+					() => ShellAppearance.SetNavBarVisible(this, true)),
+				2, 5);
+
+			Content = new ScrollView { Content = grid };
+		}
+
+		private void RemoveTabItem()
+		{
+			var shellitem = (ShellItem)Parent.Parent;
+			shellitem.Items.Remove(shellitem.Items[shellitem.Items.Count - 1]);
+		}
+
+		private void AddTabItem()
+		{
+			var shellitem = (ShellItem)Parent.Parent;
+			shellitem.Items.Add(new ShellTabItem
+			{
+				Route = "newitem",
+				Title = "New Item",
+				Icon = "calculator.png",
+				Content = new UpdatesPage()
 			});
-
-			var pushButton = new Button
-			{
-				Text = "Push Page",
-				HorizontalOptions = LayoutOptions.Center
-			};
-			pushButton.Clicked += (s, e) =>
-			{
-				Navigation.PushAsync((Page)Activator.CreateInstance(GetType()));
-			};
-			stack.Children.Add(pushButton);
-
-			var popButton = new Button
-			{
-				Text = "Pop Page",
-				HorizontalOptions = LayoutOptions.Center
-			};
-			popButton.Clicked += (s, e) =>
-			{
-				Navigation.PopAsync();
-			};
-			stack.Children.Add(popButton);
-
-			var popToRootButton = new Button
-			{
-				Text = "Pop To Root",
-				HorizontalOptions = LayoutOptions.Center
-			};
-			popToRootButton.Clicked += (s, e) =>
-			{
-				Navigation.PopToRootAsync();
-			};
-			stack.Children.Add(popToRootButton);
-
-			Content = new ScrollView { Content = stack };
 		}
 
 		protected void AddSearchHandler(string placeholder, SearchBoxVisiblity visibility)
@@ -66,6 +127,11 @@ namespace Xamarin.Forms.Controls.XamStore
 			searchHandler.ClearPlaceholderIcon = "search.png";
 
 			Shell.SetSearchHandler(this, searchHandler);
+		}
+
+		protected void RemoveSearchHandler()
+		{
+			ClearValue(Shell.SearchHandlerProperty);
 		}
 	}
 
