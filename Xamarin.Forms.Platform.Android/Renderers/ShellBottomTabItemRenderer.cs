@@ -289,7 +289,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				var menuItem = menu.Add(0, MoreTabId, 0, new Java.Lang.String("More"));
 				menuItem.SetIcon(Resource.Drawable.abc_ic_menu_overflow_material);
-				if (currentIndex >= maxBottomItems)
+				if (currentIndex >= maxBottomItems - 1)
 					menuItem.SetChecked(true);
 				
 			}
