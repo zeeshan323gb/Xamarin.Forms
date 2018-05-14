@@ -403,7 +403,7 @@
     <AndroidResource Include="Resources\drawable\gear.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\search.png" />
+    <AndroidResource Include="Resources\drawable\mic.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\booksflyout.png" />

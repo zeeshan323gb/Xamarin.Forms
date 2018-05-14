@@ -211,6 +211,7 @@
     <BundleResource Include="Resources\card.png" />
     <BundleResource Include="Resources\bell%402x.png" />
     <BundleResource Include="Resources\bell.png" />
+    <BundleResource Include="Resources\mic.png" />
     <Content Include="settings%402x.png" />
     <Content Include="menuIcon%402x.png" />
     <Content Include="crimsonsmall.jpg" />

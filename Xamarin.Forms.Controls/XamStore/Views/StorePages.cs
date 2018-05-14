@@ -124,7 +124,7 @@ namespace Xamarin.Forms.Controls.XamStore
 			searchHandler.SearchBoxVisibility = visibility;
 
 			searchHandler.ClearPlaceholderEnabled = true;
-			searchHandler.ClearPlaceholderIcon = "search.png";
+			searchHandler.ClearPlaceholderIcon = "mic.png";
 
 			Shell.SetSearchHandler(this, searchHandler);
 		}
