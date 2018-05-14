@@ -585,6 +585,11 @@ namespace Xamarin.Forms
 
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
+			var oldItem = (IShellItemController)oldValue;
+			var newItem = (IShellItemController)newValue;
+			oldItem?.UpdateChecked();
+			newItem?.UpdateChecked();
+			
 			var shell = (Shell)bindable;
 			((IShellAppearanceTracker)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
