@@ -1,10 +1,13 @@
-﻿using System;
-using System.ComponentModel;
-using Android.Content;
+﻿using Android.Content;
+using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.Support.V4.App;
 using Android.Support.V4.Widget;
 using Android.Views;
 using Android.Widget;
+using System;
+using System.ComponentModel;
+using AColor = Android.Graphics.Color;
 using AView = Android.Views.View;
 using LP = Android.Views.ViewGroup.LayoutParams;
 using Toolbar = Android.Support.V7.Widget.Toolbar;
@@ -14,13 +17,6 @@ namespace Xamarin.Forms.Platform.Android
 	public class ShellRenderer : IVisualElementRenderer, IShellContext, IAppearanceObserver
 	{
 		#region IVisualElementRenderer
-		VisualElement IVisualElementRenderer.Element => Element;
-
-		VisualElementTracker IVisualElementRenderer.Tracker => null;
-
-		ViewGroup IVisualElementRenderer.ViewGroup => _flyoutRenderer.AndroidView as ViewGroup;
-
-		AView IVisualElementRenderer.View => _flyoutRenderer.AndroidView;
 
 		event EventHandler<VisualElementChangedEventArgs> IVisualElementRenderer.ElementChanged
 		{
@@ -33,6 +29,13 @@ namespace Xamarin.Forms.Platform.Android
 			add { _elementPropertyChanged += value; }
 			remove { _elementPropertyChanged -= value; }
 		}
+
+		VisualElement IVisualElementRenderer.Element => Element;
+
+		VisualElementTracker IVisualElementRenderer.Tracker => null;
+
+		AView IVisualElementRenderer.View => _flyoutRenderer.AndroidView;
+		ViewGroup IVisualElementRenderer.ViewGroup => _flyoutRenderer.AndroidView as ViewGroup;
 
 		SizeRequest IVisualElementRenderer.GetDesiredSize(int widthConstraint, int heightConstraint)
 		{
@@ -61,13 +64,19 @@ namespace Xamarin.Forms.Platform.Android
 			var height = (int)AndroidContext.ToPixels(Element.Height);
 			_flyoutRenderer.AndroidView.Layout(0, 0, width, height);
 		}
+
 		#endregion IVisualElementRenderer
 
 		#region IShellContext
 
-		Shell IShellContext.Shell => Element;
-
 		Context IShellContext.AndroidContext => AndroidContext;
+
+		// This is very bad, FIXME.
+		// This assumes all flyouts will implement via DrawerLayout which is PROBABLY true but
+		// I dont want to back us into a corner this time.
+		DrawerLayout IShellContext.CurrentDrawerLayout => (DrawerLayout)_flyoutRenderer.AndroidView;
+
+		Shell IShellContext.Shell => Element;
 
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
 		{
@@ -88,11 +97,6 @@ namespace Xamarin.Forms.Platform.Android
 			return CreateTrackerForToolbar(toolbar);
 		}
 
-		// This is very bad, FIXME.
-		// This assumes all flyouts will implement via DrawerLayout which is PROBABLY true but
-		// I dont want to back us into a corner this time.
-		DrawerLayout IShellContext.CurrentDrawerLayout => (DrawerLayout)_flyoutRenderer.AndroidView;
-
 		#endregion IShellContext
 
 		#region IAppearanceObserver
@@ -102,13 +106,12 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateStatusBarColor(appearance);
 		}
 
-		#endregion
-
-		private event EventHandler<PropertyChangedEventArgs> _elementPropertyChanged;
-		private event EventHandler<VisualElementChangedEventArgs> _elementChanged;
+		#endregion IAppearanceObserver
 
 		private bool _disposed = false;
+
 		private IShellFlyoutRenderer _flyoutRenderer;
+
 		private FrameLayout _frameLayout;
 
 		public ShellRenderer(Context context)
@@ -116,11 +119,36 @@ namespace Xamarin.Forms.Platform.Android
 			AndroidContext = context;
 		}
 
-		protected Shell Element { get; private set; }
+		private event EventHandler<VisualElementChangedEventArgs> _elementChanged;
+
+		private event EventHandler<PropertyChangedEventArgs> _elementPropertyChanged;
 
 		protected Context AndroidContext { get; }
-
+		protected Shell Element { get; private set; }
 		private FragmentManager FragmentManager => ((FormsAppCompatActivity)AndroidContext).SupportFragmentManager;
+
+		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
+		{
+			return new ShellFlyoutTemplatedContentRenderer(this);
+			//return new ShellFlyoutContentRenderer(this, AndroidContext);
+		}
+
+		protected virtual IShellFlyoutRenderer CreateShellFlyoutRenderer()
+		{
+			return new ShellFlyoutRenderer(this, AndroidContext);
+		}
+
+		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
+		{
+			if (shellItem is MaterialShellItem materialShellItem && materialShellItem.TabLocation == ShellTabLocation.Bottom)
+				return new ShellBottomTabItemRenderer(this);
+			return new ShellTopTabItemRenderer(this);
+		}
+
+		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)
+		{
+			return new ShellToolbarTracker(this, toolbar, ((IShellContext)this).CurrentDrawerLayout);
+		}
 
 		protected virtual void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
@@ -132,39 +160,24 @@ namespace Xamarin.Forms.Platform.Android
 			_elementPropertyChanged?.Invoke(sender, e);
 		}
 
-		protected virtual void OnElementSet (Shell shell)
+		protected virtual void OnElementSet(Shell shell)
 		{
 			_flyoutRenderer = CreateShellFlyoutRenderer();
 			_frameLayout = new FrameLayout(AndroidContext)
 			{
 				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
-				Id = Platform.GenerateViewId (),
+				Id = Platform.GenerateViewId(),
 			};
 			_frameLayout.SetFitsSystemWindows(true);
 
 			_flyoutRenderer.AttachFlyout(this, _frameLayout);
-			
 
 			((IShellController)shell).AddAppearanceObserver(this, shell);
 
 			SwitchFragment(FragmentManager, _frameLayout, shell.CurrentItem, false);
 		}
 
-		private void UpdateStatusBarColor(ShellAppearance appearance)
-		{
-			if (appearance != null)
-			{
-				var color = appearance.BackgroundColor.ToAndroid(Color.FromHex("#03A9F4"));
-				((FormsAppCompatActivity)AndroidContext).Window.DecorView.SetBackgroundColor(color);
-			}
-			else
-			{
-				var color = Color.FromHex("#03A9F4").ToAndroid();
-				((FormsAppCompatActivity)AndroidContext).Window.DecorView.SetBackgroundColor(color);
-			}
-		}
-
-		protected virtual void SwitchFragment (FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
+		protected virtual void SwitchFragment(FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
 		{
 			var route = newItem.Route ?? newItem.GetHashCode().ToString();
 
@@ -185,35 +198,20 @@ namespace Xamarin.Forms.Platform.Android
 			transaction.CommitAllowingStateLoss();
 		}
 
-		protected virtual IShellFlyoutRenderer CreateShellFlyoutRenderer ()
-		{
-			return new ShellFlyoutRenderer(this, AndroidContext);
-		}
-
-		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
-		{
-			return new ShellFlyoutTemplatedContentRenderer(this);
-			//return new ShellFlyoutContentRenderer(this, AndroidContext);
-		}
-
-		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
-		{
-			if (shellItem is MaterialShellItem materialShellItem && materialShellItem.TabLocation == ShellTabLocation.Bottom)
-				return new ShellBottomTabItemRenderer(this);
-			return new ShellTopTabItemRenderer(this);
-		}
-
-		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)
-		{
-			return new ShellToolbarTracker(this, toolbar, ((IShellContext)this).CurrentDrawerLayout);
-		}
-
 		private async void GoTo(ShellItem item, ShellTabItem tab)
 		{
 			if (tab == null)
 				tab = item.CurrentItem;
 			var state = ((IShellController)Element).GetNavigationState(item, tab);
 			await Element.GoToAsync(state).ConfigureAwait(false);
+		}
+
+		private void OnElementSizeChanged(object sender, EventArgs e)
+		{
+			int width = (int)AndroidContext.ToPixels(Element.Width);
+			int height = (int)AndroidContext.ToPixels(Element.Height);
+			_flyoutRenderer.AndroidView.Measure(MeasureSpecFactory.MakeMeasureSpec(width, MeasureSpecMode.Exactly), MeasureSpecFactory.MakeMeasureSpec(height, MeasureSpecMode.Exactly));
+			_flyoutRenderer.AndroidView.Layout(0, 0, (int)width, (int)height);
 		}
 
 		private void OnFlyoutItemSelected(object sender, ElementSelectedEventArgs e)
@@ -245,15 +243,82 @@ namespace Xamarin.Forms.Platform.Android
 				GoTo(shellItem, shellTabItem);
 		}
 
-		private void OnElementSizeChanged(object sender, EventArgs e)
+		private void UpdateStatusBarColor(ShellAppearance appearance)
 		{
-			int width = (int)AndroidContext.ToPixels(Element.Width);
-			int height = (int)AndroidContext.ToPixels(Element.Height);
-			_flyoutRenderer.AndroidView.Measure(MeasureSpecFactory.MakeMeasureSpec(width, MeasureSpecMode.Exactly), MeasureSpecFactory.MakeMeasureSpec(height, MeasureSpecMode.Exactly));
-			_flyoutRenderer.AndroidView.Layout(0, 0, (int)width, (int)height);
+			var activity = ((FormsAppCompatActivity)AndroidContext);
+			var window = activity.Window;
+			var decorView = window.DecorView;
+			var resources = activity.Resources;
+
+			int statusBarHeight = 0;
+			int resourceId = resources.GetIdentifier("status_bar_height", "dimen", "android");
+			if (resourceId > 0)
+			{
+				statusBarHeight = resources.GetDimensionPixelSize(resourceId);
+			}
+
+			int navigationBarHeight = 0;
+			resourceId = resources.GetIdentifier("navigation_bar_height", "dimen", "android");
+			if (resourceId > 0)
+			{
+				navigationBarHeight = resources.GetDimensionPixelSize(resourceId);
+			}
+
+			if (appearance != null)
+			{
+				var color = appearance.BackgroundColor.ToAndroid(Color.FromHex("#03A9F4"));
+				decorView.SetBackground(new SplitDrawable(color, statusBarHeight, navigationBarHeight));
+			}
+			else
+			{
+				var color = Color.FromHex("#03A9F4").ToAndroid();
+				decorView.SetBackground(new SplitDrawable(color, statusBarHeight, navigationBarHeight));
+			}
+		}
+
+		private class SplitDrawable : Drawable
+		{
+			private readonly int _bottomSize;
+			private readonly AColor _color;
+			private readonly int _topSize;
+
+			public SplitDrawable(AColor color, int topSize, int bottomSize)
+			{
+				_color = color;
+				_bottomSize = bottomSize;
+				_topSize = topSize;
+			}
+
+			public override int Opacity => (int)Format.Opaque;
+
+			public override void Draw(Canvas canvas)
+			{
+				var bounds = Bounds;
+
+				var paint = new Paint();
+
+				paint.Color = _color;
+
+				canvas.DrawRect(new Rect(0, 0, bounds.Right, _topSize), paint);
+
+				canvas.DrawRect(new Rect(0, bounds.Bottom - _bottomSize, bounds.Right, bounds.Bottom), paint);
+			}
+
+			public override void SetAlpha(int alpha)
+			{
+			}
+
+			public override void SetColorFilter(ColorFilter colorFilter)
+			{
+			}
 		}
 
 		#region IDisposable
+
+		void IDisposable.Dispose()
+		{
+			Dispose(true);
+		}
 
 		protected virtual void Dispose(bool disposing)
 		{
@@ -273,12 +338,6 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		void IDisposable.Dispose()
-		{
-			Dispose(true);
-		}
-
-		#endregion
-
+		#endregion IDisposable
 	}
 }
