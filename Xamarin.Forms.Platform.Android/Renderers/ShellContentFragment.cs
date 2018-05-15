@@ -55,6 +55,8 @@ namespace Xamarin.Forms.Platform.Android
 			if (result == null)
 				return result;
 
+			View.SetLayerType(LayerType.Hardware, null);
+
 			// This is very strange what we are about to do. For whatever reason if you take this animation
 			// and wrap it into an animation set it will have a 1 frame glitch at the start where the
 			// fragment shows at the final position. That sucks. So instead we reach into the returned
@@ -126,6 +128,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void AndroidAnimation.IAnimationListener.OnAnimationEnd(AndroidAnimation animation)
 		{
+			View?.SetLayerType(LayerType.None, null);
 			AnimationFinished?.Invoke(this, EventArgs.Empty);
 		}
 

@@ -201,10 +201,12 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (animated && trackFragment != null)
 			{
+				GetNavigationTarget().SetBackgroundColor(Color.Black.ToAndroid());
 				void callback(object s, EventArgs e)
 				{
 					trackFragment.AnimationFinished -= callback;
 					result.TrySetResult(true);
+					GetNavigationTarget().SetBackground(null);
 				}
 				trackFragment.AnimationFinished += callback;
 			}
