@@ -84,6 +84,7 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateIsEnabled();
 				UpdateVerticalScrollBarVisibility();
 				UpdateHorizontalScrollBarVisibility();
+				UpdateVerticalBounce();
 
 				OnElementChanged(new VisualElementChangedEventArgs(oldElement, element));
 
@@ -105,6 +106,30 @@ namespace Xamarin.Forms.Platform.iOS
 		public UIViewController ViewController
 		{
 			get { return null; }
+		}
+
+		private void UpdateVerticalBounce()
+		{
+			// Normally we dont want to do this unless this scrollview is vertical and its
+			// element is the child of a Page with a SearchHandler that is collapsable.
+			// If we can't bounce in that case you may not be able to expose the handler.
+			// Also the hiding behavior only depends on scroll on iOS 11. In 10 and below
+			// the search goes in the TitleView so there is nothing to collapse/expand.
+			if (!Forms.IsiOS11OrNewer || ((ScrollView)Element).Orientation == ScrollOrientation.Horizontal)
+				return;
+
+			var parent = Element.Parent;
+			while (!Application.IsApplicationOrNull(parent))
+			{
+				if (parent is Page)
+				{
+					var searchHandler = Shell.GetSearchHandler(parent);
+					if (searchHandler?.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
+						AlwaysBounceVertical = true;
+					return;
+				}
+				parent = parent.Parent;
+			}
 		}
 
 		private void UpdateOverrideArea()
