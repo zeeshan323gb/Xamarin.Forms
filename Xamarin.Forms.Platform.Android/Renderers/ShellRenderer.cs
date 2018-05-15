@@ -155,11 +155,12 @@ namespace Xamarin.Forms.Platform.Android
 			if (appearance != null)
 			{
 				var color = appearance.BackgroundColor.ToAndroid(Color.FromHex("#03A9F4"));
-				_flyoutRenderer.AndroidView.SetBackgroundColor(color);
+				((FormsAppCompatActivity)AndroidContext).Window.DecorView.SetBackgroundColor(color);
 			}
 			else
 			{
-				_flyoutRenderer.AndroidView.SetBackgroundColor(Color.FromHex("#03A9F4").ToAndroid());
+				var color = Color.FromHex("#03A9F4").ToAndroid();
+				((FormsAppCompatActivity)AndroidContext).Window.DecorView.SetBackgroundColor(color);
 			}
 		}
 

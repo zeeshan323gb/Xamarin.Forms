@@ -59,7 +59,6 @@ namespace Xamarin.Forms.Platform.Android
 			var outerLayout = inflater.Inflate(Resource.Layout.BottomTabLayout, null);
 			_bottomView = outerLayout.FindViewById<BottomNavigationView>(Resource.Id.bottomtab_tabbar);
 			_navigationArea = outerLayout.FindViewById<FrameLayout>(Resource.Id.bottomtab_navarea);
-			_navigationArea.SetBackgroundColor(Color.Black.ToAndroid());
 
 			_bottomView.SetBackgroundColor(Color.White.ToAndroid());
 			_bottomView.SetOnNavigationItemSelectedListener(this);
