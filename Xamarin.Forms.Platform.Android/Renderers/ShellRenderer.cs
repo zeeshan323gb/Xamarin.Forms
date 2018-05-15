@@ -264,6 +264,10 @@ namespace Xamarin.Forms.Platform.Android
 				navigationBarHeight = resources.GetDimensionPixelSize(resourceId);
 			}
 
+			// we are using the split drawable here to avoid GPU overdraw.
+			// All it really is is a drawable that only draws under the statusbar/bottom bar to make sure
+			// we dont draw over areas we dont need to. This has very limited benefits considering its
+			// only saving us a flat color fill BUT it helps people not freak out about overdraw.
 			if (appearance != null)
 			{
 				var color = appearance.BackgroundColor.ToAndroid(Color.FromHex("#03A9F4"));
