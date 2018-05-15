@@ -220,6 +220,8 @@ namespace Xamarin.Forms.Platform.Android
 			bool requestContainerLayout = bottom > _previousBottom;
 			_previousBottom = bottom;
 
+			_container.Measure(MeasureSpecFactory.MakeMeasureSpec(right - left, MeasureSpecMode.Unspecified),
+				MeasureSpecFactory.MakeMeasureSpec(bottom - top, MeasureSpecMode.Unspecified));
 			base.OnLayout(changed, left, top, right, bottom);
 			if (_view.Content != null && _hScrollView != null)
 				_hScrollView.Layout(0, 0, right - left, Math.Max(bottom - top, (int)Context.ToPixels(_view.Content.Height)));
