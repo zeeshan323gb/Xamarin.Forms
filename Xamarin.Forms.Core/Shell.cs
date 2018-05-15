@@ -487,6 +487,17 @@ namespace Xamarin.Forms
 			_structureChanged?.Invoke(this, EventArgs.Empty);
 		}
 
+		protected override bool OnBackButtonPressed()
+		{
+			var currentTabItem = CurrentItem?.CurrentItem;
+			if (currentTabItem != null && currentTabItem.Stack.Count > 1)
+			{
+				currentTabItem.Navigation.PopAsync();
+				return true;
+			}
+			return false;
+		}
+
 		protected override void OnChildAdded(Element child)
 		{
 			base.OnChildAdded(child);
