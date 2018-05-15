@@ -54,8 +54,12 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (result == null)
 				return result;
-
-			View.SetLayerType(LayerType.Hardware, null);
+			
+			// we only want to use a hardware layer for the entering view because its quite likely
+			// the view exiting is animating a button press of some sort. This means lots of GPU
+			// transactions to update the texture.
+			if (enter)
+				View.SetLayerType(LayerType.Hardware, null);
 
 			// This is very strange what we are about to do. For whatever reason if you take this animation
 			// and wrap it into an animation set it will have a 1 frame glitch at the start where the
