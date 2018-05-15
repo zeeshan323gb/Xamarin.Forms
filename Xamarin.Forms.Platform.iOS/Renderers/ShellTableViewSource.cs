@@ -70,12 +70,12 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				var view = (View)template.CreateContent(context, _context.Shell);
 				view.Parent = _context.Shell;
-				view.BindingContext = context;
 				cell = new UIContainerCell(cellId, view);
+				cell.BindingContext = context;
 			}
 			else
 			{
-				cell.View.BindingContext = context;
+				cell.BindingContext = context;
 			}
 
 			return cell;
@@ -125,6 +125,29 @@ namespace Xamarin.Forms.Platform.iOS
 		private View GenerateDefaultCell(string textBinding, string iconBinding)
 		{
 			var grid = new Grid();
+
+			var groups = new VisualStateGroupList();
+
+			var commonGroup = new VisualStateGroup();
+			commonGroup.Name = "CommonStates";
+			groups.Add(commonGroup);
+
+			var normalState = new VisualState();
+			normalState.Name = "Normal";
+			commonGroup.States.Add(normalState);
+
+			var selectedState = new VisualState();
+			selectedState.Name = "Selected";
+			selectedState.Setters.Add(new Setter
+			{
+				Property = VisualElement.BackgroundColorProperty,
+				Value = new Color(0.95)
+			});
+
+			commonGroup.States.Add(selectedState);
+
+			VisualStateManager.SetVisualStateGroups(grid, groups);
+
 			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = 50 });
 			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
 

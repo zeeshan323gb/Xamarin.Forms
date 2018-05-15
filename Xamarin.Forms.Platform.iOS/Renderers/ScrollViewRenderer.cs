@@ -107,8 +107,17 @@ namespace Xamarin.Forms.Platform.iOS
 			get { return null; }
 		}
 
+		private void UpdateOverrideArea()
+		{
+			var newBounds = AdjustedContentInset.InsetRect(Bounds).ToRectangle();
+			newBounds.X = 0;
+			newBounds.Y = 0;
+			((ScrollView)Element).LayoutAreaOverride = newBounds;
+		}
+
 		public override void LayoutSubviews()
 		{
+			UpdateOverrideArea();
 			base.LayoutSubviews();
 
 			if (_requestedScroll != null && Superview != null)

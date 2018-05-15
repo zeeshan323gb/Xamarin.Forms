@@ -226,32 +226,38 @@ namespace Xamarin.Forms.Platform.iOS
 		internal void DisposeModelAndChildrenRenderers(Element view)
 		{
 			IVisualElementRenderer renderer;
-			foreach (VisualElement child in view.Descendants())
+			foreach (Element child in view.Descendants())
 			{
-				renderer = GetRenderer(child);
-				child.ClearValue(RendererProperty);
+				if (child is VisualElement ve)
+				{
+					renderer = GetRenderer(ve);
+					child.ClearValue(RendererProperty);
 
+					if (renderer != null)
+					{
+						renderer.NativeView.RemoveFromSuperview();
+						renderer.Dispose();
+					}
+				}
+			}
+
+			if (view is VisualElement visualElement)
+			{
+				renderer = GetRenderer(visualElement);
 				if (renderer != null)
 				{
+					if (renderer.ViewController != null)
+					{
+						var modalWrapper = renderer.ViewController.ParentViewController as ModalWrapper;
+						if (modalWrapper != null)
+							modalWrapper.Dispose();
+					}
+
 					renderer.NativeView.RemoveFromSuperview();
 					renderer.Dispose();
 				}
+				view.ClearValue(RendererProperty);
 			}
-
-			renderer = GetRenderer((VisualElement)view);
-			if (renderer != null)
-			{
-				if (renderer.ViewController != null)
-				{
-					var modalWrapper = renderer.ViewController.ParentViewController as ModalWrapper;
-					if (modalWrapper != null)
-						modalWrapper.Dispose();
-				}
-
-				renderer.NativeView.RemoveFromSuperview();
-				renderer.Dispose();
-			}
-			view.ClearValue(RendererProperty);
 		}
 
 		internal void DisposeRendererAndChildren(IVisualElementRenderer rendererToRemove)

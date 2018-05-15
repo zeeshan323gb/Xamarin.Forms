@@ -10,6 +10,85 @@ namespace Xamarin.Forms
 	[RenderWith(typeof(_ScrollViewRenderer))]
 	public class ScrollView : Layout, IScrollViewController, IElementConfiguration<ScrollView>
 	{
+		#region IScrollViewController
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public Rectangle LayoutAreaOverride
+		{
+			get => _layoutAreaOverride;
+			set
+			{
+				if (_layoutAreaOverride == value)
+					return;
+				_layoutAreaOverride = value;
+				// Dont invalidate here, we can relayout immediately since this only impacts our innards
+				UpdateChildrenLayout();
+			}
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public event EventHandler<ScrollToRequestedEventArgs> ScrollToRequested;
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public Point GetScrollPositionForElement(VisualElement item, ScrollToPosition pos)
+		{
+			ScrollToPosition position = pos;
+			double y = GetCoordinate(item, "Y", 0);
+			double x = GetCoordinate(item, "X", 0);
+
+			if (position == ScrollToPosition.MakeVisible)
+			{
+				bool isItemVisible = ScrollX < y && ScrollY + Height > y;
+				if (isItemVisible)
+					return new Point(ScrollX, ScrollY);
+				switch (Orientation)
+				{
+					case ScrollOrientation.Vertical:
+						position = y > ScrollY ? ScrollToPosition.End : ScrollToPosition.Start;
+						break;
+					case ScrollOrientation.Horizontal:
+						position = x > ScrollX ? ScrollToPosition.End : ScrollToPosition.Start;
+						break;
+					case ScrollOrientation.Both:
+						position = x > ScrollX || y > ScrollY ? ScrollToPosition.End : ScrollToPosition.Start;
+						break;
+				}
+			}
+			switch (position)
+			{
+				case ScrollToPosition.Center:
+					y = y - Height / 2 + item.Height / 2;
+					x = x - Width / 2 + item.Width / 2;
+					break;
+				case ScrollToPosition.End:
+					y = y - Height + item.Height;
+					x = x - Width + item.Width;
+					break;
+			}
+			return new Point(x, y);
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public void SendScrollFinished()
+		{
+			if (_scrollCompletionSource != null)
+				_scrollCompletionSource.TrySetResult(true);
+		}
+
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public void SetScrolledPosition(double x, double y)
+		{
+			if (ScrollX == x && ScrollY == y)
+				return;
+
+			ScrollX = x;
+			ScrollY = y;
+
+			Scrolled?.Invoke(this, new ScrolledEventArgs(x, y));
+		}
+
+		#endregion IScrollViewController
+
 		public static readonly BindableProperty OrientationProperty = BindableProperty.Create("Orientation", typeof(ScrollOrientation), typeof(ScrollView), ScrollOrientation.Vertical);
 
 		static readonly BindablePropertyKey ScrollXPropertyKey = BindableProperty.CreateReadOnly("ScrollX", typeof(double), typeof(ScrollView), 0d);
@@ -31,8 +110,8 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty VerticalScrollBarVisibilityProperty = BindableProperty.Create(nameof(VerticalScrollBarVisibility), typeof(ScrollBarVisibility), typeof(ScrollView), ScrollBarVisibility.Default);
 
 		View _content;
-
 		TaskCompletionSource<bool> _scrollCompletionSource;
+		Rectangle _layoutAreaOverride;
 
 		public View Content
 		{
@@ -93,66 +172,6 @@ namespace Xamarin.Forms
 			_platformConfigurationRegistry = new Lazy<PlatformConfigurationRegistry<ScrollView>>(() => new PlatformConfigurationRegistry<ScrollView>(this));
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public Point GetScrollPositionForElement(VisualElement item, ScrollToPosition pos)
-		{
-			ScrollToPosition position = pos;
-			double y = GetCoordinate(item, "Y", 0);
-			double x = GetCoordinate(item, "X", 0);
-
-			if (position == ScrollToPosition.MakeVisible)
-			{
-				bool isItemVisible = ScrollX < y && ScrollY + Height > y;
-				if (isItemVisible)
-					return new Point(ScrollX, ScrollY);
-				switch (Orientation)
-				{
-					case ScrollOrientation.Vertical:
-						position = y > ScrollY ? ScrollToPosition.End : ScrollToPosition.Start;
-						break;
-					case ScrollOrientation.Horizontal:
-						position = x > ScrollX ? ScrollToPosition.End : ScrollToPosition.Start;
-						break;
-					case ScrollOrientation.Both:
-						position = x > ScrollX || y > ScrollY ? ScrollToPosition.End : ScrollToPosition.Start;
-						break;
-				}
-			}
-			switch (position)
-			{
-				case ScrollToPosition.Center:
-					y = y - Height / 2 + item.Height / 2;
-					x = x - Width / 2 + item.Width / 2;
-					break;
-				case ScrollToPosition.End:
-					y = y - Height + item.Height;
-					x = x - Width + item.Width;
-					break;
-			}
-			return new Point(x, y);
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public void SendScrollFinished()
-		{
-			if (_scrollCompletionSource != null)
-				_scrollCompletionSource.TrySetResult(true);
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public void SetScrolledPosition(double x, double y)
-		{
-			if (ScrollX == x && ScrollY == y)
-				return;
-
-			ScrollX = x;
-			ScrollY = y;
-
-			EventHandler<ScrolledEventArgs> handler = Scrolled;
-			if (handler != null)
-				handler(this, new ScrolledEventArgs(x, y));
-		}
-
 		public event EventHandler<ScrolledEventArgs> Scrolled;
 
 		public IPlatformElementConfiguration<T, ScrollView> On<T>() where T : IConfigPlatform
@@ -185,6 +204,15 @@ namespace Xamarin.Forms
 
 		protected override void LayoutChildren(double x, double y, double width, double height)
 		{
+			var over = ((IScrollViewController)this).LayoutAreaOverride;
+			if (!over.IsEmpty)
+			{
+				x = over.X + Padding.Left;
+				y = over.Y + Padding.Top;
+				width = over.Width - Padding.HorizontalThickness;
+				height = over.Height - Padding.VerticalThickness;
+			}
+
 			if (_content != null)
 			{
 				SizeRequest size;
@@ -306,8 +334,5 @@ namespace Xamarin.Forms
 			CheckTaskCompletionSource();
 			ScrollToRequested?.Invoke(this, e);
 		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public event EventHandler<ScrollToRequestedEventArgs> ScrollToRequested;
 	}
 }
