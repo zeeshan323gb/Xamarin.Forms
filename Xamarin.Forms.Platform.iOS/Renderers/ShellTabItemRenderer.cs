@@ -142,7 +142,7 @@ namespace Xamarin.Forms.Platform.iOS
 			var content = ((IShellTabItemController)ShellTabItem).GetOrCreateContent();
 			Page = content;
 
-			if (!ShellAppearance.GetTabBarVisible(Page))
+			if (!Shell.GetTabBarVisible(Page))
 				Log.Warning("Shell", "Root page of a ShellTabItem will never hide the TabBar");
 
 			_renderer = Platform.CreateRenderer(content);
@@ -335,7 +335,7 @@ namespace Xamarin.Forms.Platform.iOS
 			var renderer = Platform.CreateRenderer(page);
 			Platform.SetRenderer(page, renderer);
 
-			bool tabBarVisible = ShellAppearance.GetTabBarVisible(page);
+			bool tabBarVisible = Shell.GetTabBarVisible(page);
 			renderer.ViewController.HidesBottomBarWhenPushed = !tabBarVisible;
 
 			var tracker = _context.CreatePageRendererTracker();
@@ -430,7 +430,7 @@ namespace Xamarin.Forms.Platform.iOS
 			public override void WillShowViewController(UINavigationController navigationController, [Transient] UIViewController viewController, bool animated)
 			{
 				var page = _self.PageForViewController(viewController);
-				bool navBarVisible = ShellAppearance.GetNavBarVisible(page);
+				bool navBarVisible = Shell.GetNavBarVisible(page);
 				navigationController.SetNavigationBarHidden(!navBarVisible, true);
 			}
 		}

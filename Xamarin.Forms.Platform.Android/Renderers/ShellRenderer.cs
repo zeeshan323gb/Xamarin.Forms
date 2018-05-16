@@ -270,7 +270,7 @@ namespace Xamarin.Forms.Platform.Android
 			// only saving us a flat color fill BUT it helps people not freak out about overdraw.
 			if (appearance != null)
 			{
-				var color = appearance.BackgroundColor.ToAndroid(Color.FromHex("#03A9F4"));
+				var color = appearance.BackgroundColor.Value.ToAndroid(Color.FromHex("#03A9F4"));
 				decorView.SetBackground(new SplitDrawable(color, statusBarHeight, navigationBarHeight));
 			}
 			else

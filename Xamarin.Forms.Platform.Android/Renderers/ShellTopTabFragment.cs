@@ -160,10 +160,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void ApplyAppearance(ShellAppearance appearance)
 		{
-			var foreground = appearance.ForegroundColor;
-			var background = appearance.BackgroundColor;
-			var titleColor = appearance.TitleColor;
-			var unselectedColor = appearance.UnselectedColor;
+			var foreground = appearance.ForegroundColor.Value;
+			var background = appearance.BackgroundColor.Value;
+			var titleColor = appearance.TitleColor.Value;
+			var unselectedColor = appearance.UnselectedColor.Value;
 
 			SetColors(foreground, background, titleColor, unselectedColor);
 		}

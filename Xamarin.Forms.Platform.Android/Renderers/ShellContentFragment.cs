@@ -150,7 +150,7 @@ namespace Xamarin.Forms.Platform.Android
 			var background = appearance.BackgroundColor;
 			var titleColor = appearance.TitleColor;
 
-			SetColors(foreground, background, titleColor);
+			SetColors(foreground.Value, background.Value, titleColor.Value);
 		}
 
 		protected virtual void ResetAppearance()
