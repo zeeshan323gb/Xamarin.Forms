@@ -142,7 +142,7 @@ namespace Xamarin.Forms.Platform.Android
 				UpdatePageTitle(_toolbar, Page);
 			else if (e.PropertyName == Shell.SearchHandlerProperty.PropertyName)
 				UpdateToolbarItems();
-			else if (e.PropertyName == ShellAppearance.NavBarVisibleProperty.PropertyName)
+			else if (e.PropertyName == Shell.NavBarVisibleProperty.PropertyName)
 				UpdateNavBarVisible(_toolbar, Page);
 		}
 
@@ -211,7 +211,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void UpdateNavBarVisible(Toolbar toolbar, Page page)
 		{
-			var navBarVisible = ShellAppearance.GetNavBarVisible(page);
+			var navBarVisible = Shell.GetNavBarVisible(page);
 			toolbar.Visibility = navBarVisible ? ViewStates.Visible : ViewStates.Gone;
 		}
 

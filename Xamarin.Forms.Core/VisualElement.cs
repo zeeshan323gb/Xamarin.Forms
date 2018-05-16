@@ -77,9 +77,7 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty TriggersProperty = TriggersPropertyKey.BindableProperty;
 
-		public static readonly BindableProperty StyleProperty = BindableProperty.Create("Style", typeof(Style), typeof(VisualElement), default(Style),
-			propertyChanged: (bindable, oldvalue, newvalue) => ((VisualElement)bindable)._mergedStyle.Style = (Style)newvalue);
-
+		
 		public static readonly BindableProperty WidthRequestProperty = BindableProperty.Create("WidthRequest", typeof(double), typeof(VisualElement), -1d, propertyChanged: OnRequestChanged);
 
 		public static readonly BindableProperty HeightRequestProperty = BindableProperty.Create("HeightRequest", typeof(double), typeof(VisualElement), -1d, propertyChanged: OnRequestChanged);
@@ -123,7 +121,7 @@ namespace Xamarin.Forms
 
 		readonly Dictionary<Size, SizeRequest> _measureCache = new Dictionary<Size, SizeRequest>();
 
-		internal readonly MergedStyle _mergedStyle;
+		
 
 		int _batched;
 		LayoutConstraint _computedConstraint;
@@ -146,7 +144,7 @@ namespace Xamarin.Forms
 
 		internal VisualElement()
 		{
-			_mergedStyle = new MergedStyle(GetType(), this);
+			
 		}
 
 		public double AnchorX
@@ -272,27 +270,6 @@ namespace Xamarin.Forms
 		public double ScaleY {
 			get => (double)GetValue(ScaleYProperty);
 			set => SetValue(ScaleYProperty, value);
-		}
-
-		public Style Style
-		{
-			get { return (Style)GetValue(StyleProperty); }
-			set { SetValue(StyleProperty, value); }
-		}
-
-
-		[TypeConverter(typeof(ListStringTypeConverter))]
-		public IList<string> StyleClass
-		{
-			get { return @class; }
-			set { @class = value; }
-		}
-
-		[TypeConverter(typeof(ListStringTypeConverter))]
-		public IList<string> @class
-		{
-			get { return _mergedStyle.StyleClass; }
-			set { _mergedStyle.StyleClass = value; }
 		}
 
 		public double TranslationX

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -13,6 +12,114 @@ namespace Xamarin.Forms
 	public class Shell : Page, IShellController, IShellAppearanceTracker
 	{
 		#region Attached Properties
+
+		public static readonly BindableProperty NavBarVisibleProperty =
+			BindableProperty.CreateAttached("NavBarVisible", typeof(bool), typeof(Shell), true);
+
+		public static readonly BindableProperty TabBarVisibleProperty =
+			BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
+
+		public static bool GetNavBarVisible(BindableObject obj) => (bool)obj.GetValue(NavBarVisibleProperty);
+
+		public static bool GetTabBarVisible(BindableObject obj) => (bool)obj.GetValue(TabBarVisibleProperty);
+
+		public static void SetNavBarVisible(BindableObject obj, bool value) => obj.SetValue(NavBarVisibleProperty, value);
+
+		public static void SetTabBarVisible(BindableObject obj, bool value) => obj.SetValue(TabBarVisibleProperty, value);
+
+		#region Appearance Properties
+
+		public static readonly BindableProperty ShellBackgroundColorProperty =
+			BindableProperty.CreateAttached("ShellBackgroundColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellDisabledColorProperty =
+			BindableProperty.CreateAttached("ShellDisabledColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellForegroundColorProperty =
+			BindableProperty.CreateAttached("ShellForegroundColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellTabBarBackgroundColorProperty = 
+			BindableProperty.CreateAttached("ShellTabBarBackgroundColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellTabBarDisabledColorProperty = 
+			BindableProperty.CreateAttached("ShellTabBarDisabledColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellTabBarForegroundColorProperty = 
+			BindableProperty.CreateAttached("ShellTabBarForegroundColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellTabBarTitleColorProperty = 
+			BindableProperty.CreateAttached("ShellTabBarTitleColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellTabBarUnselectedColorProperty = 
+			BindableProperty.CreateAttached("ShellTabBarUnselectedColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellTitleColorProperty = 
+			BindableProperty.CreateAttached("ShellTitleColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static readonly BindableProperty ShellUnselectedColorProperty = 
+			BindableProperty.CreateAttached("ShellUnselectedColor", typeof(Color), typeof(Shell), Color.Default,
+				propertyChanged: OnShellColorValueChanged);
+
+		public static Color GetShellBackgroundColor(BindableObject obj) => (Color)obj.GetValue(ShellBackgroundColorProperty);
+
+		public static Color GetShellDisabledColor(BindableObject obj) => (Color)obj.GetValue(ShellDisabledColorProperty);
+
+		public static Color GetShellForegroundColor(BindableObject obj) => (Color)obj.GetValue(ShellForegroundColorProperty);
+
+		public static Color GetShellTabBarBackgroundColor(BindableObject obj) => (Color)obj.GetValue(ShellTabBarBackgroundColorProperty);
+
+		public static Color GetShellTabBarDisabledColor(BindableObject obj) => (Color)obj.GetValue(ShellTabBarDisabledColorProperty);
+
+		public static Color GetShellTabBarForegroundColor(BindableObject obj) => (Color)obj.GetValue(ShellTabBarForegroundColorProperty);
+
+		public static Color GetShellTabBarTitleColor(BindableObject obj) => (Color)obj.GetValue(ShellTabBarTitleColorProperty);
+
+		public static Color GetShellTabBarUnselectedColor(BindableObject obj) => (Color)obj.GetValue(ShellTabBarUnselectedColorProperty);
+
+		public static Color GetShellTitleColor(BindableObject obj) => (Color)obj.GetValue(ShellTitleColorProperty);
+
+		public static Color GetShellUnselectedColor(BindableObject obj) => (Color)obj.GetValue(ShellUnselectedColorProperty);
+
+		public static void SetShellBackgroundColor(BindableObject obj, Color value) => obj.SetValue(ShellBackgroundColorProperty, value);
+
+		public static void SetShellDisabledColor(BindableObject obj, Color value) => obj.SetValue(ShellDisabledColorProperty, value);
+
+		public static void SetShellForegroundColor(BindableObject obj, Color value) => obj.SetValue(ShellForegroundColorProperty, value);
+
+		public static void SetShellTabBarBackgroundColor(BindableObject obj, Color value) => obj.SetValue(ShellTabBarBackgroundColorProperty, value);
+
+		public static void SetShellTabBarDisabledColor(BindableObject obj, Color value) => obj.SetValue(ShellTabBarDisabledColorProperty, value);
+
+		public static void SetShellTabBarForegroundColor(BindableObject obj, Color value) => obj.SetValue(ShellTabBarForegroundColorProperty, value);
+
+		public static void SetShellTabBarTitleColor(BindableObject obj, Color value) => obj.SetValue(ShellTabBarTitleColorProperty, value);
+
+		public static void SetShellTabBarUnselectedColor(BindableObject obj, Color value) => obj.SetValue(ShellTabBarUnselectedColorProperty, value);
+
+		public static void SetShellTitleColor(BindableObject obj, Color value) => obj.SetValue(ShellTitleColorProperty, value);
+
+		public static void SetShellUnselectedColor(BindableObject obj, Color value) => obj.SetValue(ShellUnselectedColorProperty, value);
+
+		private static void OnShellColorValueChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var item = (Element)bindable;
+
+			if (item.Parent is IShellAppearanceTracker tracker)
+			{
+				tracker.AppearanceChanged(item, true);
+			}
+		}
+
+		#endregion Appearance Properties
 
 		public static readonly BindableProperty BackButtonBehaviorProperty =
 			BindableProperty.CreateAttached("BackButtonBehavior", typeof(BackButtonBehavior), typeof(Shell), null, BindingMode.OneTime);
@@ -86,6 +193,8 @@ namespace Xamarin.Forms
 
 		#region IShellController
 
+		private List<Tuple<IAppearanceObserver, Element>> _observers = new List<Tuple<IAppearanceObserver, Element>>();
+
 		event EventHandler IShellController.HeaderChanged
 		{
 			add { _headerChanged += value; }
@@ -107,6 +216,12 @@ namespace Xamarin.Forms
 			get { return FlyoutHeaderView; }
 		}
 
+		void IShellController.AddAppearanceObserver(IAppearanceObserver observer, Element pivot)
+		{
+			_observers.Add(Tuple.Create(observer, pivot));
+			observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
+		}
+
 		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab)
 		{
 			return GetNavigationState(item, tab, tab.Stack.ToList());
@@ -116,27 +231,6 @@ namespace Xamarin.Forms
 		{
 			var proposedState = GetNavigationState(item, tab, stack);
 			return ProposeNavigation(source, proposedState, canCancel);
-		}
-
-		void IShellController.UpdateCurrentState(ShellNavigationSource source)
-		{
-			var oldState = CurrentState;
-			var shellItem = CurrentItem;
-			var tab = shellItem?.CurrentItem;
-			var stack = tab?.Stack;
-			var result = GetNavigationState(shellItem, tab, stack.ToList());
-
-			SetValueFromRenderer(CurrentStatePropertyKey, result);
-
-			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
-		}
-
-		List<Tuple<IAppearanceObserver, Element>> _observers = new List<Tuple<IAppearanceObserver, Element>>();
-
-		void IShellController.AddAppearanceObserver(IAppearanceObserver observer, Element pivot)
-		{
-			_observers.Add(Tuple.Create(observer, pivot));
-			observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
 		}
 
 		bool IShellController.RemoveAppearanceObserver(IAppearanceObserver observer)
@@ -150,6 +244,19 @@ namespace Xamarin.Forms
 				}
 			}
 			return false;
+		}
+
+		void IShellController.UpdateCurrentState(ShellNavigationSource source)
+		{
+			var oldState = CurrentState;
+			var shellItem = CurrentItem;
+			var tab = shellItem?.CurrentItem;
+			var stack = tab?.Stack;
+			var result = GetNavigationState(shellItem, tab, stack.ToList());
+
+			SetValueFromRenderer(CurrentStatePropertyKey, result);
+
+			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
 		}
 
 		#endregion IShellController
@@ -201,7 +308,7 @@ namespace Xamarin.Forms
 
 				while (!Application.IsApplicationOrNull(leaf))
 				{
-					if (leaf == source)
+					if (leaf == target)
 					{
 						observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
 						break;
@@ -211,7 +318,7 @@ namespace Xamarin.Forms
 			}
 		}
 
-		#endregion
+		#endregion IShellAppearanceTracker
 
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
@@ -254,14 +361,14 @@ namespace Xamarin.Forms
 		private bool _accumulateNavigatedEvents;
 		private View _flyoutHeaderView;
 
-		public event EventHandler<ShellNavigatedEventArgs> Navigated;
-
-		public event EventHandler<ShellNavigatingEventArgs> Navigating;
-
 		public Shell()
 		{
 			((INotifyCollectionChanged)Items).CollectionChanged += (s, e) => SendStructureChanged();
 		}
+
+		public event EventHandler<ShellNavigatedEventArgs> Navigated;
+
+		public event EventHandler<ShellNavigatingEventArgs> Navigating;
 
 		public ShellItem CurrentItem
 		{
@@ -482,7 +589,7 @@ namespace Xamarin.Forms
 			}
 		}
 
-		internal void SendStructureChanged ()
+		internal void SendStructureChanged()
 		{
 			_structureChanged?.Invoke(this, EventArgs.Empty);
 		}
@@ -600,7 +707,7 @@ namespace Xamarin.Forms
 			var newItem = (IShellItemController)newValue;
 			oldItem?.UpdateChecked();
 			newItem?.UpdateChecked();
-			
+
 			var shell = (Shell)bindable;
 			((IShellAppearanceTracker)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
@@ -676,6 +783,105 @@ namespace Xamarin.Forms
 			return state + queryString;
 		}
 
+		private ShellAppearance GetShellAppearanceForPivot(Element pivot)
+		{
+			// this algorithm is pretty simple
+			// 1) Get the "CurrentPage" by walking down from the pivot
+			//		Walking down goes Shell -> ShellItem -> ShellTabItem -> ShellTabItem.Stack.Last
+			// 2) Walk up from the pivot to the root Shell. Stop walking as soon as you find a ShellAppearance and return
+			// 3) If nothing found, return null
+
+			if (pivot is Shell shell)
+			{
+				pivot = shell.CurrentItem;
+			}
+			if (pivot is ShellItem shellItem)
+			{
+				pivot = shellItem.CurrentItem;
+			}
+			if (pivot is IShellTabItemController shellTabItem)
+			{
+				// this is the same as .Last but easier and will add in the root if not null
+				// it generally wont be null but this is just in case
+				pivot = shellTabItem.CurrentPage ?? pivot;
+			}
+
+			bool anySet = false;
+			ShellAppearance result = new ShellAppearance();
+			// Now we walk up
+			while (!Application.IsApplicationOrNull(pivot))
+			{
+				if (!result.BackgroundColor.HasValue && pivot.IsSet(ShellBackgroundColorProperty))
+				{
+					anySet = true;
+					result.BackgroundColor = GetShellBackgroundColor(pivot);
+				}
+
+				if (!result.DisabledColor.HasValue && pivot.IsSet(ShellDisabledColorProperty))
+				{
+					anySet = true;
+					result.DisabledColor = GetShellDisabledColor(pivot);
+				}
+
+				if (!result.ForegroundColor.HasValue && pivot.IsSet(ShellForegroundColorProperty))
+				{
+					anySet = true;
+					result.ForegroundColor = GetShellForegroundColor(pivot);
+				}
+
+				if (!result.TabBarBackgroundColor.HasValue && pivot.IsSet(ShellTabBarBackgroundColorProperty))
+				{
+					anySet = true;
+					result.TabBarBackgroundColor = GetShellTabBarBackgroundColor(pivot);
+				}
+
+				if (!result.TabBarDisabledColor.HasValue && pivot.IsSet(ShellTabBarDisabledColorProperty))
+				{
+					anySet = true;
+					result.TabBarDisabledColor = GetShellTabBarDisabledColor(pivot);
+				}
+
+				if (!result.TabBarForegroundColor.HasValue && pivot.IsSet(ShellTabBarForegroundColorProperty))
+				{
+					anySet = true;
+					result.TabBarForegroundColor = GetShellTabBarForegroundColor(pivot);
+				}
+
+				if (!result.TabBarTitleColor.HasValue && pivot.IsSet(ShellTabBarTitleColorProperty))
+				{
+					anySet = true;
+					result.TabBarTitleColor = GetShellTabBarTitleColor(pivot);
+				}
+
+				if (!result.TabBarUnselectedColor.HasValue && pivot.IsSet(ShellTabBarUnselectedColorProperty))
+				{
+					anySet = true;
+					result.TabBarUnselectedColor = GetShellTabBarUnselectedColor(pivot);
+				}
+
+				if (!result.TitleColor.HasValue && pivot.IsSet(ShellTitleColorProperty))
+				{
+					anySet = true;
+					result.TitleColor = GetShellTitleColor(pivot);
+				}
+
+				if (!result.UnselectedColor.HasValue && pivot.IsSet(ShellUnselectedColorProperty))
+				{
+					anySet = true;
+					result.UnselectedColor = GetShellUnselectedColor(pivot);
+				}
+
+				pivot = pivot.Parent;
+			}
+			
+			if (anySet)
+			{
+				result.MakeComplete();
+				return result;
+			}
+			return null;
+		}
+
 		private void OnFlyoutHeaderChanged(object oldVal, object newVal)
 		{
 			if (FlyoutHeaderTemplate == null)
@@ -718,43 +924,6 @@ namespace Xamarin.Forms
 			OnNavigating(navArgs);
 			System.Diagnostics.Debug.WriteLine("Proposed: " + proposedState.Location);
 			return !navArgs.Cancelled;
-		}
-
-		ShellAppearance GetShellAppearanceForPivot(Element pivot)
-		{
-			// this algorithm is pretty simple
-			// 1) Get the "CurrentPage" by walking down from the pivot
-			//		Walking down goes Shell -> ShellItem -> ShellTabItem -> ShellTabItem.Stack.Last
-			// 2) Walk up from the pivot to the root Shell. Stop walking as soon as you find a ShellAppearance and return
-			// 3) If nothing found, return null
-
-			if (pivot is Shell shell)
-			{
-				pivot = shell.CurrentItem;
-			}
-			if (pivot is ShellItem shellItem)
-			{
-				pivot = shellItem.CurrentItem;
-			}
-			if (pivot is IShellTabItemController shellTabItem)
-			{
-				// this is the same as .Last but easier and will add in the root if not null
-				// it generally wont be null but this is just in case
-				pivot = shellTabItem.CurrentPage ?? pivot;
-			}
-
-			// Now we walk up
-			while (!Application.IsApplicationOrNull(pivot))
-			{
-				var appearance = ShellItem.GetShellAppearance(pivot);
-
-				if (appearance != null)
-					return appearance;
-
-				pivot = pivot.Parent;
-			}
-
-			return null;
 		}
 	}
 }

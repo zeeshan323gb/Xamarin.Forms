@@ -76,7 +76,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (DisplayedPage == null)
 				return;
 
-			bool visible = ShellAppearance.GetTabBarVisible(DisplayedPage);
+			bool visible = Shell.GetTabBarVisible(DisplayedPage);
 			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
 		}
 
@@ -265,7 +265,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == ShellAppearance.TabBarVisibleProperty.PropertyName)
+			if (e.PropertyName == Shell.TabBarVisibleProperty.PropertyName)
 				UpdateTabBarVisibility();
 		}
 

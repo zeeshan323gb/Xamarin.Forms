@@ -81,19 +81,19 @@ namespace Xamarin.Forms.Controls.XamStore
 				1, 4);
 
 			grid.Children.Add(MakeButton("Hide Tabs",
-					() => ShellAppearance.SetTabBarVisible(this, false)),
+					() => Shell.SetTabBarVisible(this, false)),
 				2, 4);
 
 			grid.Children.Add(MakeButton("Show Tabs",
-					() => ShellAppearance.SetTabBarVisible(this, true)),
+					() => Shell.SetTabBarVisible(this, true)),
 				0, 5);
 
 			grid.Children.Add(MakeButton("Hide Nav",
-					() => ShellAppearance.SetNavBarVisible(this, false)),
+					() => Shell.SetNavBarVisible(this, false)),
 				1, 5);
 
 			grid.Children.Add(MakeButton("Show Nav",
-					() => ShellAppearance.SetNavBarVisible(this, true)),
+					() => Shell.SetNavBarVisible(this, true)),
 				2, 5);
 
 			Content = new ScrollView { Content = grid };

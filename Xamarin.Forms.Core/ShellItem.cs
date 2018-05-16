@@ -55,10 +55,6 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
 
-		public static readonly BindableProperty ShellAppearanceProperty =
-			BindableProperty.Create(nameof(ShellAppearance), typeof(ShellAppearance), typeof(ShellItem), null, BindingMode.OneTime,
-				propertyChanged: OnShellAppearanceChanged);
-
 		private readonly ObservableCollection<Element> _children = new ObservableCollection<Element>();
 		private ReadOnlyCollection<Element> _logicalChildren;
 
@@ -87,12 +83,6 @@ namespace Xamarin.Forms
 
 		public ShellTabItemCollection Items => (ShellTabItemCollection)GetValue(ItemsProperty);
 
-		public ShellAppearance ShellAppearance
-		{
-			get { return (ShellAppearance)GetValue(ShellAppearanceProperty); }
-			set { SetValue(ShellAppearanceProperty, value); }
-		}
-
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
 
 		internal void SendStructureChanged()
@@ -103,8 +93,6 @@ namespace Xamarin.Forms
 				shell.SendStructureChanged();
 			}
 		}
-
-		public static ShellAppearance GetShellAppearance(BindableObject obj) => (ShellAppearance)obj.GetValue(ShellAppearanceProperty);
 
 #if DEBUG
 		[Obsolete ("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
@@ -127,8 +115,6 @@ namespace Xamarin.Forms
 		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
 #endif
 		public static implicit operator ShellItem(MenuItem menuItem) => new MenuShellItem(menuItem);
-
-		public static void SetShellAppearance(BindableObject obj, ShellAppearance value) => obj.SetValue(ShellAppearanceProperty, value);
 
 		protected override void OnChildAdded(Element child)
 		{
@@ -161,16 +147,6 @@ namespace Xamarin.Forms
 			((IShellItemController)bindable).UpdateChecked();
 			shellItem.SendStructureChanged();
 			((IShellAppearanceTracker)shellItem).AppearanceChanged(shellItem, false);
-		}
-
-		private static void OnShellAppearanceChanged(BindableObject bindable, object oldValue, object newValue)
-		{
-			var item = (Element)bindable;
-
-			if (item.Parent is IShellAppearanceTracker tracker)
-			{
-				tracker.AppearanceChanged(item, true);
-			}
 		}
 
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
