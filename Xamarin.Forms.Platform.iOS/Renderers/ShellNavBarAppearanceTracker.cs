@@ -1,5 +1,4 @@
-﻿using System;
-using UIKit;
+﻿using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
