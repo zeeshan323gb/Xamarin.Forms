@@ -8,6 +8,43 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellFlyoutRenderer : UIViewController, IShellFlyoutRenderer
 	{
+		#region IShellFlyoutRenderer
+
+		UIView IShellFlyoutRenderer.View => View;
+
+		UIViewController IShellFlyoutRenderer.ViewController => this;
+
+		void IShellFlyoutRenderer.AttachFlyout(IShellContext context, UIViewController content)
+		{
+			Context = context;
+			Shell = Context.Shell;
+			Detail = content;
+
+			Shell.PropertyChanged += OnShellPropertyChanged;
+
+			PanGestureRecognizer = new UIPanGestureRecognizer(HandlePanGesture);
+			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) =>
+			{
+				if (!context.AllowFlyoutGesture)
+					return false;
+				var view = View;
+				CGPoint loc = touch.LocationInView(View);
+				if (touch.View is UISlider ||
+					touch.View is MPVolumeView ||
+					(loc.X > view.Frame.Width * 0.1 && !IsOpen))
+					return false;
+				return true;
+			};
+		}
+
+		void IShellFlyoutRenderer.CloseFlyout()
+		{
+			IsOpen = false;
+			LayoutSidebar(true);
+		}
+
+		#endregion IShellFlyoutRenderer
+
 		private bool _disposed;
 		private bool _gestureActive;
 		private bool _isOpen;
@@ -17,10 +54,6 @@ namespace Xamarin.Forms.Platform.iOS
 		public int AnimationDuration { get; set; } = 250;
 
 		public IShellFlyoutTransition FlyoutTransition { get; set; }
-
-		UIView IShellFlyoutRenderer.View => View;
-
-		UIViewController IShellFlyoutRenderer.ViewController => this;
 
 		private IShellContext Context { get; set; }
 
@@ -48,35 +81,6 @@ namespace Xamarin.Forms.Platform.iOS
 		private Shell Shell { get; set; }
 
 		private UIView TapoffView { get; set; }
-
-		public void AttachFlyout(IShellContext context, UIViewController detail)
-		{
-			Context = context;
-			Shell = Context.Shell;
-			Detail = detail;
-
-			Shell.PropertyChanged += OnShellPropertyChanged;
-
-			PanGestureRecognizer = new UIPanGestureRecognizer(HandlePanGesture);
-			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) =>
-			{
-				if (!context.AllowFlyoutGesture)
-					return false;
-				var view = View;
-				CGPoint loc = touch.LocationInView(View);
-				if (touch.View is UISlider ||
-					touch.View is MPVolumeView ||
-					(loc.X > view.Frame.Width * 0.1 && !IsOpen))
-					return false;
-				return true;
-			};
-		}
-
-		public void CloseFlyout()
-		{
-			IsOpen = false;
-			LayoutSidebar(true);
-		}
 
 		public override void ViewDidLayoutSubviews()
 		{

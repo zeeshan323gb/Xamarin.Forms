@@ -75,7 +75,7 @@ namespace Xamarin.Forms
 				if (!found)
 				{
 					resultArray[i].IsSet = false;
-					resultArray[i].Value = (T)prop.GetDefaultValue(this);
+					resultArray[i].Value = default(T);
 				}
 			}
 
