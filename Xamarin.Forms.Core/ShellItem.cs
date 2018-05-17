@@ -75,12 +75,6 @@ namespace Xamarin.Forms
 			set { SetValue(GroupBehaviorProperty, value); }
 		}
 
-		public ImageSource Icon
-		{
-			get { return (ImageSource)GetValue(IconProperty); }
-			set { SetValue(IconProperty, value); }
-		}
-
 		public ShellTabItemCollection Items => (ShellTabItemCollection)GetValue(ItemsProperty);
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
