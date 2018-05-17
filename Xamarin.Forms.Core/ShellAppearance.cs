@@ -57,6 +57,11 @@ namespace Xamarin.Forms
 		Color IShellAppearanceController.EffectiveTabBarUnselectedColor =>
 			!TabBarUnselectedColor.IsDefault ? TabBarUnselectedColor : UnselectedColor;
 
+		internal ShellAppearance()
+		{
+
+		}
+
 		public override bool Equals(object obj)
 		{
 			var appearance = obj as ShellAppearance;
