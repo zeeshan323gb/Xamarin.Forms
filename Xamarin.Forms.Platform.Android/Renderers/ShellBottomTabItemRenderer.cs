@@ -71,15 +71,6 @@ namespace Xamarin.Forms.Platform.Android
 			return outerLayout;
 		}
 
-		private void UpdateTabBarVisibility()
-		{
-			if (DisplayedPage == null)
-				return;
-
-			bool visible = Shell.GetTabBarVisible(DisplayedPage);
-			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
-		}
-
 		// Use OnDestory become OnDestroyView may fire before events are completed.
 		public override void OnDestroy()
 		{
@@ -115,6 +106,20 @@ namespace Xamarin.Forms.Platform.Android
 			_bottomView.ItemIconTintList = colorStateList;
 
 			SetBackgroundColor(background);
+		}
+
+		protected virtual void ChangeTabItem(ShellTabItem tabItem)
+		{
+			var controller = (IShellController)ShellContext.Shell;
+			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
+				ShellItem,
+				tabItem,
+				tabItem.Stack.ToList(),
+				true
+			);
+
+			if (accept)
+				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
 		}
 
 		protected override IShellObservableFragment CreateFragmentForPage(Page page)
@@ -208,48 +213,6 @@ namespace Xamarin.Forms.Platform.Android
 			menuItem.SetChecked(true);
 		}
 
-		protected override void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			base.OnShellItemsChanged(sender, e);
-			
-			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
-		}
-
-		protected virtual bool OnItemSelected(IMenuItem item)
-		{
-			var id = item.ItemId;
-			if (id == MoreTabId)
-			{
-				var bottomSheetDialog = CreateMoreBottomSheet(OnMoreItemSelected);
-				bottomSheetDialog.Show();
-				bottomSheetDialog.DismissEvent += OnMoreSheetDismissed;
-			}
-			else
-			{
-				if (!item.IsChecked)
-				{
-					var shellTabItem = ShellItem.Items[id];
-					ChangeTabItem(shellTabItem);
-				}
-			}
-
-			return true;
-		}
-
-		protected virtual void ChangeTabItem(ShellTabItem tabItem)
-		{
-			var controller = (IShellController)ShellContext.Shell;
-			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
-				ShellItem,
-				tabItem,
-				tabItem.Stack.ToList(),
-				true
-			);
-
-			if (accept)
-				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
-		}
-
 		protected override void OnDisplayedPageChanged(Page newPage, Page oldPage)
 		{
 			base.OnDisplayedPageChanged(newPage, oldPage);
@@ -263,10 +226,29 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateTabBarVisibility();
 		}
 
-		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected virtual bool OnItemSelected(IMenuItem item)
 		{
-			if (e.PropertyName == Shell.TabBarVisibleProperty.PropertyName)
-				UpdateTabBarVisibility();
+			var id = item.ItemId;
+			if (id == MoreTabId)
+			{
+				var bottomSheetDialog = CreateMoreBottomSheet(OnMoreItemSelected);
+				bottomSheetDialog.Show();
+				bottomSheetDialog.DismissEvent += OnMoreSheetDismissed;
+			}
+			else
+			{
+				var shellTabItem = ShellItem.Items[id];
+				if (item.IsChecked)
+				{
+					OnTabReselected(shellTabItem);
+				}
+				else
+				{
+					ChangeTabItem(shellTabItem);
+				}
+			}
+
+			return true;
 		}
 
 		protected virtual void OnMoreItemSelected(ShellTabItem tabItem, BottomSheetDialog dialog)
@@ -280,6 +262,17 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e)
 		{
 			OnCurrentTabItemChanged();
+		}
+
+		protected override void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			base.OnShellItemsChanged(sender, e);
+
+			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
+		}
+
+		protected virtual void OnTabReselected(ShellTabItem tab)
+		{
 		}
 
 		protected virtual void ResetAppearance()
@@ -343,7 +336,6 @@ namespace Xamarin.Forms.Platform.Android
 				menuItem.SetIcon(Resource.Drawable.abc_ic_menu_overflow_material);
 				if (currentIndex >= maxBottomItems - 1)
 					menuItem.SetChecked(true);
-				
 			}
 
 			_bottomView.Visibility = end == 1 ? ViewStates.Gone : ViewStates.Visible;
@@ -376,6 +368,12 @@ namespace Xamarin.Forms.Platform.Android
 			return new ColorStateList(states, colors);
 		}
 
+		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == Shell.TabBarVisibleProperty.PropertyName)
+				UpdateTabBarVisibility();
+		}
+
 		private async void SetImage(ImageView image, ImageSource source)
 		{
 			image.SetImageDrawable(await Context.GetFormsDrawable(source));
@@ -387,6 +385,15 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 			var drawable = await Context.GetFormsDrawable(source);
 			menuItem.SetIcon(drawable);
+		}
+
+		private void UpdateTabBarVisibility()
+		{
+			if (DisplayedPage == null)
+				return;
+
+			bool visible = Shell.GetTabBarVisible(DisplayedPage);
+			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
 		}
 	}
 }
