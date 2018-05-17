@@ -44,9 +44,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public void SetAppearance(UINavigationController controller, ShellAppearance appearance)
 		{
-			var background = appearance.BackgroundColor.Value;
-			var foreground = appearance.ForegroundColor.Value;
-			var titleColor = appearance.TitleColor.Value;
+			var background = appearance.BackgroundColor;
+			var foreground = appearance.ForegroundColor;
+			var titleColor = appearance.TitleColor;
 
 			var navBar = controller.NavigationBar;
 

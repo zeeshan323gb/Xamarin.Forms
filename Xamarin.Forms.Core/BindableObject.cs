@@ -52,6 +52,36 @@ namespace Xamarin.Forms
 			ClearValue(propertyKey.BindableProperty, fromStyle:false, checkAccess: false);
 		}
 
+		internal (bool IsSet, T Value)[] LunacyFetch<T>(BindableProperty[] propArray)
+		{
+			List<BindablePropertyContext> properties = _properties;
+			var resultArray = new(bool IsSet, T Value)[propArray.Length];
+
+			for (int i = 0; i < propArray.Length; i++)
+			{
+				bool found = false;
+				var prop = propArray[i];
+				for (int k = 0; k < properties.Count; k++)
+				{
+					var context = properties[k];
+
+					if (ReferenceEquals(context.Property, prop))
+					{
+						found = true;
+						resultArray[i].IsSet = (context.Attributes & BindableContextAttributes.IsDefaultValue) == 0;
+						resultArray[i].Value = (T)context.Value;
+					}
+				}
+				if (!found)
+				{
+					resultArray[i].IsSet = false;
+					resultArray[i].Value = (T)prop.GetDefaultValue(this);
+				}
+			}
+
+			return resultArray;
+		}
+
 		public bool IsSet(BindableProperty targetProperty)
 		{
 			if (targetProperty == null)

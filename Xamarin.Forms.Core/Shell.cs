@@ -133,45 +133,21 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty SetPaddingInsetsProperty =
 			BindableProperty.CreateAttached("SetPaddingInsets", typeof(bool), typeof(Shell), false);
 
-		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj)
-		{
-			return (BackButtonBehavior)obj.GetValue(BackButtonBehaviorProperty);
-		}
+		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj) => (BackButtonBehavior)obj.GetValue(BackButtonBehaviorProperty);
 
-		public static FlyoutBehavior GetFlyoutBehavior(BindableObject obj)
-		{
-			return (FlyoutBehavior)obj.GetValue(FlyoutBehaviorProperty);
-		}
+		public static FlyoutBehavior GetFlyoutBehavior(BindableObject obj) => (FlyoutBehavior)obj.GetValue(FlyoutBehaviorProperty);
 
-		public static SearchHandler GetSearchHandler(BindableObject obj)
-		{
-			return (SearchHandler)obj.GetValue(SearchHandlerProperty);
-		}
+		public static SearchHandler GetSearchHandler(BindableObject obj) => (SearchHandler)obj.GetValue(SearchHandlerProperty);
 
-		public static bool GetSetPaddingInsets(BindableObject obj)
-		{
-			return (bool)obj.GetValue(SetPaddingInsetsProperty);
-		}
+		public static bool GetSetPaddingInsets(BindableObject obj) => (bool)obj.GetValue(SetPaddingInsetsProperty);
 
-		public static void SetBackButtonBehavior(BindableObject obj, BackButtonBehavior behavior)
-		{
-			obj.SetValue(BackButtonBehaviorProperty, behavior);
-		}
+		public static void SetBackButtonBehavior(BindableObject obj, BackButtonBehavior behavior) => obj.SetValue(BackButtonBehaviorProperty, behavior);
 
-		public static void SetFlyoutBehavior(BindableObject obj, FlyoutBehavior value)
-		{
-			obj.SetValue(FlyoutBehaviorProperty, value);
-		}
+		public static void SetFlyoutBehavior(BindableObject obj, FlyoutBehavior value) => obj.SetValue(FlyoutBehaviorProperty, value);
 
-		public static void SetSearchHandler(BindableObject obj, SearchHandler handler)
-		{
-			obj.SetValue(SearchHandlerProperty, handler);
-		}
+		public static void SetSearchHandler(BindableObject obj, SearchHandler handler) => obj.SetValue(SearchHandlerProperty, handler);
 
-		public static void SetSetPaddingInsets(BindableObject obj, bool value)
-		{
-			obj.SetValue(SetPaddingInsetsProperty, value);
-		}
+		public static void SetSetPaddingInsets(BindableObject obj, bool value) => obj.SetValue(SetPaddingInsetsProperty, value);
 
 		#endregion Attached Properties
 
@@ -811,65 +787,8 @@ namespace Xamarin.Forms
 			// Now we walk up
 			while (!Application.IsApplicationOrNull(pivot))
 			{
-				if (!result.BackgroundColor.HasValue && pivot.IsSet(ShellBackgroundColorProperty))
-				{
+				if (result.Ingest(pivot))
 					anySet = true;
-					result.BackgroundColor = GetShellBackgroundColor(pivot);
-				}
-
-				if (!result.DisabledColor.HasValue && pivot.IsSet(ShellDisabledColorProperty))
-				{
-					anySet = true;
-					result.DisabledColor = GetShellDisabledColor(pivot);
-				}
-
-				if (!result.ForegroundColor.HasValue && pivot.IsSet(ShellForegroundColorProperty))
-				{
-					anySet = true;
-					result.ForegroundColor = GetShellForegroundColor(pivot);
-				}
-
-				if (!result.TabBarBackgroundColor.HasValue && pivot.IsSet(ShellTabBarBackgroundColorProperty))
-				{
-					anySet = true;
-					result.TabBarBackgroundColor = GetShellTabBarBackgroundColor(pivot);
-				}
-
-				if (!result.TabBarDisabledColor.HasValue && pivot.IsSet(ShellTabBarDisabledColorProperty))
-				{
-					anySet = true;
-					result.TabBarDisabledColor = GetShellTabBarDisabledColor(pivot);
-				}
-
-				if (!result.TabBarForegroundColor.HasValue && pivot.IsSet(ShellTabBarForegroundColorProperty))
-				{
-					anySet = true;
-					result.TabBarForegroundColor = GetShellTabBarForegroundColor(pivot);
-				}
-
-				if (!result.TabBarTitleColor.HasValue && pivot.IsSet(ShellTabBarTitleColorProperty))
-				{
-					anySet = true;
-					result.TabBarTitleColor = GetShellTabBarTitleColor(pivot);
-				}
-
-				if (!result.TabBarUnselectedColor.HasValue && pivot.IsSet(ShellTabBarUnselectedColorProperty))
-				{
-					anySet = true;
-					result.TabBarUnselectedColor = GetShellTabBarUnselectedColor(pivot);
-				}
-
-				if (!result.TitleColor.HasValue && pivot.IsSet(ShellTitleColorProperty))
-				{
-					anySet = true;
-					result.TitleColor = GetShellTitleColor(pivot);
-				}
-
-				if (!result.UnselectedColor.HasValue && pivot.IsSet(ShellUnselectedColorProperty))
-				{
-					anySet = true;
-					result.UnselectedColor = GetShellUnselectedColor(pivot);
-				}
 
 				pivot = pivot.Parent;
 			}
