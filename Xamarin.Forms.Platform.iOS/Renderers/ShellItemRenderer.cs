@@ -1,5 +1,4 @@
 ﻿using CoreGraphics;
-using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -10,11 +9,39 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellItemRenderer : UITabBarController, IShellItemRenderer, IAppearanceObserver
 	{
+		#region IShellItemRenderer
+
+		public ShellItem ShellItem
+		{
+			get => _shellItem;
+			set
+			{
+				if (_shellItem == value)
+					return;
+				_shellItem = value;
+				OnShellItemSet(_shellItem);
+				CreateTabRenderers();
+			}
+		}
+
+		UIViewController IShellItemRenderer.ViewController => this;
+
+		#endregion IShellItemRenderer
+
+		#region IAppearanceObserver
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
+		{
+			UpdateShellAppearance(appearance);
+		}
+
+		#endregion IAppearanceObserver
+
+		private readonly IShellContext _context;
+		private readonly Dictionary<UIViewController, IShellTabItemRenderer> _tabRenderers = new Dictionary<UIViewController, IShellTabItemRenderer>();
 		private IShellTabBarAppearanceTracker _appearanceTracker;
-		private IShellContext _context;
 		private bool _disposed;
 		private ShellItem _shellItem;
-		private Dictionary<UIViewController, IShellTabItemRenderer> _tabRenderers = new Dictionary<UIViewController, IShellTabItemRenderer>();
 
 		public ShellItemRenderer(IShellContext context)
 		{
@@ -36,21 +63,6 @@ namespace Xamarin.Forms.Platform.iOS
 				}
 			}
 		}
-
-		public ShellItem ShellItem
-		{
-			get => _shellItem;
-			set
-			{
-				if (_shellItem == value)
-					return;
-				_shellItem = value;
-				OnShellItemSet(_shellItem);
-				CreateTabRenderers();
-			}
-		}
-
-		public UIViewController ViewController => this;
 
 		private IShellTabItemRenderer CurrentRenderer { get; set; }
 
@@ -167,7 +179,7 @@ namespace Xamarin.Forms.Platform.iOS
 					GoTo(ShellItem.CurrentItem);
 			}
 
-			SetTabBarHidden (ViewControllers.Length == 1);
+			SetTabBarHidden(ViewControllers.Length == 1);
 		}
 
 		protected virtual void OnShellItemSet(ShellItem item)
@@ -180,7 +192,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == ShellTabItem.IsEnabledProperty.PropertyName)
+			if (e.PropertyName == BaseShellItem.IsEnabledProperty.PropertyName)
 			{
 				var tabItem = (ShellTabItem)sender;
 				var renderer = RendererForShellTabItem(tabItem);
@@ -219,10 +231,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				var renderer = _context.CreateShellTabItemRenderer(shellTabItem);
 
-				if (willUseMore && i >= maxTabs - 1)
-					renderer.IsInMoreTab = true;
-				else
-					renderer.IsInMoreTab = false;
+				renderer.IsInMoreTab = willUseMore && i >= maxTabs - 1;
 
 				renderer.ShellTabItem = shellTabItem;
 				AddRenderer(renderer);
@@ -258,11 +267,6 @@ namespace Xamarin.Forms.Platform.iOS
 			CurrentRenderer = renderer;
 		}
 
-		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
-		{
-			UpdateShellAppearance(appearance);
-		}
-
 		private void RemoveRenderer(IShellTabItemRenderer renderer)
 		{
 			if (_tabRenderers.Remove(renderer.ViewController))
@@ -290,7 +294,7 @@ namespace Xamarin.Forms.Platform.iOS
 			return null;
 		}
 
-		private void SetTabBarHidden (bool hidden)
+		private void SetTabBarHidden(bool hidden)
 		{
 			TabBar.Hidden = hidden;
 
