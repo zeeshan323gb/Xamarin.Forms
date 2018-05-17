@@ -101,6 +101,7 @@ namespace Xamarin.Forms.Platform.Android
 
 				}
 
+				SearchHandler = null;
 				_shellContext = null;
 				_drawerToggle = null;
 				_searchView = null;
@@ -225,6 +226,42 @@ namespace Xamarin.Forms.Platform.Android
 			return new ShellSearchView(context, _shellContext);
 		}
 
+		private SearchHandler _searchHandler;
+		protected SearchHandler SearchHandler
+		{
+			get => _searchHandler;
+			set
+			{
+				if (value == _searchHandler)
+					return;
+
+				var oldValue = _searchHandler;
+				_searchHandler = value;
+				OnSearchHandlerChanged(oldValue, _searchHandler);
+			}
+		}
+
+		protected virtual void OnSearchHandlerChanged(SearchHandler oldValue, SearchHandler newValue)
+		{
+			if (oldValue != null)
+			{
+				oldValue.PropertyChanged -= OnSearchHandlerPropertyChanged;
+			}
+
+			if (newValue != null)
+			{
+				newValue.PropertyChanged += OnSearchHandlerPropertyChanged;
+			}
+		}
+
+		protected virtual void OnSearchHandlerPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == SearchHandler.SearchBoxVisibilityProperty.PropertyName)
+			{
+				UpdateToolbarItems(_toolbar, Page);
+			}
+		}
+
 		protected virtual void UpdateToolbarItems(Toolbar toolbar, Page page)
 		{
 			var menu = toolbar.Menu;
@@ -239,14 +276,14 @@ namespace Xamarin.Forms.Platform.Android
 				menuitem.SetOnMenuItemClickListener(new GenericMenuClickListener(item.Activate));
 			}
 
-			var searchHandler = Shell.GetSearchHandler(page);
-			if (searchHandler != null)
+			SearchHandler = Shell.GetSearchHandler(page);
+			if (SearchHandler != null && SearchHandler.SearchBoxVisibility != SearchBoxVisiblity.Hidden)
 			{
 				var context = _shellContext.AndroidContext;
 				if (_searchView == null)
 				{
 					_searchView = GetSearchView(context);
-					_searchView.SearchHandler = searchHandler;
+					_searchView.SearchHandler = SearchHandler;
 
 					_searchView.LoadView();
 					_searchView.View.ViewAttachedToWindow += OnSearchViewAttachedToWindow;
@@ -255,9 +292,9 @@ namespace Xamarin.Forms.Platform.Android
 					_searchView.SearchConfirmed += OnSearchConfirmed;
 				}
 
-				if (searchHandler.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
+				if (SearchHandler.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
 				{
-					var item = menu.Add(new Java.Lang.String(searchHandler.Placeholder));
+					var item = menu.Add(new Java.Lang.String(SearchHandler.Placeholder));
 					item.SetIcon(Resource.Drawable.abc_ic_search_api_material);
 					item.Icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					item.SetShowAsAction(ShowAsAction.IfRoom | ShowAsAction.CollapseActionView);
@@ -268,7 +305,7 @@ namespace Xamarin.Forms.Platform.Android
 					_searchView.ShowKeyboardOnAttached = true;
 					item.SetActionView(_searchView.View);
 				}
-				else if (searchHandler.SearchBoxVisibility == SearchBoxVisiblity.Expanded)
+				else if (SearchHandler.SearchBoxVisibility == SearchBoxVisiblity.Expanded)
 				{
 					_searchView.ShowKeyboardOnAttached = false;
 					if (_searchView.View.Parent != _toolbar)
@@ -290,9 +327,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void OnSearchViewAttachedToWindow(object sender, AView.ViewAttachedToWindowEventArgs e)
 		{
-			var searchHandler = Shell.GetSearchHandler(Page);
 			// We only need to do this tint hack when using collapsed search handlers
-			if (searchHandler.SearchBoxVisibility != SearchBoxVisiblity.Collapsable)
+			if (SearchHandler.SearchBoxVisibility != SearchBoxVisiblity.Collapsable)
 				return;
 
 			for (int i = 0; i < _toolbar.ChildCount; i++)

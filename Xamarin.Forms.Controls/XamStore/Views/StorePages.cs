@@ -96,6 +96,18 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => Shell.SetNavBarVisible(this, true)),
 				2, 5);
 
+			grid.Children.Add(MakeButton("Hide Search",
+					() => Shell.GetSearchHandler(this).SearchBoxVisibility = SearchBoxVisiblity.Hidden),
+				0, 6);
+
+			grid.Children.Add(MakeButton("Collapse Search",
+					() => Shell.GetSearchHandler(this).SearchBoxVisibility = SearchBoxVisiblity.Collapsable),
+				1, 6);
+
+			grid.Children.Add(MakeButton("Show Search",
+					() => Shell.GetSearchHandler(this).SearchBoxVisibility = SearchBoxVisiblity.Expanded),
+				2, 6);
+
 			Content = new ScrollView { Content = grid };
 		}
 
