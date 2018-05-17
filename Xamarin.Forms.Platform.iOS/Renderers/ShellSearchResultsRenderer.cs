@@ -30,13 +30,11 @@ namespace Xamarin.Forms.Platform.iOS
 		public event EventHandler<object> ItemSelected;
 
 		// If data templates were horses, this is a donkey
-		DataTemplate DefaultTemplate
+		private DataTemplate DefaultTemplate
 		{
 			get
 			{
-				if (_defaultTemplate == null)
-				{
-					_defaultTemplate = new DataTemplate(() =>
+				return _defaultTemplate ?? (_defaultTemplate = new DataTemplate(() =>
 					{
 						var label = new Label();
 						label.SetBinding(Label.TextProperty, SearchHandler.DisplayMemberName ?? ".");
@@ -44,9 +42,7 @@ namespace Xamarin.Forms.Platform.iOS
 						label.VerticalTextAlignment = TextAlignment.Center;
 
 						return label;
-					});
-				}
-				return _defaultTemplate;
+					}));
 			}
 		}
 
@@ -61,6 +57,23 @@ namespace Xamarin.Forms.Platform.iOS
 		protected UITableViewRowAnimation ReloadSectionsAnimation { get; set; } = UITableViewRowAnimation.Automatic;
 		private ISearchHandlerController SearchController => SearchHandler;
 		private SearchHandler SearchHandler { get; set; }
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing)
+			{
+				if (SearchHandler != null)
+				{
+					((INotifyCollectionChanged)SearchController.ListProxy).CollectionChanged -= OnProxyCollectionChanged;
+					SearchController.ListProxyChanged -= OnListProxyChanged;
+				}
+
+				SearchHandler = null;
+			}
+
+		}
 
 		public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
 		{
@@ -110,11 +123,6 @@ namespace Xamarin.Forms.Platform.iOS
 			return SearchController.ListProxy.Count;
 		}
 
-		public override void ViewDidLoad()
-		{
-			base.ViewDidLoad();
-		}
-
 		private NSIndexPath[] GetPaths(int section, int index, int count)
 		{
 			var paths = new NSIndexPath[count];
@@ -124,22 +132,22 @@ namespace Xamarin.Forms.Platform.iOS
 			return paths;
 		}
 
-		private void HandleListProxyChanged(object sender, ListProxyChangedEventArgs e)
+		private void OnListProxyChanged(object sender, ListProxyChangedEventArgs e)
 		{
 			if (e.OldList != null)
 			{
-				((INotifyCollectionChanged)e.OldList).CollectionChanged -= HandleProxyCollectionChanged;
+				((INotifyCollectionChanged)e.OldList).CollectionChanged -= OnProxyCollectionChanged;
 			}
 			// Full reset
 			TableView.ReloadData();
 
 			if (e.NewList != null)
 			{
-				((INotifyCollectionChanged)e.NewList).CollectionChanged += HandleProxyCollectionChanged;
+				((INotifyCollectionChanged)e.NewList).CollectionChanged += OnProxyCollectionChanged;
 			}
 		}
 
-		private void HandleProxyCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		private void OnProxyCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			int section = 0;
 			switch (e.Action)
@@ -200,7 +208,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void OnSearchHandlerSet()
 		{
-			SearchController.ListProxyChanged += HandleListProxyChanged;
+			SearchController.ListProxyChanged += OnListProxyChanged;
 		}
 	}
 }
