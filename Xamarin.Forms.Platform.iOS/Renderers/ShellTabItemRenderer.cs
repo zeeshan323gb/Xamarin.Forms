@@ -10,32 +10,13 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IUIGestureRecognizerDelegate, IAppearanceObserver
+	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IAppearanceObserver
 	{
-		private readonly IShellContext _context;
-
-		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
-			new Dictionary<UIViewController, TaskCompletionSource<bool>>();
-
-		private bool _disposed;
-		private bool _ignorePop;
-		private TaskCompletionSource<bool> _popCompletionTask;
-		private IVisualElementRenderer _renderer;
-		private ShellTabItem _shellTabItem;
-		private IShellNavBarAppearanceTracker _appearanceTracker;
-
-		private readonly Dictionary<Page, IShellPageRendererTracker> _trackers =
-			new Dictionary<Page, IShellPageRendererTracker>();
-
-		public ShellTabItemRenderer(IShellContext context)
-		{
-			Delegate = new NavDelegate(this);
-			_context = context;
-		}
-
-		public Page Page { get; private set; }
+		#region IShellTabItemRenderer
 
 		public bool IsInMoreTab { get; set; }
+
+		public Page Page { get; private set; }
 
 		public ShellTabItem ShellTabItem
 		{
@@ -53,6 +34,40 @@ namespace Xamarin.Forms.Platform.iOS
 		}
 
 		public UIViewController ViewController => this;
+
+		#endregion IShellTabItemRenderer
+
+		#region IAppearanceObserver
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
+		{
+			if (appearance == null)
+				_appearanceTracker.ResetAppearance(this);
+			else
+				_appearanceTracker.SetAppearance(this, appearance);
+		}
+
+		#endregion IAppearanceObserver
+
+		private readonly IShellContext _context;
+
+		private readonly Dictionary<Page, IShellPageRendererTracker> _trackers =
+			new Dictionary<Page, IShellPageRendererTracker>();
+		private IShellNavBarAppearanceTracker _appearanceTracker;
+		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
+							new Dictionary<UIViewController, TaskCompletionSource<bool>>();
+
+		private bool _disposed;
+		private bool _ignorePop;
+		private TaskCompletionSource<bool> _popCompletionTask;
+		private IVisualElementRenderer _renderer;
+		private ShellTabItem _shellTabItem;
+
+		public ShellTabItemRenderer(IShellContext context)
+		{
+			Delegate = new NavDelegate(this);
+			_context = context;
+		}
 
 		public override UIViewController PopViewController(bool animated)
 		{
@@ -131,9 +146,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == ShellTabItem.TitleProperty.PropertyName)
+			if (e.PropertyName == BaseShellItem.TitleProperty.PropertyName)
 				UpdateTabBarItem();
-			else if (e.PropertyName == ShellTabItem.IconProperty.PropertyName)
+			else if (e.PropertyName == BaseShellItem.IconProperty.PropertyName)
 				UpdateTabBarItem();
 		}
 
@@ -164,6 +179,26 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		protected virtual void OnInsertRequested(NavigationRequestedEventArgs e)
+		{
+			var page = e.Page;
+			var before = e.BeforePage;
+
+			var beforeRenderer = Platform.GetRenderer(before);
+
+			var renderer = Platform.CreateRenderer(page);
+			Platform.SetRenderer(page, renderer);
+
+			var tracker = _context.CreatePageRendererTracker();
+			tracker.Renderer = renderer;
+
+			_trackers[page] = tracker;
+
+			renderer.SetElementSize(View.Bounds.ToRectangle().Size);
+
+			ViewControllers.Insert(ViewControllers.IndexOf(beforeRenderer.ViewController), renderer.ViewController);
+		}
+
 		protected virtual void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
 		{
 			switch (e.RequestType)
@@ -188,45 +223,6 @@ namespace Xamarin.Forms.Platform.iOS
 					OnRemoveRequested(e);
 					break;
 			}
-		}
-
-		protected virtual void OnRemoveRequested(NavigationRequestedEventArgs e)
-		{
-			var page = e.Page;
-
-			var renderer = Platform.GetRenderer(page);
-
-			if (renderer != null)
-			{
-				if (renderer.ViewController == TopViewController)
-				{
-					e.Animated = false;
-					OnPopRequested(e);
-				}
-				ViewControllers = ViewControllers.Remove(renderer.ViewController);
-				DisposePage(page);
-			}
-		}
-
-		protected virtual void OnInsertRequested(NavigationRequestedEventArgs e)
-		{
-			var page = e.Page;
-			var before = e.BeforePage;
-
-			var beforeRenderer = Platform.GetRenderer(before);
-
-			var renderer = Platform.CreateRenderer(page);
-			Platform.SetRenderer(page, renderer);
-
-			var tracker = _context.CreatePageRendererTracker();
-			tracker.Renderer = renderer;
-
-			_trackers[page] = tracker;
-
-			renderer.SetElementSize(View.Bounds.ToRectangle().Size);
-
-			ViewControllers.Insert(ViewControllers.IndexOf(beforeRenderer.ViewController), renderer.ViewController);
-			
 		}
 
 		protected virtual async void OnPopRequested(NavigationRequestedEventArgs e)
@@ -275,6 +271,24 @@ namespace Xamarin.Forms.Platform.iOS
 			PushPage(page, animated, taskSource);
 
 			e.Task = taskSource.Task;
+		}
+
+		protected virtual void OnRemoveRequested(NavigationRequestedEventArgs e)
+		{
+			var page = e.Page;
+
+			var renderer = Platform.GetRenderer(page);
+
+			if (renderer != null)
+			{
+				if (renderer.ViewController == TopViewController)
+				{
+					e.Animated = false;
+					OnPopRequested(e);
+				}
+				ViewControllers = ViewControllers.Remove(renderer.ViewController);
+				DisposePage(page);
+			}
 		}
 
 		protected virtual void OnShellTabItemSet()
@@ -373,14 +387,6 @@ namespace Xamarin.Forms.Platform.iOS
 			stack.RemoveAt(stack.Count - 1);
 
 			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, tab, stack, true);
-		}
-
-		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
-		{
-			if (appearance == null)
-				_appearanceTracker.ResetAppearance(this);
-			else
-				_appearanceTracker.SetAppearance(this, appearance);
 		}
 
 		private class GestureDelegate : UIGestureRecognizerDelegate

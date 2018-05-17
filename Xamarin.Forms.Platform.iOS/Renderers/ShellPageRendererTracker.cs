@@ -9,18 +9,7 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ShellPageRendererTracker : IShellPageRendererTracker
 	{
-		private IShellSearchResultsRenderer _resultsRenderer;
-		private readonly IShellContext _context;
-		private BackButtonBehavior _backButtonBehavior;
-		private bool _disposed = false;
-		private WeakReference<IVisualElementRenderer> _rendererRef;
-		private UISearchController _searchController;
-		private SearchHandler _searchHandler;
-
-		public ShellPageRendererTracker(IShellContext context)
-		{
-			_context = context;
-		}
+		#region IShellPageRendererTracker
 
 		public bool IsRootPage { get; set; }
 
@@ -39,21 +28,29 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		private BackButtonBehavior BackButtonBehavior => _backButtonBehavior;
+		#endregion IShellPageRendererTracker
+
+		private readonly IShellContext _context;
+		private bool _disposed;
+		private WeakReference<IVisualElementRenderer> _rendererRef;
+		private IShellSearchResultsRenderer _resultsRenderer;
+		private UISearchController _searchController;
+		private SearchHandler _searchHandler;
+
+		public ShellPageRendererTracker(IShellContext context)
+		{
+			_context = context;
+		}
+
+		private BackButtonBehavior BackButtonBehavior { get; set; }
 		private UINavigationItem NavigationItem { get; set; }
 		private Page Page { get; set; }
-
-		private UIBarButtonItem[] ToolbarItems
-		{
-			get => Renderer.ViewController.ToolbarItems;
-			set => Renderer.ViewController.ToolbarItems = value;
-		}
 
 		protected virtual async void OnBackButtonBehaviorPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == BackButtonBehavior.CommandParameterProperty.PropertyName)
 				return;
-			await UpdateToolbarItems();
+			await UpdateToolbarItems().ConfigureAwait(false);
 		}
 
 		protected virtual void OnPagePropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -75,7 +72,7 @@ namespace Xamarin.Forms.Platform.iOS
 			((INotifyCollectionChanged)Page.ToolbarItems).CollectionChanged += OnToolbarItemsChanged;
 			SetBackButtonBehavior(Shell.GetBackButtonBehavior(Page));
 			SearchHandler = Shell.GetSearchHandler(Page);
-			await UpdateToolbarItems();
+			await UpdateToolbarItems().ConfigureAwait(false);
 		}
 
 		protected virtual async Task UpdateToolbarItems()
@@ -132,25 +129,25 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private async void OnToolbarItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			await UpdateToolbarItems();
+			await UpdateToolbarItems().ConfigureAwait(false);
 		}
 
 		private async void SetBackButtonBehavior(BackButtonBehavior value)
 		{
-			if (_backButtonBehavior == value)
+			if (BackButtonBehavior == value)
 				return;
 
-			if (_backButtonBehavior != null)
+			if (BackButtonBehavior != null)
 			{
-				_backButtonBehavior.PropertyChanged -= OnBackButtonBehaviorPropertyChanged;
+				BackButtonBehavior.PropertyChanged -= OnBackButtonBehaviorPropertyChanged;
 			}
 
-			_backButtonBehavior = value;
+			BackButtonBehavior = value;
 
-			if (_backButtonBehavior != null)
+			if (BackButtonBehavior != null)
 			{
-				_backButtonBehavior.PropertyChanged += OnBackButtonBehaviorPropertyChanged;
-				await UpdateToolbarItems();
+				BackButtonBehavior.PropertyChanged += OnBackButtonBehaviorPropertyChanged;
+				await UpdateToolbarItems().ConfigureAwait(false);
 			}
 		}
 
@@ -189,8 +186,32 @@ namespace Xamarin.Forms.Platform.iOS
 		protected virtual void OnSearchHandlerPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == SearchHandler.ClearPlaceholderEnabledProperty.PropertyName)
-			{
 				_searchController.SearchBar.ShowsBookmarkButton = _searchHandler.ClearPlaceholderEnabled;
+			else if (e.PropertyName == SearchHandler.SearchBoxVisibilityProperty.PropertyName)
+				UpdateSearchVisibility(_searchController);
+		}
+
+		protected virtual void UpdateSearchVisibility(UISearchController searchController)
+		{
+			var visibility = SearchHandler.SearchBoxVisibility;
+			if (visibility == SearchBoxVisiblity.Hidden)
+			{
+				if (searchController != null)
+				{
+					if (Forms.IsiOS11OrNewer)
+						NavigationItem.SearchController = null;
+					else
+						NavigationItem.TitleView = null;
+				}
+			}
+			else if (visibility == SearchBoxVisiblity.Collapsable || visibility == SearchBoxVisiblity.Expanded)
+			{
+				if (Forms.IsiOS11OrNewer)
+					NavigationItem.SearchController = _searchController;
+				else
+					NavigationItem.TitleView = _searchController.SearchBar;
+
+				NavigationItem.HidesSearchBarWhenScrolling = visibility == SearchBoxVisiblity.Collapsable;
 			}
 		}
 
@@ -206,16 +227,12 @@ namespace Xamarin.Forms.Platform.iOS
 
 			_searchController = new UISearchController(_resultsRenderer?.ViewController);
 			var visibility = SearchHandler.SearchBoxVisibility;
-			if (SearchHandler.SearchBoxVisibility != SearchBoxVisiblity.Hidden)
+			if (visibility != SearchBoxVisiblity.Hidden)
 			{
 				if (Forms.IsiOS11OrNewer)
-				{
 					NavigationItem.SearchController = _searchController;
-				}
 				else
-				{
 					NavigationItem.TitleView = _searchController.SearchBar;
-				}
 			}
 
 			var searchBar = _searchController.SearchBar;
@@ -253,12 +270,6 @@ namespace Xamarin.Forms.Platform.iOS
 			searchBar.ShowsBookmarkButton = SearchHandler.ClearPlaceholderEnabled;
 		}
 
-		private void OnSearchItemSelected(object sender, object e)
-		{
-			_searchController.Active = false;
-			((ISearchHandlerController)SearchHandler).ItemSelected(e);
-		}
-
 		private void BookmarkButtonClicked(object sender, EventArgs e)
 		{
 			((ISearchHandlerController)SearchHandler).ClearPlaceholderClicked();
@@ -278,6 +289,12 @@ namespace Xamarin.Forms.Platform.iOS
 			_searchController.SetSearchResultsUpdater(null);
 			_searchController.Dispose();
 			_searchController = null;
+		}
+
+		private void OnSearchItemSelected(object sender, object e)
+		{
+			_searchController.Active = false;
+			((ISearchHandlerController)SearchHandler).ItemSelected(e);
 		}
 
 		private void SearchButtonClicked(object sender, EventArgs e)
