@@ -145,6 +145,8 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateToolbarItems();
 			else if (e.PropertyName == Shell.NavBarVisibleProperty.PropertyName)
 				UpdateNavBarVisible(_toolbar, Page);
+			else if (e.PropertyName == Shell.BackButtonBehaviorProperty.PropertyName)
+				UpdateLeftBarButtonItem();
 		}
 
 		protected virtual void OnPageToolbarItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
