@@ -108,6 +108,17 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => Shell.GetSearchHandler(this).SearchBoxVisibility = SearchBoxVisiblity.Expanded),
 				2, 6);
 
+			grid.Children.Add(MakeButton("Set Back",
+					() => Shell.SetBackButtonBehavior(this, new BackButtonBehavior()
+					{
+						IconOverride = "calculator.png"
+					})),
+				0, 7);
+
+			grid.Children.Add(MakeButton("Clear Back",
+					() => Shell.SetBackButtonBehavior(this, null)),
+				1, 7);
+
 			Content = new ScrollView { Content = grid };
 		}
 
@@ -140,7 +151,7 @@ namespace Xamarin.Forms.Controls.XamStore
 			searchHandler.ClearPlaceholderHelpText = "Start voice search";
 
 			searchHandler.QueryIconName = "Search";
-			searchHandler.QueryIconHelpText = "Search app";
+			searchHandler.QueryIconHelpText = "Press to search app";
 
 			searchHandler.Placeholder = placeholder;
 			searchHandler.SearchBoxVisibility = visibility;
