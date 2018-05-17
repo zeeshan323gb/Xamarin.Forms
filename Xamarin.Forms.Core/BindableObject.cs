@@ -52,7 +52,7 @@ namespace Xamarin.Forms
 			ClearValue(propertyKey.BindableProperty, fromStyle:false, checkAccess: false);
 		}
 
-		internal (bool IsSet, T Value)[] LunacyFetch<T>(BindableProperty[] propArray)
+		internal (bool IsSet, T Value)[] GetValues<T>(BindableProperty[] propArray)
 		{
 			List<BindablePropertyContext> properties = _properties;
 			var resultArray = new(bool IsSet, T Value)[propArray.Length];
