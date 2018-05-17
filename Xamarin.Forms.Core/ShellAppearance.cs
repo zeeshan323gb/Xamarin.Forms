@@ -93,7 +93,7 @@ namespace Xamarin.Forms
 		{
 			bool anySet = false;
 
-			var dataSet = pivot.LunacyFetch<Color>(IngestArray);
+			var dataSet = pivot.GetValues<Color>(IngestArray);
 			for (int i = 0; i < IngestArray.Length; i++)
 			{
 				if (!_colorArray[i].HasValue && dataSet[i].IsSet)
