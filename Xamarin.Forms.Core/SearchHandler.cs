@@ -37,20 +37,26 @@ namespace Xamarin.Forms
 			OnClearPlaceholderClicked();
 		}
 
-		void ISearchHandlerController.QueryConfirmed()
-		{
-			OnQueryConfirmed();
-		}
-
 		void ISearchHandlerController.ItemSelected(object obj)
 		{
 			OnItemSelected(obj);
 		}
 
+		void ISearchHandlerController.QueryConfirmed()
+		{
+			OnQueryConfirmed();
+		}
+
 		#endregion ISearchHandlerController
 
+		public static readonly BindableProperty ClearIconHelpTextProperty =
+			BindableProperty.Create(nameof(ClearIconHelpText), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+		public static readonly BindableProperty ClearIconNameProperty =
+			BindableProperty.Create(nameof(ClearIconName), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
 		public static readonly BindableProperty ClearIconProperty =
-			BindableProperty.Create(nameof(ClearIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
+							BindableProperty.Create(nameof(ClearIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
 
 		public static readonly BindableProperty ClearPlaceholderCommandParameterProperty =
 			BindableProperty.Create(nameof(ClearPlaceholderCommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime,
@@ -63,11 +69,20 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ClearPlaceholderEnabledProperty =
 			BindableProperty.Create(nameof(ClearPlaceholderEnabled), typeof(bool), typeof(SearchHandler), false, BindingMode.OneWay);
 
+		public static readonly BindableProperty ClearPlaceholderHelpTextProperty =
+			BindableProperty.Create(nameof(ClearPlaceholderHelpText), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+
 		public static readonly BindableProperty ClearPlaceholderIconProperty =
-			BindableProperty.Create(nameof(ClearPlaceholderIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
+					BindableProperty.Create(nameof(ClearPlaceholderIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime,
+						propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+
+		public static readonly BindableProperty ClearPlaceholderNameProperty =
+			BindableProperty.Create(nameof(ClearPlaceholderName), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
 
 		public static readonly BindableProperty CommandParameterProperty =
-			BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime,
+					BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(SearchHandler), null, BindingMode.OneTime,
 				propertyChanged: OnCommandParameterChanged);
 
 		public static readonly BindableProperty CommandProperty =
@@ -90,8 +105,17 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty PlaceholderProperty =
 			BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime);
 
+		public static readonly BindableProperty QueryIconHelpTextProperty =
+			BindableProperty.Create(nameof(QueryIconHelpText), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+
+		public static readonly BindableProperty QueryIconNameProperty =
+			BindableProperty.Create(nameof(QueryIconName), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+
 		public static readonly BindableProperty QueryIconProperty =
-			BindableProperty.Create(nameof(QueryIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(QueryIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime,
+				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
 
 		public static readonly BindableProperty QueryProperty =
 			BindableProperty.Create(nameof(Query), typeof(string), typeof(SearchHandler), null, BindingMode.TwoWay,
@@ -109,6 +133,18 @@ namespace Xamarin.Forms
 		{
 			get { return (ImageSource)GetValue(ClearIconProperty); }
 			set { SetValue(ClearIconProperty, value); }
+		}
+
+		public string ClearIconHelpText
+		{
+			get { return (string)GetValue(ClearIconHelpTextProperty); }
+			set { SetValue(ClearIconHelpTextProperty, value); }
+		}
+
+		public string ClearIconName
+		{
+			get { return (string)GetValue(ClearIconNameProperty); }
+			set { SetValue(ClearIconNameProperty, value); }
 		}
 
 		public ICommand ClearPlaceholderCommand
@@ -129,10 +165,22 @@ namespace Xamarin.Forms
 			set { SetValue(ClearPlaceholderEnabledProperty, value); }
 		}
 
+		public string ClearPlaceholderHelpText
+		{
+			get { return (string)GetValue(ClearPlaceholderHelpTextProperty); }
+			set { SetValue(ClearPlaceholderHelpTextProperty, value); }
+		}
+
 		public ImageSource ClearPlaceholderIcon
 		{
 			get { return (ImageSource)GetValue(ClearPlaceholderIconProperty); }
 			set { SetValue(ClearPlaceholderIconProperty, value); }
+		}
+
+		public string ClearPlaceholderName
+		{
+			get { return (string)GetValue(ClearPlaceholderNameProperty); }
+			set { SetValue(ClearPlaceholderNameProperty, value); }
 		}
 
 		public ICommand Command
@@ -189,6 +237,18 @@ namespace Xamarin.Forms
 			set { SetValue(QueryIconProperty, value); }
 		}
 
+		public string QueryIconHelpText
+		{
+			get { return (string)GetValue(QueryIconHelpTextProperty); }
+			set { SetValue(QueryIconHelpTextProperty, value); }
+		}
+
+		public string QueryIconName
+		{
+			get { return (string)GetValue(QueryIconNameProperty); }
+			set { SetValue(QueryIconNameProperty, value); }
+		}
+
 		public SearchBoxVisiblity SearchBoxVisibility
 		{
 			get { return (SearchBoxVisiblity)GetValue(SearchBoxVisibilityProperty); }
@@ -217,7 +277,6 @@ namespace Xamarin.Forms
 
 		protected virtual void OnItemSelected(object item)
 		{
-
 		}
 
 		protected virtual void OnQueryChanged(string oldValue, string newValue)
@@ -331,6 +390,46 @@ namespace Xamarin.Forms
 		{
 			if (Command != null)
 				IsSearchEnabledCore = Command.CanExecute(CommandParameter);
+		}
+
+		private void UpdateAutomationProperties()
+		{
+			var queryIcon = QueryIcon;
+			var clearIcon = ClearIcon;
+			var clearPlaceholderIcon = ClearPlaceholderIcon;
+
+			if (queryIcon != null)
+			{
+				var queryIconName = QueryIconName;
+				var queryIconHelpText = QueryIconHelpText;
+				if (queryIconName != null)
+					AutomationProperties.SetName(queryIcon, queryIconName);
+
+				if (queryIconHelpText != null)
+					AutomationProperties.SetHelpText(queryIcon, queryIconHelpText);
+			}
+
+			if (clearIcon != null)
+			{
+				var clearIconName = ClearIconName;
+				var clearIconHelpText = ClearIconHelpText;
+				if (clearIconName != null)
+					AutomationProperties.SetName(clearIcon, clearIconName);
+
+				if (clearIconHelpText != null)
+					AutomationProperties.SetHelpText(clearIcon, clearIconHelpText);
+			}
+
+			if (clearPlaceholderIcon != null)
+			{
+				var clearPlaceholderName = ClearPlaceholderName;
+				var clearPlacholderHelpText = ClearPlaceholderHelpText;
+				if (clearPlaceholderName != null)
+					AutomationProperties.SetName(clearPlaceholderIcon, clearPlaceholderName);
+
+				if (clearPlacholderHelpText != null)
+					AutomationProperties.SetHelpText(clearPlaceholderIcon, clearPlacholderHelpText);
+			}
 		}
 	}
 }

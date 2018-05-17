@@ -132,6 +132,16 @@ namespace Xamarin.Forms.Controls.XamStore
 		protected void AddSearchHandler(string placeholder, SearchBoxVisiblity visibility)
 		{
 			var searchHandler = new SearchHandler();
+
+			searchHandler.ClearIconName = "Clear";
+			searchHandler.ClearIconHelpText = "Clears the search field text";
+
+			searchHandler.ClearPlaceholderName = "Voice Search";
+			searchHandler.ClearPlaceholderHelpText = "Start voice search";
+
+			searchHandler.QueryIconName = "Search";
+			searchHandler.QueryIconHelpText = "Search app";
+
 			searchHandler.Placeholder = placeholder;
 			searchHandler.SearchBoxVisibility = visibility;
 

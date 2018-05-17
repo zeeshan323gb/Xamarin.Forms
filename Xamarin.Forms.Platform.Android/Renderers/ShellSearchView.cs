@@ -8,6 +8,7 @@ using Android.Widget;
 using System;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.Platform.Android.FastRenderers;
 using AColor = Android.Graphics.Color;
 using AView = Android.Views.View;
 using LP = Android.Views.ViewGroup.LayoutParams;
@@ -123,6 +124,9 @@ namespace Xamarin.Forms.Platform.Android
 			_textBlock.ItemClick += OnTextBlockItemClicked;
 			_textBlock.SetDropDownBackgroundDrawable(new ClipDrawableWrapper(_textBlock.DropDownBackground));
 
+			// A note on accessibility. The _textBlocks hint is what android defaults to reading in the screen
+			// reader. Therefor we do not need to set something else.
+
 			_clearButton = CreateImageButton(context, clearImage, Resource.Drawable.abc_ic_clear_material, 0, padding);
 			_clearPlaceholderButton = CreateImageButton(context, clearPlaceholderImage, -1, 0, padding);
 
@@ -235,6 +239,11 @@ namespace Xamarin.Forms.Platform.Android
 			var result = new ImageButton(context);
 			result.SetPadding(0, 0, 0, 0);
 			result.SetFocusable(ViewFocusability.NotFocusable);
+
+			string defaultHint = null;
+			string defaultDescription = null;
+			AutomationPropertiesProvider.SetContentDescription(result, image, ref defaultDescription, ref defaultHint);
+
 			SetImage(result, image, defaultImage);
 			result.LayoutParameters = new LinearLayout.LayoutParams((int)Context.ToPixels(22), LP.MatchParent)
 			{
