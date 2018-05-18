@@ -21,19 +21,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 		IShellItemRenderer IShellContext.CurrentShellItemRenderer => _currentShellItemRenderer;
 
-		IShellPageRendererTracker IShellContext.CreatePageRendererTracker()
-		{
-			return CreatePageRendererTracker();
-		}
-
 		IShellNavBarAppearanceTracker IShellContext.CreateNavBarAppearanceTracker()
 		{
 			return CreateNavBarAppearanceTracker();
 		}
 
-		IShellTabBarAppearanceTracker IShellContext.CreateTabBarAppearanceTracker()
+		IShellPageRendererTracker IShellContext.CreatePageRendererTracker()
 		{
-			return CreateTabBarAppearanceTracker();
+			return CreatePageRendererTracker();
 		}
 
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
@@ -45,14 +40,19 @@ namespace Xamarin.Forms.Platform.iOS
 			return content;
 		}
 
+		IShellSearchResultsRenderer IShellContext.CreateShellSearchResultsRenderer()
+		{
+			return CreateShellSearchResultsRenderer();
+		}
+
 		IShellTabItemRenderer IShellContext.CreateShellTabItemRenderer(ShellTabItem tabItem)
 		{
 			return CreateShellTabItemRenderer(tabItem);
 		}
 
-		IShellSearchResultsRenderer IShellContext.CreateShellSearchResultsRenderer()
+		IShellTabBarAppearanceTracker IShellContext.CreateTabBarAppearanceTracker()
 		{
-			return CreateShellSearchResultsRenderer();
+			return CreateTabBarAppearanceTracker();
 		}
 
 		#endregion IShellContext
@@ -67,6 +67,7 @@ namespace Xamarin.Forms.Platform.iOS
 		public UIView NativeView => FlyoutRenderer.View;
 		public Shell Shell => (Shell)Element;
 		public UIViewController ViewController => FlyoutRenderer.ViewController;
+
 		private IShellFlyoutRenderer FlyoutRenderer
 		{
 			get
@@ -137,11 +138,6 @@ namespace Xamarin.Forms.Platform.iOS
 			return new SafeShellNavBarAppearanceTracker();
 		}
 
-		protected virtual IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker()
-		{
-			return new SafeShellTabBarAppearanceTracker();
-		}
-
 		protected virtual IShellPageRendererTracker CreatePageRendererTracker()
 		{
 			return new ShellPageRendererTracker(this);
@@ -165,14 +161,19 @@ namespace Xamarin.Forms.Platform.iOS
 			return new ShellItemTransition();
 		}
 
+		protected virtual IShellSearchResultsRenderer CreateShellSearchResultsRenderer()
+		{
+			return new ShellSearchResultsRenderer(this);
+		}
+
 		protected virtual IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem)
 		{
 			return new ShellTabItemRenderer(this);
 		}
 
-		protected virtual IShellSearchResultsRenderer CreateShellSearchResultsRenderer()
+		protected virtual IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker()
 		{
-			return new ShellSearchResultsRenderer(this);
+			return new SafeShellTabBarAppearanceTracker();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -251,7 +252,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (tab == null)
 				tab = item.CurrentItem;
-			var state = ((IShellController)Shell).GetNavigationState(item, tab);
+			var state = ((IShellController)Shell).GetNavigationState(item, tab, false);
 			await Shell.GoToAsync(state);
 		}
 

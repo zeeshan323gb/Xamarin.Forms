@@ -40,11 +40,6 @@ namespace Xamarin.Forms.Platform.Android
 			CurrentTabItem = null;
 		}
 
-		protected override IShellObservableFragment CreateFragmentForPage(Page page)
-		{
-			return new ShellContentFragment(ShellContext, page);
-		}
-
 		protected override ViewGroup GetNavigationTarget() => _navigationArea;
 
 		protected override IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab)

@@ -6,11 +6,10 @@ namespace Xamarin.Forms.Platform.Android
 {
 	public interface IShellContext
 	{
-		Shell Shell { get; }
-
 		Context AndroidContext { get; }
-
 		DrawerLayout CurrentDrawerLayout { get; }
+		Shell Shell { get; }
+		IShellObservableFragment CreateFragmentForPage(Page page);
 
 		IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer();
 
