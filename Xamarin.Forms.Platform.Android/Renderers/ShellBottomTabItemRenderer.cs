@@ -279,7 +279,8 @@ namespace Xamarin.Forms.Platform.Android
 				var menuItem = _bottomView.Menu.FindItem(index);
 				UpdateShellTabItemEnabled(tab, menuItem);
 			}
-			else if (e.PropertyName == BaseShellItem.TitleProperty.PropertyName)
+			else if (e.PropertyName == BaseShellItem.TitleProperty.PropertyName ||
+				e.PropertyName == BaseShellItem.IconProperty.PropertyName)
 			{
 				SetupMenu();
 			}
