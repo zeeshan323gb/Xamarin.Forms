@@ -5,6 +5,7 @@ using Android.Content;
 using Xamarin.Forms.Internals;
 using Android.Views;
 using AView = Android.Views.View;
+using System.Linq;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -159,7 +160,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (view != null)
 				AddChild(view);
 
-			if (ElementController.LogicalChildren[ElementController.LogicalChildren.Count - 1] != view)
+			if (ElementController.LogicalChildren.FirstOrDefault() != view)
 				EnsureChildOrder();
 		}
 
