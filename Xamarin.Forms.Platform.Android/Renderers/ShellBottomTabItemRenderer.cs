@@ -271,6 +271,26 @@ namespace Xamarin.Forms.Platform.Android
 			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
 		}
 
+		protected override void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			base.OnShellTabItemPropertyChanged(sender, e);
+
+			if (e.PropertyName == BaseShellItem.IsEnabledProperty.PropertyName)
+			{
+				var tab = (ShellTabItem)sender;
+				var index = ShellItem.Items.IndexOf(tab);
+
+				var itemCount = ShellItem.Items.Count;
+				var maxItems = _bottomView.MaxItemCount;
+
+				if (itemCount > maxItems && index > maxItems - 2)
+					return;
+
+				var menuItem = _bottomView.Menu.FindItem(index);
+				UpdateShellTabItemEnabled(tab, menuItem);
+			}
+		}
+
 		protected virtual void OnTabReselected(ShellTabItem tab)
 		{
 		}
@@ -324,6 +344,7 @@ namespace Xamarin.Forms.Platform.Android
 				var item = shellItem.Items[i];
 				var menuItem = menu.Add(0, i, 0, new Java.Lang.String(item.Title));
 				SetMenuItemIcon(menuItem, item.Icon);
+				UpdateShellTabItemEnabled(item, menuItem);
 				if (item == CurrentTabItem)
 				{
 					menuItem.SetChecked(true);
@@ -341,6 +362,13 @@ namespace Xamarin.Forms.Platform.Android
 			_bottomView.Visibility = end == 1 ? ViewStates.Gone : ViewStates.Visible;
 
 			_bottomView.SetShiftMode(false, false);
+		}
+
+		protected virtual void UpdateShellTabItemEnabled(ShellTabItem tab, IMenuItem menuItem)
+		{
+			bool tabEnabled = tab.IsEnabled;
+			if (menuItem.IsEnabled != tabEnabled)
+				menuItem.SetEnabled(tabEnabled);
 		}
 
 		private ColorStateList MakeColorStateList(Color titleColor, Color disabledColor, Color unselectedColor)

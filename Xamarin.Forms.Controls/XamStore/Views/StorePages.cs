@@ -119,6 +119,14 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => Shell.SetBackButtonBehavior(this, null)),
 				1, 7);
 
+			grid.Children.Add(MakeButton("Disable Tab",
+					() => ((ShellTabItem)Parent).IsEnabled = false),
+				2, 7);
+
+			grid.Children.Add(MakeButton("Enable Tab",
+					() => ((ShellTabItem)Parent).IsEnabled = true),
+				0, 8);
+
 			Content = new ScrollView { Content = grid };
 		}
 

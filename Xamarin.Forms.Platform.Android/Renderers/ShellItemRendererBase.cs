@@ -3,6 +3,7 @@ using Android.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
@@ -239,6 +240,7 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual void HookTabEvents(ShellTabItem shellTabItem)
 		{
 			((IShellTabItemController)shellTabItem).NavigationRequested += OnNavigationRequested;
+			shellTabItem.PropertyChanged += OnShellTabItemPropertyChanged;
 		}
 
 		protected virtual void OnCurrentTabItemChanged()
@@ -309,6 +311,11 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual void UnhookTabEvents(ShellTabItem shellTabItem)
 		{
 			((IShellTabItemController)shellTabItem).NavigationRequested -= OnNavigationRequested;
+			shellTabItem.PropertyChanged -= OnShellTabItemPropertyChanged;
+		}
+
+		protected virtual void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
 		}
 
 		private void RemoveAllButCurrent(Fragment skip)
