@@ -65,7 +65,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected ShellItem ShellItem { get; private set; }
 
-		protected abstract IShellObservableFragment CreateFragmentForPage(Page page);
+		protected virtual IShellObservableFragment CreateFragmentForPage(Page page)
+		{
+			return ShellContext.CreateFragmentForPage(page);
+		}
 
 		protected override void Dispose(bool disposing)
 		{
@@ -79,7 +82,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected abstract ViewGroup GetNavigationTarget();
 
-		protected abstract IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab);
+		protected virtual IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab)
+		{
+			return new ShellContentFragment(ShellContext, tab);
+		}
 
 		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellTabItem item, Page page, bool animated)
 		{
@@ -258,7 +264,7 @@ namespace Xamarin.Forms.Platform.Android
 			e.Task = HandleFragmentUpdate((ShellNavigationSource)e.RequestType, (ShellTabItem)sender, e.Page, e.Animated);
 		}
 
-		protected virtual void OnShellItemPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
 				CurrentTabItem = ShellItem.CurrentItem;

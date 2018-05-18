@@ -78,6 +78,11 @@ namespace Xamarin.Forms.Platform.Android
 
 		Shell IShellContext.Shell => Element;
 
+		IShellObservableFragment IShellContext.CreateFragmentForPage(Page page)
+		{
+			return CreateFragmentForPage(page);
+		}
+
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
 		{
 			var content = CreateShellFlyoutContentRenderer();
@@ -126,6 +131,11 @@ namespace Xamarin.Forms.Platform.Android
 		protected Context AndroidContext { get; }
 		protected Shell Element { get; private set; }
 		private FragmentManager FragmentManager => ((FormsAppCompatActivity)AndroidContext).SupportFragmentManager;
+
+		protected virtual IShellObservableFragment CreateFragmentForPage(Page page)
+		{
+			return new ShellContentFragment(this, page);
+		}
 
 		protected virtual IShellFlyoutContentRenderer CreateShellFlyoutContentRenderer()
 		{
@@ -202,7 +212,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (tab == null)
 				tab = item.CurrentItem;
-			var state = ((IShellController)Element).GetNavigationState(item, tab);
+			var state = ((IShellController)Element).GetNavigationState(item, tab, false);
 			await Element.GoToAsync(state).ConfigureAwait(false);
 		}
 
@@ -210,8 +220,9 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			int width = (int)AndroidContext.ToPixels(Element.Width);
 			int height = (int)AndroidContext.ToPixels(Element.Height);
-			_flyoutRenderer.AndroidView.Measure(MeasureSpecFactory.MakeMeasureSpec(width, MeasureSpecMode.Exactly), MeasureSpecFactory.MakeMeasureSpec(height, MeasureSpecMode.Exactly));
-			_flyoutRenderer.AndroidView.Layout(0, 0, (int)width, (int)height);
+			_flyoutRenderer.AndroidView.Measure(MeasureSpecFactory.MakeMeasureSpec(width, MeasureSpecMode.Exactly), 
+				MeasureSpecFactory.MakeMeasureSpec(height, MeasureSpecMode.Exactly));
+			_flyoutRenderer.AndroidView.Layout(0, 0, width, height);
 		}
 
 		private void OnFlyoutItemSelected(object sender, ElementSelectedEventArgs e)

@@ -20,7 +20,7 @@ namespace Xamarin.Forms
 
 		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel);
 
-		ShellNavigationState GetNavigationState(ShellItem item, ShellTabItem tab);
+		ShellNavigationState GetNavigationState(ShellItem item, ShellTabItem tab, bool includeStack = true);
 
 		void AddAppearanceObserver(IAppearanceObserver observer, Element pivot);
 

@@ -142,8 +142,14 @@ namespace Xamarin.Forms
 			return result;
 		}
 
-		public virtual async Task GoToAsync(List<string> routes, IDictionary<string, string> queryData)
+		public virtual async Task GoToAsync(List<string> routes, IDictionary<string, string> queryData, bool animate)
 		{
+			if (routes == null || routes.Count == 0)
+			{
+				await Navigation.PopToRootAsync(animate);
+				return;
+			}
+
 			for (int i = 0; i < routes.Count; i++)
 			{
 				bool isLast = i == routes.Count - 1;
@@ -169,7 +175,7 @@ namespace Xamarin.Forms
 					break;
 
 				Shell.ApplyQueryAttributes(content, queryData, isLast);
-				await OnPushAsync(content, i == routes.Count - 1);
+				await OnPushAsync(content, i == routes.Count - 1 && animate);
 			}
 
 			SendAppearanceChanged();

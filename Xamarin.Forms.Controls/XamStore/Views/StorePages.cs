@@ -135,6 +135,18 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => Shell.GetSearchHandler(this).IsSearchEnabled = false),
 				2, 8);
 
+			grid.Children.Add(MakeButton("Set Title",
+					() => Title = "New Title"),
+				0, 9);
+
+			grid.Children.Add(MakeButton("Set Tab Title",
+					() => ((ShellTabItem)Parent).Title = "New Title"),
+				1, 9);
+
+			grid.Children.Add(MakeButton("Set GroupTitle",
+					() => ((ShellItem)Parent.Parent).Title = "New Title"),
+				2, 9);
+
 			Content = new ScrollView { Content = grid };
 		}
 

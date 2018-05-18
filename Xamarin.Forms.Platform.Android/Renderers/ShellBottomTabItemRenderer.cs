@@ -64,7 +64,7 @@ namespace Xamarin.Forms.Platform.Android
 			_bottomView.SetOnNavigationItemSelectedListener(this);
 
 			HookEvents(ShellItem);
-			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
+			SetupMenu();
 
 			((IShellController)ShellContext.Shell).AddAppearanceObserver(this, ShellItem);
 
@@ -120,11 +120,6 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (accept)
 				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
-		}
-
-		protected override IShellObservableFragment CreateFragmentForPage(Page page)
-		{
-			return new ShellContentFragment(ShellContext, page);
 		}
 
 		protected virtual Drawable CreateItemBackgroundDrawable()
@@ -196,11 +191,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected override ViewGroup GetNavigationTarget() => _navigationArea;
 
-		protected override IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab)
-		{
-			return new ShellContentFragment(ShellContext, tab);
-		}
-
 		protected override void OnCurrentTabItemChanged()
 		{
 			base.OnCurrentTabItemChanged();
@@ -268,7 +258,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			base.OnShellItemsChanged(sender, e);
 
-			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
+			SetupMenu();
 		}
 
 		protected override void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -288,6 +278,10 @@ namespace Xamarin.Forms.Platform.Android
 
 				var menuItem = _bottomView.Menu.FindItem(index);
 				UpdateShellTabItemEnabled(tab, menuItem);
+			}
+			else if (e.PropertyName == BaseShellItem.TitleProperty.PropertyName)
+			{
+				SetupMenu();
 			}
 		}
 
@@ -413,6 +407,11 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 			var drawable = await Context.GetFormsDrawable(source);
 			menuItem.SetIcon(drawable);
+		}
+
+		private void SetupMenu()
+		{
+			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
 		}
 
 		private void UpdateTabBarVisibility()

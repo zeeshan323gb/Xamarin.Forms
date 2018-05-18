@@ -198,9 +198,9 @@ namespace Xamarin.Forms
 			observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
 		}
 
-		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab)
+		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab, bool includeStack = true)
 		{
-			return GetNavigationState(item, tab, tab.Stack.ToList());
+			return GetNavigationState(item, tab, includeStack ? tab.Stack.ToList() : null);
 		}
 
 		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel)
@@ -477,6 +477,7 @@ namespace Xamarin.Forms
 
 			ApplyQueryAttributes(this, queryData, false);
 
+			bool changedTab = false;
 			// Find ShellItem
 			foreach (var shellItem in Items)
 			{
@@ -484,7 +485,11 @@ namespace Xamarin.Forms
 				{
 					ApplyQueryAttributes(shellItem, queryData, parts.Length == 2);
 					if (CurrentItem != shellItem)
+					{
+						changedTab = true;
 						SetValueFromRenderer(CurrentItemProperty, shellItem);
+					}
+
 					break;
 				}
 			}
@@ -500,7 +505,11 @@ namespace Xamarin.Forms
 					{
 						ApplyQueryAttributes(tabItem, queryData, parts.Length == 3);
 						if (shellItem.CurrentItem != tabItem)
+						{
+							changedTab = true;
 							shellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
+						}
+
 						selectedTabItem = tabItem;
 						break;
 					}
@@ -508,18 +517,24 @@ namespace Xamarin.Forms
 			}
 
 			// Send out navigation to ShellTabItem
-			if (parts.Length > 3 && selectedTabItem != null)
+			if (selectedTabItem != null)
 			{
 				List<string> navParts = new List<string>();
-				for (int i = 3; i < parts.Length; i++)
+				if (parts.Length > 3)
 				{
-					navParts.Add(parts[i]);
+					for (int i = 3; i < parts.Length; i++)
+					{
+						navParts.Add(parts[i]);
+					}
 				}
-				await selectedTabItem.GoToAsync(navParts, queryData);
+				await selectedTabItem.GoToAsync(navParts, queryData, !changedTab);
 			}
 
 			_accumulateNavigatedEvents = false;
-			OnNavigated(_accumulatedEvent);
+
+			// this can be null in the event that no navigation actually took place!
+			if (_accumulatedEvent != null)
+				OnNavigated(_accumulatedEvent);
 		}
 
 		internal static void ApplyQueryAttributes(Element element, IDictionary<string, string> query, bool isLastItem)
