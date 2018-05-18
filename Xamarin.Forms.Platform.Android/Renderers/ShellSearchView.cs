@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android.FastRenderers;
@@ -76,7 +77,14 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			base.Dispose(disposing);
 
-			_disposed = true;
+			if (disposing)
+			{
+				_disposed = true;
+
+				SearchHandler.PropertyChanged -= OnSearchHandlerPropertyChanged;
+			}
+
+			SearchHandler = null;
 		}
 
 		protected virtual void LoadView(SearchHandler searchHandler)
@@ -86,6 +94,8 @@ namespace Xamarin.Forms.Platform.Android
 			var clearPlaceholderImage = searchHandler.ClearPlaceholderIcon;
 			var query = searchHandler.Query;
 			var placeholder = searchHandler.Placeholder;
+
+			searchHandler.PropertyChanged += OnSearchHandlerPropertyChanged;
 
 			var context = Context;
 			_cardView = new CardView(context)
@@ -116,6 +126,7 @@ namespace Xamarin.Forms.Platform.Android
 				Hint = placeholder,
 				ImeOptions = ImeAction.Done
 			};
+			_textBlock.Enabled = searchHandler.IsSearchEnabled;
 			_textBlock.SetBackground(null);
 			_textBlock.SetPadding(padding, 0, padding, 0);
 			_textBlock.SetSingleLine(true);
@@ -145,6 +156,14 @@ namespace Xamarin.Forms.Platform.Android
 			_searchButton.Click += OnSearchButtonClicked;
 
 			AddView(_cardView);
+		}
+
+		protected virtual void OnSearchHandlerPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == SearchHandler.IsSearchEnabledProperty.PropertyName)
+			{
+				_textBlock.Enabled = SearchHandler.IsSearchEnabled;
+			}
 		}
 
 		protected override async void OnAttachedToWindow()

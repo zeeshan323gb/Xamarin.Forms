@@ -127,6 +127,14 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => ((ShellTabItem)Parent).IsEnabled = true),
 				0, 8);
 
+			grid.Children.Add(MakeButton("Enable Search",
+					() => Shell.GetSearchHandler(this).IsSearchEnabled = true),
+				1, 8);
+
+			grid.Children.Add(MakeButton("Disable Search",
+					() => Shell.GetSearchHandler(this).IsSearchEnabled = false),
+				2, 8);
+
 			Content = new ScrollView { Content = grid };
 		}
 
