@@ -1,19 +1,19 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Support.V4.Widget;
 using Android.Support.V7.Graphics.Drawable;
+using Android.Support.V7.Widget;
 using Android.Views;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using ActionBarDrawerToggle = Android.Support.V7.App.ActionBarDrawerToggle;
 using AView = Android.Views.View;
-using Toolbar = Android.Support.V7.Widget.Toolbar;
 using LP = Android.Views.ViewGroup.LayoutParams;
 using R = Android.Resource;
-using Android.Graphics;
-using Android.Support.V7.Widget;
+using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -24,10 +24,11 @@ namespace Xamarin.Forms.Platform.Android
 		private DrawerLayout _drawerLayout;
 		private ActionBarDrawerToggle _drawerToggle;
 		private Page _page;
-		private IShellContext _shellContext;
-		private Toolbar _toolbar;
+		private SearchHandler _searchHandler;
 		private IShellSearchView _searchView;
+		private IShellContext _shellContext;
 		private Color _tintColor = Color.Default;
+		private Toolbar _toolbar;
 
 		public ShellToolbarTracker(IShellContext shellContext, Toolbar toolbar, DrawerLayout drawerLayout)
 		{
@@ -75,6 +76,20 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
+		protected SearchHandler SearchHandler
+		{
+			get => _searchHandler;
+			set
+			{
+				if (value == _searchHandler)
+					return;
+
+				var oldValue = _searchHandler;
+				_searchHandler = value;
+				OnSearchHandlerChanged(oldValue, _searchHandler);
+			}
+		}
+
 		void AView.IOnClickListener.OnClick(AView v)
 		{
 			var backButtonHandler = Shell.GetBackButtonBehavior(Page);
@@ -98,7 +113,6 @@ namespace Xamarin.Forms.Platform.Android
 						_searchView.SearchConfirmed -= OnSearchConfirmed;
 						_searchView.Dispose();
 					}
-
 				}
 
 				SearchHandler = null;
@@ -110,6 +124,11 @@ namespace Xamarin.Forms.Platform.Android
 				_drawerLayout = null;
 				_disposed = true;
 			}
+		}
+
+		protected virtual IShellSearchView GetSearchView(Context context)
+		{
+			return new ShellSearchView(context, _shellContext);
 		}
 
 		protected virtual void OnNavigateBack()
@@ -152,6 +171,33 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual void OnPageToolbarItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			UpdateToolbarItems(_toolbar, Page);
+		}
+
+		protected virtual void OnSearchConfirmed(object sender, EventArgs e)
+		{
+			_toolbar.CollapseActionView();
+		}
+
+		protected virtual void OnSearchHandlerChanged(SearchHandler oldValue, SearchHandler newValue)
+		{
+			if (oldValue != null)
+			{
+				oldValue.PropertyChanged -= OnSearchHandlerPropertyChanged;
+			}
+
+			if (newValue != null)
+			{
+				newValue.PropertyChanged += OnSearchHandlerPropertyChanged;
+			}
+		}
+
+		protected virtual void OnSearchHandlerPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == SearchHandler.SearchBoxVisibilityProperty.PropertyName ||
+				e.PropertyName == SearchHandler.IsSearchEnabledProperty.PropertyName)
+			{
+				UpdateToolbarItems(_toolbar, Page);
+			}
 		}
 
 		protected virtual async void UpdateLeftBarButtonItem(Context context, Toolbar toolbar, DrawerLayout drawerLayout, Page page)
@@ -223,47 +269,6 @@ namespace Xamarin.Forms.Platform.Android
 			_toolbar.Title = page.Title;
 		}
 
-		protected virtual IShellSearchView GetSearchView(Context context)
-		{
-			return new ShellSearchView(context, _shellContext);
-		}
-
-		private SearchHandler _searchHandler;
-		protected SearchHandler SearchHandler
-		{
-			get => _searchHandler;
-			set
-			{
-				if (value == _searchHandler)
-					return;
-
-				var oldValue = _searchHandler;
-				_searchHandler = value;
-				OnSearchHandlerChanged(oldValue, _searchHandler);
-			}
-		}
-
-		protected virtual void OnSearchHandlerChanged(SearchHandler oldValue, SearchHandler newValue)
-		{
-			if (oldValue != null)
-			{
-				oldValue.PropertyChanged -= OnSearchHandlerPropertyChanged;
-			}
-
-			if (newValue != null)
-			{
-				newValue.PropertyChanged += OnSearchHandlerPropertyChanged;
-			}
-		}
-
-		protected virtual void OnSearchHandlerPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == SearchHandler.SearchBoxVisibilityProperty.PropertyName)
-			{
-				UpdateToolbarItems(_toolbar, Page);
-			}
-		}
-
 		protected virtual void UpdateToolbarItems(Toolbar toolbar, Page page)
 		{
 			var menu = toolbar.Menu;
@@ -297,6 +302,7 @@ namespace Xamarin.Forms.Platform.Android
 				if (SearchHandler.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
 				{
 					var item = menu.Add(new Java.Lang.String(SearchHandler.Placeholder));
+					item.SetEnabled(SearchHandler.IsSearchEnabled);
 					item.SetIcon(Resource.Drawable.abc_ic_search_api_material);
 					item.Icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					item.SetShowAsAction(ShowAsAction.IfRoom | ShowAsAction.CollapseActionView);
@@ -345,11 +351,6 @@ namespace Xamarin.Forms.Platform.Android
 					}
 				}
 			}
-		}
-
-		protected virtual void OnSearchConfirmed(object sender, EventArgs e)
-		{
-			_toolbar.CollapseActionView();
 		}
 
 		private void UpdateLeftBarButtonItem()
