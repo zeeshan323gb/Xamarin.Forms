@@ -111,7 +111,7 @@ namespace Xamarin.Forms.Platform.Android
 				IVisualElementRenderer renderer = oldRenderer;
 				if (pool != null)
 					renderer = pool.GetFreeRenderer(view);
-				if (renderer == null)
+				if (renderer == null || (renderer.View?.Handle ?? IntPtr.Zero) == IntPtr.Zero)
 				{
 					Performance.Start(reference, "New renderer");
 					renderer = Platform.CreateRenderer(view, _renderer.View.Context);
@@ -120,7 +120,7 @@ namespace Xamarin.Forms.Platform.Android
 
 				if (renderer == oldRenderer)
 				{
-					Platform.SetRenderer(renderer.Element, null);
+					renderer.Element?.ClearValue(Platform.RendererProperty);
 					renderer.SetElement(view);
 				}
 
