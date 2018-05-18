@@ -147,6 +147,10 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => ((ShellItem)Parent.Parent).Title = "New Title"),
 				2, 9);
 
+			grid.Children.Add(MakeButton("New Tab Icon",
+					() => ((ShellTabItem)Parent).Icon = "calculator.png"),
+				0, 10);
+
 			Content = new ScrollView { Content = grid };
 		}
 
