@@ -9,21 +9,45 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class Shell : Page, IShellController, IShellAppearanceTracker
+	public class Shell : Page, IShellController
 	{
 		#region Attached Properties
 
+		public static readonly BindableProperty BackButtonBehaviorProperty =
+			BindableProperty.CreateAttached("BackButtonBehavior", typeof(BackButtonBehavior), typeof(Shell), null, BindingMode.OneTime);
+		public static readonly BindableProperty FlyoutBehaviorProperty =
+			BindableProperty.CreateAttached("FlyoutBehavior", typeof(FlyoutBehavior), typeof(Shell), FlyoutBehavior.Flyout);
 		public static readonly BindableProperty NavBarVisibleProperty =
-			BindableProperty.CreateAttached("NavBarVisible", typeof(bool), typeof(Shell), true);
+							BindableProperty.CreateAttached("NavBarVisible", typeof(bool), typeof(Shell), true);
 
+		public static readonly BindableProperty SearchHandlerProperty =
+			BindableProperty.CreateAttached("SearchHandler", typeof(SearchHandler), typeof(Shell), null, BindingMode.OneTime);
+		public static readonly BindableProperty SetPaddingInsetsProperty =
+			BindableProperty.CreateAttached("SetPaddingInsets", typeof(bool), typeof(Shell), false);
 		public static readonly BindableProperty TabBarVisibleProperty =
-			BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
+							BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
+
+		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj) => (BackButtonBehavior)obj.GetValue(BackButtonBehaviorProperty);
+
+		public static FlyoutBehavior GetFlyoutBehavior(BindableObject obj) => (FlyoutBehavior)obj.GetValue(FlyoutBehaviorProperty);
 
 		public static bool GetNavBarVisible(BindableObject obj) => (bool)obj.GetValue(NavBarVisibleProperty);
 
+		public static SearchHandler GetSearchHandler(BindableObject obj) => (SearchHandler)obj.GetValue(SearchHandlerProperty);
+
+		public static bool GetSetPaddingInsets(BindableObject obj) => (bool)obj.GetValue(SetPaddingInsetsProperty);
+
 		public static bool GetTabBarVisible(BindableObject obj) => (bool)obj.GetValue(TabBarVisibleProperty);
 
+		public static void SetBackButtonBehavior(BindableObject obj, BackButtonBehavior behavior) => obj.SetValue(BackButtonBehaviorProperty, behavior);
+
+		public static void SetFlyoutBehavior(BindableObject obj, FlyoutBehavior value) => obj.SetValue(FlyoutBehaviorProperty, value);
+
 		public static void SetNavBarVisible(BindableObject obj, bool value) => obj.SetValue(NavBarVisibleProperty, value);
+
+		public static void SetSearchHandler(BindableObject obj, SearchHandler handler) => obj.SetValue(SearchHandlerProperty, handler);
+
+		public static void SetSetPaddingInsets(BindableObject obj, bool value) => obj.SetValue(SetPaddingInsetsProperty, value);
 
 		public static void SetTabBarVisible(BindableObject obj, bool value) => obj.SetValue(TabBarVisibleProperty, value);
 
@@ -41,31 +65,31 @@ namespace Xamarin.Forms
 			BindableProperty.CreateAttached("ShellForegroundColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellTabBarBackgroundColorProperty = 
+		public static readonly BindableProperty ShellTabBarBackgroundColorProperty =
 			BindableProperty.CreateAttached("ShellTabBarBackgroundColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellTabBarDisabledColorProperty = 
+		public static readonly BindableProperty ShellTabBarDisabledColorProperty =
 			BindableProperty.CreateAttached("ShellTabBarDisabledColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellTabBarForegroundColorProperty = 
+		public static readonly BindableProperty ShellTabBarForegroundColorProperty =
 			BindableProperty.CreateAttached("ShellTabBarForegroundColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellTabBarTitleColorProperty = 
+		public static readonly BindableProperty ShellTabBarTitleColorProperty =
 			BindableProperty.CreateAttached("ShellTabBarTitleColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellTabBarUnselectedColorProperty = 
+		public static readonly BindableProperty ShellTabBarUnselectedColorProperty =
 			BindableProperty.CreateAttached("ShellTabBarUnselectedColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellTitleColorProperty = 
+		public static readonly BindableProperty ShellTitleColorProperty =
 			BindableProperty.CreateAttached("ShellTitleColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
-		public static readonly BindableProperty ShellUnselectedColorProperty = 
+		public static readonly BindableProperty ShellUnselectedColorProperty =
 			BindableProperty.CreateAttached("ShellUnselectedColor", typeof(Color), typeof(Shell), Color.Default,
 				propertyChanged: OnShellColorValueChanged);
 
@@ -112,42 +136,19 @@ namespace Xamarin.Forms
 		private static void OnShellColorValueChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var item = (Element)bindable;
+			var source = item;
 
-			if (item.Parent is IShellAppearanceTracker tracker)
+			while (!Application.IsApplicationOrNull(item))
 			{
-				tracker.AppearanceChanged(item, true);
+				if (item is IShellController shell)
+				{
+					shell.AppearanceChanged(source, true);
+				}
+				item = item.Parent;
 			}
 		}
 
 		#endregion Appearance Properties
-
-		public static readonly BindableProperty BackButtonBehaviorProperty =
-			BindableProperty.CreateAttached("BackButtonBehavior", typeof(BackButtonBehavior), typeof(Shell), null, BindingMode.OneTime);
-
-		public static readonly BindableProperty FlyoutBehaviorProperty =
-			BindableProperty.CreateAttached("FlyoutBehavior", typeof(FlyoutBehavior), typeof(Shell), FlyoutBehavior.Popover);
-
-		public static readonly BindableProperty SearchHandlerProperty =
-			BindableProperty.CreateAttached("SearchHandler", typeof(SearchHandler), typeof(Shell), null, BindingMode.OneTime);
-
-		public static readonly BindableProperty SetPaddingInsetsProperty =
-			BindableProperty.CreateAttached("SetPaddingInsets", typeof(bool), typeof(Shell), false);
-
-		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj) => (BackButtonBehavior)obj.GetValue(BackButtonBehaviorProperty);
-
-		public static FlyoutBehavior GetFlyoutBehavior(BindableObject obj) => (FlyoutBehavior)obj.GetValue(FlyoutBehaviorProperty);
-
-		public static SearchHandler GetSearchHandler(BindableObject obj) => (SearchHandler)obj.GetValue(SearchHandlerProperty);
-
-		public static bool GetSetPaddingInsets(BindableObject obj) => (bool)obj.GetValue(SetPaddingInsetsProperty);
-
-		public static void SetBackButtonBehavior(BindableObject obj, BackButtonBehavior behavior) => obj.SetValue(BackButtonBehaviorProperty, behavior);
-
-		public static void SetFlyoutBehavior(BindableObject obj, FlyoutBehavior value) => obj.SetValue(FlyoutBehaviorProperty, value);
-
-		public static void SetSearchHandler(BindableObject obj, SearchHandler handler) => obj.SetValue(SearchHandlerProperty, handler);
-
-		public static void SetSetPaddingInsets(BindableObject obj, bool value) => obj.SetValue(SetPaddingInsetsProperty, value);
 
 		#endregion Attached Properties
 
@@ -169,7 +170,8 @@ namespace Xamarin.Forms
 
 		#region IShellController
 
-		private List<Tuple<IAppearanceObserver, Element>> _observers = new List<Tuple<IAppearanceObserver, Element>>();
+		private List<(IAppearanceObserver Observer, Element Pivot)> _appearanceObservers = new List<(IAppearanceObserver Observer, Element Pivot)>();
+		private List<IFlyoutBehaviorObserver> _flyoutBehaviorObservers = new List<IFlyoutBehaviorObserver>();
 
 		event EventHandler IShellController.HeaderChanged
 		{
@@ -194,53 +196,27 @@ namespace Xamarin.Forms
 
 		void IShellController.AddAppearanceObserver(IAppearanceObserver observer, Element pivot)
 		{
-			_observers.Add(Tuple.Create(observer, pivot));
+			_appearanceObservers.Add((observer, pivot));
 			observer.OnAppearanceChanged(GetShellAppearanceForPivot(pivot));
 		}
 
-		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab, bool includeStack = true)
+		void IShellController.AddFlyoutBehaviorObserver(IFlyoutBehaviorObserver observer)
 		{
-			return GetNavigationState(item, tab, includeStack ? tab.Stack.ToList() : null);
+			_flyoutBehaviorObservers.Add(observer);
+			observer.OnFlyoutBehaviorChanged(GetEffectiveFlyoutBehavior());
 		}
 
-		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel)
+		void IShellController.AppearanceChanged(Element source, bool appearanceSet)
 		{
-			var proposedState = GetNavigationState(item, tab, stack);
-			return ProposeNavigation(source, proposedState, canCancel);
-		}
-
-		bool IShellController.RemoveAppearanceObserver(IAppearanceObserver observer)
-		{
-			for (int i = 0; i < _observers.Count; i++)
+			if (!appearanceSet)
 			{
-				if (_observers[i].Item1 == observer)
-				{
-					_observers.RemoveAt(i);
-					return true;
-				}
+				// This bubbles up whenever there is an kind of structure/page change
+				// So its also quite useful for checking the FlyoutBehavior conditions
+				var behavior = GetEffectiveFlyoutBehavior();
+				foreach (var observer in _flyoutBehaviorObservers)
+					observer.OnFlyoutBehaviorChanged(behavior);
 			}
-			return false;
-		}
 
-		void IShellController.UpdateCurrentState(ShellNavigationSource source)
-		{
-			var oldState = CurrentState;
-			var shellItem = CurrentItem;
-			var tab = shellItem?.CurrentItem;
-			var stack = tab?.Stack;
-			var result = GetNavigationState(shellItem, tab, stack.ToList());
-
-			SetValueFromRenderer(CurrentStatePropertyKey, result);
-
-			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
-		}
-
-		#endregion IShellController
-
-		#region IShellAppearanceTracker
-
-		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
-		{
 			// here we wish to notify every element whose "pivot line" contains the source
 			// To do that we first need to find the leaf node in the line, and then walk up
 			// to see if we find the source on the way up.
@@ -249,10 +225,10 @@ namespace Xamarin.Forms
 			// need walk up from the source to look for the pivot as items below the change
 			// can't be affected by it
 
-			foreach (var t in _observers)
+			foreach (var (Observer, Pivot) in _appearanceObservers)
 			{
-				var observer = t.Item1;
-				var pivot = t.Item2;
+				var observer = Observer;
+				var pivot = Pivot;
 
 				Element target;
 				Element leaf;
@@ -294,7 +270,49 @@ namespace Xamarin.Forms
 			}
 		}
 
-		#endregion IShellAppearanceTracker
+		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab, bool includeStack = true)
+		{
+			return GetNavigationState(item, tab, includeStack ? tab.Stack.ToList() : null);
+		}
+
+		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel)
+		{
+			var proposedState = GetNavigationState(item, tab, stack);
+			return ProposeNavigation(source, proposedState, canCancel);
+		}
+
+		bool IShellController.RemoveAppearanceObserver(IAppearanceObserver observer)
+		{
+			for (int i = 0; i < _appearanceObservers.Count; i++)
+			{
+				if (_appearanceObservers[i].Observer == observer)
+				{
+					_appearanceObservers.RemoveAt(i);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool IShellController.RemoveFlyoutBehaviorObserver(IFlyoutBehaviorObserver observer)
+		{
+			return _flyoutBehaviorObservers.Remove(observer);
+		}
+
+		void IShellController.UpdateCurrentState(ShellNavigationSource source)
+		{
+			var oldState = CurrentState;
+			var shellItem = CurrentItem;
+			var tab = shellItem?.CurrentItem;
+			var stack = tab?.Stack;
+			var result = GetNavigationState(shellItem, tab, stack.ToList());
+
+			SetValueFromRenderer(CurrentStatePropertyKey, result);
+
+			OnNavigated(new ShellNavigatedEventArgs(oldState, CurrentState, source));
+		}
+
+		#endregion IShellController
 
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
@@ -334,7 +352,9 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ShellNavigationStateProperty = ShellNavigationStatePropertyKey.BindableProperty;
 
 		private ShellNavigatedEventArgs _accumulatedEvent;
+
 		private bool _accumulateNavigatedEvents;
+
 		private View _flyoutHeaderView;
 
 		public Shell()
@@ -700,7 +720,7 @@ namespace Xamarin.Forms
 			newItem?.UpdateChecked();
 
 			var shell = (Shell)bindable;
-			((IShellAppearanceTracker)shell).AppearanceChanged(shell, false);
+			((IShellController)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
 		}
 
@@ -732,6 +752,19 @@ namespace Xamarin.Forms
 			}
 
 			return lookupDict;
+		}
+
+		private FlyoutBehavior GetEffectiveFlyoutBehavior()
+		{
+			var page = WalkToPage(this);
+
+			while (page != this)
+			{
+				if (page.IsSet(FlyoutBehaviorProperty))
+					return GetFlyoutBehavior(page);
+				page = page.Parent;
+			}
+			return FlyoutBehavior;
 		}
 
 		private ShellNavigationState GetNavigationState(ShellItem item, ShellTabItem tab, IList<Page> stack)
@@ -782,20 +815,7 @@ namespace Xamarin.Forms
 			// 2) Walk up from the pivot to the root Shell. Stop walking as soon as you find a ShellAppearance and return
 			// 3) If nothing found, return null
 
-			if (pivot is Shell shell)
-			{
-				pivot = shell.CurrentItem;
-			}
-			if (pivot is ShellItem shellItem)
-			{
-				pivot = shellItem.CurrentItem;
-			}
-			if (pivot is IShellTabItemController shellTabItem)
-			{
-				// this is the same as .Last but easier and will add in the root if not null
-				// it generally wont be null but this is just in case
-				pivot = shellTabItem.CurrentPage ?? pivot;
-			}
+			pivot = WalkToPage(pivot);
 
 			bool anySet = false;
 			ShellAppearance result = new ShellAppearance();
@@ -807,7 +827,7 @@ namespace Xamarin.Forms
 
 				pivot = pivot.Parent;
 			}
-			
+
 			if (anySet)
 			{
 				result.MakeComplete();
@@ -858,6 +878,26 @@ namespace Xamarin.Forms
 			OnNavigating(navArgs);
 			System.Diagnostics.Debug.WriteLine("Proposed: " + proposedState.Location);
 			return !navArgs.Cancelled;
+		}
+
+		private Element WalkToPage(Element element)
+		{
+			if (element is Shell shell)
+			{
+				element = shell.CurrentItem;
+			}
+			if (element is ShellItem shellItem)
+			{
+				element = shellItem.CurrentItem;
+			}
+			if (element is IShellTabItemController shellTabItem)
+			{
+				// this is the same as .Last but easier and will add in the root if not null
+				// it generally wont be null but this is just in case
+				element = shellTabItem.CurrentPage ?? element;
+			}
+
+			return element;
 		}
 	}
 }

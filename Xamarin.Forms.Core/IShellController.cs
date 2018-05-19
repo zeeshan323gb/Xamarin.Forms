@@ -8,6 +8,11 @@ namespace Xamarin.Forms
 		void OnAppearanceChanged(ShellAppearance appearance);
 	}
 
+	public interface IFlyoutBehaviorObserver
+	{
+		void OnFlyoutBehaviorChanged(FlyoutBehavior behavior);
+	}
+
 	public interface IShellController : IPageController
 	{
 		event EventHandler HeaderChanged;
@@ -16,14 +21,20 @@ namespace Xamarin.Forms
 
 		View FlyoutHeader { get; }
 
-		void UpdateCurrentState(ShellNavigationSource source);
+		void AddAppearanceObserver(IAppearanceObserver observer, Element pivot);
 
-		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel);
+		void AddFlyoutBehaviorObserver(IFlyoutBehaviorObserver observer);
+
+		void AppearanceChanged(Element source, bool appearanceSet);
 
 		ShellNavigationState GetNavigationState(ShellItem item, ShellTabItem tab, bool includeStack = true);
 
-		void AddAppearanceObserver(IAppearanceObserver observer, Element pivot);
+		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel);
 
 		bool RemoveAppearanceObserver(IAppearanceObserver observer);
+
+		bool RemoveFlyoutBehaviorObserver(IFlyoutBehaviorObserver observer);
+
+		void UpdateCurrentState(ShellNavigationSource source);
 	}
 }
