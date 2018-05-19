@@ -6,6 +6,7 @@ using Android.Support.V7.Widget;
 using Android.Widget;
 using Android.Views;
 using Android.Support.Design.Widget;
+using Android.Util;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -56,6 +57,19 @@ namespace Xamarin.Forms.Platform.Android
 			recycler.SetBackgroundColor(Color.White.ToAndroid());
 			recycler.SetLayoutManager(new LinearLayoutManager(context, (int)Orientation.Vertical, false));
 			recycler.SetAdapter(adapter);
+
+			var metrics = context.Resources.DisplayMetrics;
+			var width = Math.Min(metrics.WidthPixels, metrics.HeightPixels);
+
+			TypedValue tv = new TypedValue();
+			int actionBarHeight = (int)context.ToPixels(56);
+			if (context.Theme.ResolveAttribute(global::Android.Resource.Attribute.ActionBarSize, tv, true))
+			{
+				actionBarHeight = TypedValue.ComplexToDimensionPixelSize(tv.Data, metrics);
+			}
+			width -= actionBarHeight;
+
+			coordinator.LayoutParameters = new LP (width, LP.MatchParent);
 
 			return coordinator;
 		}

@@ -151,6 +151,18 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => ((ShellTabItem)Parent).Icon = "calculator.png"),
 				0, 10);
 
+			grid.Children.Add(MakeButton("Flyout Disabled",
+					() => Shell.SetFlyoutBehavior(this, FlyoutBehavior.Disabled)),
+				1, 10);
+
+			grid.Children.Add(MakeButton("Flyout Collapse",
+					() => Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout)),
+				2, 10);
+
+			grid.Children.Add(MakeButton("Flyout Locked",
+					() => Shell.SetFlyoutBehavior(this, FlyoutBehavior.Locked)),
+				0, 11);
+
 			Content = new ScrollView { Content = grid };
 		}
 

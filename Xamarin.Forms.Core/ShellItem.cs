@@ -140,7 +140,7 @@ namespace Xamarin.Forms
 
 			((IShellItemController)bindable).UpdateChecked();
 			shellItem.SendStructureChanged();
-			((IShellAppearanceTracker)shellItem).AppearanceChanged(shellItem, false);
+			((IShellController)shellItem?.Parent)?.AppearanceChanged(shellItem, false);
 		}
 
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

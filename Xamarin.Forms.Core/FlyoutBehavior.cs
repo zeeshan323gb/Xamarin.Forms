@@ -2,10 +2,8 @@
 {
 	public enum FlyoutBehavior
 	{
-		SplitOnLandscape,
-		Split,
-		Popover,
-		SplitOnPortrait,
 		Disabled,
+		Flyout,
+		Locked
 	}
 }

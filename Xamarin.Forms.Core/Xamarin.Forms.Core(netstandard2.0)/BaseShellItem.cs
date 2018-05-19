@@ -1,16 +1,7 @@
 ﻿namespace Xamarin.Forms
 {
-	public class BaseShellItem : NavigableElement, IShellAppearanceTracker
+	public class BaseShellItem : NavigableElement
 	{
-		#region IShellAppearanceTracker
-
-		void IShellAppearanceTracker.AppearanceChanged(Element source, bool appearanceSet)
-		{
-			AppearanceTrackerUtils.AppearanceChanged(this, source, appearanceSet);
-		}
-
-		#endregion
-
 		#region PropertyKeys
 
 		internal static readonly BindablePropertyKey IsCheckedPropertyKey = BindableProperty.CreateReadOnly(nameof(IsChecked), typeof(bool), typeof(BaseShellItem), false);

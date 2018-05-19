@@ -376,7 +376,7 @@ namespace Xamarin.Forms
 				OnChildRemoved(page);
 		}
 
-		private void SendAppearanceChanged() => ((IShellAppearanceTracker)this).AppearanceChanged(this, false);
+		private void SendAppearanceChanged() => ((IShellController)Parent?.Parent)?.AppearanceChanged(this, false);
 
 		private void SendUpdateCurrentState(ShellNavigationSource source)
 		{
