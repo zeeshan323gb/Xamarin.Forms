@@ -1,7 +1,6 @@
 ﻿using Android.Content;
 using Android.Graphics.Drawables;
 using Android.OS;
-using Android.Support.Design.Internal;
 using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
@@ -37,7 +36,7 @@ namespace Xamarin.Forms.Platform.Android
 		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
 		{
 			if (appearance != null)
-				ApplyAppearance(appearance);
+				SetAppearance(appearance);
 			else
 				ResetAppearance();
 		}
@@ -46,9 +45,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected const int MoreTabId = 99;
 		private BottomNavigationView _bottomView;
-		private ColorStateList _defaultList;
-		private Color _lastColor = Color.Default;
 		private FrameLayout _navigationArea;
+		private IShellBottomNavViewAppearanceTracker _appearanceTracker;
 
 		public ShellBottomTabItemRenderer(IShellContext shellContext) : base(shellContext)
 		{
@@ -66,6 +64,7 @@ namespace Xamarin.Forms.Platform.Android
 			HookEvents(ShellItem);
 			SetupMenu();
 
+			_appearanceTracker = ShellContext.CreateBottomNavViewAppearanceTracker(ShellItem);
 			((IShellController)ShellContext.Shell).AddAppearanceObserver(this, ShellItem);
 
 			return outerLayout;
@@ -87,25 +86,9 @@ namespace Xamarin.Forms.Platform.Android
 			base.OnDestroy();
 		}
 
-		protected virtual void ApplyAppearance(ShellAppearance appearance)
+		protected virtual void SetAppearance(ShellAppearance appearance)
 		{
-			if (_defaultList == null)
-			{
-				_defaultList = _bottomView.ItemTextColor;
-			}
-
-			IShellAppearanceController controller = appearance;
-			var background = controller.EffectiveTabBarBackgroundColor;
-			var foreground = controller.EffectiveTabBarForegroundColor;
-			var disabled = controller.EffectiveTabBarDisabledColor;
-			var unselected = controller.EffectiveTabBarUnselectedColor;
-			var title = controller.EffectiveTabBarTitleColor;
-
-			var colorStateList = MakeColorStateList(title, disabled, unselected);
-			_bottomView.ItemTextColor = colorStateList;
-			_bottomView.ItemIconTintList = colorStateList;
-
-			SetBackgroundColor(background);
+			_appearanceTracker.SetAppearance(_bottomView, appearance);
 		}
 
 		protected virtual void ChangeTabItem(ShellTabItem tabItem)
@@ -292,37 +275,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void ResetAppearance()
 		{
-			if (_defaultList != null)
-			{
-				_bottomView.ItemTextColor = _defaultList;
-				_bottomView.ItemIconTintList = _defaultList;
-			}
-
-			SetBackgroundColor(Color.White);
-		}
-
-		protected virtual void SetBackgroundColor(Color color)
-		{
-			if (_lastColor.IsDefault)
-				_lastColor = color;
-
-			var menuView = _bottomView.GetChildAt(0) as BottomNavigationMenuView;
-
-			if (menuView == null)
-			{
-				_bottomView.SetBackground(new ColorDrawable(color.ToAndroid()));
-			}
-			else
-			{
-				var index = ShellItem.Items.IndexOf(CurrentTabItem);
-				index = Math.Min(index, _bottomView.Menu.Size() - 1);
-
-				var child = menuView.GetChildAt(index);
-				var touchPoint = new Point(child.Left + (child.Right - child.Left) / 2, child.Top + (child.Bottom - child.Top) / 2);
-
-				_bottomView.SetBackground(new ColorChangeRevealDrawable(_lastColor.ToAndroid(), color.ToAndroid(), touchPoint));
-				_lastColor = color;
-			}
+			_appearanceTracker.ResetAppearance(_bottomView);
 		}
 
 		protected virtual void SetupMenu(IMenu menu, int maxBottomItems, ShellItem shellItem)
@@ -364,31 +317,6 @@ namespace Xamarin.Forms.Platform.Android
 			bool tabEnabled = tab.IsEnabled;
 			if (menuItem.IsEnabled != tabEnabled)
 				menuItem.SetEnabled(tabEnabled);
-		}
-
-		private ColorStateList MakeColorStateList(Color titleColor, Color disabledColor, Color unselectedColor)
-		{
-			var states = new int[][] {
-				new int[] { -R.Attribute.StateEnabled },
-				new int[] {R.Attribute.StateChecked },
-				new int[] { }
-			};
-
-			var disabledInt = disabledColor.IsDefault ?
-				_defaultList.GetColorForState(new[] { -R.Attribute.StateEnabled }, AColor.Gray) :
-				disabledColor.ToAndroid().ToArgb();
-
-			var checkedInt = titleColor.IsDefault ?
-				_defaultList.GetColorForState(new[] { R.Attribute.StateChecked }, AColor.Black) :
-				titleColor.ToAndroid().ToArgb();
-
-			var defaultColor = unselectedColor.IsDefault ?
-				_defaultList.GetColorForState(new int[0], AColor.Black) :
-				unselectedColor.ToAndroid().ToArgb();
-
-			var colors = new[] { disabledInt, checkedInt, defaultColor };
-
-			return new ColorStateList(states, colors);
 		}
 
 		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)

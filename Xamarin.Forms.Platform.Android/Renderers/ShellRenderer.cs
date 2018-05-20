@@ -102,6 +102,21 @@ namespace Xamarin.Forms.Platform.Android
 			return CreateTrackerForToolbar(toolbar);
 		}
 
+		IShellToolbarAppearanceTracker IShellContext.CreateToolbarAppearanceTracker()
+		{
+			return CreateToolbarAppearanceTracker();
+		}
+
+		IShellTabLayoutAppearanceTracker IShellContext.CreateTabLayoutAppearanceTracker(ShellItem shellItem)
+		{
+			return CreateTabLayoutAppearanceTracker(shellItem);
+		}
+
+		IShellBottomNavViewAppearanceTracker IShellContext.CreateBottomNavViewAppearanceTracker(ShellItem shellItem)
+		{
+			return CreateBottomNavViewAppearanceTracker(shellItem);
+		}
+
 		#endregion IShellContext
 
 		#region IAppearanceObserver
@@ -113,10 +128,13 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IAppearanceObserver
 
-		private bool _disposed = false;
+		public static readonly Color DefaultBackgroundColor = Color.FromRgb(33, 150, 243);
+		public static readonly Color DefaultForegroundColor = Color.White;
+		public static readonly Color DefaultTitleColor = Color.White;
+		public static readonly Color DefaultUnselectedColor = Color.FromRgba(255, 255, 255, 180);
 
+		private bool _disposed;
 		private IShellFlyoutRenderer _flyoutRenderer;
-
 		private FrameLayout _frameLayout;
 
 		public ShellRenderer(Context context)
@@ -158,6 +176,21 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)
 		{
 			return new ShellToolbarTracker(this, toolbar, ((IShellContext)this).CurrentDrawerLayout);
+		}
+
+		protected virtual IShellToolbarAppearanceTracker CreateToolbarAppearanceTracker()
+		{
+			return new ShellToolbarAppearanceTracker(this);
+		}
+
+		protected virtual IShellTabLayoutAppearanceTracker CreateTabLayoutAppearanceTracker(ShellItem shellItem)
+		{
+			return new ShellTabLayoutAppearanceTracker(this);
+		}
+
+		protected virtual IShellBottomNavViewAppearanceTracker CreateBottomNavViewAppearanceTracker(ShellItem shellItem)
+		{
+			return new ShellBottomNavViewAppearanceTracker(this, shellItem);
 		}
 
 		protected virtual void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)

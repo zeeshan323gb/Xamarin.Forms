@@ -1,8 +1,6 @@
-﻿using Android.Graphics.Drawables;
-using Android.OS;
+﻿using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
-using Android.Support.V4.App;
 using Android.Support.V4.View;
 using Android.Support.V4.Widget;
 using Android.Views;
@@ -52,10 +50,10 @@ namespace Xamarin.Forms.Platform.Android
 			if (appearance == null)
 				ResetAppearance();
 			else
-				ApplyAppearance(appearance);
+				SetAppearance(appearance);
 		}
 
-		#endregion
+		#endregion IAppearanceObserver
 
 		#region IOnClickListener
 
@@ -65,14 +63,12 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IOnClickListener
 
-		public static readonly Color DefaultBackgroundColor = Color.FromRgb(33, 150, 243);
-		public static readonly Color DefaultForegroundColor = Color.White;
-		public static readonly Color DefaultTitleColor = Color.White;
-		public static readonly Color DefaultUnselectedColor = Color.FromRgba(255, 255, 255, 180);
-		private AView _rootView;
 		private readonly IShellContext _shellContext;
+		private AView _rootView;
 		private TabLayout _tablayout;
+		private IShellTabLayoutAppearanceTracker _tabLayoutAppearanceTracker;
 		private Toolbar _toolbar;
+		private IShellToolbarAppearanceTracker _toolbarAppearanceTracker;
 		private IShellToolbarTracker _toolbarTracker;
 		private ViewPager _viewPager;
 
@@ -87,11 +83,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		public event EventHandler AnimationFinished;
 
+		Fragment IShellObservableFragment.Fragment => this;
 		public ShellItem ShellItem { get; set; }
 
 		private IShellController ShellController => _shellContext.Shell;
-
-		Fragment IShellObservableFragment.Fragment => this;
 
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
@@ -132,6 +127,9 @@ namespace Xamarin.Forms.Platform.Android
 				_tablayout.Visibility = ViewStates.Gone;
 			}
 
+			_tabLayoutAppearanceTracker = _shellContext.CreateTabLayoutAppearanceTracker(ShellItem);
+			_toolbarAppearanceTracker = _shellContext.CreateToolbarAppearanceTracker();
+
 			HookEvents();
 
 			return _rootView = root;
@@ -146,11 +144,15 @@ namespace Xamarin.Forms.Platform.Android
 			if (_rootView != null)
 			{
 				UnhookEvents();
+				_toolbarAppearanceTracker.Dispose();
+				_tabLayoutAppearanceTracker.Dispose();
 				_viewPager.RemoveOnPageChangeListener(this);
 				_rootView.Dispose();
 				_toolbarTracker.Dispose();
 			}
 
+			_toolbarAppearanceTracker = null;
+			_tabLayoutAppearanceTracker = null;
 			_toolbarTracker = null;
 			_toolbar = null;
 			_tablayout = null;
@@ -158,15 +160,13 @@ namespace Xamarin.Forms.Platform.Android
 			_viewPager = null;
 		}
 
-		protected virtual void ApplyAppearance(ShellAppearance appearance)
+		protected virtual void OnAnimationFinished(EventArgs e)
 		{
-			var foreground = appearance.ForegroundColor;
-			var background = appearance.BackgroundColor;
-			var titleColor = appearance.TitleColor;
-			var unselectedColor = appearance.UnselectedColor;
-
-			SetColors(foreground, background, titleColor, unselectedColor);
+			AnimationFinished?.Invoke(this, e);
 		}
+
+		protected virtual void OnItemsCollectionChagned(object sender, NotifyCollectionChangedEventArgs e) =>
+			_tablayout.Visibility = (ShellItem.Items.Count > 1) ? ViewStates.Visible : ViewStates.Gone;
 
 		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
@@ -186,7 +186,14 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void ResetAppearance()
 		{
-			SetColors(DefaultForegroundColor, DefaultBackgroundColor, DefaultTitleColor, DefaultUnselectedColor);
+			_toolbarAppearanceTracker.ResetAppearance(_toolbar, _toolbarTracker);
+			_tabLayoutAppearanceTracker.ResetAppearance(_tablayout);
+		}
+
+		protected virtual void SetAppearance(ShellAppearance appearance)
+		{
+			_toolbarAppearanceTracker.SetAppearance(_toolbar, _toolbarTracker, appearance);
+			_tabLayoutAppearanceTracker.SetAppearance(_tablayout, appearance);
 		}
 
 		private void HookEvents()
@@ -196,36 +203,11 @@ namespace Xamarin.Forms.Platform.Android
 			ShellItem.PropertyChanged += OnShellItemPropertyChanged;
 		}
 
-		protected virtual void OnItemsCollectionChagned(object sender, NotifyCollectionChangedEventArgs e) =>
-			_tablayout.Visibility = (ShellItem.Items.Count > 1) ? ViewStates.Visible : ViewStates.Gone;
-
-		private void SetColors(Color foreground, Color background, Color title, Color unselected)
-		{
-			var titleArgb = title.ToAndroid(DefaultTitleColor).ToArgb();
-			var unselectedArgb = unselected.ToAndroid(DefaultUnselectedColor).ToArgb();
-
-			_toolbar.SetTitleTextColor(titleArgb);
-			_tablayout.SetTabTextColors(unselectedArgb, titleArgb);
-
-			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(DefaultBackgroundColor)));
-			_tablayout.SetBackground(new ColorDrawable(background.ToAndroid(DefaultBackgroundColor)));
-
-
-			_tablayout.SetSelectedTabIndicatorColor(foreground.ToAndroid(DefaultForegroundColor));
-
-			_toolbarTracker.TintColor = foreground.IsDefault ? DefaultForegroundColor : foreground;
-		}
-
 		private void UnhookEvents()
 		{
 			((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChagned;
 			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
 			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
-		}
-
-		protected virtual void OnAnimationFinished(EventArgs e)
-		{
-			AnimationFinished?.Invoke(this, e);
 		}
 	}
 }
