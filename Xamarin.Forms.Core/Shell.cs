@@ -30,7 +30,10 @@ namespace Xamarin.Forms
 			BindableProperty.CreateAttached("SetPaddingInsets", typeof(bool), typeof(Shell), false);
 
 		public static readonly BindableProperty TabBarVisibleProperty =
-							BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
+			BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
+
+		public static readonly BindableProperty TitleViewProperty =
+			BindableProperty.CreateAttached("TitleView", typeof(View), typeof(Shell), null);
 
 		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj) => (BackButtonBehavior)obj.GetValue(BackButtonBehaviorProperty);
 
@@ -44,6 +47,8 @@ namespace Xamarin.Forms
 
 		public static bool GetTabBarVisible(BindableObject obj) => (bool)obj.GetValue(TabBarVisibleProperty);
 
+		public static View GetTitleView(BindableObject obj) => (View)obj.GetValue(TitleViewProperty);
+
 		public static void SetBackButtonBehavior(BindableObject obj, BackButtonBehavior behavior) => obj.SetValue(BackButtonBehaviorProperty, behavior);
 
 		public static void SetFlyoutBehavior(BindableObject obj, FlyoutBehavior value) => obj.SetValue(FlyoutBehaviorProperty, value);
@@ -55,6 +60,8 @@ namespace Xamarin.Forms
 		public static void SetSetPaddingInsets(BindableObject obj, bool value) => obj.SetValue(SetPaddingInsetsProperty, value);
 
 		public static void SetTabBarVisible(BindableObject obj, bool value) => obj.SetValue(TabBarVisibleProperty, value);
+
+		public static void SetTitleView(BindableObject obj, View value) => obj.SetValue(TitleViewProperty, value);
 
 		private static void OnFlyoutBehaviorChanged(BindableObject bindable, object oldValue, object newValue)
 		{
