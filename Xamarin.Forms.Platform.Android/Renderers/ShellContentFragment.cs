@@ -3,26 +3,55 @@ using Android.Runtime;
 using Android.Support.Design.Widget;
 using Android.Support.V4.App;
 using Android.Support.V4.Widget;
+using Android.Support.V7.Widget;
 using Android.Views;
+using Android.Views.Animations;
 using System;
-using AView = Android.Views.View;
 using AndroidAnimation = Android.Views.Animations.Animation;
 using AnimationSet = Android.Views.Animations.AnimationSet;
-using Android.Views.Animations;
-using Android.Support.V7.Widget;
-using Android.Graphics.Drawables;
+using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
 {
-
 	public class ShellContentFragment : Fragment, AndroidAnimation.IAnimationListener, IShellObservableFragment, IAppearanceObserver
 	{
+		#region IAnimationListener
+
+		void AndroidAnimation.IAnimationListener.OnAnimationEnd(AndroidAnimation animation)
+		{
+			View?.SetLayerType(LayerType.None, null);
+			AnimationFinished?.Invoke(this, EventArgs.Empty);
+		}
+
+		void AndroidAnimation.IAnimationListener.OnAnimationRepeat(AndroidAnimation animation)
+		{
+		}
+
+		void AndroidAnimation.IAnimationListener.OnAnimationStart(AndroidAnimation animation)
+		{
+		}
+
+		#endregion IAnimationListener
+
+		#region IAppearanceObserver
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
+		{
+			if (appearance == null)
+				ResetAppearance();
+			else
+				SetAppearance(appearance);
+		}
+
+		#endregion IAppearanceObserver
+
+		private readonly IShellContext _shellContext;
+		private IShellToolbarAppearanceTracker _appearanceTracker;
 		private Page _page;
 		private IVisualElementRenderer _renderer;
 		private AView _root;
-		private readonly IShellContext _shellContext;
-		private ShellTabItem _shellTabItem;
 		private ShellPageContainer _shellPageContainer;
+		private ShellTabItem _shellTabItem;
 		private Toolbar _toolbar;
 		private IShellToolbarTracker _toolbarTracker;
 
@@ -42,7 +71,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		public Fragment Fragment => this;
 
-
 		public override AndroidAnimation OnCreateAnimation(int transit, bool enter, int nextAnim)
 		{
 			var result = base.OnCreateAnimation(transit, enter, nextAnim);
@@ -54,7 +82,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (result == null)
 				return result;
-			
+
 			// we only want to use a hardware layer for the entering view because its quite likely
 			// the view exiting is animating a button press of some sort. This means lots of GPU
 			// transactions to update the texture.
@@ -99,12 +127,14 @@ namespace Xamarin.Forms.Platform.Android
 			// this is probably not the most ideal way to do that
 			_toolbarTracker.CanNavigateBack = _shellTabItem == null;
 
+			_appearanceTracker = _shellContext.CreateToolbarAppearanceTracker();
+
 			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, _page);
 
 			return _root;
 		}
 
-		// Use OnDestroy instead of OnDestroyView because OnDestroyView will be 
+		// Use OnDestroy instead of OnDestroyView because OnDestroyView will be
 		// called before the animation completes. This causes tons of tiny issues.
 		public override void OnDestroy()
 		{
@@ -114,6 +144,7 @@ namespace Xamarin.Forms.Platform.Android
 			_renderer?.Dispose();
 			_root?.Dispose();
 			_toolbarTracker.Dispose();
+			_appearanceTracker.Dispose();
 
 			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
 
@@ -124,55 +155,15 @@ namespace Xamarin.Forms.Platform.Android
 				_page = null;
 			}
 
+			_appearanceTracker = null;
 			_toolbar = null;
 			_toolbarTracker = null;
 			_root = null;
 			_renderer = null;
 		}
 
-		void AndroidAnimation.IAnimationListener.OnAnimationEnd(AndroidAnimation animation)
-		{
-			View?.SetLayerType(LayerType.None, null);
-			AnimationFinished?.Invoke(this, EventArgs.Empty);
-		}
+		protected virtual void ResetAppearance() => _appearanceTracker.ResetAppearance(_toolbar, _toolbarTracker);
 
-		void AndroidAnimation.IAnimationListener.OnAnimationRepeat(AndroidAnimation animation)
-		{
-		}
-
-		void AndroidAnimation.IAnimationListener.OnAnimationStart(AndroidAnimation animation)
-		{
-		}
-
-		protected virtual void ApplyAppearance(ShellAppearance appearance)
-		{
-			var foreground = appearance.ForegroundColor;
-			var background = appearance.BackgroundColor;
-			var titleColor = appearance.TitleColor;
-
-			SetColors(foreground, background, titleColor);
-		}
-
-		protected virtual void ResetAppearance()
-		{
-			SetColors(ShellTopTabFragment.DefaultForegroundColor, ShellTopTabFragment.DefaultBackgroundColor, ShellTopTabFragment.DefaultTitleColor);
-		}
-
-		private void SetColors(Color foreground, Color background, Color title)
-		{
-			var titleArgb = title.ToAndroid(ShellTopTabFragment.DefaultTitleColor).ToArgb();
-
-			_toolbar.SetTitleTextColor(titleArgb);
-			_toolbar.SetBackground(new ColorDrawable(background.ToAndroid(ShellTopTabFragment.DefaultBackgroundColor)));
-			_toolbarTracker.TintColor = foreground.IsDefault ? ShellTopTabFragment.DefaultForegroundColor : foreground;
-		}
-
-		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
-		{
-			if (appearance == null)
-				ResetAppearance();
-			else
-				ApplyAppearance(appearance);
-		}
+		protected virtual void SetAppearance(ShellAppearance appearance) => _appearanceTracker.SetAppearance(_toolbar, _toolbarTracker, appearance);
 	}
 }

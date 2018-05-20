@@ -128,6 +128,8 @@ namespace Xamarin.Forms.Platform.Android
 						_searchView.SearchConfirmed -= OnSearchConfirmed;
 						_searchView.Dispose();
 					}
+
+					((IShellController)_shellContext.Shell).RemoveFlyoutBehaviorObserver(this);
 				}
 
 				SearchHandler = null;

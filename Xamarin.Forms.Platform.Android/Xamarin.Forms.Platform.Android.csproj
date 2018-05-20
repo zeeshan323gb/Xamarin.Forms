@@ -202,12 +202,15 @@
     <Compile Include="Renderers\IImageSourceHandler.cs" />
     <Compile Include="Renderers\ImageExtensions.cs" />
     <Compile Include="Renderers\ImageLoaderSourceHandler.cs" />
+    <Compile Include="Renderers\IShellBottomNavigationViewAppearanceTracker.cs" />
     <Compile Include="Renderers\IShellContext.cs" />
     <Compile Include="Renderers\IShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\IShellFlyoutRenderer.cs" />
     <Compile Include="Renderers\IShellItemRenderer.cs" />
     <Compile Include="Renderers\IShellObservableFragment.cs" />
     <Compile Include="Renderers\IShellSearchView.cs" />
+    <Compile Include="Renderers\IShellTabLayoutAppearanceTracker.cs" />
+    <Compile Include="Renderers\IShellToolbarAppearanceTracker.cs" />
     <Compile Include="Renderers\IShellToolbarTracker.cs" />
     <Compile Include="Renderers\IToolbarButton.cs" />
     <Compile Include="Renderers\KeyboardExtensions.cs" />
@@ -218,6 +221,7 @@
     <Compile Include="Renderers\MotionEventHelper.cs" />
     <Compile Include="Renderers\PageContainer.cs" />
     <Compile Include="Renderers\ScrollViewContainer.cs" />
+    <Compile Include="Renderers\ShellBottomNavViewAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellBottomTabItemRenderer.cs" />
     <Compile Include="Renderers\ShellContentFragment.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
@@ -230,6 +234,8 @@
     <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\ShellSearchView.cs" />
     <Compile Include="Renderers\ShellSearchViewAdapter.cs" />
+    <Compile Include="Renderers\ShellTabLayoutAppearanceTracker.cs" />
+    <Compile Include="Renderers\ShellToolbarAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellToolbarTracker.cs" />
     <Compile Include="Renderers\ShellTopTabFragment.cs" />
     <Compile Include="Renderers\ShellTopTabItemRenderer.cs" />
