@@ -15,15 +15,20 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty BackButtonBehaviorProperty =
 			BindableProperty.CreateAttached("BackButtonBehavior", typeof(BackButtonBehavior), typeof(Shell), null, BindingMode.OneTime);
+
 		public static readonly BindableProperty FlyoutBehaviorProperty =
-			BindableProperty.CreateAttached("FlyoutBehavior", typeof(FlyoutBehavior), typeof(Shell), FlyoutBehavior.Flyout);
+			BindableProperty.CreateAttached("FlyoutBehavior", typeof(FlyoutBehavior), typeof(Shell), FlyoutBehavior.Flyout,
+				propertyChanged: OnFlyoutBehaviorChanged);
+
 		public static readonly BindableProperty NavBarVisibleProperty =
 							BindableProperty.CreateAttached("NavBarVisible", typeof(bool), typeof(Shell), true);
 
 		public static readonly BindableProperty SearchHandlerProperty =
 			BindableProperty.CreateAttached("SearchHandler", typeof(SearchHandler), typeof(Shell), null, BindingMode.OneTime);
+
 		public static readonly BindableProperty SetPaddingInsetsProperty =
 			BindableProperty.CreateAttached("SetPaddingInsets", typeof(bool), typeof(Shell), false);
+
 		public static readonly BindableProperty TabBarVisibleProperty =
 							BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
 
@@ -50,6 +55,20 @@ namespace Xamarin.Forms
 		public static void SetSetPaddingInsets(BindableObject obj, bool value) => obj.SetValue(SetPaddingInsetsProperty, value);
 
 		public static void SetTabBarVisible(BindableObject obj, bool value) => obj.SetValue(TabBarVisibleProperty, value);
+
+		private static void OnFlyoutBehaviorChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var element = (Element)bindable;
+
+			while (!Application.IsApplicationOrNull(element))
+			{
+				if (element is Shell shell)
+				{
+					shell.NotifyFlyoutBehaviorObservers();
+				}
+				element = element.Parent;
+			}
+		}
 
 		#region Appearance Properties
 
@@ -212,9 +231,7 @@ namespace Xamarin.Forms
 			{
 				// This bubbles up whenever there is an kind of structure/page change
 				// So its also quite useful for checking the FlyoutBehavior conditions
-				var behavior = GetEffectiveFlyoutBehavior();
-				foreach (var observer in _flyoutBehaviorObservers)
-					observer.OnFlyoutBehaviorChanged(behavior);
+				NotifyFlyoutBehaviorObservers();
 			}
 
 			// here we wish to notify every element whose "pivot line" contains the source
@@ -834,6 +851,13 @@ namespace Xamarin.Forms
 				return result;
 			}
 			return null;
+		}
+
+		private void NotifyFlyoutBehaviorObservers()
+		{
+			var behavior = GetEffectiveFlyoutBehavior();
+			foreach (var observer in _flyoutBehaviorObservers)
+				observer.OnFlyoutBehaviorChanged(behavior);
 		}
 
 		private void OnFlyoutHeaderChanged(object oldVal, object newVal)

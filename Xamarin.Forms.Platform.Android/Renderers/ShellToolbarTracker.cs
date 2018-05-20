@@ -17,8 +17,20 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellToolbarTracker : Java.Lang.Object, AView.IOnClickListener, IShellToolbarTracker
+	public class ShellToolbarTracker : Java.Lang.Object, AView.IOnClickListener, IShellToolbarTracker, IFlyoutBehaviorObserver
 	{
+		#region IFlyoutBehaviorObserver
+
+		void IFlyoutBehaviorObserver.OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
+		{
+			if (_flyoutBehavior == behavior)
+				return;
+			_flyoutBehavior = behavior;
+			UpdateLeftBarButtonItem();
+		}
+
+		#endregion IFlyoutBehaviorObserver
+
 		private bool _canNavigateBack;
 		private bool _disposed;
 		private DrawerLayout _drawerLayout;
@@ -27,6 +39,7 @@ namespace Xamarin.Forms.Platform.Android
 		private SearchHandler _searchHandler;
 		private IShellSearchView _searchView;
 		private IShellContext _shellContext;
+		private FlyoutBehavior _flyoutBehavior = FlyoutBehavior.Flyout; //assume teh default
 		private Color _tintColor = Color.Default;
 		private Toolbar _toolbar;
 
@@ -35,6 +48,8 @@ namespace Xamarin.Forms.Platform.Android
 			_shellContext = shellContext ?? throw new ArgumentNullException(nameof(shellContext));
 			_toolbar = toolbar ?? throw new ArgumentNullException(nameof(toolbar));
 			_drawerLayout = drawerLayout ?? throw new ArgumentNullException(nameof(drawerLayout));
+
+			((IShellController)_shellContext.Shell).AddFlyoutBehaviorObserver(this);
 		}
 
 		public bool CanNavigateBack
@@ -233,11 +248,15 @@ namespace Xamarin.Forms.Platform.Android
 					icon.Progress = 1;
 					toolbar.NavigationIcon = icon;
 				}
-				else
+				else if (_flyoutBehavior == FlyoutBehavior.Flyout)
 				{
 					toolbar.NavigationIcon = null;
 					_drawerToggle.DrawerArrowDrawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					_drawerToggle.DrawerIndicatorEnabled = true;
+				}
+				else
+				{
+					_drawerToggle.DrawerIndicatorEnabled = false;
 				}
 				_drawerToggle.SyncState();
 			}
