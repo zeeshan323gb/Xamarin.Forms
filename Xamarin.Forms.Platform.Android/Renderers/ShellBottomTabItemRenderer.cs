@@ -79,6 +79,9 @@ namespace Xamarin.Forms.Platform.Android
 				_bottomView.SetOnNavigationItemSelectedListener(null);
 				_bottomView.Dispose();
 				_bottomView = null;
+
+				_appearanceTracker?.Dispose();
+				_appearanceTracker = null;
 			}
 
 			((IShellController)ShellContext.Shell).RemoveAppearanceObserver(this);
@@ -86,10 +89,7 @@ namespace Xamarin.Forms.Platform.Android
 			base.OnDestroy();
 		}
 
-		protected virtual void SetAppearance(ShellAppearance appearance)
-		{
-			_appearanceTracker.SetAppearance(_bottomView, appearance);
-		}
+		protected virtual void SetAppearance(ShellAppearance appearance) => _appearanceTracker.SetAppearance(_bottomView, appearance);
 
 		protected virtual void ChangeTabItem(ShellTabItem tabItem)
 		{
@@ -232,10 +232,7 @@ namespace Xamarin.Forms.Platform.Android
 			dialog.Dispose();
 		}
 
-		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e)
-		{
-			OnCurrentTabItemChanged();
-		}
+		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e) => OnCurrentTabItemChanged();
 
 		protected override void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
@@ -273,10 +270,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 		}
 
-		protected virtual void ResetAppearance()
-		{
-			_appearanceTracker.ResetAppearance(_bottomView);
-		}
+		protected virtual void ResetAppearance() => _appearanceTracker.ResetAppearance(_bottomView);
 
 		protected virtual void SetupMenu(IMenu menu, int maxBottomItems, ShellItem shellItem)
 		{
@@ -338,10 +332,7 @@ namespace Xamarin.Forms.Platform.Android
 			menuItem.SetIcon(drawable);
 		}
 
-		private void SetupMenu()
-		{
-			SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
-		}
+		private void SetupMenu() => SetupMenu(_bottomView.Menu, _bottomView.MaxItemCount, ShellItem);
 
 		private void UpdateTabBarVisibility()
 		{
