@@ -486,4 +486,8 @@
   <Import Project="..\packages\Xamarin.Firebase.Common.60.1142.1\build\MonoAndroid80\Xamarin.Firebase.Common.targets" Condition="Exists('..\packages\Xamarin.Firebase.Common.60.1142.1\build\MonoAndroid80\Xamarin.Firebase.Common.targets')" />
   <Import Project="..\packages\Xamarin.GooglePlayServices.Base.60.1142.1\build\MonoAndroid80\Xamarin.GooglePlayServices.Base.targets" Condition="Exists('..\packages\Xamarin.GooglePlayServices.Base.60.1142.1\build\MonoAndroid80\Xamarin.GooglePlayServices.Base.targets')" />
   <Import Project="..\packages\Xamarin.Firebase.AppIndexing.60.1142.1\build\MonoAndroid80\Xamarin.Firebase.AppIndexing.targets" Condition="Exists('..\packages\Xamarin.Firebase.AppIndexing.60.1142.1\build\MonoAndroid80\Xamarin.Firebase.AppIndexing.targets')" />
+<<<<<<< HEAD
 </Project>
+=======
+</Project>
+>>>>>>> Update all android support libraries
