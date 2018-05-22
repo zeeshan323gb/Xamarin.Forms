@@ -28,6 +28,7 @@ namespace Xamarin.Forms.Platform.Android
 		#endregion IShellFlyoutRenderer
 
 		#region IDrawerListener
+
 		void IDrawerListener.OnDrawerClosed(AView drawerView)
 		{
 			Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, false);
@@ -45,35 +46,26 @@ namespace Xamarin.Forms.Platform.Android
 		void IDrawerListener.OnDrawerStateChanged(int newState)
 		{
 		}
+
 		#endregion IDrawerListener
 
 		#region IFlyoutBehaviorObserver
 
 		void IFlyoutBehaviorObserver.OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
 		{
-			switch (behavior)
-			{
-				case FlyoutBehavior.Disabled:
-					CloseDrawers();
-					SetDrawerLockMode(LockModeLockedClosed);
-					break;
-				case FlyoutBehavior.Flyout:
-					SetDrawerLockMode(LockModeUnlocked);
-					break;
-				case FlyoutBehavior.Locked:
-					SetDrawerLockMode(LockModeLockedOpen);
-					break;
-			}
+			UpdateDrawerLockMode(behavior);
 		}
 
 		#endregion IFlyoutBehaviorObserver
 
+		private const uint DefaultScrimColor = 0x99000000;
 		private readonly IShellContext _shellContext;
-
 		private AView _content;
 		private IShellFlyoutContentRenderer _flyoutContent;
+		private int _flyoutWidth;
+		private int _currentLockMode;
 
-		public ShellFlyoutRenderer(IShellContext shellContext, Context context) : base (context)
+		public ShellFlyoutRenderer(IShellContext shellContext, Context context) : base(context)
 		{
 			_shellContext = shellContext;
 
@@ -82,16 +74,14 @@ namespace Xamarin.Forms.Platform.Android
 
 		private Shell Shell => _shellContext.Shell;
 
-		protected virtual void OnShellPropertyChanged(object sender, PropertyChangedEventArgs e)
+		public override bool OnInterceptTouchEvent(MotionEvent ev)
 		{
-			if (e.PropertyName == Shell.FlyoutIsPresentedProperty.PropertyName)
-			{
-				var presented = Shell.FlyoutIsPresented;
-				if (presented)
-					OpenDrawer(_flyoutContent.AndroidView, true);
-				else
-					CloseDrawers();
-			}
+			bool result = base.OnInterceptTouchEvent(ev);
+
+			if (GetDrawerLockMode(_flyoutContent.AndroidView) == LockModeLockedOpen)
+				return false;
+
+			return result;
 		}
 
 		protected virtual void AttachFlyout(IShellContext context, AView content)
@@ -100,7 +90,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			_flyoutContent = context.CreateShellFlyoutContentRenderer();
 
-			// Depending on what you read the right edge of the drawer should be 56dp
+			// Depending on what you read the right edge of the drawer should be Max(56dp, actionBarSize)
 			// from the right edge of the screen. Fine. Well except that doesn't account
 			// for landscape devices, in which case its still, according to design
 			// documents from google 56dp, except google doesn't do that with their own apps.
@@ -108,8 +98,8 @@ namespace Xamarin.Forms.Platform.Android
 			// this isn't what DrawerLayout does by default.
 
 			// Oh then there is this rule about how wide it should be at most. It should not
-			// at least according to docs be more than 6 * actionBarSize wide. Again non of 
-			// this is about landscape devices and google does not perfectly follow these 
+			// at least according to docs be more than 6 * actionBarSize wide. Again non of
+			// this is about landscape devices and google does not perfectly follow these
 			// rules... so we'll kind of just... do our best.
 
 			var metrics = Context.Resources.DisplayMetrics;
@@ -126,6 +116,8 @@ namespace Xamarin.Forms.Platform.Android
 			var maxWidth = actionBarHeight * 6;
 			width = Math.Min(width, maxWidth);
 
+			_flyoutWidth = width;
+
 			_flyoutContent.AndroidView.LayoutParameters =
 				new LayoutParams(width, LP.MatchParent) { Gravity = (int)GravityFlags.Start };
 
@@ -135,6 +127,50 @@ namespace Xamarin.Forms.Platform.Android
 			AddDrawerListener(this);
 
 			((IShellController)context.Shell).AddFlyoutBehaviorObserver(this);
+		}
+
+		protected virtual void OnShellPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == Shell.FlyoutIsPresentedProperty.PropertyName)
+			{
+				var presented = Shell.FlyoutIsPresented;
+				if (presented)
+					OpenDrawer(_flyoutContent.AndroidView, true);
+				else
+					CloseDrawers();
+			}
+		}
+
+		protected virtual void UpdateDrawerLockMode(FlyoutBehavior behavior)
+		{
+			switch (behavior)
+			{
+				case FlyoutBehavior.Disabled:
+					CloseDrawers();
+					Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, false);
+					_currentLockMode = LockModeLockedClosed;
+					SetDrawerLockMode(_currentLockMode);
+					_content.SetPadding(0, 0, 0, 0);
+					break;
+
+				case FlyoutBehavior.Flyout:
+					_currentLockMode = LockModeUnlocked;
+					SetDrawerLockMode(_currentLockMode);
+					_content.SetPadding(0, 0, 0, 0);
+					break;
+
+				case FlyoutBehavior.Locked:
+					Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, true);
+					_currentLockMode = LockModeLockedOpen;
+					SetDrawerLockMode(_currentLockMode);
+					_content.SetPadding(_flyoutWidth, 0, 0, 0);
+					break;
+			}
+
+			unchecked
+			{
+				SetScrimColor(behavior == FlyoutBehavior.Locked ? Color.Transparent.ToAndroid() : (int)DefaultScrimColor);
+			}
 		}
 	}
 }
