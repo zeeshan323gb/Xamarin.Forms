@@ -163,6 +163,17 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => Shell.SetFlyoutBehavior(this, FlyoutBehavior.Locked)),
 				0, 11);
 
+			grid.Children.Add(MakeButton("Add TitleView",
+					() => Shell.SetTitleView(this, new Label {
+						BackgroundColor = Color.Purple,
+						Text = "TITLE VIEW"
+					})),
+				1, 11);
+
+			grid.Children.Add(MakeButton("Null TitleView",
+					() => Shell.SetTitleView(this, null)),
+				2, 11);
+
 			Content = new ScrollView { Content = grid };
 		}
 

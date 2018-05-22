@@ -84,6 +84,7 @@ namespace Xamarin.Forms.Platform.Android
 				view.Platform = _shellContext.Shell.Platform;
 
 				result = new ContainerView(parent.Context, view);
+				result.MatchWidth = true;
 			}
 
 			return result;

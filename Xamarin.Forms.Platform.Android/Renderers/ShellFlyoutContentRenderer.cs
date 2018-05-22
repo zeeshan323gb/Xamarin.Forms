@@ -34,7 +34,10 @@ namespace Xamarin.Forms.Platform.Android
 
 			BuildMenu();
 
-			_headerView = new ContainerView(context, ((IShellController)shellContext.Shell).FlyoutHeader);
+			_headerView = new ContainerView(context, ((IShellController)shellContext.Shell).FlyoutHeader)
+			{
+				MatchWidth = true
+			};
 
 			AddHeaderView(_headerView);
 		}

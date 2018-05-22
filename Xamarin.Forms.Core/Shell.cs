@@ -485,11 +485,6 @@ namespace Xamarin.Forms
 			}
 		}
 
-		public bool AddToBackStack(ShellNavigationState state)
-		{
-			throw new NotImplementedException();
-		}
-
 		public async Task GoToAsync(ShellNavigationState state, bool animate = true)
 		{
 			// FIXME: This should not be none, we need to compute the delta and set flags correctly
