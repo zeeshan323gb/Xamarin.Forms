@@ -1,8 +1,10 @@
 ﻿using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
+using Android.Runtime;
 using Android.Support.V4.App;
 using Android.Support.V4.Widget;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using System;
@@ -14,6 +16,41 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
+	public class CustomFrameLayout : FrameLayout
+	{
+		public CustomFrameLayout(Context context) : base(context)
+		{
+		}
+
+		public CustomFrameLayout(Context context, IAttributeSet attrs) : base(context, attrs)
+		{
+		}
+
+		public CustomFrameLayout(Context context, IAttributeSet attrs, int defStyleAttr) : base(context, attrs, defStyleAttr)
+		{
+		}
+
+		public CustomFrameLayout(Context context, IAttributeSet attrs, int defStyleAttr, int defStyleRes) : base(context, attrs, defStyleAttr, defStyleRes)
+		{
+		}
+
+		protected CustomFrameLayout(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+		{
+		}
+
+		public override WindowInsets OnApplyWindowInsets(WindowInsets insets)
+		{
+			var leftPadding = PaddingLeft;
+
+			var result = base.OnApplyWindowInsets(insets);
+
+			SetPadding(leftPadding, PaddingTop, PaddingRight, PaddingBottom);
+
+			return result;
+		}
+	}
+
+
 	public class ShellRenderer : IVisualElementRenderer, IShellContext, IAppearanceObserver
 	{
 		#region IVisualElementRenderer
@@ -206,7 +243,7 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual void OnElementSet(Shell shell)
 		{
 			_flyoutRenderer = CreateShellFlyoutRenderer();
-			_frameLayout = new FrameLayout(AndroidContext)
+			_frameLayout = new CustomFrameLayout(AndroidContext)
 			{
 				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
 				Id = Platform.GenerateViewId(),

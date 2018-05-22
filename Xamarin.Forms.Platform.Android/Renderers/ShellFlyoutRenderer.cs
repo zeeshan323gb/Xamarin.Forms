@@ -150,7 +150,7 @@ namespace Xamarin.Forms.Platform.Android
 					Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, false);
 					_currentLockMode = LockModeLockedClosed;
 					SetDrawerLockMode(_currentLockMode);
-					_content.SetPadding(0, _content.PaddingTop, 0, 0);
+					_content.SetPadding(0, _content.PaddingTop, _content.PaddingRight, _content.PaddingBottom);
 					break;
 
 				case FlyoutBehavior.Flyout:
@@ -163,7 +163,7 @@ namespace Xamarin.Forms.Platform.Android
 					Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, true);
 					_currentLockMode = LockModeLockedOpen;
 					SetDrawerLockMode(_currentLockMode);
-					_content.SetPadding(_flyoutWidth, _content.PaddingTop, 0, 0);
+					_content.SetPadding(_flyoutWidth, _content.PaddingTop, _content.PaddingRight, _content.PaddingBottom);
 					break;
 			}
 
