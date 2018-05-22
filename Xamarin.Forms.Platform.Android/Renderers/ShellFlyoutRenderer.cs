@@ -107,6 +107,11 @@ namespace Xamarin.Forms.Platform.Android
 			// So we are just going to go ahead and do what google does here even though
 			// this isn't what DrawerLayout does by default.
 
+			// Oh then there is this rule about how wide it should be at most. It should not
+			// at least according to docs be more than 6 * actionBarSize wide. Again non of 
+			// this is about landscape devices and google does not perfectly follow these 
+			// rules... so we'll kind of just... do our best.
+
 			var metrics = Context.Resources.DisplayMetrics;
 			var width = Math.Min(metrics.WidthPixels, metrics.HeightPixels);
 
@@ -117,6 +122,9 @@ namespace Xamarin.Forms.Platform.Android
 				actionBarHeight = TypedValue.ComplexToDimensionPixelSize(tv.Data, metrics);
 			}
 			width -= actionBarHeight;
+
+			var maxWidth = actionBarHeight * 6;
+			width = Math.Min(width, maxWidth);
 
 			_flyoutContent.AndroidView.LayoutParameters =
 				new LayoutParams(width, LP.MatchParent) { Gravity = (int)GravityFlags.Start };
