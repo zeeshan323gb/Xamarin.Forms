@@ -33,7 +33,7 @@ namespace Xamarin.Forms
 			BindableProperty.CreateAttached("TabBarVisible", typeof(bool), typeof(Shell), true);
 
 		public static readonly BindableProperty TitleViewProperty =
-			BindableProperty.CreateAttached("TitleView", typeof(View), typeof(Shell), null);
+			BindableProperty.CreateAttached("TitleView", typeof(View), typeof(Shell), null, propertyChanged: OnTitleViewChanged);
 
 		public static BackButtonBehavior GetBackButtonBehavior(BindableObject obj) => (BackButtonBehavior)obj.GetValue(BackButtonBehaviorProperty);
 
@@ -741,6 +741,22 @@ namespace Xamarin.Forms
 			var shell = (Shell)bindable;
 			((IShellController)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
+		}
+
+		private static void OnTitleViewChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var owner = bindable as Element;
+			if (owner == null)
+				return;
+
+			var oldView = (View)oldValue;
+			var newView = (View)newValue;
+
+			if (oldView != null)
+				oldView.Parent = null;
+
+			if (newView != null)
+				newView.Parent = owner;
 		}
 
 		private static void OnFlyoutHeaderChanged(BindableObject bindable, object oldValue, object newValue)

@@ -166,6 +166,7 @@ namespace Xamarin.Forms.Controls.XamStore
 			grid.Children.Add(MakeButton("Add TitleView",
 					() => Shell.SetTitleView(this, new Label {
 						BackgroundColor = Color.Purple,
+						Margin = new Thickness(5, 10),
 						Text = "TITLE VIEW"
 					})),
 				1, 11);
