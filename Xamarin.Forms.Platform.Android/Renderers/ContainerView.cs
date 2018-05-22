@@ -12,16 +12,6 @@ namespace Xamarin.Forms.Platform.Android
 		private IVisualElementRenderer _renderer;
 		private View _view;
 
-		public View View
-		{
-			get { return _view; }
-			set
-			{
-				_view = value;
-				OnViewSet(value);
-			}
-		}
-
 		public ContainerView(Context context, View view) : base(context)
 		{
 			_context = context;
@@ -40,35 +30,18 @@ namespace Xamarin.Forms.Platform.Android
 		{
 		}
 
-		protected virtual void OnViewSet(View view)
+		public bool MatchHeight { get; set; }
+
+		public bool MatchWidth { get; set; }
+
+		public View View
 		{
-			_renderer = Platform.CreateRenderer(view, Context);
-			Platform.SetRenderer(view, _renderer);
-
-			AddView(_renderer.View);
-		}
-
-		protected override void OnLayout(bool changed, int l, int t, int r, int b)
-		{
-			if (_renderer == null)
-				return;
-
-			var width = _context.FromPixels(r - l);
-			var height = _context.FromPixels(b - t);
-
-			View.Layout(new Rectangle (0, 0, width, height));
-			_renderer.UpdateLayout();
-		}
-
-		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)
-		{
-			_renderer.View.Measure(widthMeasureSpec, heightMeasureSpec);
-
-			var width = MeasureSpecFactory.GetSize(widthMeasureSpec);
-
-			var sizeReq = View.Measure(_context.FromPixels(width), double.PositiveInfinity);
-
-			SetMeasuredDimension(width, (int)_context.ToPixels(sizeReq.Request.Height));
+			get { return _view; }
+			set
+			{
+				_view = value;
+				OnViewSet(value);
+			}
 		}
 
 		protected override void Dispose(bool disposing)
@@ -82,6 +55,43 @@ namespace Xamarin.Forms.Platform.Android
 				_view = null;
 				_context = null;
 			}
+		}
+
+		protected override void OnLayout(bool changed, int l, int t, int r, int b)
+		{
+			if (_renderer == null)
+				return;
+
+			var width = _context.FromPixels(r - l);
+			var height = _context.FromPixels(b - t);
+
+			View.Layout(new Rectangle(0, 0, width, height));
+			_renderer.UpdateLayout();
+		}
+
+		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)
+		{
+			// chain on down
+			_renderer.View.Measure(widthMeasureSpec, heightMeasureSpec);
+
+			var width = MeasureSpecFactory.GetSize(widthMeasureSpec);
+			var height = MeasureSpecFactory.GetSize(heightMeasureSpec);
+
+			var measureWidth = width > 0 ? _context.FromPixels(width) : double.PositiveInfinity;
+			var measureHeight = height > 0 ? _context.FromPixels(height) : double.PositiveInfinity;
+
+			var sizeReq = View.Measure(measureWidth, measureHeight);
+
+			SetMeasuredDimension((MatchWidth && width != 0) ? width : (int)_context.ToPixels(sizeReq.Request.Width),
+								 (MatchHeight && height != 0) ? height : (int)_context.ToPixels(sizeReq.Request.Height));
+		}
+
+		protected virtual void OnViewSet(View view)
+		{
+			_renderer = Platform.CreateRenderer(view, Context);
+			Platform.SetRenderer(view, _renderer);
+
+			AddView(_renderer.View);
 		}
 	}
 }

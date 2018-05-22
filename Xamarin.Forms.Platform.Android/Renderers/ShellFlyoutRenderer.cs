@@ -150,20 +150,20 @@ namespace Xamarin.Forms.Platform.Android
 					Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, false);
 					_currentLockMode = LockModeLockedClosed;
 					SetDrawerLockMode(_currentLockMode);
-					_content.SetPadding(0, 0, 0, 0);
+					_content.SetPadding(0, _content.PaddingTop, 0, 0);
 					break;
 
 				case FlyoutBehavior.Flyout:
 					_currentLockMode = LockModeUnlocked;
 					SetDrawerLockMode(_currentLockMode);
-					_content.SetPadding(0, 0, 0, 0);
+					_content.SetPadding(0, _content.PaddingTop, 0, 0);
 					break;
 
 				case FlyoutBehavior.Locked:
 					Shell.SetValueFromRenderer(Shell.FlyoutIsPresentedProperty, true);
 					_currentLockMode = LockModeLockedOpen;
 					SetDrawerLockMode(_currentLockMode);
-					_content.SetPadding(_flyoutWidth, 0, 0, 0);
+					_content.SetPadding(_flyoutWidth, _content.PaddingTop, 0, 0);
 					break;
 			}
 

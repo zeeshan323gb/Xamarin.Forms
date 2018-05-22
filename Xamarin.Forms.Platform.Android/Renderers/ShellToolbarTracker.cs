@@ -35,11 +35,13 @@ namespace Xamarin.Forms.Platform.Android
 		private bool _disposed;
 		private DrawerLayout _drawerLayout;
 		private ActionBarDrawerToggle _drawerToggle;
+		private FlyoutBehavior _flyoutBehavior = FlyoutBehavior.Flyout;
 		private Page _page;
 		private SearchHandler _searchHandler;
 		private IShellSearchView _searchView;
+		private ContainerView _titleViewContainer;
 		private IShellContext _shellContext;
-		private FlyoutBehavior _flyoutBehavior = FlyoutBehavior.Flyout; //assume teh default
+		//assume teh default
 		private Color _tintColor = Color.Default;
 		private Toolbar _toolbar;
 
@@ -120,6 +122,8 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				if (disposing)
 				{
+					UpdateTitleView(_shellContext.AndroidContext, _toolbar, null);
+
 					_drawerToggle.Dispose();
 					if (_searchView != null)
 					{
@@ -170,6 +174,7 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateLeftBarButtonItem();
 				UpdateToolbarItems();
 				UpdateNavBarVisible(_toolbar, newPage);
+				UpdateTitleView();
 			}
 		}
 
@@ -183,6 +188,8 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateNavBarVisible(_toolbar, Page);
 			else if (e.PropertyName == Shell.BackButtonBehaviorProperty.PropertyName)
 				UpdateLeftBarButtonItem();
+			else if (e.PropertyName == Shell.TitleViewProperty.PropertyName)
+				UpdateTitleView();
 		}
 
 		protected virtual void OnPageToolbarItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -290,6 +297,35 @@ namespace Xamarin.Forms.Platform.Android
 			_toolbar.Title = page.Title;
 		}
 
+		protected virtual void UpdateTitleView(Context context, Toolbar toolbar, View titleView)
+		{
+			if (titleView == null)
+			{
+				if (_titleViewContainer != null)
+				{
+					_titleViewContainer.RemoveFromParent();
+					_titleViewContainer.Dispose();
+					_titleViewContainer = null;
+				}
+			}
+			else
+			{
+				// FIXME
+				titleView.Parent = _shellContext.Shell;
+				_titleViewContainer = new ContainerView(context, titleView);
+				_titleViewContainer.MatchHeight = _titleViewContainer.MatchWidth = true;
+				_titleViewContainer.LayoutParameters = new Toolbar.LayoutParams(LP.MatchParent, LP.MatchParent)
+				{
+					LeftMargin = (int)context.ToPixels(titleView.Margin.Left),
+					TopMargin = (int)context.ToPixels(titleView.Margin.Top),
+					RightMargin = (int)context.ToPixels(titleView.Margin.Right),
+					BottomMargin = (int)context.ToPixels(titleView.Margin.Bottom)
+				};
+
+				_toolbar.AddView(_titleViewContainer);
+			}
+		}
+
 		protected virtual void UpdateToolbarItems(Toolbar toolbar, Page page)
 		{
 			var menu = toolbar.Menu;
@@ -377,6 +413,11 @@ namespace Xamarin.Forms.Platform.Android
 		private void UpdateLeftBarButtonItem()
 		{
 			UpdateLeftBarButtonItem(_shellContext.AndroidContext, _toolbar, _drawerLayout, Page);
+		}
+
+		private void UpdateTitleView()
+		{
+			UpdateTitleView(_shellContext.AndroidContext, _toolbar, Shell.GetTitleView(Page));
 		}
 
 		private void UpdateToolbarItems()

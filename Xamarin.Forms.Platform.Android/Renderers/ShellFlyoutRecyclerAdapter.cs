@@ -85,6 +85,7 @@ namespace Xamarin.Forms.Platform.Android
 			linearLayout.AddView(bar);
 
 			var container = new ContainerView(parent.Context, content);
+			container.MatchWidth = true;
 			container.LayoutParameters = new LP(LP.MatchParent, LP.WrapContent);
 			linearLayout.AddView(container);
 

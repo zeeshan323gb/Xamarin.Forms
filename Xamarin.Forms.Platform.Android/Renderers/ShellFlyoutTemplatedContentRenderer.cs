@@ -46,7 +46,10 @@ namespace Xamarin.Forms.Platform.Android
 			var recycler = coordinator.FindViewById<RecyclerView>(Resource.Id.flyoutcontent_recycler);
 			var appBar = coordinator.FindViewById<AppBarLayout>(Resource.Id.flyoutcontent_appbar);
 
-			_headerView = new ContainerView(context, ((IShellController)shellContext.Shell).FlyoutHeader);
+			_headerView = new ContainerView(context, ((IShellController)shellContext.Shell).FlyoutHeader)
+			{
+				MatchWidth = true
+			};
 			_headerView.LayoutParameters = new AppBarLayout.LayoutParams(LP.MatchParent, LP.WrapContent)
 			{
 				ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagScroll
