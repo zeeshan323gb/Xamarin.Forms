@@ -40,6 +40,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override WindowInsets OnApplyWindowInsets(WindowInsets insets)
 		{
+			// We need to make sure we retain left padding.
+			// Failure to do so will result in the padding being wrong if you set FlyoutBehavior to Locked
+			// and then rotate the device.
+
 			var leftPadding = PaddingLeft;
 
 			var result = base.OnApplyWindowInsets(insets);
