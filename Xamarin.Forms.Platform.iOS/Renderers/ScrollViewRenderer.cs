@@ -134,10 +134,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void UpdateOverrideArea()
 		{
-			var newBounds = AdjustedContentInset.InsetRect(Bounds).ToRectangle();
-			newBounds.X = 0;
-			newBounds.Y = 0;
-			((ScrollView)Element).LayoutAreaOverride = newBounds;
+			if (Forms.IsiOS11OrNewer)
+			{
+				var newBounds = AdjustedContentInset.InsetRect(Bounds).ToRectangle();
+				newBounds.X = 0;
+				newBounds.Y = 0;
+				((ScrollView)Element).LayoutAreaOverride = newBounds;
+			}
 		}
 
 		public override void LayoutSubviews()
