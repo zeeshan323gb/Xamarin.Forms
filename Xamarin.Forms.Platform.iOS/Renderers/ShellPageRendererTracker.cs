@@ -252,6 +252,13 @@ namespace Xamarin.Forms.Platform.iOS
 				_searchController.SearchBar.ShowsBookmarkButton = _searchHandler.ClearPlaceholderEnabled;
 			else if (e.PropertyName == SearchHandler.SearchBoxVisibilityProperty.PropertyName)
 				UpdateSearchVisibility(_searchController);
+			else if (e.PropertyName == SearchHandler.IsSearchEnabledProperty.PropertyName)
+				UpdateSearchIsEnabled(_searchController);
+		}
+
+		protected virtual void UpdateSearchIsEnabled(UISearchController searchController)
+		{
+			searchController.SearchBar.UserInteractionEnabled = SearchHandler.IsSearchEnabled;
 		}
 
 		protected virtual void UpdateSearchVisibility(UISearchController searchController)
@@ -311,7 +318,7 @@ namespace Xamarin.Forms.Platform.iOS
 			searchBar.BookmarkButtonClicked += BookmarkButtonClicked;
 
 			searchBar.Placeholder = SearchHandler.Placeholder;
-			searchBar.UserInteractionEnabled = SearchHandler.IsSearchEnabled;
+			UpdateSearchIsEnabled(_searchController);
 			searchBar.SearchButtonClicked += SearchButtonClicked;
 			if (Forms.IsiOS11OrNewer)
 				NavigationItem.HidesSearchBarWhenScrolling = visibility == SearchBoxVisiblity.Collapsable;
