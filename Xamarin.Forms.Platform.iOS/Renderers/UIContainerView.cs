@@ -1,4 +1,5 @@
-﻿using UIKit;
+﻿using CoreGraphics;
+using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
@@ -6,6 +7,7 @@ namespace Xamarin.Forms.Platform.iOS
 	{
 		private readonly View _view;
 		private IVisualElementRenderer _renderer;
+		private bool _disposed;
 
 		public UIContainerView(View view)
 		{
@@ -20,6 +22,20 @@ namespace Xamarin.Forms.Platform.iOS
 		public override void LayoutSubviews()
 		{
 			_view.Layout(Bounds.ToRectangle());
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && !_disposed)
+			{
+				_renderer?.Dispose();
+				_renderer = null;
+				_view.ClearValue(Platform.RendererProperty);
+
+				_disposed = true;
+			}
+
+			base.Dispose(disposing);
 		}
 	}
 }

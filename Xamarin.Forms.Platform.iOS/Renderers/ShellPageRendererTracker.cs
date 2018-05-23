@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreGraphics;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -63,6 +64,10 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				SearchHandler = Shell.GetSearchHandler(Page);
 			}
+			else if (e.PropertyName == Shell.TitleViewProperty.PropertyName)
+			{
+				UpdateTitleView();
+			}
 		}
 
 		protected virtual async void OnRendererSet()
@@ -72,7 +77,36 @@ namespace Xamarin.Forms.Platform.iOS
 			((INotifyCollectionChanged)Page.ToolbarItems).CollectionChanged += OnToolbarItemsChanged;
 			SetBackButtonBehavior(Shell.GetBackButtonBehavior(Page));
 			SearchHandler = Shell.GetSearchHandler(Page);
+			UpdateTitleView();
 			await UpdateToolbarItems().ConfigureAwait(false);
+		}
+
+		protected virtual void UpdateTitleView()
+		{
+			var titleView = Shell.GetTitleView(Page);
+
+			if (titleView == null)
+			{
+				var view = NavigationItem.TitleView;
+				NavigationItem.TitleView = null;
+				view?.Dispose();
+			}
+			else
+			{
+				var view = new TitleViewContainer(titleView);
+
+				if (Forms.IsiOS11OrNewer)
+				{
+					view.TranslatesAutoresizingMaskIntoConstraints = false;
+				}
+				else
+				{
+					view.TranslatesAutoresizingMaskIntoConstraints = true;
+					view.AutoresizingMask = UIViewAutoresizing.FlexibleHeight | UIViewAutoresizing.FlexibleWidth;
+				}
+
+				NavigationItem.TitleView = view;
+			}
 		}
 
 		protected virtual async Task UpdateToolbarItems()
@@ -151,6 +185,35 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		public class TitleViewContainer : UIContainerView
+		{
+			public TitleViewContainer(View view) : base(view)
+			{
+			}
+
+			public override CGRect Frame
+			{
+				get => base.Frame;
+				set
+				{
+					if (!Forms.IsiOS11OrNewer && Superview != null)
+					{
+						value.Y = Superview.Bounds.Y;
+						value.Height = Superview.Bounds.Height;
+					}
+
+					base.Frame = value;
+				}
+			}
+
+			public override CGSize IntrinsicContentSize => UILayoutFittingExpandedSize;
+
+			public override CGSize SizeThatFits(CGSize size)
+			{
+				return size;
+			}
+		}
+
 		#region SearchHandler
 
 		private SearchHandler SearchHandler
@@ -207,11 +270,14 @@ namespace Xamarin.Forms.Platform.iOS
 			else if (visibility == SearchBoxVisiblity.Collapsable || visibility == SearchBoxVisiblity.Expanded)
 			{
 				if (Forms.IsiOS11OrNewer)
+				{
 					NavigationItem.SearchController = _searchController;
+					NavigationItem.HidesSearchBarWhenScrolling = visibility == SearchBoxVisiblity.Collapsable;
+				}
 				else
+				{
 					NavigationItem.TitleView = _searchController.SearchBar;
-
-				NavigationItem.HidesSearchBarWhenScrolling = visibility == SearchBoxVisiblity.Collapsable;
+				}
 			}
 		}
 
@@ -247,7 +313,8 @@ namespace Xamarin.Forms.Platform.iOS
 			searchBar.Placeholder = SearchHandler.Placeholder;
 			searchBar.UserInteractionEnabled = SearchHandler.IsSearchEnabled;
 			searchBar.SearchButtonClicked += SearchButtonClicked;
-			NavigationItem.HidesSearchBarWhenScrolling = visibility == SearchBoxVisiblity.Collapsable;
+			if (Forms.IsiOS11OrNewer)
+				NavigationItem.HidesSearchBarWhenScrolling = visibility == SearchBoxVisiblity.Collapsable;
 
 			var icon = SearchHandler.QueryIcon;
 			if (icon != null)
