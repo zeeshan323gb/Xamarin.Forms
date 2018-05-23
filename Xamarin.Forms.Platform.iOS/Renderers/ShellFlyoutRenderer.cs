@@ -6,7 +6,7 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellFlyoutRenderer : UIViewController, IShellFlyoutRenderer
+	public class ShellFlyoutRenderer : UIViewController, IShellFlyoutRenderer, IFlyoutBehaviorObserver
 	{
 		#region IShellFlyoutRenderer
 
@@ -25,7 +25,7 @@ namespace Xamarin.Forms.Platform.iOS
 			PanGestureRecognizer = new UIPanGestureRecognizer(HandlePanGesture);
 			PanGestureRecognizer.ShouldReceiveTouch += (sender, touch) =>
 			{
-				if (!context.AllowFlyoutGesture)
+				if (!context.AllowFlyoutGesture || _flyoutBehavior != FlyoutBehavior.Flyout)
 					return false;
 				var view = View;
 				CGPoint loc = touch.LocationInView(View);
@@ -48,6 +48,7 @@ namespace Xamarin.Forms.Platform.iOS
 		private bool _disposed;
 		private bool _gestureActive;
 		private bool _isOpen;
+		private FlyoutBehavior _flyoutBehavior;
 
 		public UIViewAnimationCurve AnimationCurve { get; set; } = UIViewAnimationCurve.EaseOut;
 
@@ -60,8 +61,6 @@ namespace Xamarin.Forms.Platform.iOS
 		private UIViewController Detail { get; set; }
 
 		private IShellFlyoutContentRenderer Flyout { get; set; }
-
-		private nfloat FlyoutWidth => (nfloat)(Math.Min(View.Frame.Width, View.Frame.Height) * 0.8);
 
 		private bool IsOpen
 		{
@@ -82,11 +81,20 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private UIView TapoffView { get; set; }
 
+		public void OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
+		{
+			_flyoutBehavior = behavior;
+			if (behavior == FlyoutBehavior.Locked)
+				IsOpen = true;
+			else if (behavior == FlyoutBehavior.Disabled)
+				IsOpen = false;
+			LayoutSidebar(false);
+		}
+
 		public override void ViewDidLayoutSubviews()
 		{
 			base.ViewDidLayoutSubviews();
-
-			Detail.View.Frame = View.Bounds;
+			
 			LayoutSidebar(false);
 		}
 
@@ -101,6 +109,8 @@ namespace Xamarin.Forms.Platform.iOS
 			AddChildViewController(Flyout.ViewController);
 			View.AddSubview(Flyout.ViewController.View);
 			View.AddGestureRecognizer(PanGestureRecognizer);
+
+			((IShellController)Shell).AddFlyoutBehaviorObserver(this);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -112,6 +122,9 @@ namespace Xamarin.Forms.Platform.iOS
 				if (!_disposed)
 				{
 					_disposed = true;
+
+					Shell.PropertyChanged -= OnShellPropertyChanged;
+					((IShellController)Shell).RemoveFlyoutBehaviorObserver(this);
 
 					Context = null;
 					Shell = null;
@@ -169,7 +182,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				case UIGestureRecognizerState.Changed:
 					_gestureActive = true;
-					FlyoutTransition.LayoutViews((nfloat)openProgress, Flyout.ViewController.View, Detail.View, FlyoutWidth);
+					FlyoutTransition.LayoutViews(View.Bounds, (nfloat)openProgress, Flyout.ViewController.View, Detail.View, _flyoutBehavior);
 					break;
 
 				case UIGestureRecognizerState.Ended:
@@ -200,7 +213,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				UIView.BeginAnimations("Flyout");
 			}
-			FlyoutTransition.LayoutViews(IsOpen ? 1 : 0, Flyout.ViewController.View, Detail.View, FlyoutWidth);
+			FlyoutTransition.LayoutViews(View.Bounds, IsOpen ? 1 : 0, Flyout.ViewController.View, Detail.View, _flyoutBehavior);
 			if (animate)
 			{
 				UIView.SetAnimationCurve(AnimationCurve);
@@ -209,7 +222,7 @@ namespace Xamarin.Forms.Platform.iOS
 				View.LayoutIfNeeded();
 			}
 
-			if (IsOpen)
+			if (IsOpen && _flyoutBehavior == FlyoutBehavior.Flyout)
 				AddTapoffView();
 			else
 				RemoveTapoffView();
