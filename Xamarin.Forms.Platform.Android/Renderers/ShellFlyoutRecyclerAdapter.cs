@@ -128,6 +128,7 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual void OnShellStructureChanged(object sender, EventArgs e)
 		{
 			_listItems = GenerateItemList();
+			NotifyDataSetChanged();
 		}
 
 		private View GenerateDefaultCell(string textBinding, string iconBinding)

@@ -156,7 +156,7 @@ namespace Xamarin.Forms.Platform.Android
 				case FlyoutBehavior.Flyout:
 					_currentLockMode = LockModeUnlocked;
 					SetDrawerLockMode(_currentLockMode);
-					_content.SetPadding(0, _content.PaddingTop, 0, 0);
+					_content.SetPadding(0, _content.PaddingTop, _content.PaddingRight, _content.PaddingBottom);
 					break;
 
 				case FlyoutBehavior.Locked:
