@@ -175,6 +175,18 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => Shell.SetTitleView(this, null)),
 				2, 11);
 
+			grid.Children.Add(MakeButton("FH Fixed",
+					() => ((Shell)Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.Fixed),
+				0, 12);
+
+			grid.Children.Add(MakeButton("FH Scroll",
+					() => ((Shell)Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.Scroll),
+				1, 12);
+
+			grid.Children.Add(MakeButton("FH Collapse",
+					() => ((Shell)Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.CollapseOnScroll),
+				2, 12);
+
 			Content = new ScrollView { Content = grid };
 		}
 

@@ -65,8 +65,13 @@ namespace Xamarin.Forms.Platform.Android
 			var width = _context.FromPixels(r - l);
 			var height = _context.FromPixels(b - t);
 
-			View.Layout(new Rectangle(0, 0, width, height));
+			LayoutView(0, 0, width, height);
 			_renderer.UpdateLayout();
+		}
+
+		protected virtual void LayoutView(double x, double y, double width, double height)
+		{
+			View.Layout(new Rectangle(x, y, width, height));
 		}
 
 		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)
