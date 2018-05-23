@@ -8,7 +8,7 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellPageRendererTracker : IShellPageRendererTracker
+	public class ShellPageRendererTracker : IShellPageRendererTracker, IFlyoutBehaviorObserver
 	{
 		#region IShellPageRendererTracker
 
@@ -37,6 +37,7 @@ namespace Xamarin.Forms.Platform.iOS
 		private IShellSearchResultsRenderer _resultsRenderer;
 		private UISearchController _searchController;
 		private SearchHandler _searchHandler;
+		private FlyoutBehavior _flyoutBehavior;
 
 		public ShellPageRendererTracker(IShellContext context)
 		{
@@ -46,6 +47,12 @@ namespace Xamarin.Forms.Platform.iOS
 		private BackButtonBehavior BackButtonBehavior { get; set; }
 		private UINavigationItem NavigationItem { get; set; }
 		private Page Page { get; set; }
+
+		public async void OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
+		{
+			_flyoutBehavior = behavior;
+			await UpdateToolbarItems().ConfigureAwait(false);
+		}
 
 		protected virtual async void OnBackButtonBehaviorPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
@@ -70,7 +77,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual async void OnRendererSet()
+		protected virtual void OnRendererSet()
 		{
 			NavigationItem = Renderer.ViewController.NavigationItem;
 			Page.PropertyChanged += OnPagePropertyChanged;
@@ -78,7 +85,7 @@ namespace Xamarin.Forms.Platform.iOS
 			SetBackButtonBehavior(Shell.GetBackButtonBehavior(Page));
 			SearchHandler = Shell.GetSearchHandler(Page);
 			UpdateTitleView();
-			await UpdateToolbarItems().ConfigureAwait(false);
+			((IShellController)_context.Shell).AddFlyoutBehaviorObserver(this);
 		}
 
 		protected virtual void UpdateTitleView()
@@ -147,12 +154,16 @@ namespace Xamarin.Forms.Platform.iOS
 						new UIBarButtonItem(icon, UIBarButtonItemStyle.Plain, (s, e) => command?.Execute(commandParameter)) { Enabled = enabled };
 				}
 			}
-			else if (IsRootPage)
+			else if (IsRootPage && _flyoutBehavior == FlyoutBehavior.Flyout)
 			{
 				ImageSource image = "3bar.png";
 				var source = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(image);
 				var icon = await source.LoadImageAsync(image);
 				NavigationItem.LeftBarButtonItem = new UIBarButtonItem(icon, UIBarButtonItemStyle.Plain, OnMenuButtonPressed);
+			}
+			else
+			{
+				NavigationItem.LeftBarButtonItem = null;
 			}
 		}
 
@@ -401,6 +412,7 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					Page.PropertyChanged -= OnPagePropertyChanged;
 					((INotifyCollectionChanged)Page.ToolbarItems).CollectionChanged -= OnToolbarItemsChanged;
+					((IShellController)_context.Shell).RemoveFlyoutBehaviorObserver(this);
 				}
 
 				SearchHandler = null;
