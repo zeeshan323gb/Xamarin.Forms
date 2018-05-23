@@ -181,8 +181,8 @@ namespace Xamarin.Forms.Platform.iOS
 			if (BackButtonBehavior != null)
 			{
 				BackButtonBehavior.PropertyChanged += OnBackButtonBehaviorPropertyChanged;
-				await UpdateToolbarItems().ConfigureAwait(false);
 			}
+			await UpdateToolbarItems().ConfigureAwait(false);
 		}
 
 		public class TitleViewContainer : UIContainerView
