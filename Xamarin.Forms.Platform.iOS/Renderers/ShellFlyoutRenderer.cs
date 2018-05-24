@@ -39,17 +39,33 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void IShellFlyoutRenderer.CloseFlyout()
 		{
-			IsOpen = false;
-			LayoutSidebar(true);
+			if (_flyoutBehavior == FlyoutBehavior.Flyout)
+			{
+				IsOpen = false;
+				LayoutSidebar(true);
+			}
 		}
 
 		#endregion IShellFlyoutRenderer
 
+		#region IFlyoutBehaviorObserver
+
+		void IFlyoutBehaviorObserver.OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
+		{
+			_flyoutBehavior = behavior;
+			if (behavior == FlyoutBehavior.Locked)
+				IsOpen = true;
+			else if (behavior == FlyoutBehavior.Disabled)
+				IsOpen = false;
+			LayoutSidebar(false);
+		}
+
+		#endregion IFlyoutBehaviorObserver
+
 		private bool _disposed;
+		private FlyoutBehavior _flyoutBehavior;
 		private bool _gestureActive;
 		private bool _isOpen;
-		private FlyoutBehavior _flyoutBehavior;
-
 		public UIViewAnimationCurve AnimationCurve { get; set; } = UIViewAnimationCurve.EaseOut;
 
 		public int AnimationDuration { get; set; } = 250;
@@ -81,20 +97,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private UIView TapoffView { get; set; }
 
-		public void OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
-		{
-			_flyoutBehavior = behavior;
-			if (behavior == FlyoutBehavior.Locked)
-				IsOpen = true;
-			else if (behavior == FlyoutBehavior.Disabled)
-				IsOpen = false;
-			LayoutSidebar(false);
-		}
-
 		public override void ViewDidLayoutSubviews()
 		{
 			base.ViewDidLayoutSubviews();
-			
+
 			LayoutSidebar(false);
 		}
 

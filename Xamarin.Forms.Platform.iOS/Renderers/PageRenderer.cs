@@ -300,7 +300,7 @@ namespace Xamarin.Forms.Platform.iOS
 		void UpdateTitle()
 		{
 			if (!string.IsNullOrWhiteSpace(((Page)Element).Title))
-				Title = ((Page)Element).Title;
+				NavigationItem.Title = ((Page)Element).Title;
 		}
 
 		IEnumerable<UIView> ViewAndSuperviewsOfView(UIView view)

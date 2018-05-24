@@ -8,5 +8,9 @@ namespace Xamarin.Forms.Platform.iOS
 		event EventHandler<ElementSelectedEventArgs> ElementSelected;
 
 		UIViewController ViewController { get; }
+
+		event EventHandler WillAppear;
+
+		event EventHandler WillDisappear;
 	}
 }
