@@ -111,8 +111,6 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			base.ViewDidLayoutSubviews();
 
-			_renderer.Element.Layout(View.Bounds.ToRectangle());
-
 			_appearanceTracker.UpdateLayout(this);
 		}
 
@@ -168,7 +166,6 @@ namespace Xamarin.Forms.Platform.iOS
 			tracker.Renderer = _renderer;
 
 			_trackers[Page] = tracker;
-			_renderer.SetElementSize(View.Bounds.ToRectangle().Size);
 
 			PushViewController(_renderer.ViewController, false);
 
@@ -193,8 +190,6 @@ namespace Xamarin.Forms.Platform.iOS
 			tracker.Renderer = renderer;
 
 			_trackers[page] = tracker;
-
-			renderer.SetElementSize(View.Bounds.ToRectangle().Size);
 
 			ViewControllers.Insert(ViewControllers.IndexOf(beforeRenderer.ViewController), renderer.ViewController);
 		}
@@ -357,7 +352,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 			_trackers[page] = tracker;
 
-			renderer.SetElementSize(View.Bounds.ToRectangle().Size);
 			if (completionSource != null)
 				_completionTasks[renderer.ViewController] = completionSource;
 

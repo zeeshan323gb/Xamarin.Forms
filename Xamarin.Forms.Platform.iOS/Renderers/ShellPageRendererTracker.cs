@@ -33,11 +33,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private readonly IShellContext _context;
 		private bool _disposed;
+		private FlyoutBehavior _flyoutBehavior;
 		private WeakReference<IVisualElementRenderer> _rendererRef;
 		private IShellSearchResultsRenderer _resultsRenderer;
 		private UISearchController _searchController;
 		private SearchHandler _searchHandler;
-		private FlyoutBehavior _flyoutBehavior;
 
 		public ShellPageRendererTracker(IShellContext context)
 		{
@@ -267,6 +267,24 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateSearchIsEnabled(_searchController);
 		}
 
+		protected virtual void RemoveSearchController(UINavigationItem navigationItem)
+		{
+			navigationItem.SearchController = null;
+
+			// And now that we have removed the search controller we must perform the sacred dance
+			// handed down from code-dancer to code-dancer. Yes this dance is to ensure the SafeAreaInsets
+			// update since they do not update reliably without doing this.
+
+			// We prefer a verticle down jiggle since it is least likely to produce a visual artifact
+
+			if (Renderer?.NativeView != null)
+			{
+				var oldFrame = Renderer.NativeView.Frame;
+				Renderer.NativeView.Frame = new CGRect(oldFrame.X, oldFrame.Y, oldFrame.Width, oldFrame.Height + 1);
+				Renderer.NativeView.Frame = oldFrame;
+			}
+		}
+
 		protected virtual void UpdateSearchIsEnabled(UISearchController searchController)
 		{
 			searchController.SearchBar.UserInteractionEnabled = SearchHandler.IsSearchEnabled;
@@ -280,7 +298,7 @@ namespace Xamarin.Forms.Platform.iOS
 				if (searchController != null)
 				{
 					if (Forms.IsiOS11OrNewer)
-						NavigationItem.SearchController = null;
+						RemoveSearchController(NavigationItem);
 					else
 						NavigationItem.TitleView = null;
 				}
@@ -364,7 +382,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (Forms.IsiOS11OrNewer)
 			{
-				NavigationItem.SearchController = null;
+				RemoveSearchController(NavigationItem);
 			}
 			else
 			{
