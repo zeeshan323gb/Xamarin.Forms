@@ -12,6 +12,9 @@ namespace Xamarin.Forms.Platform.iOS
 		private UIView _headerView;
 		private ShellTableViewController _tableViewController;
 
+		public event EventHandler WillAppear;
+		public event EventHandler WillDisappear;
+
 		public ShellFlyoutContentRenderer(IShellContext context)
 		{
 			_headerView = new UIContainerView(((IShellController)context.Shell).FlyoutHeader);
@@ -73,6 +76,20 @@ namespace Xamarin.Forms.Platform.iOS
 			_blurView.Frame = View.Bounds;
 
 			UpdateBackgroundColor();
+		}
+
+		public override void ViewWillAppear(bool animated)
+		{
+			base.ViewWillAppear(animated);
+
+			WillAppear?.Invoke(this, EventArgs.Empty);
+		}
+
+		public override void ViewWillDisappear(bool animated)
+		{
+			base.ViewWillDisappear(animated);
+
+			WillDisappear?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnElementSelected(Element element)
