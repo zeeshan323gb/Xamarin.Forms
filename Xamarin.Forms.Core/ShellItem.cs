@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class ShellItem : BaseShellItem, IShellItemController
+	public class ShellItem : BaseShellItem, IShellItemController, IElementConfiguration<ShellItem>
 	{
 		#region PropertyKeys
 
@@ -57,10 +57,12 @@ namespace Xamarin.Forms
 
 		private readonly ObservableCollection<Element> _children = new ObservableCollection<Element>();
 		private ReadOnlyCollection<Element> _logicalChildren;
+		private Lazy<PlatformConfigurationRegistry<ShellItem>> _platformConfigurationRegistry;
 
 		public ShellItem()
 		{
 			((INotifyCollectionChanged)Items).CollectionChanged += ItemsCollectionChanged;
+			_platformConfigurationRegistry = new Lazy<PlatformConfigurationRegistry<ShellItem>>(() => new PlatformConfigurationRegistry<ShellItem>(this));
 		}
 
 		public ShellTabItem CurrentItem
@@ -158,6 +160,11 @@ namespace Xamarin.Forms
 			}
 
 			SendStructureChanged();
+		}
+
+		public IPlatformElementConfiguration<T, ShellItem> On<T>() where T : IConfigPlatform
+		{
+			return _platformConfigurationRegistry.Value.On<T>();
 		}
 
 		public class MenuShellItem : ShellItem
