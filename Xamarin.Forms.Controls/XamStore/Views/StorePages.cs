@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Xamarin.Forms.Controls.XamStore
 {
@@ -208,9 +209,42 @@ namespace Xamarin.Forms.Controls.XamStore
 			});
 		}
 
+		private class CustomSearchHandler : SearchHandler
+		{
+			protected async override void OnQueryChanged(string oldValue, string newValue)
+			{
+				base.OnQueryChanged(oldValue, newValue);
+
+				if (string.IsNullOrEmpty(newValue))
+				{
+					ItemsSource = null;
+				}
+				else
+				{
+					List<string> results = new List<string>();
+					results.Add(newValue + "initial");
+
+					ItemsSource = results;
+
+					await Task.Delay(2000);
+
+					results = new List<string>();
+
+					for (int i = 0; i < 10; i++)
+					{
+						results.Add(newValue + i);
+					}
+
+					ItemsSource = results;
+				}
+			}
+		}
+
 		protected void AddSearchHandler(string placeholder, SearchBoxVisiblity visibility)
 		{
-			var searchHandler = new SearchHandler();
+			var searchHandler = new CustomSearchHandler();
+
+			searchHandler.ShowsResults = true;
 
 			searchHandler.ClearIconName = "Clear";
 			searchHandler.ClearIconHelpText = "Clears the search field text";
