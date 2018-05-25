@@ -103,6 +103,8 @@ namespace Xamarin.Forms
 
 		private List<Page> _navStack = new List<Page> { null };
 
+		public event EventHandler Reselected;
+
 		public ShellTabItem()
 		{
 			((INotifyCollectionChanged)MenuItems).CollectionChanged += MenuItemsCollectionChanged;
