@@ -2,6 +2,7 @@
 <Shell xmlns="http://xamarin.com/schemas/2014/forms"
 			xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			xmlns:local="clr-namespace:Xamarin.Forms.Controls.XamStore"
+			xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
 			Route="xamstore"
 			RouteHost="www.xamarin.com"
 			RouteScheme="http"
@@ -46,7 +47,7 @@
 
 	<ShellTabItem Route="subs" Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
-	<MaterialShellItem Route="store" x:Name="_storeItem" TabLocation="Bottom" GroupBehavior="ShowTabs">
+	<ShellItem android:ShellItem.TabBarLocation="Bottom"  Route="store" x:Name="_storeItem" GroupBehavior="ShowTabs">
 		<ShellTabItem Route="home" Style="{StaticResource GreenShell}" Title="Home" Icon="home.png" FlyoutIcon="homeflyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
 		<ShellTabItem Route="games" Style="{StaticResource GreenShell}" Title="Games" Icon="games.png" FlyoutIcon="gamesflyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
 		<ShellTabItem Route="movies" Style="{StaticResource MoviesShell}" Title="Movies &amp; TV" 
@@ -73,7 +74,7 @@
 				<MenuItem Icon="newspaper.png" Text="Open News App" />
 			</ShellTabItem.MenuItems>
 		</ShellTabItem>
-	</MaterialShellItem>
+	</ShellItem>
 
 	<ShellTabItem Route="account" Title="Account" Icon="person.png" ContentTemplate="{DataTemplate local:AccountsPage}" />
 
