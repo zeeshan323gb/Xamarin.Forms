@@ -97,21 +97,21 @@ namespace Xamarin.Forms.Platform.Android
 						section = menu.AddSubMenu(new Java.Lang.String(shellItem.Title));
 					}
 
-					foreach (var tabItem in shellItem.Items)
+					foreach (var shellContent in shellItem.Items)
 					{
-						var item = section.Add(gid, id, 0, new Java.Lang.String(tabItem.Title));
-						item.SetEnabled(tabItem.IsEnabled);
-						if (tabItem.Icon != null)
+						var item = section.Add(gid, id, 0, new Java.Lang.String(shellContent.Title));
+						item.SetEnabled(shellContent.IsEnabled);
+						if (shellContent.Icon != null)
 						{
-							SetMenuItemIcon(item, tabItem.Icon);
+							SetMenuItemIcon(item, shellContent.Icon);
 						}
 						item.SetCheckable(true);
-						_lookupTable[item] = tabItem;
+						_lookupTable[item] = shellContent;
 						// when an item is selected we will display its menu items
-						if (isCurrentShellItem && tabItem == shellItem.CurrentItem)
+						if (isCurrentShellItem && shellContent == shellItem.CurrentItem)
 						{
 							item.SetChecked(true);
-							foreach (var menuItem in tabItem.MenuItems)
+							foreach (var menuItem in shellContent.MenuItems)
 							{
 								var subItem = section.Add(gid, id, 0, new Java.Lang.String(menuItem.Text));
 								subItem.SetEnabled(menuItem.IsEnabled);

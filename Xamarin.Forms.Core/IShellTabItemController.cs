@@ -3,7 +3,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
 {
-	public interface IShellTabItemController : IElementController
+	public interface IShellContentController : IElementController
 	{
 		Page RootPage { get; }
 

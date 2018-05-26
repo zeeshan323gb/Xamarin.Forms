@@ -20,8 +20,8 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var shell = new Shell();
 			var shellItem = new ShellItem();
-			var shellTabItem = new ShellTabItem();
-			shellItem.Items.Add(shellTabItem);
+			var shellContent = new ShellContent();
+			shellItem.Items.Add(shellContent);
 			shell.Items.Add(shellItem);
 
 			Assert.That(shell.CurrentItem, Is.EqualTo(shellItem));
@@ -32,8 +32,8 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var shell = new Shell();
 			var shellItem = new ShellItem();
-			var shellTabItem = new ShellTabItem();
-			shellItem.Items.Add(shellTabItem);
+			var shellContent = new ShellContent();
+			shellItem.Items.Add(shellContent);
 			shell.Items.Add(shellItem);
 
 			Assume.That(shell.CurrentItem, Is.EqualTo(shellItem));
@@ -52,10 +52,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			var one = new ShellItem { Route = "one" };
 			var two = new ShellItem { Route = "two" };
 
-			var tabone = new ShellTabItem { Route = "tabone" };
-			var tabtwo = new ShellTabItem { Route = "tabtwo" };
-			var tabthree = new ShellTabItem { Route = "tabthree" };
-			var tabfour = new ShellTabItem { Route = "tabfour" };
+			var tabone = new ShellContent { Route = "tabone" };
+			var tabtwo = new ShellContent { Route = "tabtwo" };
+			var tabthree = new ShellContent { Route = "tabthree" };
+			var tabfour = new ShellContent { Route = "tabfour" };
 
 			one.Items.Add(tabone);
 			one.Items.Add(tabtwo);
@@ -82,10 +82,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			var one = new ShellItem { Route = "one" };
 			var two = new ShellItem { Route = "two" };
 
-			var tabone = new ShellTabItem { Route = "tabone" };
-			var tabtwo = new ShellTabItem { Route = "tabtwo" };
-			var tabthree = new ShellTabItem { Route = "tabthree" };
-			var tabfour = new ShellTabItem { Route = "tabfour" };
+			var tabone = new ShellContent { Route = "tabone" };
+			var tabtwo = new ShellContent { Route = "tabtwo" };
+			var tabthree = new ShellContent { Route = "tabthree" };
+			var tabfour = new ShellContent { Route = "tabfour" };
 
 			one.Items.Add(tabone);
 			one.Items.Add(tabtwo);

@@ -267,11 +267,11 @@ namespace Xamarin.Forms
 					{
 						leaf = shellItem.CurrentItem;
 					}
-					if (leaf is IShellTabItemController shellTabItem)
+					if (leaf is IShellContentController shellContent)
 					{
 						// this is the same as .Last but easier and will add in the root if not null
 						// it generally wont be null but this is just in case
-						leaf = shellTabItem.CurrentPage ?? leaf;
+						leaf = shellContent.CurrentPage ?? leaf;
 					}
 
 					target = source;
@@ -294,14 +294,14 @@ namespace Xamarin.Forms
 			}
 		}
 
-		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellTabItem tab, bool includeStack = true)
+		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellContent content, bool includeStack = true)
 		{
-			return GetNavigationState(item, tab, includeStack ? tab.Stack.ToList() : null);
+			return GetNavigationState(item, content, includeStack ? content.Stack.ToList() : null);
 		}
 
-		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellTabItem tab, IList<Page> stack, bool canCancel)
+		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellContent content, IList<Page> stack, bool canCancel)
 		{
-			var proposedState = GetNavigationState(item, tab, stack);
+			var proposedState = GetNavigationState(item, content, stack);
 			return ProposeNavigation(source, proposedState, canCancel);
 		}
 
@@ -327,9 +327,9 @@ namespace Xamarin.Forms
 		{
 			var oldState = CurrentState;
 			var shellItem = CurrentItem;
-			var tab = shellItem?.CurrentItem;
-			var stack = tab?.Stack;
-			var result = GetNavigationState(shellItem, tab, stack.ToList());
+			var shellContent = shellItem?.CurrentItem;
+			var stack = shellContent?.Stack;
+			var result = GetNavigationState(shellItem, shellContent, stack.ToList());
 
 			SetValueFromRenderer(CurrentStatePropertyKey, result);
 
@@ -508,7 +508,7 @@ namespace Xamarin.Forms
 
 			var shellRoute = parts[0];
 			var shellItemRoute = parts[1];
-			var shellTabItemRoute = parts.Length > 2 ? parts[2] : null;
+			var shellContentRoute = parts.Length > 2 ? parts[2] : null;
 
 			var expectedShellRoute = Routing.GetRoute(this) ?? string.Empty;
 			if (expectedShellRoute != shellRoute)
@@ -533,30 +533,30 @@ namespace Xamarin.Forms
 				}
 			}
 
-			// Find ShellTabItem
-			ShellTabItem selectedTabItem = null;
-			if (shellTabItemRoute != null)
+			// Find ShellContent
+			ShellContent selectedContent = null;
+			if (shellContentRoute != null)
 			{
 				var shellItem = CurrentItem;
-				foreach (var tabItem in shellItem.Items)
+				foreach (var shellContent in shellItem.Items)
 				{
-					if (Routing.GetRoute(tabItem) == shellTabItemRoute)
+					if (Routing.GetRoute(shellContent) == shellContentRoute)
 					{
-						ApplyQueryAttributes(tabItem, queryData, parts.Length == 3);
-						if (shellItem.CurrentItem != tabItem)
+						ApplyQueryAttributes(shellContent, queryData, parts.Length == 3);
+						if (shellItem.CurrentItem != shellContent)
 						{
 							changedTab = true;
-							shellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
+							shellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellContent);
 						}
 
-						selectedTabItem = tabItem;
+						selectedContent = shellContent;
 						break;
 					}
 				}
 			}
 
-			// Send out navigation to ShellTabItem
-			if (selectedTabItem != null)
+			// Send out navigation to ShellContent
+			if (selectedContent != null)
 			{
 				List<string> navParts = new List<string>();
 				if (parts.Length > 3)
@@ -566,7 +566,7 @@ namespace Xamarin.Forms
 						navParts.Add(parts[i]);
 					}
 				}
-				await selectedTabItem.GoToAsync(navParts, queryData, !changedTab);
+				await selectedContent.GoToAsync(navParts, queryData, !changedTab);
 			}
 
 			_accumulateNavigatedEvents = false;
@@ -626,10 +626,10 @@ namespace Xamarin.Forms
 
 		protected override bool OnBackButtonPressed()
 		{
-			var currentTabItem = CurrentItem?.CurrentItem;
-			if (currentTabItem != null && currentTabItem.Stack.Count > 1)
+			var currentContent = CurrentItem?.CurrentItem;
+			if (currentContent != null && currentContent.Stack.Count > 1)
 			{
-				currentTabItem.Navigation.PopAsync();
+				currentContent.Navigation.PopAsync();
 				return true;
 			}
 			return false;
@@ -802,7 +802,7 @@ namespace Xamarin.Forms
 			return FlyoutBehavior;
 		}
 
-		private ShellNavigationState GetNavigationState(ShellItem item, ShellTabItem tab, IList<Page> stack)
+		private ShellNavigationState GetNavigationState(ShellItem item, ShellContent content, IList<Page> stack)
 		{
 			var state = RouteScheme + "://" + RouteHost + "/" + Route + "/";
 			Dictionary<string, string> queryData = new Dictionary<string, string>();
@@ -814,14 +814,14 @@ namespace Xamarin.Forms
 				state += Routing.GetRouteStringForElement(item);
 				state += "/";
 
-				GetQueryStringData(item, tab == null, queryData);
+				GetQueryStringData(item, content == null, queryData);
 
-				if (tab != null)
+				if (content != null)
 				{
-					state += Routing.GetRouteStringForElement(tab);
+					state += Routing.GetRouteStringForElement(content);
 					state += "/";
 
-					GetQueryStringData(tab, stack == null || stack.Count <= 1, queryData);
+					GetQueryStringData(content, stack == null || stack.Count <= 1, queryData);
 
 					if (stack != null)
 					{
@@ -846,7 +846,7 @@ namespace Xamarin.Forms
 		{
 			// this algorithm is pretty simple
 			// 1) Get the "CurrentPage" by walking down from the pivot
-			//		Walking down goes Shell -> ShellItem -> ShellTabItem -> ShellTabItem.Stack.Last
+			//		Walking down goes Shell -> ShellItem -> ShellContent -> ShellContent.Stack.Last
 			// 2) Walk up from the pivot to the root Shell. Stop walking as soon as you find a ShellAppearance and return
 			// 3) If nothing found, return null
 
@@ -932,11 +932,11 @@ namespace Xamarin.Forms
 			{
 				element = shellItem.CurrentItem;
 			}
-			if (element is IShellTabItemController shellTabItem)
+			if (element is IShellContentController shellContent)
 			{
 				// this is the same as .Last but easier and will add in the root if not null
 				// it generally wont be null but this is just in case
-				element = shellTabItem.CurrentPage ?? element;
+				element = shellContent.CurrentPage ?? element;
 			}
 
 			return element;

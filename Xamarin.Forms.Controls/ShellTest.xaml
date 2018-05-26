@@ -39,30 +39,30 @@
 		<MenuItem x:Name="_duck"  Text="Click Me!" />
 	</Shell.MenuItems>
 	<ShellItem Route="home"  Title="Home" Icon="calculator.png" GroupBehavior="ShowTabs">
-		<ShellTabItem Route="updates"  Title="Updates" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}">
-		</ShellTabItem>
-		<ShellTabItem Route="derp"  Title="Updates 2" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}" />
-		<ShellTabItem Route="games"  Title="Games" Icon="coffee.png">
-			<ShellTabItem.MenuItems>
+		<ShellContent Route="updates"  Title="Updates" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}">
+		</ShellContent>
+		<ShellContent Route="derp"  Title="Updates 2" Icon="coffee.png" Content="Foo"  ContentTemplate="{DataTemplate local:ShellContent}" />
+		<ShellContent Route="games"  Title="Games" Icon="coffee.png">
+			<ShellContent.MenuItems>
 				<MenuItem Text="Game Options" Icon="3bar.png" />
-			</ShellTabItem.MenuItems>
+			</ShellContent.MenuItems>
 			<ContentPage Title="Testing Games" BackgroundColor="Red" />
-		</ShellTabItem>
-		<ShellTabItem Route="buttons"  Title="Buttons" Icon="coffee.png">
+		</ShellContent>
+		<ShellContent Route="buttons"  Title="Buttons" Icon="coffee.png">
 			<local:ButtonGallery />
-		</ShellTabItem>
+		</ShellContent>
 	</ShellItem>
 	<ShellItem Route="apps"  Title="Apps" Icon="calculator.png">
-		<ShellTabItem Route="books"  Title="Books" Icon="coffee.png">
+		<ShellContent Route="books"  Title="Books" Icon="coffee.png">
 			<ContentPage Title="Testing Apps" BackgroundColor="Purple">
 				<Shell.BackButtonBehavior>
 					<BackButtonBehavior IconOverride="bank.png" />
 				</Shell.BackButtonBehavior>
 				<Label Text="Hello World" VerticalOptions="Center" HorizontalOptions="Center" />
 			</ContentPage>
-		</ShellTabItem>
-		<ShellTabItem Route="movies"  Title="Movies" Icon="coffee.png">
+		</ShellContent>
+		<ShellContent Route="movies"  Title="Movies" Icon="coffee.png">
 			<ContentPage Title="Testing Movies" BackgroundColor="Gray" />
-		</ShellTabItem>
+		</ShellContent>
 	</ShellItem>
 </Shell>

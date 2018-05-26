@@ -28,8 +28,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override Fragment GetItem(int position)
 		{
-			var shellTabItem = _shellitem.Items[position];
-			return new ShellFragmentContainer(shellTabItem) { Arguments = new Bundle() };
+			var shellContent = _shellitem.Items[position];
+			return new ShellFragmentContainer(shellContent) { Arguments = new Bundle() };
 		}
 
 		public override long GetItemId(int position)
@@ -40,10 +40,10 @@ namespace Xamarin.Forms.Platform.Android
 		public override int GetItemPosition(Object objectValue)
 		{
 			var fragContainer = objectValue as ShellFragmentContainer;
-			var shellTabItem = fragContainer?.ShellTabItem;
-			if (shellTabItem != null)
+			var shellContent = fragContainer?.ShellContent;
+			if (shellContent != null)
 			{
-				int index = _shellitem.Items.IndexOf(shellTabItem);
+				int index = _shellitem.Items.IndexOf(shellContent);
 				if (index >= 0)
 					return index;
 			}

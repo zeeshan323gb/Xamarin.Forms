@@ -11,11 +11,11 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 	{
 		private Page _page;
 
-		public ShellTabItem ShellTabItem { get; private set; }
+		public ShellContent ShellContent { get; private set; }
 
-		public ShellFragmentContainer(ShellTabItem tabItem) : base()
+		public ShellFragmentContainer(ShellContent shellContent) : base()
 		{
-			ShellTabItem = tabItem;
+			ShellContent = shellContent;
 		}
 
 		protected ShellFragmentContainer(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
@@ -34,14 +34,14 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 		public override global::Android.Views.View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			_page = ((IShellTabItemController)ShellTabItem).GetOrCreateContent();
+			_page = ((IShellContentController)ShellContent).GetOrCreateContent();
 			return base.OnCreateView(inflater, container, savedInstanceState);
 		}
 
 		public override void OnDestroyView()
 		{
 			base.OnDestroyView();
-			((IShellTabItemController)ShellTabItem).RecyclePage(_page);
+			((IShellContentController)ShellContent).RecyclePage(_page);
 			_page = null;
 		}
 	}

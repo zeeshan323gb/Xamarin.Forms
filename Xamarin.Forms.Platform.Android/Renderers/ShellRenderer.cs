@@ -284,11 +284,11 @@ namespace Xamarin.Forms.Platform.Android
 			transaction.CommitAllowingStateLoss();
 		}
 
-		private async void GoTo(ShellItem item, ShellTabItem tab)
+		private async void GoTo(ShellItem item, ShellContent shellContent)
 		{
-			if (tab == null)
-				tab = item.CurrentItem;
-			var state = ((IShellController)Element).GetNavigationState(item, tab, false);
+			if (shellContent == null)
+				shellContent = item.CurrentItem;
+			var state = ((IShellController)Element).GetNavigationState(item, shellContent, false);
 			await Element.GoToAsync(state).ConfigureAwait(false);
 		}
 
@@ -305,7 +305,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			var element = e.Element;
 			ShellItem shellItem = null;
-			ShellTabItem shellTabItem = null;
+			ShellContent shellContent = null;
 
 			if (element is ShellItem.MenuShellItem menuShellItem)
 			{
@@ -315,10 +315,10 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				shellItem = item;
 			}
-			else if (element is ShellTabItem tab)
+			else if (element is ShellContent content)
 			{
-				shellItem = tab.Parent as ShellItem;
-				shellTabItem = tab;
+				shellItem = content.Parent as ShellItem;
+				shellContent = content;
 			}
 			else if (element is MenuItem menuItem)
 			{
@@ -327,7 +327,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			_flyoutRenderer.CloseFlyout();
 			if (shellItem != null && shellItem.IsEnabled)
-				GoTo(shellItem, shellTabItem);
+				GoTo(shellItem, shellContent);
 		}
 
 		private void UpdateStatusBarColor(ShellAppearance appearance)

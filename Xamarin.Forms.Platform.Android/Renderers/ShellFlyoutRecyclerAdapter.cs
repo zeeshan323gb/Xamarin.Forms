@@ -103,8 +103,8 @@ namespace Xamarin.Forms.Platform.Android
 				{
 					for (int i = 0; i < item.Items.Count; i++)
 					{
-						var tab = item.Items[i];
-						result.Add(new AdapterListItem(tab, previous != null && i == 0));
+						var content = item.Items[i];
+						result.Add(new AdapterListItem(content, previous != null && i == 0));
 					}
 				}
 				else

@@ -90,18 +90,18 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void SetAppearance(ShellAppearance appearance) => _appearanceTracker.SetAppearance(_bottomView, appearance);
 
-		protected virtual void ChangeTabItem(ShellTabItem tabItem)
+		protected virtual void ChangeContent(ShellContent shellContent)
 		{
 			var controller = (IShellController)ShellContext.Shell;
-			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged,
+			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellContentChanged,
 				ShellItem,
-				tabItem,
-				tabItem.Stack.ToList(),
+				shellContent,
+				shellContent.Stack.ToList(),
 				true
 			);
 
 			if (accept)
-				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tabItem);
+				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellContent);
 		}
 
 		protected virtual Drawable CreateItemBackgroundDrawable()
@@ -110,7 +110,7 @@ namespace Xamarin.Forms.Platform.Android
 			return new RippleDrawable(stateList, new ColorDrawable(AColor.White), null);
 		}
 
-		protected virtual BottomSheetDialog CreateMoreBottomSheet(Action<ShellTabItem, BottomSheetDialog> selectCallback)
+		protected virtual BottomSheetDialog CreateMoreBottomSheet(Action<ShellContent, BottomSheetDialog> selectCallback)
 		{
 			var bottomSheetDialog = new BottomSheetDialog(Context);
 			var bottomSheetLayout = new LinearLayout(Context);
@@ -119,7 +119,7 @@ namespace Xamarin.Forms.Platform.Android
 			// handle the more tab
 			for (int i = 4; i < ShellItem.Items.Count; i++)
 			{
-				var tab = ShellItem.Items[i];
+				var shellContent = ShellItem.Items[i];
 
 				var innerLayout = new LinearLayout(Context);
 				innerLayout.ClipToOutline = true;
@@ -132,7 +132,7 @@ namespace Xamarin.Forms.Platform.Android
 				// we dont even unhook the events that dont fire
 				void clickCallback(object s, EventArgs e)
 				{
-					selectCallback(tab, bottomSheetDialog);
+					selectCallback(shellContent, bottomSheetDialog);
 					innerLayout.Click -= clickCallback;
 				}
 				innerLayout.Click += clickCallback;
@@ -147,14 +147,14 @@ namespace Xamarin.Forms.Platform.Android
 					Gravity = GravityFlags.Center
 				};
 				image.ImageTintList = ColorStateList.ValueOf(Color.Black.MultiplyAlpha(0.6).ToAndroid());
-				SetImage(image, tab.Icon);
+				SetImage(image, shellContent.Icon);
 
 				innerLayout.AddView(image);
 
 				var text = new TextView(Context);
 				text.SetTypeface(Typeface.Create("sans-serif-medium", TypefaceStyle.Normal), TypefaceStyle.Normal);
 				text.SetTextColor(AColor.Black);
-				text.Text = tab.Title;
+				text.Text = shellContent.Title;
 				text.LayoutParameters = new LinearLayout.LayoutParams(0, LP.WrapContent)
 				{
 					Gravity = GravityFlags.Center,
@@ -173,11 +173,11 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected override ViewGroup GetNavigationTarget() => _navigationArea;
 
-		protected override void OnCurrentTabItemChanged()
+		protected override void OnCurrentContentChanged()
 		{
-			base.OnCurrentTabItemChanged();
+			base.OnCurrentContentChanged();
 
-			var index = ShellItem.Items.IndexOf(CurrentTabItem);
+			var index = ShellItem.Items.IndexOf(ShellContent);
 			index = Math.Min(index, _bottomView.Menu.Size() - 1);
 			if (index < 0)
 				return;
@@ -209,29 +209,29 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			else
 			{
-				var shellTabItem = ShellItem.Items[id];
+				var shellContent = ShellItem.Items[id];
 				if (item.IsChecked)
 				{
-					OnTabReselected(shellTabItem);
+					OnTabReselected(shellContent);
 				}
 				else
 				{
-					ChangeTabItem(shellTabItem);
+					ChangeContent(shellContent);
 				}
 			}
 
 			return true;
 		}
 
-		protected virtual void OnMoreItemSelected(ShellTabItem tabItem, BottomSheetDialog dialog)
+		protected virtual void OnMoreItemSelected(ShellContent shellContent, BottomSheetDialog dialog)
 		{
-			ChangeTabItem(tabItem);
+			ChangeContent(shellContent);
 
 			dialog.Dismiss();
 			dialog.Dispose();
 		}
 
-		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e) => OnCurrentTabItemChanged();
+		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e) => OnCurrentContentChanged();
 
 		protected override void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
@@ -240,14 +240,14 @@ namespace Xamarin.Forms.Platform.Android
 			SetupMenu();
 		}
 
-		protected override void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected override void OnShellContentPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			base.OnShellTabItemPropertyChanged(sender, e);
+			base.OnShellContentPropertyChanged(sender, e);
 
 			if (e.PropertyName == BaseShellItem.IsEnabledProperty.PropertyName)
 			{
-				var tab = (ShellTabItem)sender;
-				var index = ShellItem.Items.IndexOf(tab);
+				var content = (ShellContent)sender;
+				var index = ShellItem.Items.IndexOf(content);
 
 				var itemCount = ShellItem.Items.Count;
 				var maxItems = _bottomView.MaxItemCount;
@@ -256,7 +256,7 @@ namespace Xamarin.Forms.Platform.Android
 					return;
 
 				var menuItem = _bottomView.Menu.FindItem(index);
-				UpdateShellTabItemEnabled(tab, menuItem);
+				UpdateShellContentEnabled(content, menuItem);
 			}
 			else if (e.PropertyName == BaseShellItem.TitleProperty.PropertyName ||
 				e.PropertyName == BaseShellItem.IconProperty.PropertyName)
@@ -265,7 +265,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		protected virtual void OnTabReselected(ShellTabItem tab)
+		protected virtual void OnTabReselected(ShellContent shellContent)
 		{
 		}
 
@@ -278,15 +278,15 @@ namespace Xamarin.Forms.Platform.Android
 
 			int end = showMore ? maxBottomItems - 1 : ShellItem.Items.Count;
 
-			var currentIndex = shellItem.Items.IndexOf(CurrentTabItem);
+			var currentIndex = shellItem.Items.IndexOf(ShellContent);
 
 			for (int i = 0; i < end; i++)
 			{
 				var item = shellItem.Items[i];
 				var menuItem = menu.Add(0, i, 0, new Java.Lang.String(item.Title));
 				SetMenuItemIcon(menuItem, item.Icon);
-				UpdateShellTabItemEnabled(item, menuItem);
-				if (item == CurrentTabItem)
+				UpdateShellContentEnabled(item, menuItem);
+				if (item == ShellContent)
 				{
 					menuItem.SetChecked(true);
 				}
@@ -305,9 +305,9 @@ namespace Xamarin.Forms.Platform.Android
 			_bottomView.SetShiftMode(false, false);
 		}
 
-		protected virtual void UpdateShellTabItemEnabled(ShellTabItem tab, IMenuItem menuItem)
+		protected virtual void UpdateShellContentEnabled(ShellContent shellContent, IMenuItem menuItem)
 		{
-			bool tabEnabled = tab.IsEnabled;
+			bool tabEnabled = shellContent.IsEnabled;
 			if (menuItem.IsEnabled != tabEnabled)
 				menuItem.SetEnabled(tabEnabled);
 		}

@@ -228,7 +228,7 @@ namespace Xamarin.Forms
 
 		protected override void OnParentSet()
 		{
-			if (!Application.IsApplicationOrNull(RealParent) && !(RealParent is Page) && !(RealParent is ShellTabItem))
+			if (!Application.IsApplicationOrNull(RealParent) && !(RealParent is Page) && !(RealParent is ShellContent))
 				throw new InvalidOperationException("Parent of a Page must also be a Page");
 			base.OnParentSet();
 		}

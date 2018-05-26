@@ -26,7 +26,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		private readonly Dictionary<Element, IShellObservableFragment> _fragmentMap = new Dictionary<Element, IShellObservableFragment>();
 		private IShellObservableFragment _currentFragment;
-		private ShellTabItem _currentTabItem;
+		private ShellContent _currentShellContent;
 		private Page _displayedPage;
 
 		protected ShellItemRendererBase(IShellContext shellContext)
@@ -34,15 +34,15 @@ namespace Xamarin.Forms.Platform.Android
 			ShellContext = shellContext;
 		}
 
-		protected ShellTabItem CurrentTabItem
+		protected ShellContent ShellContent
 		{
-			get => _currentTabItem;
+			get => _currentShellContent;
 			set
 			{
-				_currentTabItem = value;
+				_currentShellContent = value;
 				if (value != null)
 				{
-					OnCurrentTabItemChanged();
+					OnCurrentContentChanged();
 				}
 			}
 		}
@@ -82,21 +82,21 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected abstract ViewGroup GetNavigationTarget();
 
-		protected virtual IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab)
+		protected virtual IShellObservableFragment GetOrCreateFragmentForTab(ShellContent shellContent)
 		{
-			return new ShellContentFragment(ShellContext, tab);
+			return new ShellContentFragment(ShellContext, shellContent);
 		}
 
-		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellTabItem item, Page page, bool animated)
+		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellContent item, Page page, bool animated)
 		{
 			TaskCompletionSource<bool> result = new TaskCompletionSource<bool>();
 
-			var stack = CurrentTabItem.Stack;
-			bool isForCurrentTab = item == CurrentTabItem;
+			var stack = ShellContent.Stack;
+			bool isForCurrentTab = item == ShellContent;
 
-			if (!_fragmentMap.ContainsKey(CurrentTabItem))
+			if (!_fragmentMap.ContainsKey(ShellContent))
 			{
-				_fragmentMap[CurrentTabItem] = GetOrCreateFragmentForTab(CurrentTabItem);
+				_fragmentMap[ShellContent] = GetOrCreateFragmentForTab(ShellContent);
 			}
 
 			switch (navSource)
@@ -136,7 +136,7 @@ namespace Xamarin.Forms.Platform.Android
 						return Task.FromResult(true);
 					break;
 
-				case ShellNavigationSource.ShellTabItemChanged:
+				case ShellNavigationSource.ShellContentChanged:
 					// We need to handle this after we know what the target is
 					// because we might accidentally remove an already added target.
 					// Then there would be two transactions in a row, one removing and one adding
@@ -151,13 +151,13 @@ namespace Xamarin.Forms.Platform.Android
 			IShellObservableFragment target = null;
 			if (stack.Count == 1 || navSource == ShellNavigationSource.PopToRoot)
 			{
-				target = _fragmentMap[CurrentTabItem];
-				targetPage = ((IShellTabItemController)CurrentTabItem).RootPage;
+				target = _fragmentMap[ShellContent];
+				targetPage = ((IShellContentController)ShellContent).RootPage;
 				if (targetPage == null)
 				{
-					// There CurrentTabItem hasn't had to realize the page yet, we need
+					// The ShellContent hasn't had to realize the page yet, we need
 					// to force it here.
-					targetPage = ((IShellTabItemController)CurrentTabItem).GetOrCreateContent();
+					targetPage = ((IShellContentController)ShellContent).GetOrCreateContent();
 				}
 			}
 			else
@@ -167,7 +167,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			// Down here because of comment above
-			if (navSource == ShellNavigationSource.ShellTabItemChanged)
+			if (navSource == ShellNavigationSource.ShellContentChanged)
 				RemoveAllButCurrent(target.Fragment);
 
 			if (target == _currentFragment)
@@ -194,7 +194,7 @@ namespace Xamarin.Forms.Platform.Android
 
 				case ShellNavigationSource.Pop:
 				case ShellNavigationSource.PopToRoot:
-				case ShellNavigationSource.ShellTabItemChanged:
+				case ShellNavigationSource.ShellContentChanged:
 					trackFragment = _currentFragment;
 
 					if (_currentFragment != null)
@@ -235,23 +235,23 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			shellItem.PropertyChanged += OnShellItemPropertyChanged;
 			((INotifyCollectionChanged)shellItem.Items).CollectionChanged += OnShellItemsChanged;
-			CurrentTabItem = shellItem.CurrentItem;
+			ShellContent = shellItem.CurrentItem;
 
-			foreach (var shellTabItem in shellItem.Items)
+			foreach (var shellContent in shellItem.Items)
 			{
-				HookTabEvents(shellTabItem);
+				HookTabEvents(shellContent);
 			}
 		}
 
-		protected virtual void HookTabEvents(ShellTabItem shellTabItem)
+		protected virtual void HookTabEvents(ShellContent shellContent)
 		{
-			((IShellTabItemController)shellTabItem).NavigationRequested += OnNavigationRequested;
-			shellTabItem.PropertyChanged += OnShellTabItemPropertyChanged;
+			((IShellContentController)shellContent).NavigationRequested += OnNavigationRequested;
+			shellContent.PropertyChanged += OnShellContentPropertyChanged;
 		}
 
-		protected virtual void OnCurrentTabItemChanged()
+		protected virtual void OnCurrentContentChanged()
 		{
-			HandleFragmentUpdate(ShellNavigationSource.ShellTabItemChanged, CurrentTabItem, null, false);
+			HandleFragmentUpdate(ShellNavigationSource.ShellContentChanged, ShellContent, null, false);
 		}
 
 		protected virtual void OnDisplayedPageChanged(Page newPage, Page oldPage)
@@ -261,27 +261,27 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
 		{
-			e.Task = HandleFragmentUpdate((ShellNavigationSource)e.RequestType, (ShellTabItem)sender, e.Page, e.Animated);
+			e.Task = HandleFragmentUpdate((ShellNavigationSource)e.RequestType, (ShellContent)sender, e.Page, e.Animated);
 		}
 
 		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
-				CurrentTabItem = ShellItem.CurrentItem;
+				ShellContent = ShellItem.CurrentItem;
 		}
 
 		protected virtual void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			if (e.OldItems != null)
 			{
-				foreach (ShellTabItem tab in e.OldItems)
-					UnhookTabEvents(tab);
+				foreach (ShellContent content in e.OldItems)
+					UnhookTabEvents(content);
 			}
 
 			if (e.NewItems != null)
 			{
-				foreach (ShellTabItem tab in e.NewItems)
-					HookTabEvents(tab);
+				foreach (ShellContent content in e.NewItems)
+					HookTabEvents(content);
 			}
 		}
 
@@ -298,29 +298,29 @@ namespace Xamarin.Forms.Platform.Android
 					t.SetCustomAnimations(Resource.Animation.EnterFromLeft, Resource.Animation.ExitToRight);
 					break;
 
-				case ShellNavigationSource.ShellTabItemChanged:
+				case ShellNavigationSource.ShellContentChanged:
 					break;
 			}
 		}
 
 		protected virtual void UnhookEvents(ShellItem shellItem)
 		{
-			foreach (var shellTabItem in shellItem.Items)
+			foreach (var shellContent in shellItem.Items)
 			{
-				UnhookTabEvents(shellTabItem);
+				UnhookTabEvents(shellContent);
 			}
 
 			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
-			CurrentTabItem = null;
+			ShellContent = null;
 		}
 
-		protected virtual void UnhookTabEvents(ShellTabItem shellTabItem)
+		protected virtual void UnhookTabEvents(ShellContent shellContent)
 		{
-			((IShellTabItemController)shellTabItem).NavigationRequested -= OnNavigationRequested;
-			shellTabItem.PropertyChanged -= OnShellTabItemPropertyChanged;
+			((IShellContentController)shellContent).NavigationRequested -= OnNavigationRequested;
+			shellContent.PropertyChanged -= OnShellContentPropertyChanged;
 		}
 
-		protected virtual void OnShellTabItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected virtual void OnShellContentPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 		}
 
@@ -337,16 +337,16 @@ namespace Xamarin.Forms.Platform.Android
 			trans.CommitAllowingStateLoss();
 		}
 
-		private void RemoveAllPushedPages(ShellTabItem tab, bool keepCurrent)
+		private void RemoveAllPushedPages(ShellContent content, bool keepCurrent)
 		{
-			if (tab.Stack.Count <= 1 || (keepCurrent && tab.Stack.Count == 2))
+			if (content.Stack.Count <= 1 || (keepCurrent && content.Stack.Count == 2))
 				return;
 
 			var t = ChildFragmentManager.BeginTransaction();
 
 			foreach (var kvp in _fragmentMap.ToList())
 			{
-				if (kvp.Key.Parent != tab)
+				if (kvp.Key.Parent != content)
 					continue;
 
 				_fragmentMap.Remove(kvp.Key);

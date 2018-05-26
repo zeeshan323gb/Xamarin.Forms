@@ -51,14 +51,14 @@ namespace Xamarin.Forms.Platform.Android
 		private IVisualElementRenderer _renderer;
 		private AView _root;
 		private ShellPageContainer _shellPageContainer;
-		private ShellTabItem _shellTabItem;
+		private ShellContent _shellContent;
 		private Toolbar _toolbar;
 		private IShellToolbarTracker _toolbarTracker;
 
-		public ShellContentFragment(IShellContext shellContext, ShellTabItem shellTabItem)
+		public ShellContentFragment(IShellContext shellContext, ShellContent shellContent)
 		{
 			_shellContext = shellContext;
-			_shellTabItem = shellTabItem;
+			_shellContent = shellContent;
 		}
 
 		public ShellContentFragment(IShellContext shellContext, Page page)
@@ -105,9 +105,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			if (_shellTabItem != null)
+			if (_shellContent != null)
 			{
-				_page = ((IShellTabItemController)_shellTabItem).GetOrCreateContent();
+				_page = ((IShellContentController)_shellContent).GetOrCreateContent();
 			}
 
 			_root = inflater.Inflate(Resource.Layout.ShellContent, null).JavaCast<CoordinatorLayout>();
@@ -125,7 +125,7 @@ namespace Xamarin.Forms.Platform.Android
 			_toolbarTracker = _shellContext.CreateTrackerForToolbar(_toolbar);
 			_toolbarTracker.Page = _page;
 			// this is probably not the most ideal way to do that
-			_toolbarTracker.CanNavigateBack = _shellTabItem == null;
+			_toolbarTracker.CanNavigateBack = _shellContent == null;
 
 			_appearanceTracker = _shellContext.CreateToolbarAppearanceTracker();
 
@@ -148,9 +148,9 @@ namespace Xamarin.Forms.Platform.Android
 
 			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
 
-			if (_shellTabItem != null)
+			if (_shellContent != null)
 			{
-				((IShellTabItemController)_shellTabItem).RecyclePage(_page);
+				((IShellContentController)_shellContent).RecyclePage(_page);
 				_page.ClearValue(Platform.RendererProperty);
 				_page = null;
 			}

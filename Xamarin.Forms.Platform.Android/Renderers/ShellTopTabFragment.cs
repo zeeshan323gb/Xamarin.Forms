@@ -32,13 +32,13 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			// TODO : Find a way to make this cancellable
 			var shellitem = ShellItem;
-			var tab = shellitem.Items[position];
-			var stack = tab.Stack.ToList();
-			ShellController.ProposeNavigation(ShellNavigationSource.ShellTabItemChanged, shellitem, tab, stack, false);
+			var shellContent = shellitem.Items[position];
+			var stack = shellContent.Stack.ToList();
+			ShellController.ProposeNavigation(ShellNavigationSource.ShellContentChanged, shellitem, shellContent, stack, false);
 
-			ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, tab);
+			ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellContent);
 
-			_toolbarTracker.Page = ((IShellTabItemController)ShellItem.CurrentItem).CurrentPage;
+			_toolbarTracker.Page = ((IShellContentController)ShellItem.CurrentItem).CurrentPage;
 		}
 
 		#endregion IOnPageChangeListener
@@ -113,7 +113,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			_tablayout.SetupWithViewPager(_viewPager);
 
-			var currentPage = ((IShellTabItemController)shellItem.CurrentItem).GetOrCreateContent();
+			var currentPage = ((IShellContentController)shellItem.CurrentItem).GetOrCreateContent();
 			var currentIndex = ShellItem.Items.IndexOf(ShellItem.CurrentItem);
 
 			_toolbarTracker = _shellContext.CreateTrackerForToolbar(_toolbar);

@@ -12,7 +12,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			get
 			{
-				ShellTabItem currentItem = Shell?.CurrentItem?.CurrentItem;
+				ShellContent currentItem = Shell?.CurrentItem?.CurrentItem;
 				if (currentItem == null)
 					return true;
 				return currentItem.Stack.Count <= 1;
@@ -45,9 +45,9 @@ namespace Xamarin.Forms.Platform.iOS
 			return CreateShellSearchResultsRenderer();
 		}
 
-		IShellTabItemRenderer IShellContext.CreateShellTabItemRenderer(ShellTabItem tabItem)
+		IShellContentRenderer IShellContext.CreateShellContentRenderer(ShellContent shellContent)
 		{
-			return CreateShellTabItemRenderer(tabItem);
+			return CreateShellContentRenderer(shellContent);
 		}
 
 		IShellTabBarAppearanceTracker IShellContext.CreateTabBarAppearanceTracker()
@@ -166,9 +166,9 @@ namespace Xamarin.Forms.Platform.iOS
 			return new ShellSearchResultsRenderer(this);
 		}
 
-		protected virtual IShellTabItemRenderer CreateShellTabItemRenderer(ShellTabItem tabItem)
+		protected virtual IShellContentRenderer CreateShellContentRenderer(ShellContent shellContent)
 		{
-			return new ShellTabItemRenderer(this);
+			return new ShellContentRenderer(this);
 		}
 
 		protected virtual IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker()
@@ -248,11 +248,11 @@ namespace Xamarin.Forms.Platform.iOS
 			FlyoutRenderer.View.BackgroundColor = color.ToUIColor();
 		}
 
-		private async void GoTo(ShellItem item, ShellTabItem tab)
+		private async void GoTo(ShellItem item, ShellContent content)
 		{
-			if (tab == null)
-				tab = item.CurrentItem;
-			var state = ((IShellController)Shell).GetNavigationState(item, tab, false);
+			if (content == null)
+				content = item.CurrentItem;
+			var state = ((IShellController)Shell).GetNavigationState(item, content, false);
 			await Shell.GoToAsync(state);
 		}
 
@@ -260,7 +260,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			var element = e.Element;
 			ShellItem shellItem = null;
-			ShellTabItem shellTabItem = null;
+			ShellContent shellContent = null;
 
 			if (element is ShellItem.MenuShellItem menuShellItem)
 			{
@@ -270,10 +270,10 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				shellItem = item;
 			}
-			else if (element is ShellTabItem tab)
+			else if (element is ShellContent content)
 			{
-				shellItem = tab.Parent as ShellItem;
-				shellTabItem = tab;
+				shellItem = content.Parent as ShellItem;
+				shellContent = content;
 			}
 			else if (element is MenuItem menuItem)
 			{
@@ -282,7 +282,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			FlyoutRenderer.CloseFlyout();
 			if (shellItem != null && shellItem.IsEnabled)
-				GoTo(shellItem, shellTabItem);
+				GoTo(shellItem, shellContent);
 		}
 
 		private void SetupCurrentShellItem()

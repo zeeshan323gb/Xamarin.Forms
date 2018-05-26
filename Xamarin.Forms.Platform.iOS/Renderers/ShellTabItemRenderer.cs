@@ -10,32 +10,32 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellTabItemRenderer : UINavigationController, IShellTabItemRenderer, IAppearanceObserver
+	public class ShellContentRenderer : UINavigationController, IShellContentRenderer, IAppearanceObserver
 	{
-		#region IShellTabItemRenderer
+		#region IShellContentRenderer
 
 		public bool IsInMoreTab { get; set; }
 
 		public Page Page { get; private set; }
 
-		public ShellTabItem ShellTabItem
+		public ShellContent ShellContent
 		{
-			get { return _shellTabItem; }
+			get { return _shellContent; }
 			set
 			{
-				if (_shellTabItem == value)
+				if (_shellContent == value)
 					return;
-				_shellTabItem = value;
+				_shellContent = value;
 				LoadPages();
-				OnShellTabItemSet();
-				_shellTabItem.PropertyChanged += HandlePropertyChanged;
-				((IShellTabItemController)_shellTabItem).NavigationRequested += OnNavigationRequested;
+				OnShellContentSet();
+				_shellContent.PropertyChanged += HandlePropertyChanged;
+				((IShellContentController)_shellContent).NavigationRequested += OnNavigationRequested;
 			}
 		}
 
 		public UIViewController ViewController => this;
 
-		#endregion IShellTabItemRenderer
+		#endregion IShellContentRenderer
 
 		#region IAppearanceObserver
 
@@ -61,9 +61,9 @@ namespace Xamarin.Forms.Platform.iOS
 		private bool _ignorePop;
 		private TaskCompletionSource<bool> _popCompletionTask;
 		private IVisualElementRenderer _renderer;
-		private ShellTabItem _shellTabItem;
+		private ShellContent _shellContent;
 
-		public ShellTabItemRenderer(IShellContext context)
+		public ShellContentRenderer(IShellContext context)
 		{
 			Delegate = new NavDelegate(this);
 			_context = context;
@@ -127,17 +127,17 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
-				((IShellTabItemController)_shellTabItem).RecyclePage(Page);
+				((IShellContentController)_shellContent).RecyclePage(Page);
 				_appearanceTracker.Dispose();
-				_shellTabItem.PropertyChanged -= HandlePropertyChanged;
-				((IShellTabItemController)_shellTabItem).NavigationRequested -= OnNavigationRequested;
+				_shellContent.PropertyChanged -= HandlePropertyChanged;
+				((IShellContentController)_shellContent).NavigationRequested -= OnNavigationRequested;
 				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
 				DisposePage(Page);
 			}
 
-			// must be set null prior to _shellTabItem to ensure weak ref page gets cleared
+			// must be set null prior to _shellContent to ensure weak ref page gets cleared
 			Page = null;
-			_shellTabItem = null;
+			_shellContent = null;
 			_appearanceTracker = null;
 			_renderer = null;
 		}
@@ -152,11 +152,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void LoadPages()
 		{
-			var content = ((IShellTabItemController)ShellTabItem).GetOrCreateContent();
+			var content = ((IShellContentController)ShellContent).GetOrCreateContent();
 			Page = content;
 
 			if (!Shell.GetTabBarVisible(Page))
-				Log.Warning("Shell", "Root page of a ShellTabItem will never hide the TabBar");
+				Log.Warning("Shell", "Root page of a ShellContent will never hide the TabBar");
 
 			_renderer = Platform.CreateRenderer(content);
 			Platform.SetRenderer(content, _renderer);
@@ -169,7 +169,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			PushViewController(_renderer.ViewController, false);
 
-			var stack = ShellTabItem.Stack;
+			var stack = ShellContent.Stack;
 			for (int i = 1; i < stack.Count; i++)
 			{
 				PushPage(stack[i], false);
@@ -242,7 +242,7 @@ namespace Xamarin.Forms.Platform.iOS
 			var animated = e.Animated;
 
 			var task = new TaskCompletionSource<bool>();
-			var pages = _shellTabItem.Stack.ToList();
+			var pages = _shellContent.Stack.ToList();
 			_completionTasks[_renderer.ViewController] = task;
 			e.Task = task.Task;
 
@@ -286,24 +286,24 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual void OnShellTabItemSet()
+		protected virtual void OnShellContentSet()
 		{
 			_appearanceTracker = _context.CreateNavBarAppearanceTracker();
 			UpdateTabBarItem();
-			((IShellController)_context.Shell).AddAppearanceObserver(this, ShellTabItem);
+			((IShellController)_context.Shell).AddAppearanceObserver(this, ShellContent);
 		}
 
 		protected virtual async void UpdateTabBarItem()
 		{
-			Title = ShellTabItem.Title;
-			var imageSource = ShellTabItem.Icon;
+			Title = ShellContent.Title;
+			var imageSource = ShellContent.Icon;
 			UIImage icon = null;
 			if (imageSource != null)
 			{
 				var source = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(imageSource);
 				icon = await source.LoadImageAsync(imageSource);
 			}
-			TabBarItem = new UITabBarItem(ShellTabItem.Title, icon, null);
+			TabBarItem = new UITabBarItem(ShellContent.Title, icon, null);
 		}
 
 		private void DisposePage(Page page)
@@ -327,7 +327,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_renderer.ViewController == viewController)
 				return Page;
 
-			foreach (var child in ShellTabItem.Stack)
+			foreach (var child in ShellContent.Stack)
 			{
 				if (child == null)
 					continue;
@@ -367,20 +367,20 @@ namespace Xamarin.Forms.Platform.iOS
 
 			await popTask;
 
-			var poppedPage = _shellTabItem.Stack[_shellTabItem.Stack.Count - 1];
-			((IShellTabItemController)_shellTabItem).SendPopped();
+			var poppedPage = _shellContent.Stack[_shellContent.Stack.Count - 1];
+			((IShellContentController)_shellContent).SendPopped();
 			DisposePage(poppedPage);
 		}
 
 		private bool ShouldPop()
 		{
 			var shellItem = _context.Shell.CurrentItem;
-			var tab = shellItem?.CurrentItem;
-			var stack = tab?.Stack.ToList();
+			var content = shellItem?.CurrentItem;
+			var stack = content?.Stack.ToList();
 
 			stack.RemoveAt(stack.Count - 1);
 
-			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, tab, stack, true);
+			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, content, stack, true);
 		}
 
 		private class GestureDelegate : UIGestureRecognizerDelegate
@@ -404,9 +404,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private class NavDelegate : UINavigationControllerDelegate
 		{
-			private readonly ShellTabItemRenderer _self;
+			private readonly ShellContentRenderer _self;
 
-			public NavDelegate(ShellTabItemRenderer renderer)
+			public NavDelegate(ShellContentRenderer renderer)
 			{
 				_self = renderer;
 			}

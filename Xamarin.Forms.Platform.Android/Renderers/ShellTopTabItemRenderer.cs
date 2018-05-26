@@ -37,12 +37,12 @@ namespace Xamarin.Forms.Platform.Android
 			_navigationArea?.Dispose();
 
 			_navigationArea = null;
-			CurrentTabItem = null;
+			ShellContent = null;
 		}
 
 		protected override ViewGroup GetNavigationTarget() => _navigationArea;
 
-		protected override IShellObservableFragment GetOrCreateFragmentForTab(ShellTabItem tab)
+		protected override IShellObservableFragment GetOrCreateFragmentForTab(ShellContent tab)
 		{
 			return _rootFragment ?? (_rootFragment = new ShellTopTabFragment(ShellContext) { ShellItem = ShellItem });
 		}
