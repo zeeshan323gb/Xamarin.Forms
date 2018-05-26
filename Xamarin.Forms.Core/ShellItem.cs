@@ -11,8 +11,8 @@ namespace Xamarin.Forms
 	{
 		#region PropertyKeys
 
-		private static readonly BindablePropertyKey ItemsPropertyKey = BindableProperty.CreateReadOnly(nameof(Items), typeof(ShellTabItemCollection), typeof(ShellItem), null,
-				defaultValueCreator: bo => new ShellTabItemCollection { Inner = new ElementCollection<ShellTabItem>(((ShellItem)bo)._children) });
+		private static readonly BindablePropertyKey ItemsPropertyKey = BindableProperty.CreateReadOnly(nameof(Items), typeof(ShellContentCollection), typeof(ShellItem), null,
+				defaultValueCreator: bo => new ShellContentCollection { Inner = new ElementCollection<ShellContent>(((ShellItem)bo)._children) });
 
 		#endregion PropertyKeys
 
@@ -31,14 +31,14 @@ namespace Xamarin.Forms
 			if (isChecked)
 			{
 				SetValue(IsCheckedPropertyKey, true);
-				foreach (var tab in Items)
-					tab.SetValue(IsCheckedPropertyKey, tab == CurrentItem);
+				foreach (var content in Items)
+					content.SetValue(IsCheckedPropertyKey, content == CurrentItem);
 			}
 			else
 			{
 				SetValue(IsCheckedPropertyKey, false);
-				foreach (var tab in Items)
-					tab.SetValue(IsCheckedPropertyKey, false);
+				foreach (var content in Items)
+					content.SetValue(IsCheckedPropertyKey, false);
 			}
 		}
 
@@ -47,7 +47,7 @@ namespace Xamarin.Forms
 		#endregion IShellItemController
 
 		public static readonly BindableProperty CurrentItemProperty =
-			BindableProperty.Create(nameof(CurrentItem), typeof(ShellTabItem), typeof(ShellItem), null, BindingMode.TwoWay,
+			BindableProperty.Create(nameof(CurrentItem), typeof(ShellContent), typeof(ShellItem), null, BindingMode.TwoWay,
 				propertyChanged: OnCurrentItemChanged);
 
 		public static readonly BindableProperty GroupBehaviorProperty =
@@ -65,9 +65,9 @@ namespace Xamarin.Forms
 			_platformConfigurationRegistry = new Lazy<PlatformConfigurationRegistry<ShellItem>>(() => new PlatformConfigurationRegistry<ShellItem>(this));
 		}
 
-		public ShellTabItem CurrentItem
+		public ShellContent CurrentItem
 		{
-			get { return (ShellTabItem)GetValue(CurrentItemProperty); }
+			get { return (ShellContent)GetValue(CurrentItemProperty); }
 			set { SetValue(CurrentItemProperty, value); }
 		}
 
@@ -77,7 +77,7 @@ namespace Xamarin.Forms
 			set { SetValue(GroupBehaviorProperty, value); }
 		}
 
-		public ShellTabItemCollection Items => (ShellTabItemCollection)GetValue(ItemsProperty);
+		public ShellContentCollection Items => (ShellContentCollection)GetValue(ItemsProperty);
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildren ?? (_logicalChildren = new ReadOnlyCollection<Element>(_children));
 
@@ -93,19 +93,19 @@ namespace Xamarin.Forms
 #if DEBUG
 		[Obsolete ("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
 #endif
-		public static implicit operator ShellItem(ShellTabItem tab)
+		public static implicit operator ShellItem(ShellContent content)
 		{
 			var result = new ShellItem();
-			result.Items.Add(tab);
-			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay, source: tab));
-			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay, source: tab));
+			result.Items.Add(content);
+			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay, source: content));
+			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay, source: content));
 			return result;
 		}
 
 #if DEBUG
 		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
 #endif
-		public static implicit operator ShellItem(TemplatedPage page) => (ShellTabItem)page;
+		public static implicit operator ShellItem(TemplatedPage page) => (ShellContent)page;
 
 #if DEBUG
 		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
@@ -137,7 +137,7 @@ namespace Xamarin.Forms
 
 			if (shellItem.Parent is IShellController shell)
 			{
-				shell.UpdateCurrentState(ShellNavigationSource.ShellTabItemChanged);
+				shell.UpdateCurrentState(ShellNavigationSource.ShellContentChanged);
 			}
 
 			((IShellItemController)bindable).UpdateChecked();

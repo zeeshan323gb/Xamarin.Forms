@@ -106,7 +106,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateBackgroundColor(Page view)
 		{
-			if (view.Parent is ShellTabItem)
+			if (view.Parent is ShellContent)
 			{
 				var background = view.BackgroundColor;
 				var color = Context.Resources.GetColor(global::Android.Resource.Color.BackgroundLight, Context.Theme);

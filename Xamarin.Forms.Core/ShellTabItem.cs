@@ -9,20 +9,20 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Content")]
-	public class ShellTabItem : BaseShellItem, IShellTabItemController
+	public class ShellContent : BaseShellItem, IShellContentController
 	{
 		#region PropertyKeys
 
 		private static readonly BindablePropertyKey MenuItemsPropertyKey =
-			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellTabItem), null, defaultValueCreator: bo => new MenuItemCollection());
+			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellContent), null, defaultValueCreator: bo => new MenuItemCollection());
 
 		#endregion PropertyKeys
 
-		#region IShellTabItemController
+		#region IShellContentController
 
 		private Page _contentCache;
 
-		event EventHandler<NavigationRequestedEventArgs> IShellTabItemController.NavigationRequested
+		event EventHandler<NavigationRequestedEventArgs> IShellContentController.NavigationRequested
 		{
 			add { _navigationRequested += value; }
 			remove { _navigationRequested -= value; }
@@ -30,19 +30,19 @@ namespace Xamarin.Forms
 
 		private event EventHandler<NavigationRequestedEventArgs> _navigationRequested;
 
-		Page IShellTabItemController.CurrentPage
+		Page IShellContentController.CurrentPage
 		{
 			get
 			{
 				if (_navStack.Count > 1)
 					return _navStack[_navStack.Count - 1];
-				return ((IShellTabItemController)this).RootPage;
+				return ((IShellContentController)this).RootPage;
 			}
 		}
 
-		Page IShellTabItemController.RootPage => _contentCache ?? (Content as Page);
+		Page IShellContentController.RootPage => _contentCache ?? (Content as Page);
 
-		Page IShellTabItemController.GetOrCreateContent()
+		Page IShellContentController.GetOrCreateContent()
 		{
 			var template = ContentTemplate;
 			var content = Content;
@@ -65,7 +65,7 @@ namespace Xamarin.Forms
 			return result;
 		}
 
-		void IShellTabItemController.RecyclePage(Page page)
+		void IShellContentController.RecyclePage(Page page)
 		{
 			if (_contentCache == page)
 			{
@@ -74,7 +74,7 @@ namespace Xamarin.Forms
 			}
 		}
 
-		void IShellTabItemController.SendPopped()
+		void IShellContentController.SendPopped()
 		{
 			if (_navStack.Count <= 1)
 				throw new Exception("Nav Stack consistency error");
@@ -87,13 +87,13 @@ namespace Xamarin.Forms
 			SendUpdateCurrentState(ShellNavigationSource.Pop);
 		}
 
-		#endregion IShellTabItemController
+		#endregion IShellContentController
 
 		public static readonly BindableProperty ContentProperty =
-			BindableProperty.Create(nameof(Content), typeof(object), typeof(ShellTabItem), null, BindingMode.OneTime, propertyChanged: OnContentChanged);
+			BindableProperty.Create(nameof(Content), typeof(object), typeof(ShellContent), null, BindingMode.OneTime, propertyChanged: OnContentChanged);
 
 		public static readonly BindableProperty ContentTemplateProperty =
-			BindableProperty.Create(nameof(ContentTemplate), typeof(DataTemplate), typeof(ShellTabItem), null, BindingMode.OneTime);
+			BindableProperty.Create(nameof(ContentTemplate), typeof(DataTemplate), typeof(ShellContent), null, BindingMode.OneTime);
 
 		public static readonly BindableProperty MenuItemsProperty = MenuItemsPropertyKey.BindableProperty;
 
@@ -105,7 +105,7 @@ namespace Xamarin.Forms
 
 		public event EventHandler Reselected;
 
-		public ShellTabItem()
+		public ShellContent()
 		{
 			((INotifyCollectionChanged)MenuItems).CollectionChanged += MenuItemsCollectionChanged;
 			Navigation = new NavigationImpl(this);
@@ -133,9 +133,9 @@ namespace Xamarin.Forms
 
 		private ShellItem ShellItem => Parent as ShellItem;
 
-		public static implicit operator ShellTabItem(TemplatedPage page)
+		public static implicit operator ShellContent(TemplatedPage page)
 		{
-			var result = new ShellTabItem();
+			var result = new ShellContent();
 
 			result.Content = page;
 			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
@@ -327,25 +327,25 @@ namespace Xamarin.Forms
 
 		private static void OnContentChanged(BindableObject bindable, object oldValue, object newValue)
 		{
-			var shellTabItem = (ShellTabItem)bindable;
+			var shellContent = (ShellContent)bindable;
 			// This check is wrong but will work for testing
-			if (shellTabItem.ContentTemplate == null)
+			if (shellContent.ContentTemplate == null)
 			{
 				// deparent old item
 				if (oldValue is Page oldElement)
-					shellTabItem.OnChildRemoved(oldElement);
+					shellContent.OnChildRemoved(oldElement);
 
 				// make sure LogicalChildren collection stays consisten
-				shellTabItem._logicalChildren.Clear();
+				shellContent._logicalChildren.Clear();
 				if (newValue is Page newElement)
 				{
-					shellTabItem._logicalChildren.Add((Element)newValue);
+					shellContent._logicalChildren.Add((Element)newValue);
 					// parent new item
-					shellTabItem.OnChildAdded(newElement);
+					shellContent.OnChildAdded(newElement);
 				}
 			}
 
-			if (shellTabItem.Parent is ShellItem shellItem)
+			if (shellContent.Parent is ShellItem shellItem)
 			{
 				shellItem?.SendStructureChanged();
 			}
@@ -390,9 +390,9 @@ namespace Xamarin.Forms
 
 		public class NavigationImpl : NavigationProxy
 		{
-			private readonly ShellTabItem _owner;
+			private readonly ShellContent _owner;
 
-			public NavigationImpl(ShellTabItem owner) => _owner = owner;
+			public NavigationImpl(ShellContent owner) => _owner = owner;
 
 			protected override IReadOnlyList<Page> GetNavigationStack() => _owner.GetNavigationStack();
 

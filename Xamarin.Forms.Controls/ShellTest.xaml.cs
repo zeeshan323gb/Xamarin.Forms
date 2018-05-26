@@ -24,7 +24,7 @@ namespace Xamarin.Forms.Controls
 			MenuItem menuItem = _duck;
 			menuItem.Clicked += (s, e) =>
 			{
-				Items[0].Items.Add(new ShellTabItem
+				Items[0].Items.Add(new Forms.ShellContent
 				{
 					Content = new ButtonGallery(),
 					Title = "Show Test",

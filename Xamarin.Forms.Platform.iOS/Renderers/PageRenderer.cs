@@ -66,7 +66,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			base.ViewDidLayoutSubviews();
 
-			if (Element.Parent is ShellTabItem)
+			if (Element.Parent is ShellContent)
 				Element.Layout(View.Bounds.ToRectangle());
 
 			UpdateShellInsetPadding();
@@ -132,7 +132,7 @@ namespace Xamarin.Forms.Platform.iOS
 			_packager.Load();
 
 			Element.PropertyChanged += OnHandlePropertyChanged;
-			_tracker = new VisualElementTracker(this, !(Element.Parent is ShellTabItem));
+			_tracker = new VisualElementTracker(this, !(Element.Parent is ShellContent));
 
 			_events = new EventTracker(this);
 			_events.LoadEvents(View);

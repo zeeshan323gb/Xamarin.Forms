@@ -185,13 +185,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 					if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
 					{
-						foreach (var tabItem in shellItem.Items)
+						foreach (var shellContent in shellItem.Items)
 						{
-							section.Add(tabItem);
+							section.Add(shellContent);
 							// when an item is selected we will display its menu items
-							if (isCurrentShellItem && tabItem == shellItem.CurrentItem)
+							if (isCurrentShellItem && shellContent == shellItem.CurrentItem)
 							{
-								foreach (var menuItem in tabItem.MenuItems)
+								foreach (var menuItem in shellContent.MenuItems)
 									section.Add(menuItem);
 							}
 						}
