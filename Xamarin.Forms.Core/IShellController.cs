@@ -27,6 +27,8 @@ namespace Xamarin.Forms
 
 		void AppearanceChanged(Element source, bool appearanceSet);
 
+		List<List<Element>> GenerateFlyoutGrouping();
+
 		ShellNavigationState GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, bool includeStack = true);
 
 		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellSection shellSection, ShellContent shellContent, IList<Page> stack, bool canCancel);

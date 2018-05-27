@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Xamarin.Forms
 {
 	[ContentProperty("Items")]
-	public class ShellItem : BaseShellItem, IShellItemController, IElementConfiguration<ShellItem>
+	public class ShellItem : ShellGroupItem, IShellItemController, IElementConfiguration<ShellItem>
 	{
 		#region PropertyKeys
 
@@ -58,8 +58,6 @@ namespace Xamarin.Forms
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellSection), typeof(ShellItem), null, BindingMode.TwoWay,
 				propertyChanged: OnCurrentItemChanged);
 
-		public static readonly BindableProperty GroupBehaviorProperty =
-			BindableProperty.Create(nameof(FlyoutDisplayOptions), typeof(FlyoutDisplayOptions), typeof(ShellItem), FlyoutDisplayOptions.AsSingleItem, BindingMode.OneTime);
 
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
 
@@ -77,12 +75,6 @@ namespace Xamarin.Forms
 		{
 			get { return (ShellSection)GetValue(CurrentItemProperty); }
 			set { SetValue(CurrentItemProperty, value); }
-		}
-
-		public FlyoutDisplayOptions FlyoutDisplayOptions
-		{
-			get { return (FlyoutDisplayOptions)GetValue(GroupBehaviorProperty); }
-			set { SetValue(GroupBehaviorProperty, value); }
 		}
 
 		public ShellSectionCollection Items => (ShellSectionCollection)GetValue(ItemsProperty);

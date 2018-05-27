@@ -9,16 +9,13 @@ using Xamarin.Forms.Internals;
 namespace Xamarin.Forms
 {
 	[ContentProperty ("Items")]
-	public class ShellSection : BaseShellItem, IShellSectionController
+	public class ShellSection : ShellGroupItem, IShellSectionController
 	{
 		#region PropertyKeys
 
 		private static readonly BindablePropertyKey ItemsPropertyKey =
 			BindableProperty.CreateReadOnly(nameof(Items), typeof(ShellContentCollection), typeof(ShellSection), null,
 				defaultValueCreator: bo => new ShellContentCollection());
-		private static readonly BindablePropertyKey MenuItemsPropertyKey =
-					BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellSection), null,
-				defaultValueCreator: bo => new MenuItemCollection());
 
 		#endregion PropertyKeys
 
@@ -96,8 +93,6 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
 
-		public static readonly BindableProperty MenuItemsProperty = MenuItemsPropertyKey.BindableProperty;
-
 		private IList<Element> _logicalChildren = new List<Element>();
 
 		private ReadOnlyCollection<Element> _logicalChildrenReadOnly;
@@ -107,7 +102,6 @@ namespace Xamarin.Forms
 		public ShellSection()
 		{
 			((INotifyCollectionChanged)Items).CollectionChanged += ItemsCollectionChanged;
-			((INotifyCollectionChanged)MenuItems).CollectionChanged += MenuItemsCollectionChanged;
 			Navigation = new NavigationImpl(this);
 		}
 
@@ -118,8 +112,6 @@ namespace Xamarin.Forms
 		}
 
 		public ShellContentCollection Items => (ShellContentCollection)GetValue(ItemsProperty);
-
-		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
 
 		public IReadOnlyList<Page> Stack => _navStack;
 

@@ -61,27 +61,27 @@
 		<ShellContent Route="games" Style="{StaticResource GreenShell}" Title="Games" Icon="games.png" FlyoutIcon="gamesflyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
 		<ShellContent Route="movies" Style="{StaticResource MoviesShell}" Title="Movies &amp; TV" 
 					  Icon="film.png" FlyoutIcon="filmflyout.png" ContentTemplate="{DataTemplate local:MoviesPage}">
-			<!--<ShellContent.MenuItems>
+			<ShellContent.MenuItems>
 				<MenuItem Icon="film.png" Text="Open Movies App" />
-			</ShellContent.MenuItems>-->
+			</ShellContent.MenuItems>
 		</ShellContent>
 		<ShellContent Route="books" Style="{StaticResource BooksShell}" Title="Books" 
 					  Icon="books.png" FlyoutIcon="booksflyout.png" ContentTemplate="{DataTemplate local:BooksPage}">
-			<!--<ShellContent.MenuItems>
+			<ShellContent.MenuItems>
 				<MenuItem Icon="books.png" Text="Open Reader" />
-			</ShellContent.MenuItems>-->
+			</ShellContent.MenuItems>
 		</ShellContent>
 		<ShellContent Route="music" Style="{StaticResource MusicShell}" Title="Music" 
 					  Icon="headphone.png" FlyoutIcon="headphoneflyout.png" ContentTemplate="{DataTemplate local:MusicPage}">
-			<!--<ShellContent.MenuItems>
+			<ShellContent.MenuItems>
 				<MenuItem Icon="headphone.png" Text="Open Music App" />
-			</ShellContent.MenuItems>-->
+			</ShellContent.MenuItems>
 		</ShellContent>
 		<ShellContent Route="news" Style="{StaticResource NewsShell}" Title="Newsstand" 
 					  Icon="newspaper.png" FlyoutIcon="newspaperflyout.png" ContentTemplate="{DataTemplate local:NewsPage}">
-			<!--<ShellContent.MenuItems>
+			<ShellContent.MenuItems>
 				<MenuItem Icon="newspaper.png" Text="Open News App" />
-			</ShellContent.MenuItems>-->
+			</ShellContent.MenuItems>
 		</ShellContent>
 	</ShellItem>
 

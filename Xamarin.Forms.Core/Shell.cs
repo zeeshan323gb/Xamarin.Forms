@@ -355,7 +355,7 @@ namespace Xamarin.Forms
 				throw new NotImplementedException();
 			else
 				parts.RemoveAt(0);
-			
+
 			var shellItemRoute = parts[0];
 			ApplyQueryAttributes(this, queryData, false);
 
@@ -694,6 +694,72 @@ namespace Xamarin.Forms
 					OnChildAdded(_flyoutHeaderView);
 				_headerChanged?.Invoke(this, EventArgs.Empty);
 			}
+		}
+
+		List<List<Element>> IShellController.GenerateFlyoutGrouping()
+		{
+			// The idea here is to create grouping such that the Flyout would
+			// render correctly if it renderered each item in the groups in order
+			// but put a line between the groups. This is needed because our grouping can
+			// actually go 3 layers deep.
+
+			// Ideally this lets us control where lines are drawn in the core code
+			// just by changing how we generate these groupings
+
+			var result = new List<List<Element>>();
+
+			var currentGroup = new List<Element>();
+			result.Add(currentGroup);
+
+			void IncrementGroup()
+			{
+				if (currentGroup.Count > 0)
+				{
+					currentGroup = new List<Element>();
+					result.Add(currentGroup);
+				}
+			}
+
+			foreach (var shellItem in Items)
+			{
+				if (shellItem.FlyoutDisplayOptions == FlyoutDisplayOptions.AsMultipleItems)
+				{
+					IncrementGroup();
+
+					foreach (var shellSection in shellItem.Items)
+					{
+						if (shellSection.FlyoutDisplayOptions == FlyoutDisplayOptions.AsMultipleItems)
+						{
+							IncrementGroup();
+
+							foreach (var shellContent in shellSection.Items)
+							{
+								currentGroup.Add(shellContent);
+								if (shellContent == shellSection.CurrentItem)
+								{
+									currentGroup.AddRange(shellContent.MenuItems);
+								}
+							}
+							IncrementGroup();
+						}
+						else
+						{
+							currentGroup.Add(shellSection);
+						}
+					}
+					IncrementGroup();
+				}
+				else
+				{
+					currentGroup.Add(shellItem);
+				}
+			}
+
+			IncrementGroup();
+
+			currentGroup.AddRange(MenuItems);
+
+			return result;
 		}
 
 		internal void SendStructureChanged()

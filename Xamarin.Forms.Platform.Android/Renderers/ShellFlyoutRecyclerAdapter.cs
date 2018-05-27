@@ -80,7 +80,7 @@ namespace Xamarin.Forms.Platform.Android
 			linearLayout.LayoutParameters = new RecyclerView.LayoutParams(LP.MatchParent, LP.WrapContent);
 
 			var bar = new AView(parent.Context);
-			bar.SetBackgroundColor(Color.Black.MultiplyAlpha(0.2).ToAndroid());
+			bar.SetBackgroundColor(Color.Black.MultiplyAlpha(0.14).ToAndroid());
 			bar.LayoutParameters = new LP(LP.MatchParent, (int)parent.Context.ToPixels(1));
 			linearLayout.AddView(bar);
 
@@ -96,30 +96,19 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			var result = new List<AdapterListItem>();
 
-			ShellItem previous = null;
-			foreach (var item in Shell.Items)
-			{
-				if (item.FlyoutDisplayOptions == FlyoutDisplayOptions.AsMultipleItems)
-				{
-					for (int i = 0; i < item.Items.Count; i++)
-					{
-						var content = item.Items[i];
-						result.Add(new AdapterListItem(content, previous != null && i == 0));
-					}
-				}
-				else
-				{
-					result.Add(new AdapterListItem(item, previous?.FlyoutDisplayOptions == FlyoutDisplayOptions.AsMultipleItems));
-				}
+			var grouping = ((IShellController)_shellContext.Shell).GenerateFlyoutGrouping();
 
-				previous = item;
-			}
+			bool skip = true;
 
-			var menuItems = Shell.MenuItems;
-			for (int i = 0; i < menuItems.Count; i++)
+			foreach (var sublist in grouping)
 			{
-				var menuItem = menuItems[i];
-				result.Add(new AdapterListItem(menuItem, i == 0));
+				bool first = !skip;
+				foreach (var element in sublist)
+				{
+					result.Add(new AdapterListItem(element, first));
+					first = false;
+				}
+				skip = false;
 			}
 
 			return result;
@@ -156,23 +145,24 @@ namespace Xamarin.Forms.Platform.Android
 
 			VisualStateManager.SetVisualStateGroups(grid, groups);
 
-			grid.HeightRequest = 40;
-			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = 50 });
+			grid.HeightRequest = 50;
+			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = 54 });
 			grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
 
 			var image = new Image();
 			image.VerticalOptions = image.HorizontalOptions = LayoutOptions.Center;
-			image.HeightRequest = image.WidthRequest = 22;
+			image.HeightRequest = image.WidthRequest = 24;
 			image.SetBinding(Image.SourceProperty, iconBinding);
 			grid.Children.Add(image);
 
 			var label = new Label();
+			label.Margin = new Thickness(20, 0, 0, 0);
 			label.VerticalTextAlignment = TextAlignment.Center;
 			label.SetBinding(Label.TextProperty, textBinding);
 			grid.Children.Add(label, 1, 0);
 
 			label.FontSize = 14;
-			label.TextColor = Color.Black;
+			label.TextColor = Color.Black.MultiplyAlpha(0.87);
 			label.FontFamily = "sans-serif-medium";
 
 			return grid;

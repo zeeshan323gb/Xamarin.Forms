@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
@@ -7,7 +8,17 @@ namespace Xamarin.Forms
 	[ContentProperty("Content")]
 	public class ShellContent : BaseShellItem, IShellContentController
 	{
+		#region PropertyKeys
+
+		private static readonly BindablePropertyKey MenuItemsPropertyKey =
+			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(ShellContent), null,
+				defaultValueCreator: bo => new MenuItemCollection());
+
+		#endregion PropertyKeys
+
 		#region IShellContentController
+
+		Page IShellContentController.Page => _contentCache;
 
 		Page IShellContentController.GetOrCreateContent()
 		{
@@ -41,8 +52,6 @@ namespace Xamarin.Forms
 			}
 		}
 
-		Page IShellContentController.Page => _contentCache;
-
 		#endregion IShellContentController
 
 		public static readonly BindableProperty ContentProperty =
@@ -51,9 +60,16 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ContentTemplateProperty =
 			BindableProperty.Create(nameof(ContentTemplate), typeof(DataTemplate), typeof(ShellContent), null, BindingMode.OneTime);
 
+		public static readonly BindableProperty MenuItemsProperty = MenuItemsPropertyKey.BindableProperty;
+
 		private Page _contentCache;
 		private IList<Element> _logicalChildren = new List<Element>();
 		private ReadOnlyCollection<Element> _logicalChildrenReadOnly;
+
+		public ShellContent()
+		{
+			((INotifyCollectionChanged)MenuItems).CollectionChanged += MenuItemsCollectionChanged;
+		}
 
 		public object Content
 		{
@@ -67,6 +83,7 @@ namespace Xamarin.Forms
 			set { SetValue(ContentTemplateProperty, value); }
 		}
 
+		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
 
 		public static implicit operator ShellContent(TemplatedPage page)
@@ -107,6 +124,21 @@ namespace Xamarin.Forms
 			if (shellContent.Parent?.Parent is ShellItem shellItem)
 			{
 				shellItem?.SendStructureChanged();
+			}
+		}
+
+		private void MenuItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			if (e.NewItems != null)
+			{
+				foreach (Element el in e.NewItems)
+					OnChildAdded(el);
+			}
+
+			if (e.OldItems != null)
+			{
+				foreach (Element el in e.OldItems)
+					OnChildRemoved(el);
 			}
 		}
 	}
