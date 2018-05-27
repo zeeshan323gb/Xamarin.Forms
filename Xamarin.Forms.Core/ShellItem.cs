@@ -99,8 +99,9 @@ namespace Xamarin.Forms
 			result.Route = Routing.GenerateImplicitRoute(shellSection.Route);
 
 			result.Items.Add(shellSection);
-			result.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay, source: shellSection));
-			result.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay, source: shellSection));
+			result.SetBinding(TitleProperty, new Binding(nameof(Title), BindingMode.OneWay, source: shellSection));
+			result.SetBinding(IconProperty, new Binding(nameof(Icon), BindingMode.OneWay, source: shellSection));
+			result.SetBinding(FlyoutDisplayOptionsProperty, new Binding(nameof(FlyoutDisplayOptions), BindingMode.OneTime, source: shellSection));
 			return result;
 		}
 

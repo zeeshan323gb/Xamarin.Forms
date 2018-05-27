@@ -37,7 +37,7 @@
 		<local:FlyoutHeader />
 	</Shell.FlyoutHeader>
 
-	<ShellSection Route="apps" Title="My apps &amp; games" Icon="grid.png" Style="{StaticResource GreenShell}">
+	<ShellSection FlyoutDisplayOptions="AsMultipleItems" Route="apps" Title="My apps &amp; games" Icon="grid.png" Style="{StaticResource GreenShell}">
 		<ShellContent Route="updates" Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 		<ShellContent Route="installed" Title="Installed" ContentTemplate="{DataTemplate local:InstalledPage}" />
 		<ShellContent Route="library" Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />

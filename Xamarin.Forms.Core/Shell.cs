@@ -898,11 +898,26 @@ namespace Xamarin.Forms
 
 			pivot = WalkToPage(pivot);
 
+			bool foundShellContent = false;
 			bool anySet = false;
 			ShellAppearance result = new ShellAppearance();
 			// Now we walk up
 			while (!Application.IsApplicationOrNull(pivot))
 			{
+				if (pivot is ShellContent)
+					foundShellContent = true;
+
+				// One minor deviation here. Even though a pushed page is technically the child of
+				// a ShellSection and not the ShellContent, we want the root ShellContent to 
+				// be taken into account. Yes this could behavior oddly if the developer switches
+				// tabs while a page is pushed, however that is in the developers wheelhouse
+				// and this will be the generally expected behavior.
+				if (!foundShellContent && pivot is ShellSection shellSection && shellSection.CurrentItem != null)
+				{
+					if (result.Ingest(shellSection.CurrentItem))
+						anySet = true;
+				}
+
 				if (result.Ingest(pivot))
 					anySet = true;
 
