@@ -89,16 +89,12 @@ namespace Xamarin.Forms.Platform.Android
 			((IShellController)ShellContext.Shell).RemoveAppearanceObserver(this);
 
 			base.OnDestroy();
-
-			// The evil dance starts here
-			Device.BeginInvokeOnMainThread(Dispose);
 		}
 
 		protected virtual void SetAppearance(ShellAppearance appearance) => _appearanceTracker.SetAppearance(_bottomView, appearance);
 
 		protected virtual void ChangeSection(ShellSection shellSection)
 		{
-			// FIXME, WRONG
 			var controller = (IShellController)ShellContext.Shell;
 			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellSectionChanged,
 				ShellItem,
