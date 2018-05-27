@@ -1,4 +1,6 @@
-﻿namespace Xamarin.Forms
+﻿using System.Collections.Generic;
+
+namespace Xamarin.Forms
 {
 	public class BaseShellItem : NavigableElement
 	{
@@ -33,6 +35,22 @@
 		{
 			get { return (ImageSource)GetValue(IconProperty); }
 			set { SetValue(IconProperty, value); }
+		}
+
+		internal void UpdateChildrenChecked(bool isChecked, IEnumerable<Element> children, Element currentItem)
+		{
+			if (isChecked)
+			{
+				SetValue(IsCheckedPropertyKey, true);
+				foreach (var content in children)
+					content.SetValue(IsCheckedPropertyKey, content == currentItem);
+			}
+			else
+			{
+				SetValue(IsCheckedPropertyKey, false);
+				foreach (var content in children)
+					content.SetValue(IsCheckedPropertyKey, false);
+			}
 		}
 
 		public bool IsChecked => (bool)GetValue(IsCheckedProperty);

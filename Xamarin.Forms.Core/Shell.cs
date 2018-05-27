@@ -169,6 +169,7 @@ namespace Xamarin.Forms
 				if (item is IShellController shell)
 				{
 					shell.AppearanceChanged(source, true);
+					return;
 				}
 				item = item.Parent;
 			}
@@ -258,22 +259,7 @@ namespace Xamarin.Forms
 				Element leaf;
 				if (appearanceSet)
 				{
-					leaf = pivot;
-					if (leaf is Shell shell)
-					{
-						leaf = shell.CurrentItem;
-					}
-					if (leaf is ShellItem shellItem)
-					{
-						leaf = shellItem.CurrentItem;
-					}
-					if (leaf is IShellContentController shellContent)
-					{
-						// this is the same as .Last but easier and will add in the root if not null
-						// it generally wont be null but this is just in case
-						leaf = shellContent.CurrentPage ?? leaf;
-					}
-
+					leaf = WalkToPage(pivot);
 					target = source;
 				}
 				else
@@ -294,14 +280,14 @@ namespace Xamarin.Forms
 			}
 		}
 
-		ShellNavigationState IShellController.GetNavigationState(ShellItem item, ShellContent content, bool includeStack = true)
+		ShellNavigationState IShellController.GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, bool includeStack = true)
 		{
-			return GetNavigationState(item, content, includeStack ? content.Stack.ToList() : null);
+			return GetNavigationState(shellItem, shellSection, shellContent, includeStack ? shellSection.Stack.ToList() : null);
 		}
 
-		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellContent content, IList<Page> stack, bool canCancel)
+		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IList<Page> stack, bool canCancel)
 		{
-			var proposedState = GetNavigationState(item, content, stack);
+			var proposedState = GetNavigationState(shellItem, shellSection, shellContent, stack);
 			return ProposeNavigation(source, proposedState, canCancel);
 		}
 
@@ -327,9 +313,10 @@ namespace Xamarin.Forms
 		{
 			var oldState = CurrentState;
 			var shellItem = CurrentItem;
-			var shellContent = shellItem?.CurrentItem;
-			var stack = shellContent?.Stack;
-			var result = GetNavigationState(shellItem, shellContent, stack.ToList());
+			var shellSection = shellItem?.CurrentItem;
+			var shellContent = shellSection?.CurrentItem;
+			var stack = shellSection?.Stack;
+			var result = GetNavigationState(shellItem, shellSection, shellContent, stack.ToList());
 
 			SetValueFromRenderer(CurrentStatePropertyKey, result);
 
@@ -337,6 +324,230 @@ namespace Xamarin.Forms
 		}
 
 		#endregion IShellController
+
+		#region URI Navigation
+
+		public async Task GoToAsync(ShellNavigationState state, bool animate = true)
+		{
+			// FIXME: This should not be none, we need to compute the delta and set flags correctly
+			var accept = ProposeNavigation(ShellNavigationSource.Unknown, state, true);
+			if (!accept)
+				return;
+
+			_accumulateNavigatedEvents = true;
+
+			var uri = state.Location;
+			var queryString = uri.Query;
+			var queryData = ParseQueryString(queryString);
+			var path = uri.AbsolutePath;
+
+			path = path.TrimEnd('/');
+
+			var parts = path.Substring(1).Split('/').ToList();
+
+			if (path.Length < 2)
+				throw new InvalidOperationException("Path must be at least 2 items long in Shell navigation");
+
+			var shellRoute = parts[0];
+
+			var expectedShellRoute = Routing.GetRoute(this) ?? string.Empty;
+			if (expectedShellRoute != shellRoute)
+				throw new NotImplementedException();
+			else
+				parts.RemoveAt(0);
+			
+			var shellItemRoute = parts[0];
+			ApplyQueryAttributes(this, queryData, false);
+
+			foreach (var shellItem in Items)
+			{
+				if (Routing.CompareRoutes(shellItem.Route, shellItemRoute, out var isImplicit))
+				{
+					ApplyQueryAttributes(shellItem, queryData, parts.Count == 1);
+
+					if (CurrentItem != shellItem)
+						SetValueFromRenderer(CurrentItemProperty, shellItem);
+
+					if (!isImplicit)
+						parts.RemoveAt(0);
+
+					if (parts.Count > 0)
+						await ((IShellItemController)shellItem).GoToPart(parts, queryData);
+
+					break;
+				}
+			}
+
+			_accumulateNavigatedEvents = false;
+
+			// this can be null in the event that no navigation actually took place!
+			if (_accumulatedEvent != null)
+				OnNavigated(_accumulatedEvent);
+		}
+
+		internal static void ApplyQueryAttributes(Element element, IDictionary<string, string> query, bool isLastItem)
+		{
+			if (query.Count == 0)
+				return;
+
+			string prefix = "";
+			if (!isLastItem)
+			{
+				var route = Routing.GetRoute(element);
+				if (string.IsNullOrEmpty(route))
+					return;
+				prefix = route + ".";
+			}
+
+			var typeInfo = element.GetType().GetTypeInfo();
+			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+
+			if (effectAttributes.Length == 0)
+				return;
+
+			foreach (var a in effectAttributes)
+			{
+				if (a is QueryPropertyAttribute attrib)
+				{
+					if (query.TryGetValue(prefix + attrib.QueryId, out var value))
+					{
+						PropertyInfo prop = null;
+
+						while (prop == null && typeInfo != null)
+						{
+							prop = typeInfo.GetDeclaredProperty(attrib.Name);
+							typeInfo = typeInfo.BaseType.GetTypeInfo();
+						}
+
+						if (prop != null && prop.CanWrite && prop.SetMethod.IsPublic)
+						{
+							prop.SetValue(element, value);
+						}
+					}
+				}
+			}
+		}
+
+		private static string GenerateQueryString(Dictionary<string, string> queryData)
+		{
+			if (queryData.Count == 0)
+				return string.Empty;
+			string result = "?";
+
+			bool addAnd = false;
+			foreach (var kvp in queryData)
+			{
+				if (addAnd)
+					result += "&";
+				result += kvp.Key + "=" + kvp.Value;
+				addAnd = true;
+			}
+
+			return result;
+		}
+
+		private static void GetQueryStringData(Element element, bool isLastItem, Dictionary<string, string> result)
+		{
+			string prefix = string.Empty;
+			if (!isLastItem)
+			{
+				var route = Routing.GetRoute(element);
+				if (string.IsNullOrEmpty(route))
+					return;
+				prefix = route + ".";
+			}
+
+			var typeInfo = element.GetType().GetTypeInfo();
+			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+
+			if (effectAttributes.Length == 0)
+				return;
+
+			foreach (var a in effectAttributes)
+			{
+				if (a is QueryPropertyAttribute attrib)
+				{
+					PropertyInfo prop = null;
+
+					while (prop == null && typeInfo != null)
+					{
+						prop = typeInfo.GetDeclaredProperty(attrib.Name);
+						typeInfo = typeInfo.BaseType.GetTypeInfo();
+					}
+
+					if (prop != null && prop.CanRead && prop.GetMethod.IsPublic)
+					{
+						var val = (string)prop.GetValue(element);
+						var key = isLastItem ? prefix + attrib.QueryId : attrib.QueryId;
+						result[key] = val;
+					}
+				}
+			}
+		}
+
+		private ShellNavigationState GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IList<Page> sectionStack)
+		{
+			var state = RouteScheme + "://" + RouteHost + "/" + Route + "/";
+			Dictionary<string, string> queryData = new Dictionary<string, string>();
+
+			bool stackAtRoot = sectionStack == null || sectionStack.Count <= 1;
+
+			GetQueryStringData(this, false, queryData);
+
+			if (shellItem != null)
+			{
+				var shellItemRoute = shellItem.Route;
+				if (!shellItemRoute.StartsWith(Routing.ImplicitPrefix))
+				{
+					state += shellItemRoute;
+					state += "/";
+				}
+
+				GetQueryStringData(shellItem, shellSection == null, queryData);
+
+				if (shellSection != null)
+				{
+					var shellSectionRoute = shellSection.Route;
+					if (!shellSectionRoute.StartsWith(Routing.ImplicitPrefix))
+					{
+						state += shellSectionRoute;
+						state += "/";
+					}
+
+					GetQueryStringData(shellSection, shellContent == null && stackAtRoot, queryData);
+
+					if (shellContent != null)
+					{
+						var shellContentRoute = shellContent.Route;
+						if (!shellContentRoute.StartsWith(Routing.ImplicitPrefix))
+						{
+							state += shellContentRoute;
+							state += "/";
+						}
+
+						GetQueryStringData(shellContent, stackAtRoot, queryData);
+					}
+
+					if (!stackAtRoot)
+					{
+						for (int i = 1; i < sectionStack.Count; i++)
+						{
+							var page = sectionStack[i];
+							state += Routing.GetRoute(page);
+							GetQueryStringData(page, i == sectionStack.Count - 1, queryData);
+							if (i < sectionStack.Count - 1)
+								state += "/";
+						}
+					}
+				}
+			}
+
+			var queryString = GenerateQueryString(queryData);
+
+			return state + queryString;
+		}
+
+		#endregion URI Navigation
 
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
@@ -485,140 +696,6 @@ namespace Xamarin.Forms
 			}
 		}
 
-		public async Task GoToAsync(ShellNavigationState state, bool animate = true)
-		{
-			// FIXME: This should not be none, we need to compute the delta and set flags correctly
-			var accept = ProposeNavigation(ShellNavigationSource.Unknown, state, true);
-			if (!accept)
-				return;
-
-			_accumulateNavigatedEvents = true;
-
-			var uri = state.Location;
-			var queryString = uri.Query;
-			var queryData = ParseQueryString(queryString);
-			var path = uri.AbsolutePath;
-
-			path = path.TrimEnd('/');
-
-			var parts = path.Substring(1).Split('/');
-
-			if (path.Length < 2)
-				throw new InvalidOperationException("Path must be at least 2 items long in Shell navigation");
-
-			var shellRoute = parts[0];
-			var shellItemRoute = parts[1];
-			var shellContentRoute = parts.Length > 2 ? parts[2] : null;
-
-			var expectedShellRoute = Routing.GetRoute(this) ?? string.Empty;
-			if (expectedShellRoute != shellRoute)
-				throw new NotImplementedException();
-
-			ApplyQueryAttributes(this, queryData, false);
-
-			bool changedTab = false;
-			// Find ShellItem
-			foreach (var shellItem in Items)
-			{
-				if (Routing.GetRoute(shellItem) == shellItemRoute)
-				{
-					ApplyQueryAttributes(shellItem, queryData, parts.Length == 2);
-					if (CurrentItem != shellItem)
-					{
-						changedTab = true;
-						SetValueFromRenderer(CurrentItemProperty, shellItem);
-					}
-
-					break;
-				}
-			}
-
-			// Find ShellContent
-			ShellContent selectedContent = null;
-			if (shellContentRoute != null)
-			{
-				var shellItem = CurrentItem;
-				foreach (var shellContent in shellItem.Items)
-				{
-					if (Routing.GetRoute(shellContent) == shellContentRoute)
-					{
-						ApplyQueryAttributes(shellContent, queryData, parts.Length == 3);
-						if (shellItem.CurrentItem != shellContent)
-						{
-							changedTab = true;
-							shellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellContent);
-						}
-
-						selectedContent = shellContent;
-						break;
-					}
-				}
-			}
-
-			// Send out navigation to ShellContent
-			if (selectedContent != null)
-			{
-				List<string> navParts = new List<string>();
-				if (parts.Length > 3)
-				{
-					for (int i = 3; i < parts.Length; i++)
-					{
-						navParts.Add(parts[i]);
-					}
-				}
-				await selectedContent.GoToAsync(navParts, queryData, !changedTab);
-			}
-
-			_accumulateNavigatedEvents = false;
-
-			// this can be null in the event that no navigation actually took place!
-			if (_accumulatedEvent != null)
-				OnNavigated(_accumulatedEvent);
-		}
-
-		internal static void ApplyQueryAttributes(Element element, IDictionary<string, string> query, bool isLastItem)
-		{
-			if (query.Count == 0)
-				return;
-
-			string prefix = "";
-			if (!isLastItem)
-			{
-				var route = Routing.GetRoute(element);
-				if (string.IsNullOrEmpty(route))
-					return;
-				prefix = route + ".";
-			}
-
-			var typeInfo = element.GetType().GetTypeInfo();
-			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
-
-			if (effectAttributes.Length == 0)
-				return;
-
-			foreach (var a in effectAttributes)
-			{
-				if (a is QueryPropertyAttribute attrib)
-				{
-					if (query.TryGetValue(prefix + attrib.QueryId, out var value))
-					{
-						PropertyInfo prop = null;
-
-						while (prop == null && typeInfo != null)
-						{
-							prop = typeInfo.GetDeclaredProperty(attrib.Name);
-							typeInfo = typeInfo.BaseType.GetTypeInfo();
-						}
-
-						if (prop != null && prop.CanWrite && prop.SetMethod.IsPublic)
-						{
-							prop.SetValue(element, value);
-						}
-					}
-				}
-			}
-		}
-
 		internal void SendStructureChanged()
 		{
 			_structureChanged?.Invoke(this, EventArgs.Empty);
@@ -674,63 +751,6 @@ namespace Xamarin.Forms
 			Navigating?.Invoke(this, args);
 		}
 
-		private static string GenerateQueryString(Dictionary<string, string> queryData)
-		{
-			if (queryData.Count == 0)
-				return string.Empty;
-			string result = "?";
-
-			bool addAnd = false;
-			foreach (var kvp in queryData)
-			{
-				if (addAnd)
-					result += "&";
-				result += kvp.Key + "=" + kvp.Value;
-				addAnd = true;
-			}
-
-			return result;
-		}
-
-		private static void GetQueryStringData(Element element, bool isLastItem, Dictionary<string, string> result)
-		{
-			string prefix = string.Empty;
-			if (!isLastItem)
-			{
-				var route = Routing.GetRoute(element);
-				if (string.IsNullOrEmpty(route))
-					return;
-				prefix = route + ".";
-			}
-
-			var typeInfo = element.GetType().GetTypeInfo();
-			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
-
-			if (effectAttributes.Length == 0)
-				return;
-
-			foreach (var a in effectAttributes)
-			{
-				if (a is QueryPropertyAttribute attrib)
-				{
-					PropertyInfo prop = null;
-
-					while (prop == null && typeInfo != null)
-					{
-						prop = typeInfo.GetDeclaredProperty(attrib.Name);
-						typeInfo = typeInfo.BaseType.GetTypeInfo();
-					}
-
-					if (prop != null && prop.CanRead && prop.GetMethod.IsPublic)
-					{
-						var val = (string)prop.GetValue(element);
-						var key = isLastItem ? prefix + attrib.QueryId : attrib.QueryId;
-						result[key] = val;
-					}
-				}
-			}
-		}
-
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
 			var oldItem = (IShellItemController)oldValue;
@@ -741,6 +761,18 @@ namespace Xamarin.Forms
 			var shell = (Shell)bindable;
 			((IShellController)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
+		}
+
+		private static void OnFlyoutHeaderChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var shell = (Shell)bindable;
+			shell.OnFlyoutHeaderChanged(oldValue, newValue);
+		}
+
+		private static void OnFlyoutHeaderTemplateChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var shell = (Shell)bindable;
+			shell.OnFlyoutHeaderTemplateChanged((DataTemplate)oldValue, (DataTemplate)newValue);
 		}
 
 		private static void OnTitleViewChanged(BindableObject bindable, object oldValue, object newValue)
@@ -757,18 +789,6 @@ namespace Xamarin.Forms
 
 			if (newView != null)
 				newView.Parent = owner;
-		}
-
-		private static void OnFlyoutHeaderChanged(BindableObject bindable, object oldValue, object newValue)
-		{
-			var shell = (Shell)bindable;
-			shell.OnFlyoutHeaderChanged(oldValue, newValue);
-		}
-
-		private static void OnFlyoutHeaderTemplateChanged(BindableObject bindable, object oldValue, object newValue)
-		{
-			var shell = (Shell)bindable;
-			shell.OnFlyoutHeaderTemplateChanged((DataTemplate)oldValue, (DataTemplate)newValue);
 		}
 
 		private static Dictionary<string, string> ParseQueryString(string query)
@@ -800,46 +820,6 @@ namespace Xamarin.Forms
 				page = page.Parent;
 			}
 			return FlyoutBehavior;
-		}
-
-		private ShellNavigationState GetNavigationState(ShellItem item, ShellContent content, IList<Page> stack)
-		{
-			var state = RouteScheme + "://" + RouteHost + "/" + Route + "/";
-			Dictionary<string, string> queryData = new Dictionary<string, string>();
-
-			GetQueryStringData(this, false, queryData);
-
-			if (item != null)
-			{
-				state += Routing.GetRouteStringForElement(item);
-				state += "/";
-
-				GetQueryStringData(item, content == null, queryData);
-
-				if (content != null)
-				{
-					state += Routing.GetRouteStringForElement(content);
-					state += "/";
-
-					GetQueryStringData(content, stack == null || stack.Count <= 1, queryData);
-
-					if (stack != null)
-					{
-						for (int i = 1; i < stack.Count; i++)
-						{
-							var page = stack[i];
-							state += Routing.GetRouteStringForElement(page);
-							GetQueryStringData(page, i == stack.Count - 1, queryData);
-							if (i < stack.Count - 1)
-								state += "/";
-						}
-					}
-				}
-			}
-
-			var queryString = GenerateQueryString(queryData);
-
-			return state + queryString;
 		}
 
 		private ShellAppearance GetShellAppearanceForPivot(Element pivot)
@@ -932,11 +912,16 @@ namespace Xamarin.Forms
 			{
 				element = shellItem.CurrentItem;
 			}
-			if (element is IShellContentController shellContent)
+			if (element is ShellSection shellSection)
 			{
+				var controller = (IShellSectionController)element;
 				// this is the same as .Last but easier and will add in the root if not null
 				// it generally wont be null but this is just in case
-				element = shellContent.CurrentPage ?? element;
+				element = controller.PresentedElement;
+			}
+			if (element is IShellContentController shellContentTab)
+			{
+				element = shellContentTab.Page ?? element;
 			}
 
 			return element;

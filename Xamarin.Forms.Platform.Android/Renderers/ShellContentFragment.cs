@@ -160,6 +160,8 @@ namespace Xamarin.Forms.Platform.Android
 			_toolbarTracker = null;
 			_root = null;
 			_renderer = null;
+
+			Device.BeginInvokeOnMainThread(Dispose);
 		}
 
 		protected virtual void ResetAppearance() => _appearanceTracker.ResetAppearance(_toolbar, _toolbarTracker);

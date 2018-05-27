@@ -121,11 +121,11 @@ namespace Xamarin.Forms.Controls.XamStore
 				1, 7);
 
 			grid.Children.Add(MakeButton("Disable Tab",
-					() => ((Forms.ShellContent)Parent).IsEnabled = false),
+					() => ((Forms.ShellSection)Parent).IsEnabled = false),
 				2, 7);
 
 			grid.Children.Add(MakeButton("Enable Tab",
-					() => ((Forms.ShellContent)Parent).IsEnabled = true),
+					() => ((Forms.ShellSection)Parent).IsEnabled = true),
 				0, 8);
 
 			grid.Children.Add(MakeButton("Enable Search",
@@ -141,7 +141,7 @@ namespace Xamarin.Forms.Controls.XamStore
 				0, 9);
 
 			grid.Children.Add(MakeButton("Set Tab Title",
-					() => ((Forms.ShellContent)Parent).Title = "New Title"),
+					() => ((Forms.ShellSection)Parent).Title = "New Title"),
 				1, 9);
 
 			grid.Children.Add(MakeButton("Set GroupTitle",
@@ -149,7 +149,7 @@ namespace Xamarin.Forms.Controls.XamStore
 				2, 9);
 
 			grid.Children.Add(MakeButton("New Tab Icon",
-					() => ((Forms.ShellContent)Parent).Icon = "calculator.png"),
+					() => ((Forms.ShellSection)Parent).Icon = "calculator.png"),
 				0, 10);
 
 			grid.Children.Add(MakeButton("Flyout Disabled",
@@ -200,12 +200,18 @@ namespace Xamarin.Forms.Controls.XamStore
 		private void AddTabItem()
 		{
 			var shellitem = (ShellItem)Parent.Parent;
-			shellitem.Items.Add(new Forms.ShellContent
+			shellitem.Items.Add(new Forms.ShellSection
 			{
 				Route = "newitem",
 				Title = "New Item",
 				Icon = "calculator.png",
-				Content = new UpdatesPage()
+				Items =
+				{
+					new Forms.ShellContent()
+					{
+						Content = new UpdatesPage()
+					}
+				}
 			});
 		}
 

@@ -16,7 +16,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellTopTabFragment : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
+	public class ShellSectionRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
 	{
 		#region IOnPageChangeListener
 
@@ -31,14 +31,14 @@ namespace Xamarin.Forms.Platform.Android
 		void ViewPager.IOnPageChangeListener.OnPageSelected(int position)
 		{
 			// TODO : Find a way to make this cancellable
-			var shellitem = ShellItem;
-			var shellContent = shellitem.Items[position];
-			var stack = shellContent.Stack.ToList();
-			ShellController.ProposeNavigation(ShellNavigationSource.ShellContentChanged, shellitem, shellContent, stack, false);
+			var shellContent = ShellSection;
+			var shellContentTab = shellContent.Items[position];
+			//var stack = shellContent.Stack.ToList();
+			//ShellController.ProposeNavigation(ShellNavigationSource.ShellContentChanged, shellContent, shellContentTab, null, false);
 
-			ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellContent);
+			ShellSection.SetValueFromRenderer(ShellSection.CurrentItemProperty, shellContentTab);
 
-			_toolbarTracker.Page = ((IShellContentController)ShellItem.CurrentItem).CurrentPage;
+			_toolbarTracker.Page = ((IShellContentController)shellContentTab).Page;
 		}
 
 		#endregion IOnPageChangeListener
@@ -72,26 +72,24 @@ namespace Xamarin.Forms.Platform.Android
 		private IShellToolbarTracker _toolbarTracker;
 		private ViewPager _viewPager;
 
-		public ShellTopTabFragment(IShellContext shellContext)
+		public ShellSectionRenderer(IShellContext shellContext)
 		{
 			_shellContext = shellContext;
 		}
 
-		protected ShellTopTabFragment(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+		protected ShellSectionRenderer(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
 		{
 		}
 
 		public event EventHandler AnimationFinished;
 
 		Fragment IShellObservableFragment.Fragment => this;
-		public ShellItem ShellItem { get; set; }
-
-		private IShellController ShellController => _shellContext.Shell;
+		public ShellSection ShellSection { get; set; }
 
 		public override AView OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			var shellItem = ShellItem;
-			if (shellItem == null)
+			var shellSection = ShellSection;
+			if (shellSection == null)
 				return null;
 
 			var root = inflater.Inflate(Resource.Layout.RootLayout, null).JavaCast<CoordinatorLayout>();
@@ -108,13 +106,13 @@ namespace Xamarin.Forms.Platform.Android
 			_viewPager.AddOnPageChangeListener(this);
 			_viewPager.Id = Platform.GenerateViewId();
 
-			_viewPager.Adapter = new ShellFragmentPagerAdapter(shellItem, ChildFragmentManager);
+			_viewPager.Adapter = new ShellFragmentPagerAdapter(shellSection, ChildFragmentManager);
 			_viewPager.OverScrollMode = OverScrollMode.Never;
 
 			_tablayout.SetupWithViewPager(_viewPager);
 
-			var currentPage = ((IShellContentController)shellItem.CurrentItem).GetOrCreateContent();
-			var currentIndex = ShellItem.Items.IndexOf(ShellItem.CurrentItem);
+			var currentPage = ((IShellContentController)shellSection.CurrentItem).GetOrCreateContent();
+			var currentIndex = ShellSection.Items.IndexOf(ShellSection.CurrentItem);
 
 			_toolbarTracker = _shellContext.CreateTrackerForToolbar(_toolbar);
 			_toolbarTracker.Page = currentPage;
@@ -122,12 +120,12 @@ namespace Xamarin.Forms.Platform.Android
 			_viewPager.CurrentItem = currentIndex;
 			scrollview.AddView(_viewPager);
 
-			if (shellItem.Items.Count == 1)
+			if (shellSection.Items.Count == 1)
 			{
 				_tablayout.Visibility = ViewStates.Gone;
 			}
 
-			_tabLayoutAppearanceTracker = _shellContext.CreateTabLayoutAppearanceTracker(ShellItem);
+			_tabLayoutAppearanceTracker = _shellContext.CreateTabLayoutAppearanceTracker(ShellSection);
 			_toolbarAppearanceTracker = _shellContext.CreateToolbarAppearanceTracker();
 
 			HookEvents();
@@ -144,11 +142,21 @@ namespace Xamarin.Forms.Platform.Android
 			if (_rootView != null)
 			{
 				UnhookEvents();
+
+				var adapter = _viewPager.Adapter;
+				_viewPager.Adapter = null;
+				adapter.Dispose();
+
 				_toolbarAppearanceTracker.Dispose();
 				_tabLayoutAppearanceTracker.Dispose();
 				_viewPager.RemoveOnPageChangeListener(this);
 				_rootView.Dispose();
 				_toolbarTracker.Dispose();
+
+				_tablayout.Dispose();
+				_toolbar.Dispose();
+				_viewPager.Dispose();
+				_rootView.Dispose();
 			}
 
 			_toolbarAppearanceTracker = null;
@@ -166,16 +174,16 @@ namespace Xamarin.Forms.Platform.Android
 		}
 
 		protected virtual void OnItemsCollectionChagned(object sender, NotifyCollectionChangedEventArgs e) =>
-			_tablayout.Visibility = (ShellItem.Items.Count > 1) ? ViewStates.Visible : ViewStates.Gone;
+			_tablayout.Visibility = (ShellSection.Items.Count > 1) ? ViewStates.Visible : ViewStates.Gone;
 
 		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (_rootView == null)
 				return;
 
-			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
+			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
 			{
-				var newIndex = ShellItem.Items.IndexOf(ShellItem.CurrentItem);
+				var newIndex = ShellSection.Items.IndexOf(ShellSection.CurrentItem);
 
 				if (newIndex >= 0)
 				{
@@ -198,16 +206,16 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void HookEvents()
 		{
-			((INotifyCollectionChanged)ShellItem.Items).CollectionChanged += OnItemsCollectionChagned;
-			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, ShellItem);
-			ShellItem.PropertyChanged += OnShellItemPropertyChanged;
+			((INotifyCollectionChanged)ShellSection.Items).CollectionChanged += OnItemsCollectionChagned;
+			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, ShellSection);
+			ShellSection.PropertyChanged += OnShellItemPropertyChanged;
 		}
 
 		private void UnhookEvents()
 		{
-			((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChagned;
+			((INotifyCollectionChanged)ShellSection.Items).CollectionChanged -= OnItemsCollectionChagned;
 			((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
-			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
+			ShellSection.PropertyChanged -= OnShellItemPropertyChanged;
 		}
 	}
 }

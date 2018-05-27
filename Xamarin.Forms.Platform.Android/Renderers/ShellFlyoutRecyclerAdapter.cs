@@ -99,7 +99,7 @@ namespace Xamarin.Forms.Platform.Android
 			ShellItem previous = null;
 			foreach (var item in Shell.Items)
 			{
-				if (item.GroupBehavior == ShellItemGroupBehavior.ShowTabs)
+				if (item.FlyoutDisplayOptions == FlyoutDisplayOptions.AsMultipleItems)
 				{
 					for (int i = 0; i < item.Items.Count; i++)
 					{
@@ -109,7 +109,7 @@ namespace Xamarin.Forms.Platform.Android
 				}
 				else
 				{
-					result.Add(new AdapterListItem(item, previous?.GroupBehavior == ShellItemGroupBehavior.ShowTabs));
+					result.Add(new AdapterListItem(item, previous?.FlyoutDisplayOptions == FlyoutDisplayOptions.AsMultipleItems));
 				}
 
 				previous = item;

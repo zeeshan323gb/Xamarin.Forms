@@ -10,12 +10,12 @@ namespace Xamarin.Forms.Platform.Android
 	internal class ShellFragmentPagerAdapter : FragmentPagerAdapter
 	{
 		private bool _disposed;
-		private ShellItem _shellitem;
+		private ShellSection _shellSection;
 
-		public ShellFragmentPagerAdapter(ShellItem shellitem, FragmentManager fragmentManager) : base(fragmentManager)
+		public ShellFragmentPagerAdapter(ShellSection shellSection, FragmentManager fragmentManager) : base(fragmentManager)
 		{
-			_shellitem = shellitem;
-			((INotifyCollectionChanged)shellitem.Items).CollectionChanged += OnItemsCollectionChanged;
+			_shellSection = shellSection;
+			((INotifyCollectionChanged)shellSection.Items).CollectionChanged += OnItemsCollectionChanged;
 		}
 
 		protected virtual void OnItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -24,26 +24,28 @@ namespace Xamarin.Forms.Platform.Android
 		}
 
 		public int CountOverride { get; set; }
-		public override int Count => _shellitem.Items.Count;
+		public override int Count => _shellSection.Items.Count;
 
 		public override Fragment GetItem(int position)
 		{
-			var shellContent = _shellitem.Items[position];
+			var shellContent = _shellSection.Items[position];
 			return new ShellFragmentContainer(shellContent) { Arguments = new Bundle() };
 		}
 
 		public override long GetItemId(int position)
 		{
-			return _shellitem.Items[position].GetHashCode();
+			return _shellSection.Items[position].GetHashCode();
 		}
 
+#pragma warning disable RCS1168 // Parameter name differs from base name.
 		public override int GetItemPosition(Object objectValue)
+#pragma warning restore RCS1168 // Parameter name differs from base name.
 		{
 			var fragContainer = objectValue as ShellFragmentContainer;
-			var shellContent = fragContainer?.ShellContent;
+			var shellContent = fragContainer?.ShellContentTab;
 			if (shellContent != null)
 			{
-				int index = _shellitem.Items.IndexOf(shellContent);
+				int index = _shellSection.Items.IndexOf(shellContent);
 				if (index >= 0)
 					return index;
 			}
@@ -52,7 +54,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override ICharSequence GetPageTitleFormatted(int position)
 		{
-			return new String(_shellitem.Items[position].Title);
+			return new String(_shellSection.Items[position].Title);
 		}
 
 		// http://stackoverflow.com/questions/18642890/fragmentstatepageradapter-with-childfragmentmanager-fragmentmanagerimpl-getfra/19099987#19099987
@@ -65,8 +67,8 @@ namespace Xamarin.Forms.Platform.Android
 			base.Dispose(disposing);
 			if (disposing && !_disposed)
 			{
-				((INotifyCollectionChanged)_shellitem.Items).CollectionChanged -= OnItemsCollectionChanged;
-				_shellitem = null;
+				((INotifyCollectionChanged)_shellSection.Items).CollectionChanged -= OnItemsCollectionChanged;
+				_shellSection = null;
 				_disposed = true;
 
 			}

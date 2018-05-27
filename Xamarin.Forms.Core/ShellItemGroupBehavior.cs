@@ -1,8 +1,8 @@
 ﻿namespace Xamarin.Forms
 {
-	public enum ShellItemGroupBehavior
+	public enum FlyoutDisplayOptions
 	{
-		HideTabs,
-		ShowTabs,
+		AsSingleItem,
+		AsMultipleItems,
 	}
 }

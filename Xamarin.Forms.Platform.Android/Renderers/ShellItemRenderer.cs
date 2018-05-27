@@ -19,7 +19,7 @@ using TypefaceStyle = Android.Graphics.TypefaceStyle;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellBottomTabItemRenderer : ShellItemRendererBase, BottomNavigationView.IOnNavigationItemSelectedListener, IAppearanceObserver
+	public class ShellItemRenderer : ShellItemRendererBase, BottomNavigationView.IOnNavigationItemSelectedListener, IAppearanceObserver
 	{
 		#region IOnNavigationItemSelectedListener
 
@@ -47,7 +47,7 @@ namespace Xamarin.Forms.Platform.Android
 		private FrameLayout _navigationArea;
 		private IShellBottomNavViewAppearanceTracker _appearanceTracker;
 
-		public ShellBottomTabItemRenderer(IShellContext shellContext) : base(shellContext)
+		public ShellItemRenderer(IShellContext shellContext) : base(shellContext)
 		{
 		}
 
@@ -75,9 +75,12 @@ namespace Xamarin.Forms.Platform.Android
 			UnhookEvents(ShellItem);
 			if (_bottomView != null)
 			{
-				_bottomView.SetOnNavigationItemSelectedListener(null);
-				_bottomView.Dispose();
+				_bottomView?.SetOnNavigationItemSelectedListener(null);
+				_bottomView?.Dispose();
 				_bottomView = null;
+
+				_navigationArea?.Dispose();
+				_navigationArea = null;
 
 				_appearanceTracker?.Dispose();
 				_appearanceTracker = null;
@@ -86,22 +89,27 @@ namespace Xamarin.Forms.Platform.Android
 			((IShellController)ShellContext.Shell).RemoveAppearanceObserver(this);
 
 			base.OnDestroy();
+
+			// The evil dance starts here
+			Device.BeginInvokeOnMainThread(Dispose);
 		}
 
 		protected virtual void SetAppearance(ShellAppearance appearance) => _appearanceTracker.SetAppearance(_bottomView, appearance);
 
-		protected virtual void ChangeContent(ShellContent shellContent)
+		protected virtual void ChangeSection(ShellSection shellSection)
 		{
+			// FIXME, WRONG
 			var controller = (IShellController)ShellContext.Shell;
-			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellContentChanged,
+			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellSectionChanged,
 				ShellItem,
-				shellContent,
-				shellContent.Stack.ToList(),
+				shellSection,
+				shellSection?.CurrentItem,
+				shellSection.Stack.ToList(),
 				true
 			);
 
 			if (accept)
-				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellContent);
+				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellSection);
 		}
 
 		protected virtual Drawable CreateItemBackgroundDrawable()
@@ -110,7 +118,7 @@ namespace Xamarin.Forms.Platform.Android
 			return new RippleDrawable(stateList, new ColorDrawable(AColor.White), null);
 		}
 
-		protected virtual BottomSheetDialog CreateMoreBottomSheet(Action<ShellContent, BottomSheetDialog> selectCallback)
+		protected virtual BottomSheetDialog CreateMoreBottomSheet(Action<ShellSection, BottomSheetDialog> selectCallback)
 		{
 			var bottomSheetDialog = new BottomSheetDialog(Context);
 			var bottomSheetLayout = new LinearLayout(Context);
@@ -177,7 +185,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			base.OnCurrentContentChanged();
 
-			var index = ShellItem.Items.IndexOf(ShellContent);
+			var index = ShellItem.Items.IndexOf(ShellSection);
 			index = Math.Min(index, _bottomView.Menu.Size() - 1);
 			if (index < 0)
 				return;
@@ -185,15 +193,15 @@ namespace Xamarin.Forms.Platform.Android
 			menuItem.SetChecked(true);
 		}
 
-		protected override void OnDisplayedPageChanged(Page newPage, Page oldPage)
+		protected override void OnDisplayedElementChanged(Element newElement, Element oldElement)
 		{
-			base.OnDisplayedPageChanged(newPage, oldPage);
+			base.OnDisplayedElementChanged(newElement, oldElement);
 
-			if (oldPage != null)
-				oldPage.PropertyChanged -= OnDisplayedPagePropertyChanged;
+			if (oldElement != null)
+				oldElement.PropertyChanged -= OnDisplayedElementPropertyChanged;
 
-			if (newPage != null)
-				newPage.PropertyChanged += OnDisplayedPagePropertyChanged;
+			if (newElement != null)
+				newElement.PropertyChanged += OnDisplayedElementPropertyChanged;
 
 			UpdateTabBarVisibility();
 		}
@@ -209,23 +217,23 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			else
 			{
-				var shellContent = ShellItem.Items[id];
+				var shellSection = ShellItem.Items[id];
 				if (item.IsChecked)
 				{
-					OnTabReselected(shellContent);
+					OnTabReselected(shellSection);
 				}
 				else
 				{
-					ChangeContent(shellContent);
+					ChangeSection(shellSection);
 				}
 			}
 
 			return true;
 		}
 
-		protected virtual void OnMoreItemSelected(ShellContent shellContent, BottomSheetDialog dialog)
+		protected virtual void OnMoreItemSelected(ShellSection shellSection, BottomSheetDialog dialog)
 		{
-			ChangeContent(shellContent);
+			ChangeSection(shellSection);
 
 			dialog.Dismiss();
 			dialog.Dispose();
@@ -240,13 +248,13 @@ namespace Xamarin.Forms.Platform.Android
 			SetupMenu();
 		}
 
-		protected override void OnShellContentPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected override void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			base.OnShellContentPropertyChanged(sender, e);
+			base.OnShellSectionPropertyChanged(sender, e);
 
 			if (e.PropertyName == BaseShellItem.IsEnabledProperty.PropertyName)
 			{
-				var content = (ShellContent)sender;
+				var content = (ShellSection)sender;
 				var index = ShellItem.Items.IndexOf(content);
 
 				var itemCount = ShellItem.Items.Count;
@@ -256,7 +264,7 @@ namespace Xamarin.Forms.Platform.Android
 					return;
 
 				var menuItem = _bottomView.Menu.FindItem(index);
-				UpdateShellContentEnabled(content, menuItem);
+				UpdateShellSectionEnabled(content, menuItem);
 			}
 			else if (e.PropertyName == BaseShellItem.TitleProperty.PropertyName ||
 				e.PropertyName == BaseShellItem.IconProperty.PropertyName)
@@ -265,7 +273,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		protected virtual void OnTabReselected(ShellContent shellContent)
+		protected virtual void OnTabReselected(ShellSection shellSection)
 		{
 		}
 
@@ -278,15 +286,15 @@ namespace Xamarin.Forms.Platform.Android
 
 			int end = showMore ? maxBottomItems - 1 : ShellItem.Items.Count;
 
-			var currentIndex = shellItem.Items.IndexOf(ShellContent);
+			var currentIndex = shellItem.Items.IndexOf(ShellSection);
 
 			for (int i = 0; i < end; i++)
 			{
 				var item = shellItem.Items[i];
 				var menuItem = menu.Add(0, i, 0, new Java.Lang.String(item.Title));
 				SetMenuItemIcon(menuItem, item.Icon);
-				UpdateShellContentEnabled(item, menuItem);
-				if (item == ShellContent)
+				UpdateShellSectionEnabled(item, menuItem);
+				if (item == ShellSection)
 				{
 					menuItem.SetChecked(true);
 				}
@@ -305,14 +313,14 @@ namespace Xamarin.Forms.Platform.Android
 			_bottomView.SetShiftMode(false, false);
 		}
 
-		protected virtual void UpdateShellContentEnabled(ShellContent shellContent, IMenuItem menuItem)
+		protected virtual void UpdateShellSectionEnabled(ShellSection shellSection, IMenuItem menuItem)
 		{
-			bool tabEnabled = shellContent.IsEnabled;
+			bool tabEnabled = shellSection.IsEnabled;
 			if (menuItem.IsEnabled != tabEnabled)
 				menuItem.SetEnabled(tabEnabled);
 		}
 
-		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+		private void OnDisplayedElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == Shell.TabBarVisibleProperty.PropertyName)
 				UpdateTabBarVisibility();
@@ -335,10 +343,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void UpdateTabBarVisibility()
 		{
-			if (DisplayedPage == null)
+			if (DisplayedElement == null)
 				return;
 
-			bool visible = Shell.GetTabBarVisible(DisplayedPage);
+			bool visible = Shell.GetTabBarVisible(DisplayedElement);
 			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
 		}
 	}

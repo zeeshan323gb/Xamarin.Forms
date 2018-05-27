@@ -20,7 +20,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var shell = new Shell();
 			var shellItem = new ShellItem();
-			var shellContent = new ShellContent();
+			var shellContent = new ShellSection();
 			shellItem.Items.Add(shellContent);
 			shell.Items.Add(shellItem);
 
@@ -32,7 +32,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var shell = new Shell();
 			var shellItem = new ShellItem();
-			var shellContent = new ShellContent();
+			var shellContent = new ShellSection();
 			shellItem.Items.Add(shellContent);
 			shell.Items.Add(shellItem);
 
@@ -52,10 +52,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			var one = new ShellItem { Route = "one" };
 			var two = new ShellItem { Route = "two" };
 
-			var tabone = new ShellContent { Route = "tabone" };
-			var tabtwo = new ShellContent { Route = "tabtwo" };
-			var tabthree = new ShellContent { Route = "tabthree" };
-			var tabfour = new ShellContent { Route = "tabfour" };
+			var tabone = new ShellSection { Route = "tabone" };
+			var tabtwo = new ShellSection { Route = "tabtwo" };
+			var tabthree = new ShellSection { Route = "tabthree" };
+			var tabfour = new ShellSection { Route = "tabfour" };
 
 			one.Items.Add(tabone);
 			one.Items.Add(tabtwo);
@@ -82,10 +82,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			var one = new ShellItem { Route = "one" };
 			var two = new ShellItem { Route = "two" };
 
-			var tabone = new ShellContent { Route = "tabone" };
-			var tabtwo = new ShellContent { Route = "tabtwo" };
-			var tabthree = new ShellContent { Route = "tabthree" };
-			var tabfour = new ShellContent { Route = "tabfour" };
+			var tabone = new ShellSection { Route = "tabone" };
+			var tabtwo = new ShellSection { Route = "tabtwo" };
+			var tabthree = new ShellSection { Route = "tabthree" };
+			var tabfour = new ShellSection { Route = "tabfour" };
 
 			one.Items.Add(tabone);
 			one.Items.Add(tabtwo);

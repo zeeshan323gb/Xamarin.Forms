@@ -149,9 +149,9 @@ namespace Xamarin.Forms.Platform.Android
 			return CreateToolbarAppearanceTracker();
 		}
 
-		IShellTabLayoutAppearanceTracker IShellContext.CreateTabLayoutAppearanceTracker(ShellItem shellItem)
+		IShellTabLayoutAppearanceTracker IShellContext.CreateTabLayoutAppearanceTracker(ShellSection shellContent)
 		{
-			return CreateTabLayoutAppearanceTracker(shellItem);
+			return CreateTabLayoutAppearanceTracker(shellContent);
 		}
 
 		IShellBottomNavViewAppearanceTracker IShellContext.CreateBottomNavViewAppearanceTracker(ShellItem shellItem)
@@ -210,10 +210,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
 		{
-			var tabLocation = shellItem.OnThisPlatform().GetTabBarLocation();
-			if (tabLocation == ShellTabBarLocation.Bottom)
-				return new ShellBottomTabItemRenderer(this);
-			return new ShellTopTabItemRenderer(this);
+			//var tabLocation = shellItem.OnThisPlatform().GetTabBarLocation();
+			//if (tabLocation == ShellTabBarLocation.Bottom)
+				return new ShellItemRenderer(this);
+			//return new ShellTopTabItemRenderer(this);
 		}
 
 		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)
@@ -226,7 +226,7 @@ namespace Xamarin.Forms.Platform.Android
 			return new ShellToolbarAppearanceTracker(this);
 		}
 
-		protected virtual IShellTabLayoutAppearanceTracker CreateTabLayoutAppearanceTracker(ShellItem shellItem)
+		protected virtual IShellTabLayoutAppearanceTracker CreateTabLayoutAppearanceTracker(ShellSection shellSection)
 		{
 			return new ShellTabLayoutAppearanceTracker(this);
 		}
@@ -265,15 +265,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void SwitchFragment(FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
 		{
-			var route = newItem.Route ?? newItem.GetHashCode().ToString();
-
-			var fragment = manager.FindFragmentByTag(route);
-			if (fragment == null)
-			{
-				var shellItemRenderer = CreateShellItemRenderer(newItem);
-				shellItemRenderer.ShellItem = newItem;
-				fragment = shellItemRenderer.Fragment;
-			}
+			var shellItemRenderer = CreateShellItemRenderer(newItem);
+			shellItemRenderer.ShellItem = newItem;
+			var fragment = shellItemRenderer.Fragment;
 
 			FragmentTransaction transaction = manager.BeginTransaction();
 
@@ -284,11 +278,13 @@ namespace Xamarin.Forms.Platform.Android
 			transaction.CommitAllowingStateLoss();
 		}
 
-		private async void GoTo(ShellItem item, ShellContent shellContent)
+		private async void GoTo(ShellItem item, ShellSection shellSection, ShellContent shellContent)
 		{
+			if (shellSection == null)
+				shellSection = item?.CurrentItem;
 			if (shellContent == null)
-				shellContent = item.CurrentItem;
-			var state = ((IShellController)Element).GetNavigationState(item, shellContent, false);
+				shellContent = shellSection?.CurrentItem;
+			var state = ((IShellController)Element).GetNavigationState(item, shellSection, shellContent, false);
 			await Element.GoToAsync(state).ConfigureAwait(false);
 		}
 
@@ -305,29 +301,36 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			var element = e.Element;
 			ShellItem shellItem = null;
+			ShellSection shellSection = null;
 			ShellContent shellContent = null;
 
 			if (element is ShellItem.MenuShellItem menuShellItem)
 			{
 				menuShellItem.MenuItem.Activate();
 			}
-			else if (element is ShellItem item)
+			else if (element is ShellItem i)
 			{
-				shellItem = item;
+				shellItem = i;
 			}
-			else if (element is ShellContent content)
+			else if (element is ShellSection s)
 			{
-				shellItem = content.Parent as ShellItem;
-				shellContent = content;
+				shellItem = s.Parent as ShellItem;
+				shellSection = s;
 			}
-			else if (element is MenuItem menuItem)
+			else if (element is ShellContent c)
 			{
-				menuItem.Activate();
+				shellItem = c.Parent.Parent as ShellItem;
+				shellSection = c.Parent as ShellSection;
+				shellContent = c;
+			}
+			else if (element is MenuItem m)
+			{
+				m.Activate();
 			}
 
 			_flyoutRenderer.CloseFlyout();
 			if (shellItem != null && shellItem.IsEnabled)
-				GoTo(shellItem, shellContent);
+				GoTo(shellItem, shellSection, shellContent);
 		}
 
 		private void UpdateStatusBarColor(ShellAppearance appearance)

@@ -27,9 +27,9 @@ namespace Xamarin.Forms
 
 		void AppearanceChanged(Element source, bool appearanceSet);
 
-		ShellNavigationState GetNavigationState(ShellItem item, ShellContent shellContent, bool includeStack = true);
+		ShellNavigationState GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, bool includeStack = true);
 
-		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellContent shellContent, IList<Page> stack, bool canCancel);
+		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellSection shellSection, ShellContent shellContent, IList<Page> stack, bool canCancel);
 
 		bool RemoveAppearanceObserver(IAppearanceObserver observer);
 

@@ -12,10 +12,10 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			get
 			{
-				ShellContent currentItem = Shell?.CurrentItem?.CurrentItem;
-				if (currentItem == null)
+				ShellSection shellSection = Shell?.CurrentItem?.CurrentItem;
+				if (shellSection == null)
 					return true;
-				return currentItem.Stack.Count <= 1;
+				return shellSection.Stack.Count <= 1;
 			}
 		}
 
@@ -45,9 +45,9 @@ namespace Xamarin.Forms.Platform.iOS
 			return CreateShellSearchResultsRenderer();
 		}
 
-		IShellContentRenderer IShellContext.CreateShellContentRenderer(ShellContent shellContent)
+		IShellSectionRenderer IShellContext.CreateShellSectionRenderer(ShellSection shellSection)
 		{
-			return CreateShellContentRenderer(shellContent);
+			return CreateShellSectionRenderer(shellSection);
 		}
 
 		IShellTabBarAppearanceTracker IShellContext.CreateTabBarAppearanceTracker()
@@ -166,9 +166,9 @@ namespace Xamarin.Forms.Platform.iOS
 			return new ShellSearchResultsRenderer(this);
 		}
 
-		protected virtual IShellContentRenderer CreateShellContentRenderer(ShellContent shellContent)
+		protected virtual IShellSectionRenderer CreateShellSectionRenderer(ShellSection shellSection)
 		{
-			return new ShellContentRenderer(this);
+			return new ShellSectionRenderer(this);
 		}
 
 		protected virtual IShellTabBarAppearanceTracker CreateTabBarAppearanceTracker()
@@ -248,11 +248,15 @@ namespace Xamarin.Forms.Platform.iOS
 			FlyoutRenderer.View.BackgroundColor = color.ToUIColor();
 		}
 
-		private async void GoTo(ShellItem item, ShellContent content)
+		private async void GoTo(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent)
 		{
-			if (content == null)
-				content = item.CurrentItem;
-			var state = ((IShellController)Shell).GetNavigationState(item, content, false);
+			if (shellSection == null)
+				shellSection = shellItem.CurrentItem;
+
+			if (shellContent == null)
+				shellContent = shellSection?.CurrentItem;
+
+			var state = ((IShellController)Shell).GetNavigationState(shellItem, shellSection, shellContent, false);
 			await Shell.GoToAsync(state);
 		}
 
@@ -260,29 +264,36 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			var element = e.Element;
 			ShellItem shellItem = null;
+			ShellSection shellSection = null;
 			ShellContent shellContent = null;
 
 			if (element is ShellItem.MenuShellItem menuShellItem)
 			{
 				menuShellItem.MenuItem.Activate();
 			}
-			else if (element is ShellItem item)
+			else if (element is ShellItem i)
 			{
-				shellItem = item;
+				shellItem = i;
 			}
-			else if (element is ShellContent content)
+			else if (element is ShellSection s)
 			{
-				shellItem = content.Parent as ShellItem;
-				shellContent = content;
+				shellItem = s.Parent as ShellItem;
+				shellSection = s;
 			}
-			else if (element is MenuItem menuItem)
+			else if (element is ShellContent c)
 			{
-				menuItem.Activate();
+				shellItem = c.Parent.Parent as ShellItem;
+				shellSection = c.Parent as ShellSection;
+				shellContent = c;
+			}
+			else if (element is MenuItem m)
+			{
+				m.Activate();
 			}
 
 			FlyoutRenderer.CloseFlyout();
 			if (shellItem != null && shellItem.IsEnabled)
-				GoTo(shellItem, shellContent);
+				GoTo(shellItem, shellSection, shellContent);
 		}
 
 		private void SetupCurrentShellItem()

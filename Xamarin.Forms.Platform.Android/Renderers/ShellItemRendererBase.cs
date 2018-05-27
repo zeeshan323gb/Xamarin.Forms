@@ -26,20 +26,20 @@ namespace Xamarin.Forms.Platform.Android
 
 		private readonly Dictionary<Element, IShellObservableFragment> _fragmentMap = new Dictionary<Element, IShellObservableFragment>();
 		private IShellObservableFragment _currentFragment;
-		private ShellContent _currentShellContent;
-		private Page _displayedPage;
+		private ShellSection _shellSection;
+		private Element _displayedElement;
 
 		protected ShellItemRendererBase(IShellContext shellContext)
 		{
 			ShellContext = shellContext;
 		}
 
-		protected ShellContent ShellContent
+		protected ShellSection ShellSection
 		{
-			get => _currentShellContent;
+			get => _shellSection;
 			set
 			{
-				_currentShellContent = value;
+				_shellSection = value;
 				if (value != null)
 				{
 					OnCurrentContentChanged();
@@ -47,17 +47,17 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		protected Page DisplayedPage
+		protected Element DisplayedElement
 		{
-			get => _displayedPage;
+			get => _displayedElement;
 			set
 			{
-				if (_displayedPage == value)
+				if (_displayedElement == value)
 					return;
 
-				Page oldPage = _displayedPage;
-				_displayedPage = value;
-				OnDisplayedPageChanged(_displayedPage, oldPage);
+				Element oldPage = _displayedElement;
+				_displayedElement = value;
+				OnDisplayedElementChanged(_displayedElement, oldPage);
 			}
 		}
 
@@ -70,33 +70,36 @@ namespace Xamarin.Forms.Platform.Android
 			return ShellContext.CreateFragmentForPage(page);
 		}
 
-		protected override void Dispose(bool disposing)
+		public override void OnDestroy()
 		{
-			base.Dispose(disposing);
+			base.OnDestroy();
 
-			if (disposing)
-			{
-				DisplayedPage = null;
-			}
+			foreach (var item in _fragmentMap)
+				item.Value.Fragment.Dispose();
+			_fragmentMap.Clear();
+			DisplayedElement = null;
 		}
 
 		protected abstract ViewGroup GetNavigationTarget();
 
-		protected virtual IShellObservableFragment GetOrCreateFragmentForTab(ShellContent shellContent)
+		protected virtual IShellObservableFragment GetOrCreateFragmentForTab(ShellSection shellSection)
 		{
-			return new ShellContentFragment(ShellContext, shellContent);
+			return new ShellSectionRenderer(ShellContext)
+			{
+				ShellSection = shellSection
+			};
 		}
 
-		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellContent item, Page page, bool animated)
+		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellSection shellSection, Page page, bool animated)
 		{
 			TaskCompletionSource<bool> result = new TaskCompletionSource<bool>();
 
-			var stack = ShellContent.Stack;
-			bool isForCurrentTab = item == ShellContent;
+			var stack = ShellSection.Stack;
+			bool isForCurrentTab = shellSection == ShellSection;
 
-			if (!_fragmentMap.ContainsKey(ShellContent))
+			if (!_fragmentMap.ContainsKey(ShellSection))
 			{
-				_fragmentMap[ShellContent] = GetOrCreateFragmentForTab(ShellContent);
+				_fragmentMap[ShellSection] = GetOrCreateFragmentForTab(ShellSection);
 			}
 
 			switch (navSource)
@@ -131,12 +134,12 @@ namespace Xamarin.Forms.Platform.Android
 					return Task.FromResult(true);
 
 				case ShellNavigationSource.PopToRoot:
-					RemoveAllPushedPages(item, isForCurrentTab);
+					RemoveAllPushedPages(shellSection, isForCurrentTab);
 					if (!isForCurrentTab)
 						return Task.FromResult(true);
 					break;
 
-				case ShellNavigationSource.ShellContentChanged:
+				case ShellNavigationSource.ShellSectionChanged:
 					// We need to handle this after we know what the target is
 					// because we might accidentally remove an already added target.
 					// Then there would be two transactions in a row, one removing and one adding
@@ -147,27 +150,21 @@ namespace Xamarin.Forms.Platform.Android
 					throw new InvalidOperationException("Unexpected navigation type");
 			}
 
-			Page targetPage = null;
+			Element targetElement = null;
 			IShellObservableFragment target = null;
 			if (stack.Count == 1 || navSource == ShellNavigationSource.PopToRoot)
 			{
-				target = _fragmentMap[ShellContent];
-				targetPage = ((IShellContentController)ShellContent).RootPage;
-				if (targetPage == null)
-				{
-					// The ShellContent hasn't had to realize the page yet, we need
-					// to force it here.
-					targetPage = ((IShellContentController)ShellContent).GetOrCreateContent();
-				}
+				target = _fragmentMap[ShellSection];
+				targetElement = ShellSection;
 			}
 			else
 			{
-				targetPage = stack[stack.Count - 1];
-				target = _fragmentMap[targetPage];
+				targetElement = stack[stack.Count - 1];
+				target = _fragmentMap[targetElement];
 			}
 
 			// Down here because of comment above
-			if (navSource == ShellNavigationSource.ShellContentChanged)
+			if (navSource == ShellNavigationSource.ShellSectionChanged)
 				RemoveAllButCurrent(target.Fragment);
 
 			if (target == _currentFragment)
@@ -194,7 +191,7 @@ namespace Xamarin.Forms.Platform.Android
 
 				case ShellNavigationSource.Pop:
 				case ShellNavigationSource.PopToRoot:
-				case ShellNavigationSource.ShellContentChanged:
+				case ShellNavigationSource.ShellSectionChanged:
 					trackFragment = _currentFragment;
 
 					if (_currentFragment != null)
@@ -226,7 +223,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			_currentFragment = target;
 
-			DisplayedPage = targetPage;
+			DisplayedElement = targetElement;
 
 			return result.Task;
 		}
@@ -235,53 +232,53 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			shellItem.PropertyChanged += OnShellItemPropertyChanged;
 			((INotifyCollectionChanged)shellItem.Items).CollectionChanged += OnShellItemsChanged;
-			ShellContent = shellItem.CurrentItem;
+			ShellSection = shellItem.CurrentItem;
 
 			foreach (var shellContent in shellItem.Items)
 			{
-				HookTabEvents(shellContent);
+				HookChildEvents(shellContent);
 			}
 		}
 
-		protected virtual void HookTabEvents(ShellContent shellContent)
+		protected virtual void HookChildEvents(ShellSection shellSection)
 		{
-			((IShellContentController)shellContent).NavigationRequested += OnNavigationRequested;
-			shellContent.PropertyChanged += OnShellContentPropertyChanged;
+			((IShellSectionController)shellSection).NavigationRequested += OnNavigationRequested;
+			shellSection.PropertyChanged += OnShellSectionPropertyChanged;
 		}
 
 		protected virtual void OnCurrentContentChanged()
 		{
-			HandleFragmentUpdate(ShellNavigationSource.ShellContentChanged, ShellContent, null, false);
+			HandleFragmentUpdate(ShellNavigationSource.ShellSectionChanged, ShellSection, null, false);
 		}
 
-		protected virtual void OnDisplayedPageChanged(Page newPage, Page oldPage)
+		protected virtual void OnDisplayedElementChanged(Element newElement, Element oldElement)
 		{
 
 		}
 
 		protected virtual void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
 		{
-			e.Task = HandleFragmentUpdate((ShellNavigationSource)e.RequestType, (ShellContent)sender, e.Page, e.Animated);
+			e.Task = HandleFragmentUpdate((ShellNavigationSource)e.RequestType, (ShellSection)sender, e.Page, e.Animated);
 		}
 
 		protected virtual void OnShellItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == ShellItem.CurrentItemProperty.PropertyName)
-				ShellContent = ShellItem.CurrentItem;
+				ShellSection = ShellItem.CurrentItem;
 		}
 
 		protected virtual void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			if (e.OldItems != null)
 			{
-				foreach (ShellContent content in e.OldItems)
-					UnhookTabEvents(content);
+				foreach (ShellSection shellSection in e.OldItems)
+					UnhookChildEvents(shellSection);
 			}
 
 			if (e.NewItems != null)
 			{
-				foreach (ShellContent content in e.NewItems)
-					HookTabEvents(content);
+				foreach (ShellSection shellSection in e.NewItems)
+					HookChildEvents(shellSection);
 			}
 		}
 
@@ -298,29 +295,30 @@ namespace Xamarin.Forms.Platform.Android
 					t.SetCustomAnimations(Resource.Animation.EnterFromLeft, Resource.Animation.ExitToRight);
 					break;
 
-				case ShellNavigationSource.ShellContentChanged:
+				case ShellNavigationSource.ShellSectionChanged:
 					break;
 			}
 		}
 
 		protected virtual void UnhookEvents(ShellItem shellItem)
 		{
-			foreach (var shellContent in shellItem.Items)
+			foreach (var shellSection in shellItem.Items)
 			{
-				UnhookTabEvents(shellContent);
+				UnhookChildEvents(shellSection);
 			}
 
+			((INotifyCollectionChanged)shellItem.Items).CollectionChanged -= OnShellItemsChanged;
 			ShellItem.PropertyChanged -= OnShellItemPropertyChanged;
-			ShellContent = null;
+			ShellSection = null;
 		}
 
-		protected virtual void UnhookTabEvents(ShellContent shellContent)
+		protected virtual void UnhookChildEvents(ShellSection shellSection)
 		{
-			((IShellContentController)shellContent).NavigationRequested -= OnNavigationRequested;
-			shellContent.PropertyChanged -= OnShellContentPropertyChanged;
+			((IShellSectionController)shellSection).NavigationRequested -= OnNavigationRequested;
+			shellSection.PropertyChanged -= OnShellSectionPropertyChanged;
 		}
 
-		protected virtual void OnShellContentPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 		}
 
@@ -337,16 +335,16 @@ namespace Xamarin.Forms.Platform.Android
 			trans.CommitAllowingStateLoss();
 		}
 
-		private void RemoveAllPushedPages(ShellContent content, bool keepCurrent)
+		private void RemoveAllPushedPages(ShellSection shellSection, bool keepCurrent)
 		{
-			if (content.Stack.Count <= 1 || (keepCurrent && content.Stack.Count == 2))
+			if (shellSection.Stack.Count <= 1 || (keepCurrent && shellSection.Stack.Count == 2))
 				return;
 
 			var t = ChildFragmentManager.BeginTransaction();
 
 			foreach (var kvp in _fragmentMap.ToList())
 			{
-				if (kvp.Key.Parent != content)
+				if (kvp.Key.Parent != shellSection)
 					continue;
 
 				_fragmentMap.Remove(kvp.Key);

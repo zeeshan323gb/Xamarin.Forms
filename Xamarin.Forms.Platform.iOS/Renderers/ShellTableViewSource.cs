@@ -170,20 +170,20 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void SetVisualGroups(Shell shell, List<List<Element>> groups)
 		{
-			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
+			FlyoutDisplayOptions previous = FlyoutDisplayOptions.AsSingleItem;
 			List<Element> section = null;
 			foreach (var shellItem in shell.Items)
 			{
 				bool isCurrentShellItem = _context.Shell.CurrentItem == shellItem;
-				var groupBehavior = shellItem.GroupBehavior;
+				var groupBehavior = shellItem.FlyoutDisplayOptions;
 				if (section == null ||
-					groupBehavior == ShellItemGroupBehavior.ShowTabs ||
-					previous == ShellItemGroupBehavior.ShowTabs)
+					groupBehavior == FlyoutDisplayOptions.AsMultipleItems ||
+					previous == FlyoutDisplayOptions.AsMultipleItems)
 				{
 					section = new List<Element>();
 					groups.Add(section);
 
-					if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
+					if (groupBehavior == FlyoutDisplayOptions.AsMultipleItems)
 					{
 						foreach (var shellContent in shellItem.Items)
 						{

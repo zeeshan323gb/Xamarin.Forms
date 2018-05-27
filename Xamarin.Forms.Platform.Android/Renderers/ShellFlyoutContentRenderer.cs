@@ -79,12 +79,12 @@ namespace Xamarin.Forms.Platform.Android
 			int gid = 0;
 			int id = 0;
 
-			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
+			FlyoutDisplayOptions previous = FlyoutDisplayOptions.AsSingleItem;
 			foreach (var shellItem in shell.Items)
 			{
 				bool isCurrentShellItem = shell.CurrentItem == shellItem;
-				var groupBehavior = shellItem.GroupBehavior;
-				if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
+				var groupBehavior = shellItem.FlyoutDisplayOptions;
+				if (groupBehavior == FlyoutDisplayOptions.AsMultipleItems)
 				{
 					IMenu section = null;
 					if (string.IsNullOrEmpty(shellItem.Title))
