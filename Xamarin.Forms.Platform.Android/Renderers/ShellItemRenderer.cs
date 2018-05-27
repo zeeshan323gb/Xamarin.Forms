@@ -189,15 +189,15 @@ namespace Xamarin.Forms.Platform.Android
 			menuItem.SetChecked(true);
 		}
 
-		protected override void OnDisplayedElementChanged(Element newElement, Element oldElement)
+		protected override void OnDisplayedPageChanged(Page newPage, Page oldPage)
 		{
-			base.OnDisplayedElementChanged(newElement, oldElement);
+			base.OnDisplayedPageChanged(newPage, oldPage);
 
-			if (oldElement != null)
-				oldElement.PropertyChanged -= OnDisplayedElementPropertyChanged;
+			if (oldPage != null)
+				oldPage.PropertyChanged -= OnDisplayedElementPropertyChanged;
 
-			if (newElement != null)
-				newElement.PropertyChanged += OnDisplayedElementPropertyChanged;
+			if (newPage != null)
+				newPage.PropertyChanged += OnDisplayedElementPropertyChanged;
 
 			UpdateTabBarVisibility();
 		}
@@ -339,10 +339,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		private void UpdateTabBarVisibility()
 		{
-			if (DisplayedElement == null)
+			if (DisplayedPage == null)
 				return;
 
-			bool visible = Shell.GetTabBarVisible(DisplayedElement);
+			bool visible = Shell.GetTabBarVisible(DisplayedPage);
 			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
 		}
 	}

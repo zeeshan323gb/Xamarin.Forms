@@ -9,7 +9,7 @@ namespace Xamarin.Forms
 	{
 		void UpdateChecked();
 
-		Element PresentedElement { get; }
+		Page PresentedPage { get; }
 
 		event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
 

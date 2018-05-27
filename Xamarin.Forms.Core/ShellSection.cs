@@ -29,13 +29,13 @@ namespace Xamarin.Forms
 
 		private event EventHandler<NavigationRequestedEventArgs> _navigationRequested;
 
-		Element IShellSectionController.PresentedElement
+		Page IShellSectionController.PresentedPage
 		{
 			get
 			{
 				if (_navStack.Count > 1)
 					return _navStack[_navStack.Count - 1];
-				return CurrentItem;
+				return ((IShellContentController)CurrentItem).Page;
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Xamarin.Forms
 		protected override void OnChildAdded(Element child)
 		{
 			base.OnChildAdded(child);
-			if (CurrentItem == null)
+			if (CurrentItem == null && Items.Contains(child))
 				SetValueFromRenderer(CurrentItemProperty, child);
 		}
 

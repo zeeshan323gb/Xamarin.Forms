@@ -27,7 +27,7 @@ namespace Xamarin.Forms.Platform.Android
 		private readonly Dictionary<Element, IShellObservableFragment> _fragmentMap = new Dictionary<Element, IShellObservableFragment>();
 		private IShellObservableFragment _currentFragment;
 		private ShellSection _shellSection;
-		private Element _displayedElement;
+		private Page _displayedPage;
 
 		protected ShellItemRendererBase(IShellContext shellContext)
 		{
@@ -47,17 +47,17 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		protected Element DisplayedElement
+		protected Page DisplayedPage
 		{
-			get => _displayedElement;
+			get => _displayedPage;
 			set
 			{
-				if (_displayedElement == value)
+				if (_displayedPage == value)
 					return;
 
-				Element oldPage = _displayedElement;
-				_displayedElement = value;
-				OnDisplayedElementChanged(_displayedElement, oldPage);
+				Page oldPage = _displayedPage;
+				_displayedPage = value;
+				OnDisplayedPageChanged(_displayedPage, oldPage);
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace Xamarin.Forms.Platform.Android
 			foreach (var item in _fragmentMap)
 				item.Value.Fragment.Dispose();
 			_fragmentMap.Clear();
-			DisplayedElement = null;
+			DisplayedPage = null;
 		}
 
 		protected abstract ViewGroup GetNavigationTarget();
@@ -223,7 +223,10 @@ namespace Xamarin.Forms.Platform.Android
 
 			_currentFragment = target;
 
-			DisplayedElement = targetElement;
+			if (targetElement is Page targetPage)
+				DisplayedPage = targetPage;
+			else if (targetElement is ShellSection targetSection)
+				DisplayedPage = ((IShellContentController)targetSection.CurrentItem).GetOrCreateContent();
 
 			return result.Task;
 		}
@@ -251,7 +254,7 @@ namespace Xamarin.Forms.Platform.Android
 			HandleFragmentUpdate(ShellNavigationSource.ShellSectionChanged, ShellSection, null, false);
 		}
 
-		protected virtual void OnDisplayedElementChanged(Element newElement, Element oldElement)
+		protected virtual void OnDisplayedPageChanged(Page newPage, Page oldPage)
 		{
 
 		}
@@ -320,6 +323,13 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
+			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
+			{
+				if (ShellSection == sender)
+				{
+					DisplayedPage = ((IShellSectionController)ShellSection).PresentedPage;
+				}
+			}
 		}
 
 		private void RemoveAllButCurrent(Fragment skip)

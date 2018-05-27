@@ -121,11 +121,11 @@ namespace Xamarin.Forms.Controls.XamStore
 				1, 7);
 
 			grid.Children.Add(MakeButton("Disable Tab",
-					() => ((Forms.ShellSection)Parent).IsEnabled = false),
+					() => ((Forms.ShellSection)Parent.Parent).IsEnabled = false),
 				2, 7);
 
 			grid.Children.Add(MakeButton("Enable Tab",
-					() => ((Forms.ShellSection)Parent).IsEnabled = true),
+					() => ((Forms.ShellSection)Parent.Parent).IsEnabled = true),
 				0, 8);
 
 			grid.Children.Add(MakeButton("Enable Search",
@@ -141,15 +141,15 @@ namespace Xamarin.Forms.Controls.XamStore
 				0, 9);
 
 			grid.Children.Add(MakeButton("Set Tab Title",
-					() => ((Forms.ShellSection)Parent).Title = "New Title"),
+					() => ((Forms.ShellSection)Parent.Parent).Title = "New Title"),
 				1, 9);
 
 			grid.Children.Add(MakeButton("Set GroupTitle",
-					() => ((ShellItem)Parent.Parent).Title = "New Title"),
+					() => ((ShellItem)Parent.Parent.Parent).Title = "New Title"),
 				2, 9);
 
 			grid.Children.Add(MakeButton("New Tab Icon",
-					() => ((Forms.ShellSection)Parent).Icon = "calculator.png"),
+					() => ((Forms.ShellSection)Parent.Parent).Icon = "calculator.png"),
 				0, 10);
 
 			grid.Children.Add(MakeButton("Flyout Disabled",
@@ -177,15 +177,15 @@ namespace Xamarin.Forms.Controls.XamStore
 				2, 11);
 
 			grid.Children.Add(MakeButton("FH Fixed",
-					() => ((Shell)Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.Fixed),
+					() => ((Shell)Parent.Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.Fixed),
 				0, 12);
 
 			grid.Children.Add(MakeButton("FH Scroll",
-					() => ((Shell)Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.Scroll),
+					() => ((Shell)Parent.Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.Scroll),
 				1, 12);
 
 			grid.Children.Add(MakeButton("FH Collapse",
-					() => ((Shell)Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.CollapseOnScroll),
+					() => ((Shell)Parent.Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.CollapseOnScroll),
 				2, 12);
 
 			Content = new ScrollView { Content = grid };
@@ -193,13 +193,13 @@ namespace Xamarin.Forms.Controls.XamStore
 
 		private void RemoveTabItem()
 		{
-			var shellitem = (ShellItem)Parent.Parent;
+			var shellitem = (ShellItem)Parent.Parent.Parent;
 			shellitem.Items.Remove(shellitem.Items[shellitem.Items.Count - 1]);
 		}
 
 		private void AddTabItem()
 		{
-			var shellitem = (ShellItem)Parent.Parent;
+			var shellitem = (ShellItem)Parent.Parent.Parent;
 			shellitem.Items.Add(new Forms.ShellSection
 			{
 				Route = "newitem",

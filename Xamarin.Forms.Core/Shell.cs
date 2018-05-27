@@ -998,11 +998,7 @@ namespace Xamarin.Forms
 				var controller = (IShellSectionController)element;
 				// this is the same as .Last but easier and will add in the root if not null
 				// it generally wont be null but this is just in case
-				element = controller.PresentedElement;
-			}
-			if (element is IShellContentController shellContentTab)
-			{
-				element = shellContentTab.Page ?? element;
+				element = controller.PresentedPage ?? element;
 			}
 
 			return element;

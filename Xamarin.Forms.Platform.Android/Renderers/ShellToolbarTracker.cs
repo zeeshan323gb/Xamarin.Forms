@@ -112,8 +112,10 @@ namespace Xamarin.Forms.Platform.Android
 			var backButtonHandler = Shell.GetBackButtonBehavior(Page);
 			if (backButtonHandler?.Command != null)
 				backButtonHandler.Command.Execute(backButtonHandler.CommandParameter);
-			else
+			else if (CanNavigateBack)
 				OnNavigateBack();
+			else
+				_shellContext.Shell.FlyoutIsPresented = !_shellContext.Shell.FlyoutIsPresented;
 		}
 
 		protected override void Dispose(bool disposing)
@@ -227,13 +229,14 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual async void UpdateLeftBarButtonItem(Context context, Toolbar toolbar, DrawerLayout drawerLayout, Page page)
 		{
 			var backButtonHandler = Shell.GetBackButtonBehavior(page);
+			toolbar.SetNavigationOnClickListener(this);
 
 			if (backButtonHandler != null)
 			{
 				var icon = await context.GetFormsDrawable(backButtonHandler.IconOverride);
 				icon = icon.GetConstantState().NewDrawable().Mutate();
 				icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-				toolbar.SetNavigationOnClickListener(this);
+				
 				toolbar.NavigationIcon = icon;
 			}
 			else
@@ -246,7 +249,6 @@ namespace Xamarin.Forms.Platform.Android
 					{
 						ToolbarNavigationClickListener = this,
 					};
-					drawerLayout.AddDrawerListener(_drawerToggle);
 				}
 
 				if (CanNavigateBack)
