@@ -343,6 +343,8 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 
 			bool visible = Shell.GetTabBarVisible(DisplayedPage);
+			if (_bottomView.Menu.Size() == 1)
+				visible = false;
 			_bottomView.Visibility = (visible) ? ViewStates.Visible : ViewStates.Gone;
 		}
 	}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Controls.XamStore
 {
@@ -74,11 +75,11 @@ namespace Xamarin.Forms.Controls.XamStore
 				2, 3);
 
 			grid.Children.Add(MakeButton("Add Tab",
-					AddTabItem),
+					AddBottomTab),
 				0, 4);
 
 			grid.Children.Add(MakeButton("Remove Tab",
-					RemoveTabItem),
+					RemoveBottomTab),
 				1, 4);
 
 			grid.Children.Add(MakeButton("Hide Tabs",
@@ -188,19 +189,46 @@ namespace Xamarin.Forms.Controls.XamStore
 					() => ((Shell)Parent.Parent.Parent.Parent).FlyoutHeaderBehavior = FlyoutHeaderBehavior.CollapseOnScroll),
 				2, 12);
 
+			grid.Children.Add(MakeButton("Add TopTab",
+					AddTopTab),
+				0, 13);
+
+			grid.Children.Add(MakeButton("Remove TopTab",
+					RemoveTopTab),
+				1, 13);
+
+
 			Content = new ScrollView { Content = grid };
 		}
 
-		private void RemoveTabItem()
+		private void RemoveTopTab()
+		{
+			var shellSection = (ShellSection)Parent.Parent;
+			shellSection.Items.Remove(shellSection.Items[shellSection.Items.Count - 1]);
+		}
+
+		private void AddTopTab()
+		{
+			var shellSection = (ShellSection)Parent.Parent;
+			shellSection.Items.Add(
+				new Forms.ShellContent()
+					{
+						Title = "New Top Tab",
+						Content = new UpdatesPage()
+					}
+				);
+		}
+
+		private void RemoveBottomTab()
 		{
 			var shellitem = (ShellItem)Parent.Parent.Parent;
 			shellitem.Items.Remove(shellitem.Items[shellitem.Items.Count - 1]);
 		}
 
-		private void AddTabItem()
+		private void AddBottomTab()
 		{
 			var shellitem = (ShellItem)Parent.Parent.Parent;
-			shellitem.Items.Add(new Forms.ShellSection
+			shellitem.Items.Add(new ShellSection
 			{
 				Route = "newitem",
 				Title = "New Item",
@@ -276,6 +304,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class UpdatesPage : BasePage
 	{
 		public UpdatesPage() : base("Available Updates", Color.Default)
@@ -284,6 +313,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class InstalledPage : BasePage
 	{
 		public InstalledPage() : base("Installed Items", Color.Default)
@@ -292,6 +322,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class LibraryPage : BasePage
 	{
 		public LibraryPage() : base("My Library", Color.Default)
@@ -300,16 +331,19 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class NotificationsPage : BasePage
 	{
 		public NotificationsPage() : base("Notifications", Color.Default) { }
 	}
 
+	[Preserve (AllMembers = true)]
 	public class SubscriptionsPage : BasePage
 	{
 		public SubscriptionsPage() : base("My Subscriptions", Color.Default) { }
 	}
 
+	[Preserve (AllMembers = true)]
 	public class HomePage : BasePage
 	{
 		public HomePage() : base("Store Home", Color.Default)
@@ -318,6 +352,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class GamesPage : BasePage
 	{
 		public GamesPage() : base("Games", Color.Default)
@@ -326,6 +361,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class MoviesPage : BasePage
 	{
 		public MoviesPage() : base("Hot Movies", Color.Default)
@@ -334,6 +370,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class BooksPage : BasePage
 	{
 		public BooksPage() : base("Bookstore", Color.Default)
@@ -342,6 +379,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class MusicPage : BasePage
 	{
 		public MusicPage() : base("Music", Color.Default)
@@ -350,6 +388,7 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class NewsPage : BasePage
 	{
 		public NewsPage() : base("Newspapers", Color.Default)
@@ -358,15 +397,19 @@ namespace Xamarin.Forms.Controls.XamStore
 		}
 	}
 
+	[Preserve (AllMembers = true)]
 	public class AccountsPage : BasePage
 	{
 		public AccountsPage() : base("Account Items", Color.Default) { }
 	}
 
+	[Preserve (AllMembers = true)]
 	public class WishlistPage : BasePage
 	{
 		public WishlistPage() : base("My Wishlist", Color.Default) { }
 	}
+
+	[Preserve (AllMembers = true)]
 	public class SettingsPage : BasePage
 	{
 		public SettingsPage() : base("Settings", Color.Default) { }

@@ -202,7 +202,13 @@ namespace Xamarin.Forms
 				if (Items.Count == 0)
 					ClearValue(CurrentItemProperty);
 				else
-					SetValueFromRenderer(CurrentItemProperty, Items[0]);
+				{
+					// We want to delay invoke this because the renderer may handle this instead
+					Device.BeginInvokeOnMainThread(() => {
+						if (CurrentItem == null)
+							SetValueFromRenderer(CurrentItemProperty, Items[0]);
+					});
+				}
 			}
 		}
 
@@ -384,21 +390,6 @@ namespace Xamarin.Forms
 			}
 
 			SendStructureChanged();
-		}
-
-		private void MenuItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			if (e.NewItems != null)
-			{
-				foreach (Element el in e.NewItems)
-					OnChildAdded(el);
-			}
-
-			if (e.OldItems != null)
-			{
-				foreach (Element el in e.OldItems)
-					OnChildRemoved(el);
-			}
 		}
 
 		private void RemovePage(Page page)

@@ -249,6 +249,8 @@ namespace Xamarin.Forms.Platform.Android
 					{
 						ToolbarNavigationClickListener = this,
 					};
+					_drawerToggle.DrawerSlideAnimationEnabled = false;
+					drawerLayout.AddDrawerListener(_drawerToggle);
 				}
 
 				if (CanNavigateBack)
