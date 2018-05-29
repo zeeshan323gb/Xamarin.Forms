@@ -31,6 +31,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 			}
 		}
+
 		public partial class Color
 
 		{
@@ -69,6 +70,9 @@ namespace Xamarin.Forms.Platform.Android
 
 			// aapt resource value: 0x7f080001
 			public static int vertical = 2131230721;
+
+			// aapt resource value: 0x7f080004
+			public static int pageIndicator = 2131230724;
 
 			static Id()
 			{
@@ -156,7 +160,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
-		public partial class Style 
+		public partial class Style
 		{
 			// aapt resource value: 0x7f080180
 			public static int Widget_CirclePageIndicator = 2131231104;

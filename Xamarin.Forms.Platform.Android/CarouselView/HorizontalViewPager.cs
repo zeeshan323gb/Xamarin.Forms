@@ -14,6 +14,7 @@ namespace Xamarin.Forms.Platform.Android
 		CarouselView _element;
 
 		// Fix for #171 System.MissingMethodException: No constructor found
+		// SGN: This fix probably indicates something isn't being properly unwired
 		public HorizontalViewPager(IntPtr intPtr, JniHandleOwnership jni) : base(intPtr, jni)
 		{
 		}

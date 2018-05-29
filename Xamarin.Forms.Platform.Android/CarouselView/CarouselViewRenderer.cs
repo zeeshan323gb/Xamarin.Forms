@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Android.Content;
 using Android.Widget;
 using Android.App;
+using AShapeType = Android.Graphics.Drawables.ShapeType;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -20,7 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 		AViews.View _indicators;
 		AViews.View _nativeView;
 		ViewPager _viewPager;
-
+		PageIndicator _pageIndicator;
 		LinearLayout _prevBtn;
 		LinearLayout _nextBtn;
 
@@ -29,7 +30,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		// KeyboardService code
 		bool _isKeyboardVisible;
-		readonly SoftKeyboardService _keyboardService;
+		SoftKeyboardService _keyboardService;
 		bool _setCurrentPageCalled;
 		int _pageScrolledCount;
 		ScrollDirection _direction;
@@ -72,6 +73,14 @@ namespace Xamarin.Forms.Platform.Android
 						_nativeView = inflater.Inflate(Resource.Layout.vertical_viewpager, null);
 
 					_viewPager = _nativeView.FindViewById<ViewPager>(Resource.Id.pager);
+					_pageIndicator = _nativeView.FindViewById<PageIndicator>(Resource.Id.pageIndicator);
+
+					if (Element.Orientation == CarouselOrientation.Horizontal)
+						_pageIndicator.Orientation = Orientation.Horizontal;
+					else
+						_pageIndicator.Orientation = Orientation.Vertical;
+
+					_pageIndicator.UpdateViewPager(_viewPager);
 
 					_viewPager.PageSelected += ViewPager_PageSelected;
 					_viewPager.PageScrollStateChanged += ViewPager_PageScrollStateChanged;
@@ -93,7 +102,7 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateBackgroundColor();
 			UpdateItemsSource();
 			UpdateInterSpacing();
-			SetIsSwipeEnabled();
+			UpdateIsSwipeEnabled();
 			UpdateArrows();
 			UpdateIndicators();
 		}
@@ -114,7 +123,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			else if (e.PropertyName == CarouselView.IsSwipeEnabledProperty.PropertyName)
 			{
-				SetIsSwipeEnabled();
+				UpdateIsSwipeEnabled();
 			}
 			else if (e.PropertyName == CarouselView.IndicatorsTintColorProperty.PropertyName)
 			{
@@ -209,6 +218,9 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				UpdateItemsSource();
 			}
+
+			if (_pageIndicator != null)
+				_pageIndicator.UpdateIndicatorCount();
 		}
 
 		// KeyboardService code
@@ -231,7 +243,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (!_isChangingPosition)
 			{
-				SetCurrentPage(Element.Position);
+				UpdateCurrentPage(Element.Position);
 			}
 		}
 
@@ -288,11 +300,11 @@ namespace Xamarin.Forms.Platform.Android
 				}
 			}
 
-			// report % while the user is dragging or when SetCurrentPage has been called
+			// report % while the user is dragging or when UpdateCurrentPage has been called
 			if (_mViewPagerState == ViewPager.ScrollStateDragging || _setCurrentPageCalled)
 				Element.SendScrolled(percentCompleted, _direction);
 
-			// PageScrolled is called 2 times when SetCurrentPage is executed
+			// PageScrolled is called 2 times when UpdateCurrentPage is executed
 			if (_pageScrolledCount == 2)
 			{
 				_setCurrentPageCalled = false;
@@ -303,7 +315,7 @@ namespace Xamarin.Forms.Platform.Android
 		// To assign position when page selected
 		void ViewPager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
 		{
-			// To avoid calling SetCurrentPage
+			// To avoid calling UpdateCurrentPage
 			_isChangingPosition = true;
 			Element.NotifyPositionChanged(e.Position);
 			_isChangingPosition = false;
@@ -312,9 +324,9 @@ namespace Xamarin.Forms.Platform.Android
 		// To invoke PositionSelected
 		void ViewPager_PageScrollStateChanged(object sender, ViewPager.PageScrollStateChangedEventArgs e)
 		{
-			// ScrollStateIdle = 0 : the pager is in Idle, settled state
+			// ScrollStateIdle = 0 : the pager is in Idle, Updatetled state
 			// ScrollStateDragging = 1 : the pager is currently being dragged by the user
-			// ScrollStateSettling = 2 : the pager is in the process of settling to a final position
+			// ScrollStateUpdatetling = 2 : the pager is in the process of Updatetling to a final position
 
 			_mViewPagerState = e.State;
 
@@ -323,7 +335,7 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateArrowsVisibility();
 		}
 
-		void SetIsSwipeEnabled()
+		void UpdateIsSwipeEnabled()
 		{
 			((IViewPager)_viewPager)?.SetPagingEnabled(Element.IsSwipeEnabled);
 		}
@@ -338,7 +350,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (Element.ShowArrows)
 			{
-				//ADD previous and next arrows, should allow to set ArrowsBackgroundColor, ArrowsTintColor, ArrowsTransparency
+				//ADD previous and next arrows, should allow to Update ArrowsBackgroundColor, ArrowsTintColor, ArrowsTransparency
 				//should hide the first prev arrows, and in the last item hide the last 
 				if (_prevBtn == null)
 				{
@@ -399,15 +411,14 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (Element.ShowIndicators)
 			{
-				//Add bottom indicators that should allow to set the IndicatorsSHape, the IndicatorsTintoColor, and the CurrentPageIndicatorTintColor
-
+				_pageIndicator.Visibility = AViews.ViewStates.Visible;
 				UpdateIndicatorsTintColor();
 				UpdateIndicatorsCurrentPageTintColor();
 				UpdateIndicatorsShape();
 			}
 			else
 			{
-				//remove indicators
+				_pageIndicator.Visibility = AViews.ViewStates.Gone;
 			}
 
 			UpdateIndicatorPosition();
@@ -424,17 +435,22 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateIndicatorsShape()
 		{
-
+			if (_pageIndicator == null) return;
+			_pageIndicator.UpdateShapeType(Element.IndicatorsShape == IndicatorsShape.Circle ? AShapeType.Oval : AShapeType.Rectangle);
 		}
 
 		void UpdateIndicatorsCurrentPageTintColor()
 		{
-
+			if (_pageIndicator == null) return;
+			_pageIndicator.UpdateCurrentPageIndicatorTintColor(Element.CurrentPageIndicatorTintColor.ToAndroid());
+			UpdateIndicatorsShape();
 		}
 
 		void UpdateIndicatorsTintColor()
 		{
-
+			if (_pageIndicator == null) return;
+			_pageIndicator.UpdatePageIndicatorTintColor(Element.IndicatorsTintColor.ToAndroid());
+			UpdateIndicatorsShape();
 		}
 
 		void UpdateInterSpacing()
@@ -474,13 +490,13 @@ namespace Xamarin.Forms.Platform.Android
 				_isChangingPosition = true;
 
 				// To remove current page
-				if (position == Element.Position)
+				if (position == Element.Position && Source.Count > 1)
 				{
 					var newPos = position - 1;
 					if (newPos == -1)
 						newPos = 0;
 
-					if (position == 0)
+					if (position == 0 && _viewPager.Adapter.Count > 2)
 						// Move to next page
 						_viewPager.SetCurrentItem(1, Element.AnimateTransition);
 					else
@@ -495,16 +511,13 @@ namespace Xamarin.Forms.Platform.Android
 				}
 
 				Source.RemoveAt(position);
-
 				_viewPager.Adapter.NotifyDataSetChanged();
-
 				UpdateArrowsVisibility();
-
 				_isChangingPosition = false;
 			}
 		}
 
-		void SetCurrentPage(int position)
+		void UpdateCurrentPage(int position)
 		{
 			var itemCount = GetItemCount();
 			if (position < 0 || position > itemCount - 1)
@@ -651,6 +664,12 @@ namespace Xamarin.Forms.Platform.Android
 
 					_viewPager.Dispose();
 					_viewPager = null;
+				}
+
+				if (_keyboardService != null)
+				{
+					_keyboardService.Dispose();
+					_keyboardService = null;
 				}
 
 				_disposed = true;

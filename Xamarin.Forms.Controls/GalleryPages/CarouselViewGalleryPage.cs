@@ -63,60 +63,65 @@ namespace Xamarin.Forms.Controls
 
 			public ItemView()
 			{
-				var change = CreateButton("Change", "Change", (items, index) => items[index] = new Moo());
-
-				var removeBar = new StackLayout
+				Content = new Image()
 				{
-					Orientation = StackOrientation.Horizontal,
-					HorizontalOptions = LayoutOptions.FillAndExpand,
-					Children = {
-						CreateButton ("- Left", "RemoveLeft", (items, index) => items.RemoveAt (index - 1)),
-						CreateButton ("Remove", "Remove", (items, index) => items.RemoveAt (index)),
-						CreateButton ("- Right", "RemoveRight", (items, index) => items.RemoveAt (index + 1)),
-					}
+					Source = "coffee.png",
+					Aspect = Aspect.Fill
 				};
+				//var change = CreateButton("Change", "Change", (items, index) => items[index] = new Moo());
 
-				var addBar = new StackLayout
-				{
-					Orientation = StackOrientation.Horizontal,
-					HorizontalOptions = LayoutOptions.FillAndExpand,
-					Children = {
-						CreateButton ("+ Left", "AddLeft", (items, index) => items.Insert (index, new Moo ())),
-						CreateButton ("+ Right", "AddRight", (items, index) => {
-							if (index == items.Count - 1)
-								items.Add (new Moo ());
-							else
-								items.Insert (index + 1, new Moo ());
-						}),
-					}
-				};
+				//var removeBar = new StackLayout
+				//{
+				//	Orientation = StackOrientation.Horizontal,
+				//	HorizontalOptions = LayoutOptions.FillAndExpand,
+				//	Children = {
+				//		CreateButton ("- Left", "RemoveLeft", (items, index) => items.RemoveAt (index - 1)),
+				//		CreateButton ("Remove", "Remove", (items, index) => items.RemoveAt (index)),
+				//		CreateButton ("- Right", "RemoveRight", (items, index) => items.RemoveAt (index + 1)),
+				//	}
+				//};
 
-				var typeNameLabel = new Label() { StyleId = "typename" };
-				typeNameLabel.SetBinding(Label.TextProperty, nameof(Item.TypeName));
+				//var addBar = new StackLayout
+				//{
+				//	Orientation = StackOrientation.Horizontal,
+				//	HorizontalOptions = LayoutOptions.FillAndExpand,
+				//	Children = {
+				//		CreateButton ("+ Left", "AddLeft", (items, index) => items.Insert (index, new Moo ())),
+				//		CreateButton ("+ Right", "AddRight", (items, index) => {
+				//			if (index == items.Count - 1)
+				//				items.Add (new Moo ());
+				//			else
+				//				items.Insert (index + 1, new Moo ());
+				//		}),
+				//	}
+				//};
 
-				var idLabel = new Label()
-				{
-					AutomationId = "ItemId",
-					StyleId = "id",
-					TextColor = Color.White
-				};
-				idLabel.SetBinding(Label.TextProperty, nameof(Item.Id));
+				//var typeNameLabel = new Label() { StyleId = "typename" };
+				//typeNameLabel.SetBinding(Label.TextProperty, nameof(Item.TypeName));
 
-				Content = new StackLayout
-				{
-					Children = {
-						typeNameLabel,
-						idLabel,
-						change,
-						removeBar,
-						addBar,
-					}
-				};
+				//var idLabel = new Label()
+				//{
+				//	AutomationId = "ItemId",
+				//	StyleId = "id",
+				//	TextColor = Color.White
+				//};
+				//idLabel.SetBinding(Label.TextProperty, nameof(Item.Id));
 
-				PropertyChanged += (s, e) => {
-					if (e.PropertyName == "TextColor")
-						typeNameLabel.TextColor = TextColor;
-				};
+				//Content = new StackLayout
+				//{
+				//	Children = {
+				//		typeNameLabel,
+				//		idLabel,
+				//		change,
+				//		removeBar,
+				//		addBar,
+				//	}
+				//};
+
+				//PropertyChanged += (s, e) => {
+				//	if (e.PropertyName == "TextColor")
+				//		typeNameLabel.TextColor = TextColor;
+				//};
 			}
 
 			Button CreateButton(string text, string automationId, Action<IList<Item>, int> clicked)
@@ -125,7 +130,8 @@ namespace Xamarin.Forms.Controls
 				button.AutomationId = automationId;
 				button.Text = text;
 				button.TextColor = Color.White;
-				button.Clicked += (s, e) => {
+				button.Clicked += (s, e) =>
+				{
 					var items = (IList<Item>)Context.ItemsSource;
 					var index = items.IndexOf(BindingContext as Item);
 					clicked(items, index);
@@ -284,7 +290,8 @@ namespace Xamarin.Forms.Controls
 				Position = StartPosition,
 				ShowArrows = true,
 				ShowIndicators = true,
-				HeightRequest = 300
+				HeightRequest = 300,
+				Orientation = CarouselOrientation.Horizontal
 			};
 
 			_events = new Queue<string>();
@@ -294,7 +301,8 @@ namespace Xamarin.Forms.Controls
 			_selectedPosition = CreateValue("null", "SelectedPosition");
 			_eventLog = CreateValue("", "EventLog");
 
-			_carouselView.ItemSelected += (s, o) => {
+			_carouselView.ItemSelected += (s, o) =>
+			{
 				var selectedItem = (Item)o.SelectedItem;
 				var selectedItemId = selectedItem?.Id.ToString() ?? "null";
 				if (selectedItem != _carouselView.SelectedItem)
@@ -303,7 +311,8 @@ namespace Xamarin.Forms.Controls
 				OnEvent("i");
 			};
 
-			_carouselView.PositionSelected += (s, o) => {
+			_carouselView.PositionSelected += (s, o) =>
+			{
 				var selectedPosition = (int)o.SelectedPosition;
 				if (_items != null && _items.Any() && _items[selectedPosition] != _carouselView.SelectedItem)
 					throw new Exception("CarouselView.Item != Items[selectedPosition]");
@@ -360,8 +369,61 @@ namespace Xamarin.Forms.Controls
 						_carouselView.ItemsSource = null;
 					}),
 					CreateButton("Add", "Add", () => {
-						_items.Insert (0, new Moo ());
+						if(_items != null)
+							_items.Insert (0, new Moo ());
 					})
+				}
+			};
+
+			loadBar = new StackLayout()
+			{
+				Children =
+				{
+					loadBar,
+					new StackLayout()
+					{
+						Orientation = StackOrientation.Horizontal,
+						Children =
+						{
+							CreateButton("Shape", "Shape", () =>
+							{
+								_carouselView.IndicatorsShape = _carouselView.IndicatorsShape == IndicatorsShape.Circle ? _carouselView.IndicatorsShape = IndicatorsShape.Square : IndicatorsShape.Circle;
+							}),
+							CreateButton("Colors", "Colors", () =>
+							{
+								Color color = _carouselView.CurrentPageIndicatorTintColor == Color.Pink ? Color.Green : Color.Pink;
+
+								if(color == Color.Pink)
+								{
+									_carouselView.CurrentPageIndicatorTintColor = Color.Pink;
+									_carouselView.IndicatorsTintColor = Color.Green;
+								}
+								else
+								{
+									_carouselView.CurrentPageIndicatorTintColor = Color.Green;
+									_carouselView.IndicatorsTintColor = Color.Pink;
+								}
+							}),
+							CreateButton("Remove", "Remove", () => {
+								if(_items != null)
+									_items.RemoveAt (0);
+							}),
+							CreateButton("Orient", "Orient", () => {
+								_carouselView.Orientation = _carouselView.Orientation == CarouselOrientation.Horizontal ? CarouselOrientation.Vertical : CarouselOrientation.Horizontal;
+							}),
+						}
+					},
+					new StackLayout()
+					{
+						Orientation = StackOrientation.Horizontal,
+						Children =
+						{
+							CreateButton("Indicators", "Indicators", () =>
+							{
+								_carouselView.ShowIndicators = _carouselView.ShowIndicators ? false : true;
+							}),
+						}
+					}
 				}
 			};
 
