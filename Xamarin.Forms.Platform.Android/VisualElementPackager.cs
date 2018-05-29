@@ -160,7 +160,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (view != null)
 				AddChild(view);
 
-			if (ElementController.LogicalChildren.FirstOrDefault() != view)
+			if (ElementController.LogicalChildren.LastOrDefault() != view)
 				EnsureChildOrder();
 		}
 
