@@ -5,6 +5,7 @@ using UIKit;
 using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
 using PointF = CoreGraphics.CGPoint;
 using RectangleF = CoreGraphics.CGRect;
+using CoreGraphics;
 
 namespace Xamarin.Forms.Platform.iOS
 {
@@ -18,6 +19,8 @@ namespace Xamarin.Forms.Platform.iOS
 		RectangleF _previousFrame;
 		ScrollToRequestedEventArgs _requestedScroll;
 		VisualElementTracker _tracker;
+
+		bool _isInShell;
 
 		public ScrollViewRenderer() : base(RectangleF.Empty)
 		{
@@ -86,6 +89,23 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateHorizontalScrollBarVisibility();
 				UpdateVerticalBounce();
 
+				if (Forms.IsiOS11OrNewer)
+				{
+					var parent = Element.Parent;
+					while (!Application.IsApplicationOrNull(parent))
+					{
+						if (parent is ScrollView || parent is ListView || parent is TableView)
+							return;
+						parent = parent.Parent;
+
+						if (parent is BaseShellItem)
+						{
+							_isInShell = true;
+							ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Always;
+						}
+					}
+				}
+
 				OnElementChanged(new VisualElementChangedEventArgs(oldElement, element));
 
 				EffectUtilities.RegisterEffectControlProvider(this, oldElement, element);
@@ -134,7 +154,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void UpdateOverrideArea()
 		{
-			if (Forms.IsiOS11OrNewer)
+			if (Forms.IsiOS11OrNewer && _isInShell)
 			{
 				var newBounds = AdjustedContentInset.InsetRect(Bounds).ToRectangle();
 				newBounds.X = 0;

@@ -231,4 +231,5 @@
   <ItemGroup>
     <BundleResource Include="Resources\3bar.png" />
   </ItemGroup>
+  <ItemGroup />
 </Project>
