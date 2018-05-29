@@ -16,8 +16,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public bool IsInMoreTab { get; set; }
 
-		public Page Page { get; private set; }
-
 		public ShellSection ShellSection
 		{
 			get { return _shellSection; }
@@ -60,7 +58,7 @@ namespace Xamarin.Forms.Platform.iOS
 		private bool _disposed;
 		private bool _ignorePop;
 		private TaskCompletionSource<bool> _popCompletionTask;
-		private IVisualElementRenderer _renderer;
+		private IShellSectionRootRenderer _renderer;
 		private ShellSection _shellSection;
 
 		public ShellSectionRenderer(IShellContext context)
@@ -127,16 +125,15 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
-				//((IShellContentController)_shellContent).RecyclePage(Page);
+				_renderer.Dispose();
 				_appearanceTracker.Dispose();
 				_shellSection.PropertyChanged -= HandlePropertyChanged;
 				((IShellSectionController)_shellSection).NavigationRequested -= OnNavigationRequested;
 				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
-				DisposePage(Page);
 			}
 
 			// must be set null prior to _shellContent to ensure weak ref page gets cleared
-			Page = null;
+			//Page = null;
 			_shellSection = null;
 			_appearanceTracker = null;
 			_renderer = null;
@@ -152,20 +149,23 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void LoadPages()
 		{
-			Page content = null;// ((IShellContentController)ShellContent).GetOrCreateContent();
-			Page = content;
+			// FIXME
+			//Page content = ((IShellContentController)ShellSection.Items[0]).GetOrCreateContent();
+			//Page = content;
 
-			if (!Shell.GetTabBarVisible(Page))
-				Log.Warning("Shell", "Root page of a ShellContent will never hide the TabBar");
+			//if (!Shell.GetTabBarVisible(Page))
+			//	Log.Warning("Shell", "Root page of a ShellContent will never hide the TabBar");
 
-			_renderer = Platform.CreateRenderer(content);
-			Platform.SetRenderer(content, _renderer);
+			//_renderer = Platform.CreateRenderer(content);
+			//Platform.SetRenderer(content, _renderer);
 
-			var tracker = _context.CreatePageRendererTracker();
-			tracker.IsRootPage = !IsInMoreTab; // default tracker requires this be set first
-			tracker.Renderer = _renderer;
+			//var tracker = _context.CreatePageRendererTracker();
+			//tracker.IsRootPage = !IsInMoreTab; // default tracker requires this be set first
+			//tracker.Renderer = _renderer;
 
-			_trackers[Page] = tracker;
+			//_trackers[Page] = tracker;
+
+			_renderer = new ShellSectionRootRenderer(ShellSection);
 
 			PushViewController(_renderer.ViewController, false);
 
@@ -322,10 +322,10 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		private Page PageForViewController(UIViewController viewController)
+		private Element ElementForViewController(UIViewController viewController)
 		{
 			if (_renderer.ViewController == viewController)
-				return Page;
+				return ShellSection;
 
 			foreach (var child in ShellSection.Stack)
 			{
@@ -430,8 +430,18 @@ namespace Xamarin.Forms.Platform.iOS
 
 			public override void WillShowViewController(UINavigationController navigationController, [Transient] UIViewController viewController, bool animated)
 			{
-				var page = _self.PageForViewController(viewController);
-				bool navBarVisible = Shell.GetNavBarVisible(page);
+				var element = _self.ElementForViewController(viewController);
+
+				bool navBarVisible;
+				if (element is ShellSection)
+				{
+					navBarVisible = _self._renderer.ShowNavBar;
+				}
+				else
+				{
+					navBarVisible = Shell.GetNavBarVisible(element);
+				}
+
 				navigationController.SetNavigationBarHidden(!navBarVisible, true);
 			}
 		}

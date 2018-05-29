@@ -66,7 +66,9 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (SearchHandler != null)
 				{
-					((INotifyCollectionChanged)SearchController.ListProxy).CollectionChanged -= OnProxyCollectionChanged;
+					var listProxy = (INotifyCollectionChanged)SearchController.ListProxy;
+					if (listProxy != null)
+						listProxy.CollectionChanged -= OnProxyCollectionChanged;
 					SearchController.ListProxyChanged -= OnListProxyChanged;
 				}
 
