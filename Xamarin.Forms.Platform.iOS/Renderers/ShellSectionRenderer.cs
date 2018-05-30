@@ -165,7 +165,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			//_trackers[Page] = tracker;
 
-			_renderer = new ShellSectionRootRenderer(ShellSection);
+			_renderer = new ShellSectionRootRenderer(ShellSection, _context);
 
 			PushViewController(_renderer.ViewController, false);
 
@@ -187,7 +187,8 @@ namespace Xamarin.Forms.Platform.iOS
 			Platform.SetRenderer(page, renderer);
 
 			var tracker = _context.CreatePageRendererTracker();
-			tracker.Renderer = renderer;
+			tracker.ViewController = renderer.ViewController;
+			tracker.Page = page;
 
 			_trackers[page] = tracker;
 
@@ -348,7 +349,8 @@ namespace Xamarin.Forms.Platform.iOS
 			renderer.ViewController.HidesBottomBarWhenPushed = !tabBarVisible;
 
 			var tracker = _context.CreatePageRendererTracker();
-			tracker.Renderer = renderer;
+			tracker.ViewController = renderer.ViewController;
+			tracker.Page = page;
 
 			_trackers[page] = tracker;
 

@@ -101,6 +101,9 @@ namespace Xamarin.Forms.Platform.iOS
 						if (parent is BaseShellItem)
 						{
 							_isInShell = true;
+							// FIXME THIS SHOULD NOT BE HARDCODED
+							ContentInset = new UIEdgeInsets(35, 0, 0, 0);
+							ContentOffset = new PointF(0, -35);
 							ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Always;
 						}
 					}
