@@ -74,6 +74,12 @@ namespace Xamarin.Forms.Platform.Android
 			// aapt resource value: 0x7f080004
 			public static int pageIndicator = 2131230724;
 
+			// aapt resource value: 0x7f080005
+			public static int prev = 2131230725;
+
+			// aapt resource value: 0x7f080006
+			public static int next = 2131230726;
+
 			static Id()
 			{
 				ResourceIdManager.UpdateIdValues();

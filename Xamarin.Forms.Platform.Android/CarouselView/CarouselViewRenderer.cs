@@ -11,6 +11,8 @@ using Android.Content;
 using Android.Widget;
 using Android.App;
 using AShapeType = Android.Graphics.Drawables.ShapeType;
+using AImageViewCompat = Android.Support.V4.Widget.ImageViewCompat;
+using AColorStateList = Android.Content.Res.ColorStateList;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -80,6 +82,12 @@ namespace Xamarin.Forms.Platform.Android
 					else
 						_pageIndicator.Orientation = Orientation.Vertical;
 
+					_prevBtn = _nativeView.FindViewById<LinearLayout>(Resource.Id.prev);
+					_nextBtn = _nativeView.FindViewById<LinearLayout>(Resource.Id.next);
+
+					_prevBtn.Click += PrevBtn_Click;
+					_nextBtn.Click += NextBtn_Click;
+
 					_pageIndicator.UpdateViewPager(_viewPager);
 
 					_viewPager.PageSelected += ViewPager_PageSelected;
@@ -103,8 +111,11 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateItemsSource();
 			UpdateInterSpacing();
 			UpdateIsSwipeEnabled();
-			UpdateArrows();
+			UpdateArrowsVisibility();
 			UpdateIndicators();
+			UpdateArrowsTransparency();
+			UpdateArrowsBackgroundColor();
+			UpdateArrowsTintColor();
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -114,53 +125,31 @@ namespace Xamarin.Forms.Platform.Android
 			if (Element == null || _viewPager == null) return;
 
 			if (e.PropertyName == CarouselView.OrientationProperty.PropertyName)
-			{
 				UpdateOrientation();
-			}
 			else if (e.PropertyName == CarouselView.BackgroundColorProperty.PropertyName)
-			{
 				_viewPager.SetBackgroundColor(Element.BackgroundColor.ToAndroid());
-			}
 			else if (e.PropertyName == CarouselView.IsSwipeEnabledProperty.PropertyName)
-			{
 				UpdateIsSwipeEnabled();
-			}
 			else if (e.PropertyName == CarouselView.IndicatorsTintColorProperty.PropertyName)
-			{
 				UpdateIndicatorsTintColor();
-			}
 			else if (e.PropertyName == CarouselView.CurrentPageIndicatorTintColorProperty.PropertyName)
-			{
 				UpdateIndicatorsCurrentPageTintColor();
-			}
 			else if (e.PropertyName == CarouselView.IndicatorsShapeProperty.PropertyName)
-			{
 				UpdateIndicatorsShape();
-			}
 			else if (e.PropertyName == CarouselView.ShowIndicatorsProperty.PropertyName)
-			{
 				UpdateIndicators();
-			}
 			else if (e.PropertyName == CarouselView.ItemsSourceProperty.PropertyName)
-			{
 				UpdateItemsSource();
-			}
 			else if (e.PropertyName == CarouselView.PositionProperty.PropertyName)
-			{
 				UpdatePosition();
-			}
 			else if (e.PropertyName == CarouselView.ShowArrowsProperty.PropertyName)
-			{
-				UpdateArrows();
-			}
+				UpdateArrowsVisibility();
 			else if (e.PropertyName == CarouselView.ArrowsTintColorProperty.PropertyName)
-			{
 				UpdateArrowsTintColor();
-			}
 			else if (e.PropertyName == CarouselView.ArrowsTransparencyProperty.PropertyName)
-			{
 				UpdateArrowsTransparency();
-			}
+			else if (e.PropertyName == CarouselView.ArrowsBackgroundColorProperty.PropertyName)
+				UpdateArrowsBackgroundColor();
 		}
 
 		async void ItemsSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -345,29 +334,13 @@ namespace Xamarin.Forms.Platform.Android
 			var count = TemplatedItemsView.TemplatedItems.Count();
 			return count;
 		}
-
-		void UpdateArrows()
+		void UpdateArrowsVisibility()
 		{
-			if (Element.ShowArrows)
-			{
-				//ADD previous and next arrows, should allow to Update ArrowsBackgroundColor, ArrowsTintColor, ArrowsTransparency
-				//should hide the first prev arrows, and in the last item hide the last 
-				if (_prevBtn == null)
-				{
-					// _prevBtn.Click += PrevBtn_Click;
-				}
+			if (_prevBtn == null || _nextBtn == null) return;
+			var count = GetItemCount();
 
-				if (_nextBtn == null)
-				{
-					//_nextBtn.Click += NextBtn_Click;
-				}
-			}
-			else
-			{
-				if (_prevBtn == null || _nextBtn == null) return;
-				_prevBtn.Visibility = AViews.ViewStates.Gone;
-				_nextBtn.Visibility = AViews.ViewStates.Gone;
-			}
+			_prevBtn.Visibility = !Element.ShowArrows || Element.Position == 0 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
+			_nextBtn.Visibility = !Element.ShowArrows || Element.Position == count - 1 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
 		}
 
 		void PrevBtn_Click(object sender, EventArgs e)
@@ -390,21 +363,26 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateArrowsTintColor()
 		{
+			if (_prevBtn == null || _nextBtn == null) return;
 
+			_prevBtn.BackgroundTintList = AColorStateList.ValueOf(Element.ArrowsTintColor.ToAndroid());
+			_nextBtn.BackgroundTintList = AColorStateList.ValueOf(Element.ArrowsTintColor.ToAndroid());
 		}
 
 		void UpdateArrowsTransparency()
 		{
+			if (_prevBtn == null || _nextBtn == null) return;
 
+			_prevBtn.Alpha = Element.ArrowsTransparency;
+			_nextBtn.Alpha = Element.ArrowsTransparency;
 		}
 
-		void UpdateArrowsVisibility()
+		void UpdateArrowsBackgroundColor()
 		{
 			if (_prevBtn == null || _nextBtn == null) return;
-			var count = GetItemCount();
 
-			_prevBtn.Visibility = Element.Position == 0 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
-			_nextBtn.Visibility = Element.Position == count - 1 || count == 0 ? AViews.ViewStates.Gone : AViews.ViewStates.Visible;
+			_prevBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
+			_nextBtn.SetBackgroundColor(Element.ArrowsBackgroundColor.ToAndroid());
 		}
 
 		void UpdateIndicators()
@@ -670,6 +648,12 @@ namespace Xamarin.Forms.Platform.Android
 				{
 					_keyboardService.Dispose();
 					_keyboardService = null;
+				}
+
+				if (_pageIndicator != null)
+				{
+					_pageIndicator.Dispose();
+					_pageIndicator = null;
 				}
 
 				_disposed = true;

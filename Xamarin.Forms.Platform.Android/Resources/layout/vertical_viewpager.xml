@@ -13,8 +13,6 @@
 			android:layout_height="20dip"
 			android:layout_alignParentTop="true"
 			android:layout_centerHorizontal="true"
-			android:alpha="0.5"
-			android:visibility="gone"
 			android:gravity="center">
 		<ImageView
 				android:id="@+id/prevArrow"
@@ -28,8 +26,6 @@
 			android:layout_height="20dip"
 			android:layout_alignParentBottom="true"
 			android:layout_centerHorizontal="true"
-			android:alpha="0.5"
-			android:visibility="gone"
 			android:orientation="horizontal"
 			android:gravity="center">
 		<ImageView

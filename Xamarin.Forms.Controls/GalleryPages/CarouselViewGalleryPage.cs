@@ -422,6 +422,23 @@ namespace Xamarin.Forms.Controls
 							{
 								_carouselView.ShowIndicators = _carouselView.ShowIndicators ? false : true;
 							}),
+							CreateButton("Arrow Color", "Arrow Color", () =>
+							{
+								Color color = _carouselView.ArrowsTintColor == Color.Pink ? Color.Green : Color.Pink;
+
+								if(color == Color.Pink)
+								{
+									_carouselView.ArrowsTintColor = Color.Pink;
+									_carouselView.ArrowsBackgroundColor = Color.Green;
+									_carouselView.ArrowsTransparency = 0.3f;
+								}
+								else
+								{
+									_carouselView.ArrowsTintColor = Color.Green;
+									_carouselView.ArrowsBackgroundColor = Color.Pink;
+									_carouselView.ArrowsTransparency = 0.9f;
+								}
+							})
 						}
 					}
 				}
