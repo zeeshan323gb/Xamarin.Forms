@@ -147,8 +147,6 @@ namespace Xamarin.Forms.Platform.iOS
 				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
 			}
 
-			// must be set null prior to _shellContent to ensure weak ref page gets cleared
-			//Page = null;
 			_shellSection = null;
 			_appearanceTracker = null;
 			_renderer = null;
@@ -162,7 +160,11 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateTabBarItem();
 			else if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
 			{
-				_trackers[ShellSection].Page = ((IShellContentController)ShellSection.CurrentItem).Page;
+				// FIXME
+				Device.BeginInvokeOnMainThread(() =>
+				{
+					_trackers[ShellSection].Page = ((IShellContentController)ShellSection.CurrentItem).Page;
+				});
 			}
 		}
 

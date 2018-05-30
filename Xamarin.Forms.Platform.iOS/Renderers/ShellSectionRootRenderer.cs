@@ -102,12 +102,9 @@ namespace Xamarin.Forms.Platform.iOS
 				Platform.SetRenderer(page, renderer);
 
 				AddChildViewController(renderer.ViewController);
-				_containerArea.AddSubview(renderer.NativeView);
 
 				if (item == ShellSection.CurrentItem)
-					renderer.NativeView.Hidden = false;
-				else
-					renderer.NativeView.Hidden = true;
+					_containerArea.AddSubview(renderer.NativeView);
 
 				_renderers[item] = renderer;
 			}
@@ -117,16 +114,21 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
 			{
-				var selectedIndex = ShellSection.Items.IndexOf(ShellSection.CurrentItem);
-
-				foreach (var item in ShellSection.Items)
+				var items = ShellSection.Items;
+				for (int i = 0; i < items.Count; i++)
 				{
-					var renderer = _renderers[item];
-					if (item == ShellSection.CurrentItem)
-						renderer.NativeView.Hidden = false;
-					else
-						renderer.NativeView.Hidden = true;
+					var shellContent = items[i];
+					if (_renderers.TryGetValue(shellContent, out var renderer))
+					{
+						var view = renderer.NativeView;
+						if (shellContent == ShellSection.CurrentItem)
+							_containerArea.AddSubview(view);
+						else
+							view.RemoveFromSuperview();
+					}
 				}
+
+				LayoutRenderers();
 			}
 		}
 	}
