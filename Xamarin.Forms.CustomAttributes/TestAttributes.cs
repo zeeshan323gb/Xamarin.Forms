@@ -227,6 +227,7 @@ namespace Xamarin.Forms.CustomAttributes
 			BorderColor,
 			BorderRadius,
 			Image,
+			Padding
 		}
 
 		public enum VisualElement
@@ -494,6 +495,7 @@ namespace Xamarin.Forms.CustomAttributes
 		{
 			Completed,
 			TextChanged,
+			Placeholder,
 			Text,
 			TextColor,
 			FontAttributes,
@@ -766,7 +768,8 @@ namespace Xamarin.Forms.CustomAttributes
 
 		public enum BoxView
 		{
-			Color
+			Color,
+			CornerRadius
 		}
 
 	}

@@ -42,15 +42,16 @@ using UIKit;
 [assembly: ExportRenderer(typeof(NavigationMenu), typeof(NavigationMenuRenderer))]
 [assembly: ExportRenderer(typeof(ListView), typeof(ListViewRenderer))]
 [assembly: ExportRenderer(typeof(OpenGLView), typeof(OpenGLViewRenderer))]
-[assembly: ExportRenderer(typeof(NativeViewWrapper), typeof(NativeViewWrapperRenderer))]
 [assembly: ExportRenderer(typeof(TabbedPage), typeof(TabbedRenderer))]
 [assembly: ExportRenderer(typeof(NavigationPage), typeof(NavigationRenderer))]
 [assembly: ExportRenderer(typeof(CarouselPage), typeof(CarouselPageRenderer))]
 [assembly: ExportRenderer(typeof(Page), typeof(PageRenderer))]
 [assembly: ExportRenderer(typeof(MasterDetailPage), typeof(PhoneMasterDetailRenderer), UIUserInterfaceIdiom.Phone)]
-[assembly: ExportRenderer(typeof(MasterDetailPage), typeof(TabletMasterDetailRenderer), UIUserInterfaceIdiom.Pad)]
 [assembly: ExportRenderer(typeof(CarouselView), typeof(CarouselViewRenderer))]
 #endif
+
+[assembly: ExportRenderer(typeof(MasterDetailPage), typeof(TabletMasterDetailRenderer), UIUserInterfaceIdiom.Pad)]
+[assembly: ExportRenderer(typeof(NativeViewWrapper), typeof(NativeViewWrapperRenderer))]
 [assembly: ExportCell(typeof(Cell), typeof(CellRenderer))]
 [assembly: ExportCell(typeof(ImageCell), typeof(ImageCellRenderer))]
 [assembly: ExportCell(typeof(EntryCell), typeof(EntryCellRenderer))]
