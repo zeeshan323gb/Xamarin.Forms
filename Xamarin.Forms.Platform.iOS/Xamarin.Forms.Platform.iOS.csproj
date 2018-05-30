@@ -128,6 +128,7 @@
     <Compile Include="Renderers\AlignmentExtensions.cs" />
     <Compile Include="Forms.cs" />
     <Compile Include="PageExtensions.cs" />
+    <Compile Include="Renderers\BarAppearanceTrackerUtils.cs" />
     <Compile Include="Renderers\ElementSelectedEventArgs.cs" />
     <Compile Include="Renderers\IShellContext.cs" />
     <Compile Include="Renderers\IShellFlyoutContentRenderer.cs" />
@@ -151,6 +152,7 @@
     <Compile Include="Renderers\ShellPageRendererTracker.cs" />
     <Compile Include="Renderers\ShellRenderer.cs" />
     <Compile Include="Renderers\ShellSearchResultsRenderer.cs" />
+    <Compile Include="Renderers\ShellSectionRootHeader.cs" />
     <Compile Include="Renderers\ShellSectionRootRenderer.cs" />
     <Compile Include="Renderers\ShellTabBarAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellSectionRenderer.cs" />

@@ -49,16 +49,24 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private readonly IShellContext _context;
 
-		private readonly Dictionary<Page, IShellPageRendererTracker> _trackers =
-			new Dictionary<Page, IShellPageRendererTracker>();
+		private readonly Dictionary<Element, IShellPageRendererTracker> _trackers =
+			new Dictionary<Element, IShellPageRendererTracker>();
+
 		private IShellNavBarAppearanceTracker _appearanceTracker;
+
 		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
 							new Dictionary<UIViewController, TaskCompletionSource<bool>>();
 
 		private bool _disposed;
+
+		private bool _firstLayoutCompleted;
+
 		private bool _ignorePop;
+
 		private TaskCompletionSource<bool> _popCompletionTask;
+
 		private IShellSectionRootRenderer _renderer;
+
 		private ShellSection _shellSection;
 
 		public ShellSectionRenderer(IShellContext context)
@@ -110,6 +118,12 @@ namespace Xamarin.Forms.Platform.iOS
 			base.ViewDidLayoutSubviews();
 
 			_appearanceTracker.UpdateLayout(this);
+
+			if (!_firstLayoutCompleted)
+			{
+				UpdateShadowImages();
+				_firstLayoutCompleted = true;
+			}
 		}
 
 		public override void ViewDidLoad()
@@ -125,6 +139,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
+				_trackers[ShellSection].Dispose();
 				_renderer.Dispose();
 				_appearanceTracker.Dispose();
 				_shellSection.PropertyChanged -= HandlePropertyChanged;
@@ -145,27 +160,21 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateTabBarItem();
 			else if (e.PropertyName == BaseShellItem.IconProperty.PropertyName)
 				UpdateTabBarItem();
+			else if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
+			{
+				_trackers[ShellSection].Page = ((IShellContentController)ShellSection.CurrentItem).Page;
+			}
 		}
 
 		protected virtual void LoadPages()
 		{
-			// FIXME
-			//Page content = ((IShellContentController)ShellSection.Items[0]).GetOrCreateContent();
-			//Page = content;
-
-			//if (!Shell.GetTabBarVisible(Page))
-			//	Log.Warning("Shell", "Root page of a ShellContent will never hide the TabBar");
-
-			//_renderer = Platform.CreateRenderer(content);
-			//Platform.SetRenderer(content, _renderer);
-
-			//var tracker = _context.CreatePageRendererTracker();
-			//tracker.IsRootPage = !IsInMoreTab; // default tracker requires this be set first
-			//tracker.Renderer = _renderer;
-
-			//_trackers[Page] = tracker;
-
 			_renderer = new ShellSectionRootRenderer(ShellSection, _context);
+
+			var tracker = _context.CreatePageRendererTracker();
+			tracker.IsRootPage = true;
+			tracker.ViewController = _renderer.ViewController;
+			tracker.Page = ((IShellContentController)ShellSection.CurrentItem).GetOrCreateContent();
+			_trackers[ShellSection] = tracker;
 
 			PushViewController(_renderer.ViewController, false);
 
@@ -384,6 +393,11 @@ namespace Xamarin.Forms.Platform.iOS
 			stack.RemoveAt(stack.Count - 1);
 
 			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, shellSection, shellContent, stack, true);
+		}
+
+		private void UpdateShadowImages()
+		{
+			NavigationBar.SetValueForKey(NSObject.FromObject(true), new NSString("hidesShadow"));
 		}
 
 		private class GestureDelegate : UIGestureRecognizerDelegate

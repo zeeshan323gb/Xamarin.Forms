@@ -1,5 +1,4 @@
 ﻿using CoreGraphics;
-using Foundation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,97 +6,6 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellSectionRootHeader : UICollectionViewController
-	{
-		public class ShellSectionHeaderCell : UICollectionViewCell
-		{
-			[Export("initWithFrame:")]
-			public ShellSectionHeaderCell(CGRect frame) : base(frame)
-			{
-				Label = new UILabel();
-				Label.TextAlignment = UITextAlignment.Center;
-				Label.Font = UIFont.BoldSystemFontOfSize(14);
-				Label.TextColor = UIColor.White;
-				ContentView.AddSubview(Label);
-			}
-
-			public override CGSize SizeThatFits(CGSize size)
-			{
-				return new CGSize(Label.SizeThatFits(size).Width + 200, 35);
-			}
-
-			public override void LayoutSubviews()
-			{
-				base.LayoutSubviews();
-
-				Label.Frame = Bounds;
-			}
-
-			public UILabel Label { get; }
-		}
-
-		private static readonly NSString CellId = new NSString("HeaderCell");
-
-		private readonly ShellSection _shellSection;
-		private UIView _bar;
-
-		public ShellSectionRootHeader(ShellSection shellSection) : base (new UICollectionViewFlowLayout ())
-		{
-			_shellSection = shellSection;
-		}
-
-		public override void ViewDidLoad()
-		{
-			base.ViewDidLoad();
-
-
-			CollectionView.BackgroundColor = UIColor.FromRGB(104, 159, 57);
-
-			_bar = new UIView(new CGRect(0, 0, 20, 20));
-			_bar.BackgroundColor = UIColor.White;
-			_bar.Layer.ZPosition = 9001; //its over 9000!
-			CollectionView.AddSubview(_bar);
-
-			CollectionView.Bounces = false;
-			CollectionView.AlwaysBounceHorizontal = false;
-
-			CollectionView.ShowsHorizontalScrollIndicator = false;
-
-			var flowLayout = Layout as UICollectionViewFlowLayout;
-			flowLayout.ScrollDirection = UICollectionViewScrollDirection.Horizontal;
-			flowLayout.MinimumInteritemSpacing = 0;
-			flowLayout.MinimumLineSpacing = 0;
-			flowLayout.EstimatedItemSize = new CGSize(70, 35);
-
-			CollectionView.RegisterClassForCell(typeof(ShellSectionHeaderCell), CellId);
-		}
-
-		public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
-		{
-			var headerCell = (ShellSectionHeaderCell)collectionView.DequeueReusableCell(CellId, indexPath);
-
-			var shellContent = _shellSection.Items[indexPath.Row];
-			headerCell.Label.Text = shellContent.Title;
-			headerCell.Label.SetNeedsDisplay();
-
-			return headerCell;
-		}
-
-		public override nint NumberOfSections(UICollectionView collectionView)
-		{
-			return 1;
-		}
-
-		public override nint GetItemsCount(UICollectionView collectionView, nint section)
-		{
-			return _shellSection.Items.Count;
-		}
-
-		public override bool CanMoveItem(UICollectionView collectionView, NSIndexPath indexPath)
-		{
-			return false;
-		}
-	}
 
 	public class ShellSectionRootRenderer : UIViewController, IShellSectionRootRenderer
 	{
@@ -112,7 +20,6 @@ namespace Xamarin.Forms.Platform.iOS
 		private readonly IShellContext _shellContext;
 		private Dictionary<ShellContent, IVisualElementRenderer> _renderers = new Dictionary<ShellContent, IVisualElementRenderer>();
 		private UIView _containerArea;
-		private IShellPageRendererTracker _tracker;
 		private ShellSectionRootHeader _header;
 
 		public ShellSectionRootRenderer(ShellSection shellSection, IShellContext shellContext)
@@ -150,16 +57,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 			LoadRenderers();
 
-			_tracker = _shellContext.CreatePageRendererTracker();
-			_tracker.IsRootPage = true;
-			_tracker.ViewController = this;
-			_tracker.Page = ((IShellContentController)ShellSection.CurrentItem).Page;
-
 			ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
 
 			_header = new ShellSectionRootHeader(ShellSection);
+
 			AddChildViewController(_header);
 			View.AddSubview(_header.View);
+
+			UpdateHeaderVisibility();
 		}
 
 		public override void ViewSafeAreaInsetsDidChange()
@@ -169,21 +74,23 @@ namespace Xamarin.Forms.Platform.iOS
 			LayoutHeader();
 		}
 
+		protected virtual void UpdateHeaderVisibility()
+		{
+			_header.View.Hidden = ShellSection.Items.Count <= 1;
+		}
+
 		protected virtual void LayoutRenderers()
 		{
 			var items = ShellSection.Items;
-			int i;
-			for (i = 0; i < items.Count; i++)
+			for (int i = 0; i < items.Count; i++)
 			{
 				var shellContent = items[i];
 				if (_renderers.TryGetValue(shellContent, out var renderer))
 				{
 					var view = renderer.NativeView;
-					view.Frame = new CGRect(i * View.Bounds.Width, 0, View.Bounds.Width, View.Bounds.Height);
+					view.Frame = new CGRect(0, 0, View.Bounds.Width, View.Bounds.Height);
 				}
 			}
-
-			//_scrollView.ContentSize = new CGSize(View.Bounds.Width * i, View.Bounds.Height);
 		}
 
 		protected virtual void LoadRenderers()
@@ -197,6 +104,11 @@ namespace Xamarin.Forms.Platform.iOS
 				AddChildViewController(renderer.ViewController);
 				_containerArea.AddSubview(renderer.NativeView);
 
+				if (item == ShellSection.CurrentItem)
+					renderer.NativeView.Hidden = false;
+				else
+					renderer.NativeView.Hidden = true;
+
 				_renderers[item] = renderer;
 			}
 		}
@@ -205,7 +117,16 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
 			{
-				_tracker.Page = ((IShellContentController)ShellSection.CurrentItem).Page;
+				var selectedIndex = ShellSection.Items.IndexOf(ShellSection.CurrentItem);
+
+				foreach (var item in ShellSection.Items)
+				{
+					var renderer = _renderers[item];
+					if (item == ShellSection.CurrentItem)
+						renderer.NativeView.Hidden = false;
+					else
+						renderer.NativeView.Hidden = true;
+				}
 			}
 		}
 	}
