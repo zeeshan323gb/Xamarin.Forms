@@ -20,6 +20,7 @@ namespace Xamarin.Forms.Platform.Android
 		readonly Context _context;
 
 		// TODO hartez 2018/05/29 17:06:45 Reconcile the type/name mismatch here	
+		// This class should probably be something like ItemsViewAdapter
 		internal CollectionViewAdapter(ItemsView itemsView, Context context)
 		{
 			_itemsView = itemsView;
@@ -28,9 +29,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
 		{
+			// TODO hartez 2018/05/30 08:41:05 This needs a wrapper which can interpret the ItemsSource as an IList for us	
 			if (holder is ViewHolder textViewHolder && _itemsView.ItemsSource is IList list)
 			{
-				// TODO hartez 2018/05/29 17:14:38 This is obviously an insanely inefficient way to get the item at the position	
 				textViewHolder.TextView.Text = list[position].ToString();
 			}
 		}
