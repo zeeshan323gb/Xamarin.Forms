@@ -364,9 +364,11 @@ namespace Xamarin.Forms.Platform.Android
 		void UpdateArrowsTintColor()
 		{
 			if (_prevBtn == null || _nextBtn == null) return;
+			ImageView prev = (ImageView)_prevBtn.GetChildAt(0);
+			ImageView next = (ImageView)_nextBtn.GetChildAt(0);
 
-			_prevBtn.BackgroundTintList = AColorStateList.ValueOf(Element.ArrowsTintColor.ToAndroid());
-			_nextBtn.BackgroundTintList = AColorStateList.ValueOf(Element.ArrowsTintColor.ToAndroid());
+			AImageViewCompat.SetImageTintList(prev, AColorStateList.ValueOf(Element.ArrowsTintColor.ToAndroid()));
+			AImageViewCompat.SetImageTintList(next, AColorStateList.ValueOf(Element.ArrowsTintColor.ToAndroid()));
 		}
 
 		void UpdateArrowsTransparency()
