@@ -13,6 +13,7 @@ using Android.App;
 using AShapeType = Android.Graphics.Drawables.ShapeType;
 using AImageViewCompat = Android.Support.V4.Widget.ImageViewCompat;
 using AColorStateList = Android.Content.Res.ColorStateList;
+using AndroidAppCompat = Android.Support.V7.Content.Res.AppCompatResources;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -77,13 +78,26 @@ namespace Xamarin.Forms.Platform.Android
 					_viewPager = _nativeView.FindViewById<ViewPager>(Resource.Id.pager);
 					_pageIndicator = _nativeView.FindViewById<PageIndicator>(Resource.Id.pageIndicator);
 
-					if (Element.Orientation == CarouselOrientation.Horizontal)
-						_pageIndicator.Orientation = Orientation.Horizontal;
-					else
-						_pageIndicator.Orientation = Orientation.Vertical;
 
 					_prevBtn = _nativeView.FindViewById<LinearLayout>(Resource.Id.prev);
 					_nextBtn = _nativeView.FindViewById<LinearLayout>(Resource.Id.next);
+
+
+					ImageView prev = (ImageView)_prevBtn.GetChildAt(0);
+					ImageView next = (ImageView)_nextBtn.GetChildAt(0);
+
+					if (Element.Orientation == CarouselOrientation.Horizontal)
+					{
+						_pageIndicator.Orientation = Orientation.Horizontal;
+						prev.SetImageDrawable(AndroidAppCompat.GetDrawable(Context, Resource.Drawable.Prev));
+						next.SetImageDrawable(AndroidAppCompat.GetDrawable(Context, Resource.Drawable.Next));
+					}
+					else
+					{
+						_pageIndicator.Orientation = Orientation.Vertical;
+						prev.SetImageDrawable(AndroidAppCompat.GetDrawable(Context, Resource.Drawable.Up));
+						next.SetImageDrawable(AndroidAppCompat.GetDrawable(Context, Resource.Drawable.Down));
+					}
 
 					_prevBtn.Click += PrevBtn_Click;
 					_nextBtn.Click += NextBtn_Click;

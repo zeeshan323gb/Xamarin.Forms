@@ -318,8 +318,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\horizontal_viewpager.xml" />
-    <AndroidResource Include="Resources\layout\vertical_viewpager.xml" />
+    <AndroidResource Include="Resources\layout\horizontal_viewpager.axml" />
+    <AndroidResource Include="Resources\layout\vertical_viewpager.axml" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\Prev.xml">

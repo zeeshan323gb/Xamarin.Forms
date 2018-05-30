@@ -55,6 +55,26 @@ namespace Xamarin.Forms.Platform.Android
 			}
 		}
 
+		public partial class Drawable
+		{
+			public static int Next = 2130837637;
+
+			public static int Prev = 2130837651;
+
+			public static int Down = 2130837624;
+
+			public static int Up = 2130837661;
+
+			static Drawable()
+			{
+				ResourceIdManager.UpdateIdValues();
+			}
+
+			Drawable()
+			{
+			}
+		}
+
 
 		public partial class Id
 		{
