@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using CoreGraphics;
-using Foundation;
 using UIKit;
 using Xamarin.Forms.Internals;
 
@@ -22,6 +19,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		// TODO hartez 2018/05/31 11:50:26 Add a property for scroll direction	
 		// TODO hartez 2018/05/31 11:50:43 Add a property for the fixed width/height and use it in ItemSize	
+		// TODO hartez 2018/05/31 15:07:10 Move this into its own class file	
 		internal class ListViewLayout : UICollectionViewFlowLayout
 		{
 			public ListViewLayout()
@@ -53,69 +51,21 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected override void OnElementChanged(ElementChangedEventArgs<CollectionView> e)
 		{
-			base.OnElementChanged(e);
-
 			if (e.NewElement != null)
 			{
+				// TODO hartez 2018/05/31 15:01:19 Check for known layout types	
+				// That check should be done in its own protected virtual method (see UWP implementation)
+
+				// TODO hartez 2018/05/31 15:06:28 Set the scroll direction and item width/height	
+
 				var layout = new ListViewLayout();
 				_collectionViewController = new CollectionViewController(e.NewElement.ItemsSource, layout);
 				SetNativeControl(_collectionViewController.CollectionView);
-			}
-		}
-	}
 
-	internal class CollectionViewController : UICollectionViewController
-	{
-		readonly IEnumerable _itemsSource;
-
-		public CollectionViewController(IEnumerable itemsSource, UICollectionViewLayout layout) : base(layout)
-		{
-			_itemsSource = itemsSource;
-		}
-
-		public override void ViewDidLoad ()
-		{
-			base.ViewDidLoad ();
-			CollectionView.RegisterClassForCell (typeof(DefaultCell), DefaultCell.DefaultCellId);
-		}
-
-		public override nint GetItemsCount (UICollectionView collectionView, nint section)
-		{
-			return (_itemsSource as IList).Count;
-		}
-
-		public override UICollectionViewCell GetCell (UICollectionView collectionView, NSIndexPath indexPath)
-		{
-			// TODO hartez 2018/05/31 11:53:51 Find guidance on what this should do if it can't dequeue a cell	(Probably throw?)
-			var cell = collectionView.DequeueReusableCell(DefaultCell.DefaultCellId, indexPath) as DefaultCell;
-
-			if (_itemsSource is IList list)
-			{
-				cell.Label.Text = list[indexPath.Row].ToString();
+				_collectionViewController.CollectionView.BackgroundColor = UIColor.Clear;
 			}
 
-			return cell;
-		}
-	}
-
-	internal class DefaultCell : UICollectionViewCell
-	{
-		public static NSString DefaultCellId = new NSString("DefaultCell");
-
-		public UILabel Label { get; }
-
-		[Export("initWithFrame:")]
-		public DefaultCell(CGRect frame) : base(frame)
-		{
-			// TODO hartez 2018/05/31 11:52:33 Move all this into an overrideable init method	
-			ContentView.BackgroundColor = UIColor.White;
-
-			Label = new UILabel(Bounds)
-			{
-				TextColor = UIColor.Black
-			};
-			
-			ContentView.AddSubview(Label);
+			base.OnElementChanged(e);
 		}
 	}
 }

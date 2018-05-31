@@ -18,9 +18,9 @@ namespace Xamarin.Forms.Controls
 
 			element.ItemsSource = items;
 
-			element.HeightRequest = 500;
+			element.HeightRequest = 250;
 
-			element.ItemsLayout = ListItemsLayout.HorizontalList;
+			element.ItemsLayout = ListItemsLayout.VerticalList;
 		}
 	}
 }
