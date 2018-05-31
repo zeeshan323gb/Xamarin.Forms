@@ -1,5 +1,6 @@
 ﻿namespace Xamarin.Forms
 {
+	// TODO hartez 2018/05/31 11:49:49 Move the stuff in ItemsControl.cs to the appropriate files
 	public interface IItemsLayout {}
 
 	public enum ItemsLayoutOrientation
