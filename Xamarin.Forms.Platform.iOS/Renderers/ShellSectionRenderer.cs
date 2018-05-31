@@ -139,7 +139,6 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
-				_trackers[ShellSection].Dispose();
 				_renderer.Dispose();
 				_appearanceTracker.Dispose();
 				_shellSection.PropertyChanged -= HandlePropertyChanged;
@@ -158,25 +157,11 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateTabBarItem();
 			else if (e.PropertyName == BaseShellItem.IconProperty.PropertyName)
 				UpdateTabBarItem();
-			else if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
-			{
-				// FIXME
-				Device.BeginInvokeOnMainThread(() =>
-				{
-					_trackers[ShellSection].Page = ((IShellContentController)ShellSection.CurrentItem).Page;
-				});
-			}
 		}
 
 		protected virtual void LoadPages()
 		{
 			_renderer = new ShellSectionRootRenderer(ShellSection, _context);
-
-			var tracker = _context.CreatePageRendererTracker();
-			tracker.IsRootPage = true;
-			tracker.ViewController = _renderer.ViewController;
-			tracker.Page = ((IShellContentController)ShellSection.CurrentItem).GetOrCreateContent();
-			_trackers[ShellSection] = tracker;
 
 			PushViewController(_renderer.ViewController, false);
 
