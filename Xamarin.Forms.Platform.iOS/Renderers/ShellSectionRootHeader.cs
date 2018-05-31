@@ -6,68 +6,132 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellSectionRootHeader : UICollectionViewController
+	public class ShellSectionRootHeader : UICollectionViewController, IAppearanceObserver
 	{
-		public class ShellSectionHeaderCell : UICollectionViewCell
+		#region IAppearanceObserver
+
+		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
 		{
-			[Export("initWithFrame:")]
-			public ShellSectionHeaderCell(CGRect frame) : base(frame)
-			{
-				Label = new UILabel();
-				Label.TextAlignment = UITextAlignment.Center;
-				Label.Font = UIFont.BoldSystemFontOfSize(14);
-				Label.TextColor = UIColor.White;
-				ContentView.AddSubview(Label);
-			}
-
-			public override CGSize SizeThatFits(CGSize size)
-			{
-				return new CGSize(Label.SizeThatFits(size).Width + 30, 35);
-			}
-
-			public override void LayoutSubviews()
-			{
-				base.LayoutSubviews();
-
-				Label.Frame = Bounds;
-			}
-
-			public UILabel Label { get; }
+			if (appearance == null)
+				ResetAppearance();
+			else
+				SetAppearance(appearance);
 		}
+
+		Color _defaultBackgroundColor = new Color(0.964);
+		Color _defaultForegroundColor = Color.Black;
+		Color _defaultUnselectedColor = Color.Black.MultiplyAlpha(0.7);
+
+		protected virtual void SetAppearance(ShellAppearance appearance)
+		{
+			SetValues(appearance.BackgroundColor.IsDefault ? _defaultBackgroundColor : BarAppearanceTrackerUtils.UnblendColor(appearance.BackgroundColor),
+				appearance.ForegroundColor.IsDefault ? _defaultForegroundColor : appearance.ForegroundColor,
+				appearance.UnselectedColor.IsDefault ? _defaultUnselectedColor : appearance.UnselectedColor);
+		}
+
+		protected virtual void ResetAppearance()
+		{
+			SetValues(_defaultBackgroundColor, _defaultForegroundColor, _defaultUnselectedColor);
+		}
+
+		private void SetValues(Color backgroundColor, Color foregroundColor, Color unselectedColor)
+		{
+			CollectionView.BackgroundColor = new Color(backgroundColor.R, backgroundColor.G, backgroundColor.B, .863).ToUIColor();
+
+			bool reloadData = _selectedColor != foregroundColor || _unselectedColor != unselectedColor;
+			
+			_selectedColor = foregroundColor;
+			_unselectedColor = unselectedColor;
+
+			if (reloadData)
+				CollectionView.ReloadData();
+		}
+
+		#endregion
 
 		private static readonly NSString CellId = new NSString("HeaderCell");
 
-		private readonly ShellSection _shellSection;
+		public ShellSection ShellSection { get; set; }
+
 		private UIView _bar;
+		private Color _selectedColor;
+		private Color _unselectedColor;
 		private UIView _bottomShadow;
+		private readonly IShellContext _shellContext;
 
-		public ShellSectionRootHeader(ShellSection shellSection) : base (new UICollectionViewFlowLayout ())
+		public ShellSectionRootHeader(IShellContext shellContext) : base(new UICollectionViewFlowLayout())
 		{
-			_shellSection = shellSection;
-		}
-
-		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
-			{
-				UpdateSelectedIndex();
-			}
-		}
-
-		protected virtual void UpdateSelectedIndex (bool animated = false)
-		{
-			SelectedIndex = _shellSection.Items.IndexOf(_shellSection.CurrentItem);
-			LayoutBar();
+			_shellContext = shellContext;
 		}
 
 		public double SelectedIndex { get; set; }
+
+		public override bool CanMoveItem(UICollectionView collectionView, NSIndexPath indexPath)
+		{
+			return false;
+		}
+
+		public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
+		{
+			var headerCell = (ShellSectionHeaderCell)collectionView.DequeueReusableCell(CellId, indexPath);
+
+			var selectedItems = collectionView.GetIndexPathsForSelectedItems();
+
+			var shellContent = ShellSection.Items[indexPath.Row];
+			headerCell.Label.Text = shellContent.Title;
+			headerCell.Label.SetNeedsDisplay();
+
+			if (selectedItems.Length > 0 && selectedItems[0].Row == indexPath.Row)
+				headerCell.Label.TextColor = _selectedColor.ToUIColor();
+			else
+				headerCell.Label.TextColor = _unselectedColor.ToUIColor();
+
+			return headerCell;
+		}
+
+		public override nint GetItemsCount(UICollectionView collectionView, nint section)
+		{
+			return ShellSection.Items.Count;
+		}
+
+		public override void ItemDeselected(UICollectionView collectionView, NSIndexPath indexPath)
+		{
+			var cell = (ShellSectionHeaderCell)CollectionView.CellForItem(indexPath);
+			cell.Label.TextColor = _unselectedColor.ToUIColor();
+		}
+
+		public override void ItemSelected(UICollectionView collectionView, NSIndexPath indexPath)
+		{
+			var row = indexPath.Row;
+
+			var item = ShellSection.Items[row];
+
+			if (item != ShellSection.CurrentItem)
+				ShellSection.SetValueFromRenderer(ShellSection.CurrentItemProperty, item);
+
+			var cell = (ShellSectionHeaderCell)CollectionView.CellForItem(indexPath);
+			cell.Label.TextColor = _selectedColor.ToUIColor();
+		}
+
+		public override nint NumberOfSections(UICollectionView collectionView)
+		{
+			return 1;
+		}
+
+		public override void ViewDidLayoutSubviews()
+		{
+			base.ViewDidLayoutSubviews();
+
+			LayoutBar();
+
+			_bottomShadow.Frame = new CGRect(0, CollectionView.Frame.Bottom, CollectionView.Frame.Width, 0.5);
+		}
 
 		public override void ViewDidLoad()
 		{
 			base.ViewDidLoad();
 
-
-			CollectionView.BackgroundColor = UIColor.FromRGB(104, 159, 57);
+			
 			CollectionView.ScrollsToTop = false;
 			CollectionView.Bounces = false;
 			CollectionView.AlwaysBounceHorizontal = false;
@@ -92,17 +156,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 			CollectionView.RegisterClassForCell(typeof(ShellSectionHeaderCell), CellId);
 
+			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, ShellSection);
+
 			UpdateSelectedIndex();
-			_shellSection.PropertyChanged += OnShellSectionPropertyChanged;
-		}
-
-		public override void ViewDidLayoutSubviews()
-		{
-			base.ViewDidLayoutSubviews();
-
-			LayoutBar();
-
-			_bottomShadow.Frame = new CGRect(0, CollectionView.Frame.Bottom, CollectionView.Frame.Width, 0.5);
+			ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
 		}
 
 		protected void LayoutBar()
@@ -111,43 +168,52 @@ namespace Xamarin.Forms.Platform.iOS
 
 			var frame = layout.Frame;
 
-			_bar.Frame = new CGRect(frame.X, frame.Bottom - 4, frame.Width, 4);
+			UIView.Animate(.25, () =>
+			{
+				_bar.Frame = new CGRect(frame.X, frame.Bottom - 2, frame.Width, 2);
+			});
 		}
 
-		public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
+		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			var headerCell = (ShellSectionHeaderCell)collectionView.DequeueReusableCell(CellId, indexPath);
-
-			var shellContent = _shellSection.Items[indexPath.Row];
-			headerCell.Label.Text = shellContent.Title;
-			headerCell.Label.SetNeedsDisplay();
-
-			return headerCell;
+			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
+			{
+				UpdateSelectedIndex();
+			}
 		}
 
-		public override nint NumberOfSections(UICollectionView collectionView)
+		protected virtual void UpdateSelectedIndex(bool animated = false)
 		{
-			return 1;
+			SelectedIndex = ShellSection.Items.IndexOf(ShellSection.CurrentItem);
+			LayoutBar();
+
+			CollectionView.SelectItem(NSIndexPath.FromItemSection((int)SelectedIndex, 0), false, UICollectionViewScrollPosition.CenteredHorizontally);
 		}
 
-		public override nint GetItemsCount(UICollectionView collectionView, nint section)
+		public class ShellSectionHeaderCell : UICollectionViewCell
 		{
-			return _shellSection.Items.Count;
-		}
+			[Export("initWithFrame:")]
+			public ShellSectionHeaderCell(CGRect frame) : base(frame)
+			{
+				Label = new UILabel();
+				Label.TextAlignment = UITextAlignment.Center;
+				Label.Font = UIFont.BoldSystemFontOfSize(14);
+				ContentView.AddSubview(Label);
+			}
 
-		public override bool CanMoveItem(UICollectionView collectionView, NSIndexPath indexPath)
-		{
-			return false;
-		}
+			public UILabel Label { get; }
 
-		public override void ItemSelected(UICollectionView collectionView, NSIndexPath indexPath)
-		{
-			var row = indexPath.Row;
+			public override void LayoutSubviews()
+			{
+				base.LayoutSubviews();
 
-			var item = _shellSection.Items[row];
+				Label.Frame = Bounds;
+			}
 
-			if (item != _shellSection.CurrentItem)
-				_shellSection.SetValueFromRenderer(ShellSection.CurrentItemProperty, item);
+			public override CGSize SizeThatFits(CGSize size)
+			{
+				return new CGSize(Label.SizeThatFits(size).Width + 30, 35);
+			}
 		}
 	}
 }

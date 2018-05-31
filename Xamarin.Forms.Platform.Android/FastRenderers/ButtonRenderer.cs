@@ -466,10 +466,11 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			}
 
 			string oldText = Text;
-			Text = Button.Text;
+			string newText = Button.Text;
+			Text = newText;
 
 			// If we went from or to having no text, we need to update the image position
-			if (IsNullOrEmpty(oldText) != IsNullOrEmpty(Text))
+			if (IsNullOrEmpty(oldText) != IsNullOrEmpty(newText))
 			{
 				UpdateBitmap();
 			}

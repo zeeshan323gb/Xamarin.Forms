@@ -1,4 +1,5 @@
-﻿using Foundation;
+﻿using CoreGraphics;
+using Foundation;
 using ObjCRuntime;
 using System;
 using System.Collections.Generic;

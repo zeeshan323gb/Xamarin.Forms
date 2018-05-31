@@ -19,6 +19,7 @@ namespace Xamarin.Forms.Platform.iOS
 		private readonly IShellContext _shellContext;
 		private UIView _containerArea;
 		private int _currentIndex;
+		private UIView _blurView;
 		private ShellSectionRootHeader _header;
 		private bool _isAnimating = false;
 		private Dictionary<ShellContent, IVisualElementRenderer> _renderers = new Dictionary<ShellContent, IVisualElementRenderer>();
@@ -56,7 +57,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 			ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
 
-			_header = new ShellSectionRootHeader(ShellSection);
+			_blurView = new UIView();
+			UIVisualEffect blurEffect = UIBlurEffect.FromStyle(UIBlurEffectStyle.ExtraLight);
+			_blurView = new UIVisualEffectView(blurEffect);
+
+			View.AddSubview(_blurView);
+
+			_header = new ShellSectionRootHeader(_shellContext);
+			_header.ShellSection = ShellSection;
 
 			AddChildViewController(_header);
 			View.AddSubview(_header.View);
@@ -83,9 +91,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (disposing)
 			{
+				ShellSection.PropertyChanged -= OnShellSectionPropertyChanged;
+
 				_tracker?.Dispose();
-				_tracker = null;
 			}
+
+			ShellSection = null;
+			_tracker = null;
 		}
 
 		protected virtual void LayoutRenderers()
@@ -169,12 +181,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void UpdateHeaderVisibility()
 		{
-			_header.View.Hidden = ShellSection.Items.Count <= 1;
+			_header.View.Hidden = _blurView.Hidden =  ShellSection.Items.Count <= 1;
 		}
 
 		private void LayoutHeader()
 		{
-			_header.View.Frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, 35);
+			var frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, 35);
+			_blurView.Frame = frame;
+			_header.View.Frame = frame;
 		}
 	}
 }
