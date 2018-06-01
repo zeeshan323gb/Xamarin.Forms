@@ -74,8 +74,13 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (_shellSection.Items.Count > 1 && _isInItems)
 				{
-					_scrollView.ContentInset = new UIEdgeInsets((float)tabThickness, 0, 0, 0);
-					_scrollView.ContentOffset = new PointF(0, -tabThickness);
+					var top = (float)tabThickness;
+
+					var delta = _scrollView.ContentInset.Top - top;
+					_scrollView.ContentInset = new UIEdgeInsets(top, 0, 0, 0);
+
+					var currentOffset = _scrollView.ContentOffset;
+					_scrollView.ContentOffset = new PointF(currentOffset.X, currentOffset.Y + delta);
 				}
 
 				_scrollView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Always;
@@ -87,8 +92,11 @@ namespace Xamarin.Forms.Platform.iOS
 				if (_shellSection.Items.Count > 1 && _isInItems)
 					top += (float)tabThickness;
 
+				var delta = _scrollView.ContentInset.Top - top;
 				_scrollView.ContentInset = new UIEdgeInsets(top, (float)inset.Left, (float)inset.Bottom, (float)inset.Right);
-				_scrollView.ContentOffset = new PointF(0, -top);
+
+				var currentOffset = _scrollView.ContentOffset;
+				_scrollView.ContentOffset = new PointF(currentOffset.X, currentOffset.Y + delta);
 			}
 		}
 
