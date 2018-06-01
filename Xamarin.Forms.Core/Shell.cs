@@ -764,6 +764,7 @@ namespace Xamarin.Forms
 
 		internal void SendStructureChanged()
 		{
+			UpdateChecked(this);
 			_structureChanged?.Invoke(this, EventArgs.Empty);
 		}
 
@@ -819,14 +820,38 @@ namespace Xamarin.Forms
 
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
-			var oldItem = (IShellItemController)oldValue;
-			var newItem = (IShellItemController)newValue;
-			oldItem?.UpdateChecked();
-			newItem?.UpdateChecked();
-
 			var shell = (Shell)bindable;
+			UpdateChecked(shell);
+
 			((IShellController)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
+		}
+
+		private static void UpdateChecked(Element root, bool isChecked = true)
+		{
+			if (root is BaseShellItem baseItem)
+			{
+				baseItem.SetValue(BaseShellItem.IsCheckedPropertyKey, isChecked);
+			}
+
+			if (root is Shell shell)
+			{
+				ShellItem currentItem = shell.CurrentItem;
+				foreach (var item in shell.Items)
+					UpdateChecked(item, isChecked && item == currentItem);
+			}
+			else if (root is ShellItem shellItem)
+			{
+				var currentItem = shellItem.CurrentItem;
+				foreach (var item in shellItem.Items)
+					UpdateChecked(item, isChecked && item == currentItem);
+			}
+			else if (root is ShellSection shellSection)
+			{
+				var currentItem = shellSection.CurrentItem;
+				foreach (var item in shellSection.Items)
+					UpdateChecked(item, isChecked && item == currentItem);
+			}
 		}
 
 		private static void OnFlyoutHeaderChanged(BindableObject bindable, object oldValue, object newValue)

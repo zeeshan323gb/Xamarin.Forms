@@ -105,13 +105,6 @@ namespace Xamarin.Forms
 			SendUpdateCurrentState(ShellNavigationSource.Pop);
 		}
 
-		void IShellSectionController.UpdateChecked()
-		{
-			var shell = Parent?.Parent as Shell;
-			bool isChecked = shell?.CurrentItem?.CurrentItem == this;
-			UpdateChildrenChecked(isChecked, Items, CurrentItem);
-		}
-
 		#endregion IShellSectionController
 
 		public static readonly BindableProperty CurrentItemProperty =
@@ -392,7 +385,6 @@ namespace Xamarin.Forms
 				shell.UpdateCurrentState(ShellNavigationSource.ShellSectionChanged);
 			}
 
-			((IShellSectionController)bindable).UpdateChecked();
 			shellContent.SendStructureChanged();
 			((IShellController)shellContent?.Parent?.Parent)?.AppearanceChanged(shellContent, false);
 		}

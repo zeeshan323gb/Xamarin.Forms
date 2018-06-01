@@ -168,10 +168,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 			var frame = layout.Frame;
 
-			UIView.Animate(.25, () =>
+			if (_bar.Frame.Height != 2)
 			{
 				_bar.Frame = new CGRect(frame.X, frame.Bottom - 2, frame.Width, 2);
-			});
+			}
+			else
+			{
+				UIView.Animate(.25, () => _bar.Frame = new CGRect(frame.X, frame.Bottom - 2, frame.Width, 2));
+			}
 		}
 
 		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)

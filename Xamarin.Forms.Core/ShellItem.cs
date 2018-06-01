@@ -20,13 +20,6 @@ namespace Xamarin.Forms
 
 		#region IShellItemController
 
-		void IShellItemController.UpdateChecked()
-		{
-			var shell = Parent as Shell;
-			bool isChecked = shell?.CurrentItem == this;
-			UpdateChildrenChecked(isChecked, Items, CurrentItem);
-		}
-
 		Task IShellItemController.GoToPart(List<string> parts, Dictionary<string, string> queryData)
 		{
 			var shellSectionRoute = parts[0];
@@ -148,7 +141,6 @@ namespace Xamarin.Forms
 				shell.UpdateCurrentState(ShellNavigationSource.ShellSectionChanged);
 			}
 
-			((IShellItemController)bindable).UpdateChecked();
 			shellItem.SendStructureChanged();
 			((IShellController)shellItem?.Parent)?.AppearanceChanged(shellItem, false);
 		}

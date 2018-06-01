@@ -37,22 +37,6 @@ namespace Xamarin.Forms
 			set { SetValue(IconProperty, value); }
 		}
 
-		internal void UpdateChildrenChecked(bool isChecked, IEnumerable<Element> children, Element currentItem)
-		{
-			if (isChecked)
-			{
-				SetValue(IsCheckedPropertyKey, true);
-				foreach (var content in children)
-					content.SetValue(IsCheckedPropertyKey, content == currentItem);
-			}
-			else
-			{
-				SetValue(IsCheckedPropertyKey, false);
-				foreach (var content in children)
-					content.SetValue(IsCheckedPropertyKey, false);
-			}
-		}
-
 		public bool IsChecked => (bool)GetValue(IsCheckedProperty);
 
 		public bool IsEnabled

@@ -20,7 +20,5 @@ namespace Xamarin.Forms
 		void SendInsetChanged(Thickness inset, double tabThickness);
 
 		void SendPopped();
-
-		void UpdateChecked();
 	}
 }
