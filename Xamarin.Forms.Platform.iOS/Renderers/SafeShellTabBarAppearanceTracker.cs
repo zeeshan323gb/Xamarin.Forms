@@ -34,7 +34,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 
 			if (!background.IsDefault)
-				tabBar.BarTintColor = background.ToUIColor();
+				tabBar.BarTintColor = BarAppearanceTrackerUtils.UnblendColor(background).ToUIColor();
 			if (!foreground.IsDefault)
 				tabBar.TintColor = foreground.ToUIColor();
 			if (!unselectedColor.IsDefault)

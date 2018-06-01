@@ -14,7 +14,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public bool IsRootPage { get; set; }
 
-		public IVisualElementRenderer Renderer
+		public UIViewController ViewController
 		{
 			get
 			{
@@ -23,9 +23,23 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 			set
 			{
-				_rendererRef = new WeakReference<IVisualElementRenderer>(value);
-				Page = value.Element as Page;
+				_rendererRef = new WeakReference<UIViewController>(value);
 				OnRendererSet();
+			}
+		}
+
+		public Page Page
+		{
+			get { return _page; }
+			set
+			{
+				if (_page == value)
+					return;
+
+				var oldPage = _page;
+				_page = value;
+
+				OnPageSet(oldPage, _page);
 			}
 		}
 
@@ -34,10 +48,11 @@ namespace Xamarin.Forms.Platform.iOS
 		private readonly IShellContext _context;
 		private bool _disposed;
 		private FlyoutBehavior _flyoutBehavior;
-		private WeakReference<IVisualElementRenderer> _rendererRef;
+		private WeakReference<UIViewController> _rendererRef;
 		private IShellSearchResultsRenderer _resultsRenderer;
 		private UISearchController _searchController;
 		private SearchHandler _searchHandler;
+		private Page _page;
 
 		public ShellPageRendererTracker(IShellContext context)
 		{
@@ -46,7 +61,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private BackButtonBehavior BackButtonBehavior { get; set; }
 		private UINavigationItem NavigationItem { get; set; }
-		private Page Page { get; set; }
+		
 
 		public async void OnFlyoutBehaviorChanged(FlyoutBehavior behavior)
 		{
@@ -75,17 +90,47 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				UpdateTitleView();
 			}
+			else if (e.PropertyName == Page.TitleProperty.PropertyName)
+			{
+				UpdateTitle();
+			}
+		}
+
+		protected virtual void UpdateTitle()
+		{
+			if (Page.Parent is BaseShellItem)
+				NavigationItem.Title = Page.Title;
+		}
+
+		protected virtual void OnPageSet(Page oldPage, Page newPage)
+		{
+			if (oldPage != null)
+			{
+				oldPage.PropertyChanged -= OnPagePropertyChanged;
+				((INotifyCollectionChanged)oldPage.ToolbarItems).CollectionChanged -= OnToolbarItemsChanged;
+			}
+
+			if (newPage != null)
+			{
+				newPage.PropertyChanged += OnPagePropertyChanged;
+				((INotifyCollectionChanged)newPage.ToolbarItems).CollectionChanged += OnToolbarItemsChanged;
+				SetBackButtonBehavior(Shell.GetBackButtonBehavior(newPage));
+				SearchHandler = Shell.GetSearchHandler(newPage);
+				UpdateTitleView();
+				UpdateTitle();
+			}
+
+			if (oldPage == null)
+				((IShellController)_context.Shell).AddFlyoutBehaviorObserver(this);
 		}
 
 		protected virtual void OnRendererSet()
 		{
-			NavigationItem = Renderer.ViewController.NavigationItem;
-			Page.PropertyChanged += OnPagePropertyChanged;
-			((INotifyCollectionChanged)Page.ToolbarItems).CollectionChanged += OnToolbarItemsChanged;
-			SetBackButtonBehavior(Shell.GetBackButtonBehavior(Page));
-			SearchHandler = Shell.GetSearchHandler(Page);
-			UpdateTitleView();
-			((IShellController)_context.Shell).AddFlyoutBehaviorObserver(this);
+			NavigationItem = ViewController.NavigationItem;
+			if (!Forms.IsiOS11OrNewer)
+			{
+				ViewController.AutomaticallyAdjustsScrollViewInsets = false;
+			}
 		}
 
 		protected virtual void UpdateTitleView()
@@ -277,11 +322,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 			// We prefer a verticle down jiggle since it is least likely to produce a visual artifact
 
-			if (Renderer?.NativeView != null)
+			if (ViewController?.View != null)
 			{
-				var oldFrame = Renderer.NativeView.Frame;
-				Renderer.NativeView.Frame = new CGRect(oldFrame.X, oldFrame.Y, oldFrame.Width, oldFrame.Height + 1);
-				Renderer.NativeView.Frame = oldFrame;
+				var oldFrame = ViewController.View.Frame;
+				ViewController.View.Frame = new CGRect(oldFrame.X, oldFrame.Y, oldFrame.Width, oldFrame.Height + 1);
+				ViewController.View.Frame = oldFrame;
 			}
 		}
 
@@ -324,7 +369,7 @@ namespace Xamarin.Forms.Platform.iOS
 				_resultsRenderer = _context.CreateShellSearchResultsRenderer();
 				_resultsRenderer.ItemSelected += OnSearchItemSelected;
 				_resultsRenderer.SearchHandler = _searchHandler;
-				Renderer.ViewController.DefinesPresentationContext = true;
+				ViewController.DefinesPresentationContext = true;
 			}
 
 			_searchController = new UISearchController(_resultsRenderer?.ViewController);

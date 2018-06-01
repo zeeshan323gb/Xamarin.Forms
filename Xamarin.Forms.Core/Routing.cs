@@ -8,6 +8,26 @@ namespace Xamarin.Forms
 	{
 		private static int routeCount = 0;
 
+		internal const string ImplicitPrefix = "IMPL_";
+
+		internal static string GenerateImplicitRoute (string source)
+		{
+			if (source.StartsWith(ImplicitPrefix))
+				return source;
+			return ImplicitPrefix + source;
+		}
+
+		internal static bool CompareRoutes(string route, string compare, out bool isImplicit)
+		{
+			if (isImplicit = route.StartsWith(ImplicitPrefix))
+				route = route.Substring(ImplicitPrefix.Length);
+
+			if (compare.StartsWith(ImplicitPrefix))
+				throw new Exception();
+
+			return route == compare;
+		}
+
 		public static readonly BindableProperty RouteProperty =
 			BindableProperty.CreateAttached("Route", typeof(string), typeof(Routing), null, 
 				defaultValueCreator: CreateDefaultRoute);
@@ -43,16 +63,6 @@ namespace Xamarin.Forms
 		public static string GetRoute(Element obj)
 		{
 			return (string)obj.GetValue(RouteProperty);
-		}
-
-		public static string GetRouteStringForElement(Element element)
-		{
-			string route = GetRoute(element);
-
-			if (route != null)
-				return route;
-
-			return element.GetType().FullName;
 		}
 
 		public static void RegisterRoute(string route, RouteFactory factory)

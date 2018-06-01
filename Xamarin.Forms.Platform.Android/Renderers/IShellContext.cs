@@ -20,7 +20,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		IShellToolbarAppearanceTracker CreateToolbarAppearanceTracker();
 
-		IShellTabLayoutAppearanceTracker CreateTabLayoutAppearanceTracker(ShellItem shellItem);
+		IShellTabLayoutAppearanceTracker CreateTabLayoutAppearanceTracker(ShellSection shellSection);
 
 		IShellBottomNavViewAppearanceTracker CreateBottomNavViewAppearanceTracker(ShellItem shellItem);
 	}

@@ -5,9 +5,11 @@ using UIKit;
 using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
 using PointF = CoreGraphics.CGPoint;
 using RectangleF = CoreGraphics.CGRect;
+using CoreGraphics;
 
 namespace Xamarin.Forms.Platform.iOS
 {
+
 	public class ScrollViewRenderer : UIScrollView, IVisualElementRenderer, IEffectControlProvider
 	{
 		EventTracker _events;
@@ -18,6 +20,8 @@ namespace Xamarin.Forms.Platform.iOS
 		RectangleF _previousFrame;
 		ScrollToRequestedEventArgs _requestedScroll;
 		VisualElementTracker _tracker;
+
+		ShellScrollViewTracker _shellScrollTracker;
 
 		public ScrollViewRenderer() : base(RectangleF.Empty)
 		{
@@ -84,7 +88,8 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateIsEnabled();
 				UpdateVerticalScrollBarVisibility();
 				UpdateHorizontalScrollBarVisibility();
-				UpdateVerticalBounce();
+
+				_shellScrollTracker = new ShellScrollViewTracker(this);
 
 				OnElementChanged(new VisualElementChangedEventArgs(oldElement, element));
 
@@ -108,44 +113,12 @@ namespace Xamarin.Forms.Platform.iOS
 			get { return null; }
 		}
 
-		private void UpdateVerticalBounce()
-		{
-			// Normally we dont want to do this unless this scrollview is vertical and its
-			// element is the child of a Page with a SearchHandler that is collapsable.
-			// If we can't bounce in that case you may not be able to expose the handler.
-			// Also the hiding behavior only depends on scroll on iOS 11. In 10 and below
-			// the search goes in the TitleView so there is nothing to collapse/expand.
-			if (!Forms.IsiOS11OrNewer || ((ScrollView)Element).Orientation == ScrollOrientation.Horizontal)
-				return;
-
-			var parent = Element.Parent;
-			while (!Application.IsApplicationOrNull(parent))
-			{
-				if (parent is Page)
-				{
-					var searchHandler = Shell.GetSearchHandler(parent);
-					if (searchHandler?.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
-						AlwaysBounceVertical = true;
-					return;
-				}
-				parent = parent.Parent;
-			}
-		}
-
-		private void UpdateOverrideArea()
-		{
-			if (Forms.IsiOS11OrNewer)
-			{
-				var newBounds = AdjustedContentInset.InsetRect(Bounds).ToRectangle();
-				newBounds.X = 0;
-				newBounds.Y = 0;
-				((ScrollView)Element).LayoutAreaOverride = newBounds;
-			}
-		}
+		
 
 		public override void LayoutSubviews()
 		{
-			UpdateOverrideArea();
+			_shellScrollTracker.OnLayoutSubviews();
+
 			base.LayoutSubviews();
 
 			if (_requestedScroll != null && Superview != null)
@@ -170,6 +143,9 @@ namespace Xamarin.Forms.Platform.iOS
 					return;
 
 				SetElement(null);
+
+				_shellScrollTracker.Dispose();
+				_shellScrollTracker = null;
 
 				_packager.Dispose();
 				_packager = null;

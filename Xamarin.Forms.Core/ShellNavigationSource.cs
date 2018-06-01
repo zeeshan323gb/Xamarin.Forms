@@ -11,6 +11,7 @@ namespace Xamarin.Forms
 		Insert,
 		Remove,
 		ShellItemChanged,
+		ShellSectionChanged,
 		ShellContentChanged,
 	}
 }

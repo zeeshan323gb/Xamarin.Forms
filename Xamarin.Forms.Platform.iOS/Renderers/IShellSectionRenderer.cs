@@ -3,11 +3,10 @@ using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public interface IShellContentRenderer : IDisposable
+	public interface IShellSectionRenderer : IDisposable
 	{
 		bool IsInMoreTab { get; set; }
-		Page Page { get; }
-		ShellContent ShellContent { get; set; }
+		ShellSection ShellSection { get; set; }
 		UIViewController ViewController { get; }
 	}
 }

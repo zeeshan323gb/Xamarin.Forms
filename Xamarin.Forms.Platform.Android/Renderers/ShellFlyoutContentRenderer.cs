@@ -74,89 +74,34 @@ namespace Xamarin.Forms.Platform.Android
 
 			var menu = Menu;
 			menu.Clear();
-			var shell = _shellContext.Shell;
+
+			var groups = ((IShellController)_shellContext.Shell).GenerateFlyoutGrouping();
 
 			int gid = 0;
 			int id = 0;
 
-			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
-			foreach (var shellItem in shell.Items)
+			foreach (var group in groups)
 			{
-				bool isCurrentShellItem = shell.CurrentItem == shellItem;
-				var groupBehavior = shellItem.GroupBehavior;
-				if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
+				foreach (var element in group)
 				{
-					IMenu section = null;
-					if (string.IsNullOrEmpty(shellItem.Title))
+					string title = null;
+					ImageSource icon = null;
+					if (element is BaseShellItem shellItem)
 					{
-						gid++;
-						section = menu;
+						title = shellItem.Title;
+						icon = shellItem.FlyoutIcon;
 					}
-					else
+					else if (element is MenuItem menuItem)
 					{
-						section = menu.AddSubMenu(new Java.Lang.String(shellItem.Title));
+						title = menuItem.Text;
+						icon = menuItem.Icon;
 					}
 
-					foreach (var shellContent in shellItem.Items)
-					{
-						var item = section.Add(gid, id, 0, new Java.Lang.String(shellContent.Title));
-						item.SetEnabled(shellContent.IsEnabled);
-						if (shellContent.Icon != null)
-						{
-							SetMenuItemIcon(item, shellContent.Icon);
-						}
-						item.SetCheckable(true);
-						_lookupTable[item] = shellContent;
-						// when an item is selected we will display its menu items
-						if (isCurrentShellItem && shellContent == shellItem.CurrentItem)
-						{
-							item.SetChecked(true);
-							foreach (var menuItem in shellContent.MenuItems)
-							{
-								var subItem = section.Add(gid, id, 0, new Java.Lang.String(menuItem.Text));
-								subItem.SetEnabled(menuItem.IsEnabled);
-								if (menuItem.Icon != null)
-								{
-									SetMenuItemIcon(subItem, menuItem.Icon);
-									subItem.SetCheckable(false);
-								}
-								_lookupTable[subItem] = menuItem;
-							}
-						}
-					}
-					gid++;
+					var item = menu.Add(gid, id++, 0, new Java.Lang.String(title));
+					if (icon != null)
+						SetMenuItemIcon(item, icon);
 				}
-				else
-				{
-					var subItem = menu.Add(gid, id, 0, new Java.Lang.String(shellItem.Title));
-					subItem.SetEnabled(shellItem.IsEnabled);
-					if (shellItem.Icon != null)
-					{
-						SetMenuItemIcon(subItem, shellItem.Icon);
-					}
-					subItem.SetCheckable(true);
-					if (isCurrentShellItem)
-						subItem.SetChecked(true);
-					_lookupTable[subItem] = shellItem;
-				}
-
-				previous = groupBehavior;
-			}
-
-			if (shell.MenuItems.Count > 0)
-			{
 				gid++;
-				foreach (var menuItem in shell.MenuItems)
-				{
-					var subItem = menu.Add(gid, id, 0, new Java.Lang.String(menuItem.Text));
-					subItem.SetEnabled(menuItem.IsEnabled);
-					subItem.SetCheckable(false);
-					if (menuItem.Icon != null)
-					{
-						SetMenuItemIcon(subItem, menuItem.Icon);
-					}
-					_lookupTable[subItem] = menuItem;
-				}
 			}
 		}
 

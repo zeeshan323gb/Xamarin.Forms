@@ -1,4 +1,6 @@
-﻿namespace Xamarin.Forms
+﻿using System.Collections.Generic;
+
+namespace Xamarin.Forms
 {
 	public class BaseShellItem : NavigableElement
 	{

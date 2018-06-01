@@ -1,4 +1,5 @@
-﻿using UIKit;
+﻿using System;
+using UIKit;
 
 namespace Xamarin.Forms.Platform.iOS
 {
@@ -81,7 +82,10 @@ namespace Xamarin.Forms.Platform.iOS
 			navBar.InsertSubview(_blurView, 0);
 
 			if (!background.IsDefault)
+			{
 				_colorView.BackgroundColor = background.ToUIColor();
+			}
+
 			if (!foreground.IsDefault)
 				navBar.TintColor = foreground.ToUIColor();
 			if (!titleColor.IsDefault)

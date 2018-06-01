@@ -223,7 +223,7 @@
     <Compile Include="Renderers\PageContainer.cs" />
     <Compile Include="Renderers\ScrollViewContainer.cs" />
     <Compile Include="Renderers\ShellBottomNavViewAppearanceTracker.cs" />
-    <Compile Include="Renderers\ShellBottomTabItemRenderer.cs" />
+    <Compile Include="Renderers\ShellItemRenderer.cs" />
     <Compile Include="Renderers\ShellContentFragment.cs" />
     <Compile Include="Renderers\ShellFlyoutContentRenderer.cs" />
     <Compile Include="Renderers\ShellFlyoutRecyclerAdapter.cs" />
@@ -238,8 +238,7 @@
     <Compile Include="Renderers\ShellTabLayoutAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellToolbarAppearanceTracker.cs" />
     <Compile Include="Renderers\ShellToolbarTracker.cs" />
-    <Compile Include="Renderers\ShellTopTabFragment.cs" />
-    <Compile Include="Renderers\ShellTopTabItemRenderer.cs" />
+    <Compile Include="Renderers\ShellSectionRenderer.cs" />
     <Compile Include="Renderers\StreamImagesourceHandler.cs" />
     <Compile Include="Renderers\ToolbarButton.cs" />
     <Compile Include="Renderers\ToolbarImageButton.cs" />

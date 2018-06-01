@@ -28,8 +28,7 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				if (_groups == null)
 				{
-					_groups = new List<List<Element>>();
-					SetVisualGroups(_context.Shell, _groups);
+					_groups = ((IShellController)_context.Shell).GenerateFlyoutGrouping();
 				}
 				return _groups;
 			}
@@ -166,55 +165,6 @@ namespace Xamarin.Forms.Platform.iOS
 			label.FontAttributes = FontAttributes.Bold;
 
 			return grid;
-		}
-
-		private void SetVisualGroups(Shell shell, List<List<Element>> groups)
-		{
-			ShellItemGroupBehavior previous = ShellItemGroupBehavior.HideTabs;
-			List<Element> section = null;
-			foreach (var shellItem in shell.Items)
-			{
-				bool isCurrentShellItem = _context.Shell.CurrentItem == shellItem;
-				var groupBehavior = shellItem.GroupBehavior;
-				if (section == null ||
-					groupBehavior == ShellItemGroupBehavior.ShowTabs ||
-					previous == ShellItemGroupBehavior.ShowTabs)
-				{
-					section = new List<Element>();
-					groups.Add(section);
-
-					if (groupBehavior == ShellItemGroupBehavior.ShowTabs)
-					{
-						foreach (var shellContent in shellItem.Items)
-						{
-							section.Add(shellContent);
-							// when an item is selected we will display its menu items
-							if (isCurrentShellItem && shellContent == shellItem.CurrentItem)
-							{
-								foreach (var menuItem in shellContent.MenuItems)
-									section.Add(menuItem);
-							}
-						}
-					}
-					else
-					{
-						section.Add(shellItem);
-					}
-				}
-				else
-				{
-					section.Add(shellItem);
-				}
-
-				previous = groupBehavior;
-			}
-
-			if (shell.MenuItems.Count > 0)
-			{
-				section = new List<Element>();
-				groups.Add(section);
-				section.AddRange(shell.MenuItems);
-			}
 		}
 
 		private class SeparatorView : UIView

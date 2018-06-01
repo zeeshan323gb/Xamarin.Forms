@@ -1,4 +1,5 @@
-﻿using Foundation;
+﻿using CoreGraphics;
+using Foundation;
 using ObjCRuntime;
 using System;
 using System.Collections.Generic;
@@ -10,26 +11,24 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class ShellContentRenderer : UINavigationController, IShellContentRenderer, IAppearanceObserver
+	public class ShellSectionRenderer : UINavigationController, IShellSectionRenderer, IAppearanceObserver
 	{
 		#region IShellContentRenderer
 
 		public bool IsInMoreTab { get; set; }
 
-		public Page Page { get; private set; }
-
-		public ShellContent ShellContent
+		public ShellSection ShellSection
 		{
-			get { return _shellContent; }
+			get { return _shellSection; }
 			set
 			{
-				if (_shellContent == value)
+				if (_shellSection == value)
 					return;
-				_shellContent = value;
+				_shellSection = value;
 				LoadPages();
 				OnShellContentSet();
-				_shellContent.PropertyChanged += HandlePropertyChanged;
-				((IShellContentController)_shellContent).NavigationRequested += OnNavigationRequested;
+				_shellSection.PropertyChanged += HandlePropertyChanged;
+				((IShellSectionController)_shellSection).NavigationRequested += OnNavigationRequested;
 			}
 		}
 
@@ -51,19 +50,27 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private readonly IShellContext _context;
 
-		private readonly Dictionary<Page, IShellPageRendererTracker> _trackers =
-			new Dictionary<Page, IShellPageRendererTracker>();
+		private readonly Dictionary<Element, IShellPageRendererTracker> _trackers =
+			new Dictionary<Element, IShellPageRendererTracker>();
+
 		private IShellNavBarAppearanceTracker _appearanceTracker;
+
 		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
 							new Dictionary<UIViewController, TaskCompletionSource<bool>>();
 
 		private bool _disposed;
-		private bool _ignorePop;
-		private TaskCompletionSource<bool> _popCompletionTask;
-		private IVisualElementRenderer _renderer;
-		private ShellContent _shellContent;
 
-		public ShellContentRenderer(IShellContext context)
+		private bool _firstLayoutCompleted;
+
+		private bool _ignorePop;
+
+		private TaskCompletionSource<bool> _popCompletionTask;
+
+		private IShellSectionRootRenderer _renderer;
+
+		private ShellSection _shellSection;
+
+		public ShellSectionRenderer(IShellContext context)
 		{
 			Delegate = new NavDelegate(this);
 			_context = context;
@@ -112,6 +119,12 @@ namespace Xamarin.Forms.Platform.iOS
 			base.ViewDidLayoutSubviews();
 
 			_appearanceTracker.UpdateLayout(this);
+
+			if (!_firstLayoutCompleted)
+			{
+				UpdateShadowImages();
+				_firstLayoutCompleted = true;
+			}
 		}
 
 		public override void ViewDidLoad()
@@ -127,17 +140,14 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing && !_disposed)
 			{
 				_disposed = true;
-				((IShellContentController)_shellContent).RecyclePage(Page);
+				_renderer.Dispose();
 				_appearanceTracker.Dispose();
-				_shellContent.PropertyChanged -= HandlePropertyChanged;
-				((IShellContentController)_shellContent).NavigationRequested -= OnNavigationRequested;
+				_shellSection.PropertyChanged -= HandlePropertyChanged;
+				((IShellSectionController)_shellSection).NavigationRequested -= OnNavigationRequested;
 				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
-				DisposePage(Page);
 			}
 
-			// must be set null prior to _shellContent to ensure weak ref page gets cleared
-			Page = null;
-			_shellContent = null;
+			_shellSection = null;
 			_appearanceTracker = null;
 			_renderer = null;
 		}
@@ -152,24 +162,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void LoadPages()
 		{
-			var content = ((IShellContentController)ShellContent).GetOrCreateContent();
-			Page = content;
-
-			if (!Shell.GetTabBarVisible(Page))
-				Log.Warning("Shell", "Root page of a ShellContent will never hide the TabBar");
-
-			_renderer = Platform.CreateRenderer(content);
-			Platform.SetRenderer(content, _renderer);
-
-			var tracker = _context.CreatePageRendererTracker();
-			tracker.IsRootPage = !IsInMoreTab; // default tracker requires this be set first
-			tracker.Renderer = _renderer;
-
-			_trackers[Page] = tracker;
+			_renderer = new ShellSectionRootRenderer(ShellSection, _context);
 
 			PushViewController(_renderer.ViewController, false);
 
-			var stack = ShellContent.Stack;
+			var stack = ShellSection.Stack;
 			for (int i = 1; i < stack.Count; i++)
 			{
 				PushPage(stack[i], false);
@@ -187,7 +184,8 @@ namespace Xamarin.Forms.Platform.iOS
 			Platform.SetRenderer(page, renderer);
 
 			var tracker = _context.CreatePageRendererTracker();
-			tracker.Renderer = renderer;
+			tracker.ViewController = renderer.ViewController;
+			tracker.Page = page;
 
 			_trackers[page] = tracker;
 
@@ -242,7 +240,7 @@ namespace Xamarin.Forms.Platform.iOS
 			var animated = e.Animated;
 
 			var task = new TaskCompletionSource<bool>();
-			var pages = _shellContent.Stack.ToList();
+			var pages = _shellSection.Stack.ToList();
 			_completionTasks[_renderer.ViewController] = task;
 			e.Task = task.Task;
 
@@ -290,20 +288,20 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			_appearanceTracker = _context.CreateNavBarAppearanceTracker();
 			UpdateTabBarItem();
-			((IShellController)_context.Shell).AddAppearanceObserver(this, ShellContent);
+			((IShellController)_context.Shell).AddAppearanceObserver(this, ShellSection);
 		}
 
 		protected virtual async void UpdateTabBarItem()
 		{
-			Title = ShellContent.Title;
-			var imageSource = ShellContent.Icon;
+			Title = ShellSection.Title;
+			var imageSource = ShellSection.Icon;
 			UIImage icon = null;
 			if (imageSource != null)
 			{
 				var source = Internals.Registrar.Registered.GetHandlerForObject<IImageSourceHandler>(imageSource);
 				icon = await source.LoadImageAsync(imageSource);
 			}
-			TabBarItem = new UITabBarItem(ShellContent.Title, icon, null);
+			TabBarItem = new UITabBarItem(ShellSection.Title, icon, null);
 		}
 
 		private void DisposePage(Page page)
@@ -322,12 +320,12 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		private Page PageForViewController(UIViewController viewController)
+		private Element ElementForViewController(UIViewController viewController)
 		{
 			if (_renderer.ViewController == viewController)
-				return Page;
+				return ShellSection;
 
-			foreach (var child in ShellContent.Stack)
+			foreach (var child in ShellSection.Stack)
 			{
 				if (child == null)
 					continue;
@@ -348,7 +346,8 @@ namespace Xamarin.Forms.Platform.iOS
 			renderer.ViewController.HidesBottomBarWhenPushed = !tabBarVisible;
 
 			var tracker = _context.CreatePageRendererTracker();
-			tracker.Renderer = renderer;
+			tracker.ViewController = renderer.ViewController;
+			tracker.Page = page;
 
 			_trackers[page] = tracker;
 
@@ -367,20 +366,26 @@ namespace Xamarin.Forms.Platform.iOS
 
 			await popTask;
 
-			var poppedPage = _shellContent.Stack[_shellContent.Stack.Count - 1];
-			((IShellContentController)_shellContent).SendPopped();
+			var poppedPage = _shellSection.Stack[_shellSection.Stack.Count - 1];
+			((IShellSectionController)_shellSection).SendPopped();
 			DisposePage(poppedPage);
 		}
 
 		private bool ShouldPop()
 		{
 			var shellItem = _context.Shell.CurrentItem;
-			var content = shellItem?.CurrentItem;
-			var stack = content?.Stack.ToList();
+			var shellSection = shellItem?.CurrentItem;
+			var shellContent = shellSection?.CurrentItem;
+			var stack = shellSection?.Stack.ToList();
 
 			stack.RemoveAt(stack.Count - 1);
 
-			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, content, stack, true);
+			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, shellSection, shellContent, stack, true);
+		}
+
+		private void UpdateShadowImages()
+		{
+			NavigationBar.SetValueForKey(NSObject.FromObject(true), new NSString("hidesShadow"));
 		}
 
 		private class GestureDelegate : UIGestureRecognizerDelegate
@@ -404,9 +409,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private class NavDelegate : UINavigationControllerDelegate
 		{
-			private readonly ShellContentRenderer _self;
+			private readonly ShellSectionRenderer _self;
 
-			public NavDelegate(ShellContentRenderer renderer)
+			public NavDelegate(ShellSectionRenderer renderer)
 			{
 				_self = renderer;
 			}
@@ -429,8 +434,18 @@ namespace Xamarin.Forms.Platform.iOS
 
 			public override void WillShowViewController(UINavigationController navigationController, [Transient] UIViewController viewController, bool animated)
 			{
-				var page = _self.PageForViewController(viewController);
-				bool navBarVisible = Shell.GetNavBarVisible(page);
+				var element = _self.ElementForViewController(viewController);
+
+				bool navBarVisible;
+				if (element is ShellSection)
+				{
+					navBarVisible = _self._renderer.ShowNavBar;
+				}
+				else
+				{
+					navBarVisible = Shell.GetNavBarVisible(element);
+				}
+
 				navigationController.SetNavigationBarHidden(!navBarVisible, true);
 			}
 		}

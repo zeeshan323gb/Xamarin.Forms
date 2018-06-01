@@ -2,7 +2,6 @@
 <Shell xmlns="http://xamarin.com/schemas/2014/forms"
 			xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			xmlns:local="clr-namespace:Xamarin.Forms.Controls.XamStore"
-			xmlns:droid="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
 			Route="xamstore"
 			RouteHost="www.xamarin.com"
 			RouteScheme="http"
@@ -32,22 +31,31 @@
 			<Setter Property="Shell.ShellBackgroundColor" Value="#546DFE" />
 		</Style>
 	</Shell.Resources>
-	
+
 	<Shell.FlyoutHeader>
 		<local:FlyoutHeader />
 	</Shell.FlyoutHeader>
-	
-	<ShellItem Route="apps" Title="My apps &amp; games" Icon="grid.png" Style="{StaticResource GreenShell}">
+
+	<ShellSection FlyoutDisplayOptions="AsMultipleItems" Route="apps" Title="My apps &amp; games" Icon="grid.png" Style="{StaticResource GreenShell}">
 		<ShellContent Route="updates" Title="Updates" ContentTemplate="{DataTemplate local:UpdatesPage}" />
 		<ShellContent Route="installed" Title="Installed" ContentTemplate="{DataTemplate local:InstalledPage}" />
 		<ShellContent Route="library" Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />
-	</ShellItem>
+	</ShellSection>
 
 	<ShellContent Route="notifications" Style="{StaticResource BaseStyle}" Title="My notifications" Icon="bell.png" ContentTemplate="{DataTemplate local:NotificationsPage}" />
 
 	<ShellContent Route="subs" Title="Subscriptions" Icon="loop.png" ContentTemplate="{DataTemplate local:SubscriptionsPage}" />
 
-	<ShellItem droid:ShellItem.TabBarLocation="Bottom"  Route="store" x:Name="_storeItem" GroupBehavior="ShowTabs">
+	<ShellItem Route="xamtube" Title="XamTube">
+		<ShellContent Route="home" Style="{StaticResource GreenShell}" Title="Home" Icon="home.png" FlyoutIcon="homeflyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
+		<ShellSection Route="activity" Title="Activity" Icon="grid.png" Style="{StaticResource GreenShell}">
+			<ShellContent Route="shared" Title="Shared" ContentTemplate="{DataTemplate local:UpdatesPage}" />
+			<ShellContent Route="Notifications" Title="Notifications" ContentTemplate="{DataTemplate local:LibraryPage}" />
+		</ShellSection>
+		<ShellContent Route="library" Title="Library" ContentTemplate="{DataTemplate local:LibraryPage}" />
+	</ShellItem>
+
+	<ShellItem Route="store" x:Name="_storeItem" FlyoutDisplayOptions="AsMultipleItems">
 		<ShellContent Route="home" Style="{StaticResource GreenShell}" Title="Home" Icon="home.png" FlyoutIcon="homeflyout.png" ContentTemplate="{DataTemplate local:HomePage}" />
 		<ShellContent Route="games" Style="{StaticResource GreenShell}" Title="Games" Icon="games.png" FlyoutIcon="gamesflyout.png" ContentTemplate="{DataTemplate local:GamesPage}" />
 		<ShellContent Route="movies" Style="{StaticResource MoviesShell}" Title="Movies &amp; TV" 

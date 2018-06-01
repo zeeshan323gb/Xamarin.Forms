@@ -41,7 +41,11 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			if (_disposed || Element == null || Control == null)
 				return;
 
-			Control.SetBackgroundColor((color ?? Element.BackgroundColor).ToAndroid());
+			var finalColor = color ?? Element.BackgroundColor;
+			if (finalColor.IsDefault)
+				Control.SetBackground(null);
+			else
+				Control.SetBackgroundColor(finalColor.ToAndroid());
 		}
 
 		void UpdateFlowDirection()
