@@ -58,39 +58,6 @@ namespace Xamarin.Forms.Controls
 			s.Spans.Add(new Span { Text = "Both", FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)), FontAttributes = FontAttributes.Italic });
 			label.FormattedText = s;
 
-			StackLayout layout = null;
-
-			layout = new StackLayout()
-			{
-				Children =
-						{
-							new Label(){ Text = "Strike"},
-							new Label(){ Text = "Strike//bold", FontAttributes = FontAttributes.Bold},
-							new Label(){ Text = "Underline"},
-							new Label(){
-
-								Text = "Strike/Underline"},
-							label,
-							new Button()
-							{
-								Text = "click to clear",
-								Command =new Command(() =>
-								{
-									layout.Children.OfType<Label>()
-										.ForEach(childLabel =>
-										{
-											if(childLabel.FormattedText != null)
-											{
-												//childLabel.FormattedText.Spans
-												//.ForEach(span=> span.TextDecorations = TextDecorations.None);
-											}
-										});
-								})
-							},
-							new Label(){ Text = "css"},
-
-						}
-			};
 			var page =
 				new ContentPage()
 				{
@@ -98,10 +65,6 @@ namespace Xamarin.Forms.Controls
 
 				};
 
-			page.Resources.Add(StyleSheets.StyleSheet.FromString(@" 
-						  ^label {
-							text-decoration: underline line-through;
-						  } "));
 
 			return page;
 		}
