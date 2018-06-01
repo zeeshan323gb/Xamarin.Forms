@@ -16,12 +16,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 		#endregion IShellSectionRootRenderer
 
+		private const int HeaderHeight = 35;
 		private readonly IShellContext _shellContext;
+		private UIView _blurView;
 		private UIView _containerArea;
 		private int _currentIndex;
-		private UIView _blurView;
 		private ShellSectionRootHeader _header;
-		private bool _isAnimating = false;
+		private bool _isAnimating;
 		private Dictionary<ShellContent, IVisualElementRenderer> _renderers = new Dictionary<ShellContent, IVisualElementRenderer>();
 		private IShellPageRendererTracker _tracker;
 
@@ -82,7 +83,7 @@ namespace Xamarin.Forms.Platform.iOS
 		public override void ViewSafeAreaInsetsDidChange()
 		{
 			base.ViewSafeAreaInsetsDidChange();
-			
+
 			LayoutHeader();
 		}
 
@@ -182,16 +183,16 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void UpdateHeaderVisibility()
 		{
-			_header.View.Hidden = _blurView.Hidden =  ShellSection.Items.Count <= 1;
+			_header.View.Hidden = _blurView.Hidden = ShellSection.Items.Count <= 1;
 		}
 
 		private void LayoutHeader()
 		{
 			CGRect frame;
 			if (Forms.IsiOS11OrNewer)
-				frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, 35);
+				frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, HeaderHeight);
 			else
-				frame = new CGRect(View.Bounds.X, TopLayoutGuide.Length, View.Bounds.Width, 35);
+				frame = new CGRect(View.Bounds.X, TopLayoutGuide.Length, View.Bounds.Width, HeaderHeight);
 			_blurView.Frame = frame;
 			_header.View.Frame = frame;
 
@@ -214,7 +215,7 @@ namespace Xamarin.Forms.Platform.iOS
 				bottom = BottomLayoutGuide.Length;
 			}
 
-			((IShellSectionController)ShellSection).SendInsetChanged(new Thickness(left, top, right, bottom), 35);
+			((IShellSectionController)ShellSection).SendInsetChanged(new Thickness(left, top, right, bottom), HeaderHeight);
 		}
 	}
 }
