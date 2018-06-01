@@ -1,6 +1,7 @@
 ﻿using CoreGraphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using UIKit;
 
@@ -58,6 +59,7 @@ namespace Xamarin.Forms.Platform.iOS
 			LoadRenderers();
 
 			ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
+			((INotifyCollectionChanged)ShellSection.Items).CollectionChanged += OnShellSectionItemsChanged;
 
 			_blurView = new UIView();
 			UIVisualEffect blurEffect = UIBlurEffect.FromStyle(UIBlurEffectStyle.ExtraLight);
@@ -80,6 +82,37 @@ namespace Xamarin.Forms.Platform.iOS
 			_tracker = tracker;
 		}
 
+		private void OnShellSectionItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			// Make sure we do this after the header has a chance to react
+			Device.BeginInvokeOnMainThread(UpdateHeaderVisibility);
+
+			if (e.OldItems != null)
+			{
+				foreach (ShellContent oldItem in e.OldItems)
+				{
+					var oldRenderer = _renderers[oldItem];
+					_renderers.Remove(oldItem);
+					oldRenderer.NativeView.RemoveFromSuperview();
+					oldRenderer.ViewController.RemoveFromParentViewController();
+					oldRenderer.Dispose();
+				}
+			}
+
+			if (e.NewItems != null)
+			{
+				foreach (ShellContent newItem in e.NewItems)
+				{
+					var page = ((IShellContentController)newItem).GetOrCreateContent();
+					var renderer = Platform.CreateRenderer(page);
+					Platform.SetRenderer(page, renderer);
+
+					AddChildViewController(renderer.ViewController);
+					_renderers[newItem] = renderer;
+				}
+			}
+		}
+
 		public override void ViewSafeAreaInsetsDidChange()
 		{
 			base.ViewSafeAreaInsetsDidChange();
@@ -94,11 +127,23 @@ namespace Xamarin.Forms.Platform.iOS
 			if (disposing)
 			{
 				ShellSection.PropertyChanged -= OnShellSectionPropertyChanged;
+				((INotifyCollectionChanged)ShellSection.Items).CollectionChanged -= OnShellSectionItemsChanged;
 
+				_header?.Dispose();
 				_tracker?.Dispose();
+
+				foreach (var shellContent in ShellSection.Items)
+				{
+					var oldRenderer = _renderers[shellContent];
+					_renderers.Remove(shellContent);
+					oldRenderer.NativeView.RemoveFromSuperview();
+					oldRenderer.ViewController.RemoveFromParentViewController();
+					oldRenderer.Dispose();
+				}
 			}
 
 			ShellSection = null;
+			_header = null;
 			_tracker = null;
 		}
 

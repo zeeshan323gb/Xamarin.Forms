@@ -1,6 +1,7 @@
 ﻿using CoreGraphics;
 using Foundation;
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using UIKit;
 
@@ -130,7 +131,6 @@ namespace Xamarin.Forms.Platform.iOS
 		public override void ViewDidLoad()
 		{
 			base.ViewDidLoad();
-
 			
 			CollectionView.ScrollsToTop = false;
 			CollectionView.Bounces = false;
@@ -157,9 +157,32 @@ namespace Xamarin.Forms.Platform.iOS
 			CollectionView.RegisterClassForCell(typeof(ShellSectionHeaderCell), CellId);
 
 			((IShellController)_shellContext.Shell).AddAppearanceObserver(this, ShellSection);
+			((INotifyCollectionChanged)ShellSection.Items).CollectionChanged += OnShellSectionItemsChanged;
 
 			UpdateSelectedIndex();
 			ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
+		}
+
+		private void OnShellSectionItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			CollectionView.ReloadData();
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing)
+			{
+				((IShellController)_shellContext.Shell).RemoveAppearanceObserver(this);
+				((INotifyCollectionChanged)ShellSection.Items).CollectionChanged -= OnShellSectionItemsChanged;
+				ShellSection.PropertyChanged -= OnShellSectionPropertyChanged;
+
+				ShellSection = null;
+				_bar.RemoveFromSuperview();
+				_bar.Dispose();
+				_bar = null;
+			}
 		}
 
 		protected void LayoutBar()

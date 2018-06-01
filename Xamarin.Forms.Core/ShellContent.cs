@@ -109,13 +109,17 @@ namespace Xamarin.Forms
 			{
 				// deparent old item
 				if (oldValue is Page oldElement)
+				{
 					shellContent.OnChildRemoved(oldElement);
+					shellContent._contentCache = null;
+				}
 
 				// make sure LogicalChildren collection stays consisten
 				shellContent._logicalChildren.Clear();
 				if (newValue is Page newElement)
 				{
 					shellContent._logicalChildren.Add((Element)newValue);
+					shellContent._contentCache = newElement;
 					// parent new item
 					shellContent.OnChildAdded(newElement);
 				}
