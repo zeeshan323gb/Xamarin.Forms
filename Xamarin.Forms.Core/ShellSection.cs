@@ -8,7 +8,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms
 {
-	[ContentProperty ("Items")]
+	[ContentProperty("Items")]
 	public class ShellSection : ShellGroupItem, IShellSectionController
 	{
 		#region PropertyKeys
@@ -20,6 +20,10 @@ namespace Xamarin.Forms
 		#endregion PropertyKeys
 
 		#region IShellSectionController
+
+		private readonly List<IShellContentInsetObserver> _observers = new List<IShellContentInsetObserver>();
+		private Thickness _lastInset;
+		private double _lastTabThickness;
 
 		event EventHandler<NavigationRequestedEventArgs> IShellSectionController.NavigationRequested
 		{
@@ -39,24 +43,12 @@ namespace Xamarin.Forms
 			}
 		}
 
-		void IShellSectionController.SendPopped()
+		void IShellSectionController.AddContentInsetObserver(IShellContentInsetObserver observer)
 		{
-			if (_navStack.Count <= 1)
-				throw new Exception("Nav Stack consistency error");
+			if (!_observers.Contains(observer))
+				_observers.Add(observer);
 
-			var last = _navStack[_navStack.Count - 1];
-			_navStack.Remove(last);
-
-			RemovePage(last);
-
-			SendUpdateCurrentState(ShellNavigationSource.Pop);
-		}
-
-		void IShellSectionController.UpdateChecked()
-		{
-			var shell = Parent?.Parent as Shell;
-			bool isChecked = shell?.CurrentItem?.CurrentItem == this;
-			UpdateChildrenChecked(isChecked, Items, CurrentItem);
+			observer.OnInsetChanged(_lastInset, _lastTabThickness);
 		}
 
 		Task IShellSectionController.GoToPart(List<string> parts, Dictionary<string, string> queryData)
@@ -83,6 +75,41 @@ namespace Xamarin.Forms
 			}
 
 			return Task.FromResult(true);
+		}
+
+		bool IShellSectionController.RemoveContentInsetObserver(IShellContentInsetObserver observer)
+		{
+			return _observers.Remove(observer);
+		}
+
+		void IShellSectionController.SendInsetChanged(Thickness inset, double tabThickness)
+		{
+			foreach (var observer in _observers)
+			{
+				observer.OnInsetChanged(inset, tabThickness);
+			}
+			_lastInset = inset;
+			_lastTabThickness = tabThickness;
+		}
+
+		void IShellSectionController.SendPopped()
+		{
+			if (_navStack.Count <= 1)
+				throw new Exception("Nav Stack consistency error");
+
+			var last = _navStack[_navStack.Count - 1];
+			_navStack.Remove(last);
+
+			RemovePage(last);
+
+			SendUpdateCurrentState(ShellNavigationSource.Pop);
+		}
+
+		void IShellSectionController.UpdateChecked()
+		{
+			var shell = Parent?.Parent as Shell;
+			bool isChecked = shell?.CurrentItem?.CurrentItem == this;
+			UpdateChildrenChecked(isChecked, Items, CurrentItem);
 		}
 
 		#endregion IShellSectionController
@@ -204,7 +231,8 @@ namespace Xamarin.Forms
 				else
 				{
 					// We want to delay invoke this because the renderer may handle this instead
-					Device.BeginInvokeOnMainThread(() => {
+					Device.BeginInvokeOnMainThread(() =>
+					{
 						if (CurrentItem == null)
 							SetValueFromRenderer(CurrentItemProperty, Items[0]);
 					});

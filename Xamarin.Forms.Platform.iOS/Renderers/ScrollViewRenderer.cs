@@ -9,6 +9,7 @@ using CoreGraphics;
 
 namespace Xamarin.Forms.Platform.iOS
 {
+
 	public class ScrollViewRenderer : UIScrollView, IVisualElementRenderer, IEffectControlProvider
 	{
 		EventTracker _events;
@@ -20,7 +21,7 @@ namespace Xamarin.Forms.Platform.iOS
 		ScrollToRequestedEventArgs _requestedScroll;
 		VisualElementTracker _tracker;
 
-		bool _isInShell;
+		ShellScrollViewTracker _shellScrollTracker;
 
 		public ScrollViewRenderer() : base(RectangleF.Empty)
 		{
@@ -87,33 +88,8 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateIsEnabled();
 				UpdateVerticalScrollBarVisibility();
 				UpdateHorizontalScrollBarVisibility();
-				UpdateVerticalBounce();
 
-				if (Forms.IsiOS11OrNewer)
-				{
-					var parent = Element.Parent;
-					while (!Application.IsApplicationOrNull(parent))
-					{
-						if (parent is ScrollView || parent is ListView || parent is TableView)
-							return;
-						parent = parent.Parent;
-
-						if (parent is ShellContent)
-						{
-							_isInShell = true;
-							// FIXME THIS SHOULD NOT BE HARDCODED
-							if (parent.Parent is ShellSection shellSection && shellSection.Items.Count > 1)
-							{
-								ContentInset = new UIEdgeInsets(35, 0, 0, 0);
-								ContentOffset = new PointF(0, -35);
-							}
-
-							ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Always;
-
-							break;
-						}
-					}
-				}
+				_shellScrollTracker = new ShellScrollViewTracker(this);
 
 				OnElementChanged(new VisualElementChangedEventArgs(oldElement, element));
 
@@ -137,44 +113,12 @@ namespace Xamarin.Forms.Platform.iOS
 			get { return null; }
 		}
 
-		private void UpdateVerticalBounce()
-		{
-			// Normally we dont want to do this unless this scrollview is vertical and its
-			// element is the child of a Page with a SearchHandler that is collapsable.
-			// If we can't bounce in that case you may not be able to expose the handler.
-			// Also the hiding behavior only depends on scroll on iOS 11. In 10 and below
-			// the search goes in the TitleView so there is nothing to collapse/expand.
-			if (!Forms.IsiOS11OrNewer || ((ScrollView)Element).Orientation == ScrollOrientation.Horizontal)
-				return;
-
-			var parent = Element.Parent;
-			while (!Application.IsApplicationOrNull(parent))
-			{
-				if (parent is Page)
-				{
-					var searchHandler = Shell.GetSearchHandler(parent);
-					if (searchHandler?.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
-						AlwaysBounceVertical = true;
-					return;
-				}
-				parent = parent.Parent;
-			}
-		}
-
-		private void UpdateOverrideArea()
-		{
-			if (Forms.IsiOS11OrNewer && _isInShell)
-			{
-				var newBounds = AdjustedContentInset.InsetRect(Bounds).ToRectangle();
-				newBounds.X = 0;
-				newBounds.Y = 0;
-				((ScrollView)Element).LayoutAreaOverride = newBounds;
-			}
-		}
+		
 
 		public override void LayoutSubviews()
 		{
-			UpdateOverrideArea();
+			_shellScrollTracker.OnLayoutSubviews();
+
 			base.LayoutSubviews();
 
 			if (_requestedScroll != null && Superview != null)
@@ -199,6 +143,9 @@ namespace Xamarin.Forms.Platform.iOS
 					return;
 
 				SetElement(null);
+
+				_shellScrollTracker.Dispose();
+				_shellScrollTracker = null;
 
 				_packager.Dispose();
 				_packager = null;

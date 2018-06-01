@@ -7,14 +7,20 @@ namespace Xamarin.Forms
 {
 	public interface IShellSectionController : IElementController
 	{
-		void UpdateChecked();
+		event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
 
 		Page PresentedPage { get; }
 
-		event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
+		void AddContentInsetObserver(IShellContentInsetObserver observer);
+
+		Task GoToPart(List<string> parts, Dictionary<string, string> queryData);
+
+		bool RemoveContentInsetObserver(IShellContentInsetObserver observer);
+
+		void SendInsetChanged(Thickness inset, double tabThickness);
 
 		void SendPopped();
 
-		Task GoToPart(List<string> parts, Dictionary<string, string> queryData);
+		void UpdateChecked();
 	}
 }

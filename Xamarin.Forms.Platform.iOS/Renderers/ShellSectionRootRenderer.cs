@@ -49,7 +49,8 @@ namespace Xamarin.Forms.Platform.iOS
 			base.ViewDidLoad();
 
 			_containerArea = new UIView();
-			_containerArea.InsetsLayoutMarginsFromSafeArea = false;
+			if (Forms.IsiOS11OrNewer)
+				_containerArea.InsetsLayoutMarginsFromSafeArea = false;
 
 			View.AddSubview(_containerArea);
 
@@ -81,7 +82,7 @@ namespace Xamarin.Forms.Platform.iOS
 		public override void ViewSafeAreaInsetsDidChange()
 		{
 			base.ViewSafeAreaInsetsDidChange();
-
+			
 			LayoutHeader();
 		}
 
@@ -186,9 +187,34 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void LayoutHeader()
 		{
-			var frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, 35);
+			CGRect frame;
+			if (Forms.IsiOS11OrNewer)
+				frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, 35);
+			else
+				frame = new CGRect(View.Bounds.X, TopLayoutGuide.Length, View.Bounds.Width, 35);
 			_blurView.Frame = frame;
 			_header.View.Frame = frame;
+
+			nfloat left;
+			nfloat top;
+			nfloat right;
+			nfloat bottom;
+			if (Forms.IsiOS11OrNewer)
+			{
+				left = View.SafeAreaInsets.Left;
+				top = View.SafeAreaInsets.Top;
+				right = View.SafeAreaInsets.Right;
+				bottom = View.SafeAreaInsets.Bottom;
+			}
+			else
+			{
+				left = 0;
+				top = TopLayoutGuide.Length;
+				right = 0;
+				bottom = BottomLayoutGuide.Length;
+			}
+
+			((IShellSectionController)ShellSection).SendInsetChanged(new Thickness(left, top, right, bottom), 35);
 		}
 	}
 }
