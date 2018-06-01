@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
@@ -50,16 +51,59 @@ namespace Xamarin.Forms.Controls
 
 		public Page CreateDefaultMainPage()
 		{
-			var layout = new StackLayout { BackgroundColor = Color.Red };
-			layout.Children.Add(new Label { Text ="This is master Page" });
-			var master = new ContentPage { Title = "Master", Content = layout,  BackgroundColor = Color.SkyBlue };
-			master.On<iOS>().SetUseSafeArea(true);
-			return new MasterDetailPage
+			var label = new Label { FontSize = 20 };
+			var s = new FormattedString();
+			s.Spans.Add(new Span { Text = "Underline", FontAttributes = FontAttributes.Bold });
+			s.Spans.Add(new Span { Text = "Strikethrough" });
+			s.Spans.Add(new Span { Text = "Both", FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)), FontAttributes = FontAttributes.Italic });
+			label.FormattedText = s;
+
+			StackLayout layout = null;
+
+			layout = new StackLayout()
 			{
-				AutomationId = DefaultMainPageId,
-				Master = master,
-				Detail = CoreGallery.GetMainPage()
+				Children =
+						{
+							new Label(){ Text = "Strike"},
+							new Label(){ Text = "Strike//bold", FontAttributes = FontAttributes.Bold},
+							new Label(){ Text = "Underline"},
+							new Label(){
+
+								Text = "Strike/Underline"},
+							label,
+							new Button()
+							{
+								Text = "click to clear",
+								Command =new Command(() =>
+								{
+									layout.Children.OfType<Label>()
+										.ForEach(childLabel =>
+										{
+											if(childLabel.FormattedText != null)
+											{
+												//childLabel.FormattedText.Spans
+												//.ForEach(span=> span.TextDecorations = TextDecorations.None);
+											}
+										});
+								})
+							},
+							new Label(){ Text = "css"},
+
+						}
 			};
+			var page =
+				new ContentPage()
+				{
+					Content = label,
+
+				};
+
+			page.Resources.Add(StyleSheets.StyleSheet.FromString(@" 
+						  ^label {
+							text-decoration: underline line-through;
+						  } "));
+
+			return page;
 		}
 
 		protected override void OnAppLinkRequestReceived(Uri uri)

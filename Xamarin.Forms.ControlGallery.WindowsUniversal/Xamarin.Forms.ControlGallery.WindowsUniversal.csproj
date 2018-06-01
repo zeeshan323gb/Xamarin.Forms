@@ -126,6 +126,7 @@
   <ItemGroup>
     <Compile Include="AttachedStateEffectRenderer.cs" />
     <Compile Include="BorderEffect.cs" />
+    <Compile Include="CustomLabelRenderer.cs" />
     <Compile Include="DisposePageRenderer.cs" />
     <Compile Include="RegistrarValidationService.cs" />
     <Compile Include="SampleNativeControl.cs" />
