@@ -294,8 +294,8 @@ namespace Xamarin.Forms
 				}
 				catch (AmbiguousMatchException) {
 					// Get most derived instance of property
-					foreach (var p in sourceType.GetProperties().Where(prop => prop.Name == indexerName)) {
-						if (property == null || property.DeclaringType.IsAssignableFrom(property.DeclaringType))
+					foreach (var p in sourceType.GetProperties()) {
+						if (p.Name == indexerName && (property == null || property.DeclaringType.IsAssignableFrom(property.DeclaringType)))
 							property = p;
 					}
 				}
@@ -351,7 +351,8 @@ namespace Xamarin.Forms
 				if (property.CanWrite && property.SetMethod.IsPublic && !property.SetMethod.IsStatic)
 				{
 					part.LastSetter = property.SetMethod;
-					part.SetterType = part.LastSetter.GetParameters().Last().ParameterType;
+					var lastSetterParameters = part.LastSetter.GetParameters();
+					part.SetterType = lastSetterParameters[lastSetterParameters.Length - 1].ParameterType;
 
 					if (Binding.AllowChaining)
 					{

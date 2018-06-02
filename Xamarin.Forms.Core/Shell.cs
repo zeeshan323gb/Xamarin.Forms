@@ -285,7 +285,7 @@ namespace Xamarin.Forms
 			return GetNavigationState(shellItem, shellSection, shellContent, includeStack ? shellSection.Stack.ToList() : null);
 		}
 
-		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IList<Page> stack, bool canCancel)
+		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IReadOnlyList<Page> stack, bool canCancel)
 		{
 			var proposedState = GetNavigationState(shellItem, shellSection, shellContent, stack);
 			return ProposeNavigation(source, proposedState, canCancel);
@@ -316,7 +316,7 @@ namespace Xamarin.Forms
 			var shellSection = shellItem?.CurrentItem;
 			var shellContent = shellSection?.CurrentItem;
 			var stack = shellSection?.Stack;
-			var result = GetNavigationState(shellItem, shellSection, shellContent, stack.ToList());
+			var result = GetNavigationState(shellItem, shellSection, shellContent, stack);
 
 			SetValueFromRenderer(CurrentStatePropertyKey, result);
 
@@ -458,13 +458,19 @@ namespace Xamarin.Forms
 			}
 
 			var typeInfo = element.GetType().GetTypeInfo();
-			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+
+#if NETSTANDARD1_0
+			var effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+#else
+			var effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true);
+#endif
 
 			if (effectAttributes.Length == 0)
 				return;
 
-			foreach (var a in effectAttributes)
+			for (int i = 0; i < effectAttributes.Length; i++)
 			{
+				object a = effectAttributes[i];
 				if (a is QueryPropertyAttribute attrib)
 				{
 					PropertyInfo prop = null;
@@ -485,7 +491,7 @@ namespace Xamarin.Forms
 			}
 		}
 
-		private ShellNavigationState GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IList<Page> sectionStack)
+		private ShellNavigationState GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IReadOnlyList<Page> sectionStack)
 		{
 			var state = RouteScheme + "://" + RouteHost + "/" + Route + "/";
 			Dictionary<string, string> queryData = new Dictionary<string, string>();
@@ -497,7 +503,7 @@ namespace Xamarin.Forms
 			if (shellItem != null)
 			{
 				var shellItemRoute = shellItem.Route;
-				if (!shellItemRoute.StartsWith(Routing.ImplicitPrefix))
+				if (!shellItemRoute.StartsWith(Routing.ImplicitPrefix, StringComparison.Ordinal))
 				{
 					state += shellItemRoute;
 					state += "/";
@@ -508,7 +514,7 @@ namespace Xamarin.Forms
 				if (shellSection != null)
 				{
 					var shellSectionRoute = shellSection.Route;
-					if (!shellSectionRoute.StartsWith(Routing.ImplicitPrefix))
+					if (!shellSectionRoute.StartsWith(Routing.ImplicitPrefix, StringComparison.Ordinal))
 					{
 						state += shellSectionRoute;
 						state += "/";
@@ -519,7 +525,7 @@ namespace Xamarin.Forms
 					if (shellContent != null)
 					{
 						var shellContentRoute = shellContent.Route;
-						if (!shellContentRoute.StartsWith(Routing.ImplicitPrefix))
+						if (!shellContentRoute.StartsWith(Routing.ImplicitPrefix, StringComparison.Ordinal))
 						{
 							state += shellContentRoute;
 							state += "/";
@@ -547,7 +553,7 @@ namespace Xamarin.Forms
 			return state + queryString;
 		}
 
-		#endregion URI Navigation
+#endregion URI Navigation
 
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
@@ -809,7 +815,7 @@ namespace Xamarin.Forms
 			else
 			{
 				Navigated?.Invoke(this, args);
-				System.Diagnostics.Debug.WriteLine("Navigated: " + args.Current.Location);
+				//System.Diagnostics.Debug.WriteLine("Navigated: " + args.Current.Location);
 			}
 		}
 
@@ -837,20 +843,35 @@ namespace Xamarin.Forms
 			if (root is Shell shell)
 			{
 				ShellItem currentItem = shell.CurrentItem;
-				foreach (var item in shell.Items)
+				var items = shell.Items;
+				var count = items.Count;
+				for (int i = 0; i < count; i++)
+				{
+					ShellItem item = items[i];
 					UpdateChecked(item, isChecked && item == currentItem);
+				}
 			}
 			else if (root is ShellItem shellItem)
 			{
 				var currentItem = shellItem.CurrentItem;
-				foreach (var item in shellItem.Items)
+				var items = shellItem.Items;
+				var count = items.Count;
+				for (int i = 0; i < count; i++)
+				{
+					ShellSection item = items[i];
 					UpdateChecked(item, isChecked && item == currentItem);
+				}
 			}
 			else if (root is ShellSection shellSection)
 			{
 				var currentItem = shellSection.CurrentItem;
-				foreach (var item in shellSection.Items)
+				var items = shellSection.Items;
+				var count = items.Count;
+				for (int i = 0; i < count; i++)
+				{
+					ShellContent item = items[i];
 					UpdateChecked(item, isChecked && item == currentItem);
+				}
 			}
 		}
 
@@ -1004,7 +1025,7 @@ namespace Xamarin.Forms
 			var navArgs = new ShellNavigatingEventArgs(CurrentState, proposedState, source, canCancel);
 
 			OnNavigating(navArgs);
-			System.Diagnostics.Debug.WriteLine("Proposed: " + proposedState.Location);
+			//System.Diagnostics.Debug.WriteLine("Proposed: " + proposedState.Location);
 			return !navArgs.Cancelled;
 		}
 
