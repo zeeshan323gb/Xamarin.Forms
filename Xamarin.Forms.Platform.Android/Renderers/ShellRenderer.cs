@@ -210,10 +210,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellItemRenderer CreateShellItemRenderer(ShellItem shellItem)
 		{
-			//var tabLocation = shellItem.OnThisPlatform().GetTabBarLocation();
-			//if (tabLocation == ShellTabBarLocation.Bottom)
-				return new ShellItemRenderer(this);
-			//return new ShellTopTabItemRenderer(this);
+			return new ShellItemRenderer(this);
 		}
 
 		protected virtual IShellToolbarTracker CreateTrackerForToolbar(Toolbar toolbar)
