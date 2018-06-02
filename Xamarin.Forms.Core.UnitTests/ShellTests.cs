@@ -20,8 +20,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var shell = new Shell();
 			var shellItem = new ShellItem();
-			var shellContent = new ShellSection();
-			shellItem.Items.Add(shellContent);
+			var shellSection = new ShellSection();
+			var shellContent = new ShellContent { Content = new ContentPage() };
+			shellSection.Items.Add(shellContent);
+			shellItem.Items.Add(shellSection);
 			shell.Items.Add(shellItem);
 
 			Assert.That(shell.CurrentItem, Is.EqualTo(shellItem));
@@ -32,8 +34,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var shell = new Shell();
 			var shellItem = new ShellItem();
-			var shellContent = new ShellSection();
-			shellItem.Items.Add(shellContent);
+			var shellSection = new ShellSection();
+			var shellContent = new ShellContent { Content = new ContentPage() };
+			shellSection.Items.Add(shellContent);
+			shellItem.Items.Add(shellSection);
 			shell.Items.Add(shellItem);
 
 			Assume.That(shell.CurrentItem, Is.EqualTo(shellItem));
@@ -41,6 +45,15 @@ namespace Xamarin.Forms.Core.UnitTests
 			shell.Items.Add(new ShellItem());
 
 			Assert.AreEqual(shellItem, shell.CurrentItem);
+		}
+
+		ShellSection MakeSimpleShellSection (string route, string contentRoute)
+		{
+			var shellSection = new ShellSection();
+			shellSection.Route = route;
+			var shellContent = new ShellContent { Content = new ContentPage(), Route = contentRoute };
+			shellSection.Items.Add(shellContent);
+			return shellSection;
 		}
 
 		[Test]
@@ -52,10 +65,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			var one = new ShellItem { Route = "one" };
 			var two = new ShellItem { Route = "two" };
 
-			var tabone = new ShellSection { Route = "tabone" };
-			var tabtwo = new ShellSection { Route = "tabtwo" };
-			var tabthree = new ShellSection { Route = "tabthree" };
-			var tabfour = new ShellSection { Route = "tabfour" };
+			var tabone = MakeSimpleShellSection("tabone", "content");
+			var tabtwo = MakeSimpleShellSection("tabtwo", "content");
+			var tabthree = MakeSimpleShellSection("tabthree", "content");
+			var tabfour = MakeSimpleShellSection("tabfour", "content");
 
 			one.Items.Add(tabone);
 			one.Items.Add(tabtwo);
@@ -66,11 +79,11 @@ namespace Xamarin.Forms.Core.UnitTests
 			shell.Items.Add(one);
 			shell.Items.Add(two);
 
-			Assert.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/"));
+			Assert.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/content/"));
 
 			shell.GoToAsync(new ShellNavigationState("app:///s/two/tabfour/"));
 
-			Assert.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/two/tabfour/"));
+			Assert.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/two/tabfour/content/"));
 		}
 
 		[Test]
@@ -82,10 +95,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			var one = new ShellItem { Route = "one" };
 			var two = new ShellItem { Route = "two" };
 
-			var tabone = new ShellSection { Route = "tabone" };
-			var tabtwo = new ShellSection { Route = "tabtwo" };
-			var tabthree = new ShellSection { Route = "tabthree" };
-			var tabfour = new ShellSection { Route = "tabfour" };
+			var tabone = MakeSimpleShellSection("tabone", "content");
+			var tabtwo = MakeSimpleShellSection("tabtwo", "content");
+			var tabthree = MakeSimpleShellSection("tabthree", "content");
+			var tabfour = MakeSimpleShellSection("tabfour", "content");
 
 			one.Items.Add(tabone);
 			one.Items.Add(tabtwo);
@@ -96,7 +109,7 @@ namespace Xamarin.Forms.Core.UnitTests
 			shell.Items.Add(one);
 			shell.Items.Add(two);
 
-			Assume.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/"));
+			Assume.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/content/"));
 
 			shell.Navigating += (s, e) =>
 			{
@@ -105,7 +118,7 @@ namespace Xamarin.Forms.Core.UnitTests
 
 			shell.GoToAsync(new ShellNavigationState("app:///s/two/tabfour/"));
 
-			Assert.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/"));
+			Assume.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/content/"));
 		}
 	}
 }
