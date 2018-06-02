@@ -12,7 +12,7 @@ namespace Xamarin.Forms
 
 		internal static string GenerateImplicitRoute (string source)
 		{
-			if (source.StartsWith(ImplicitPrefix))
+			if (source.StartsWith(ImplicitPrefix, StringComparison.Ordinal))
 				return source;
 			return ImplicitPrefix + source;
 		}

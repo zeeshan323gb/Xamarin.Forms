@@ -37,7 +37,8 @@ namespace Xamarin.Forms.Platform.Android
 			var unselectedArgb = unselected.ToAndroid(ShellRenderer.DefaultUnselectedColor).ToArgb();
 
 			tabLayout.SetTabTextColors(unselectedArgb, titleArgb);
-			tabLayout.SetBackground(new ColorDrawable(background.ToAndroid(ShellRenderer.DefaultBackgroundColor)));
+			using (var colorDrawable = new ColorDrawable(background.ToAndroid(ShellRenderer.DefaultBackgroundColor)))
+				tabLayout.SetBackground(colorDrawable);
 			tabLayout.SetSelectedTabIndicatorColor(foreground.ToAndroid(ShellRenderer.DefaultForegroundColor));
 		}
 

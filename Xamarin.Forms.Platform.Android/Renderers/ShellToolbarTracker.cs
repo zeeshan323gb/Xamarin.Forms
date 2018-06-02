@@ -233,11 +233,12 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (backButtonHandler != null)
 			{
-				var icon = await context.GetFormsDrawable(backButtonHandler.IconOverride);
-				icon = icon.GetConstantState().NewDrawable().Mutate();
-				icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-				
-				toolbar.NavigationIcon = icon;
+				using (var icon = await context.GetFormsDrawable(backButtonHandler.IconOverride))
+				using (var mutatedIcon = icon.GetConstantState().NewDrawable().Mutate())
+				{
+					mutatedIcon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+					toolbar.NavigationIcon = mutatedIcon;
+				}
 			}
 			else
 			{
@@ -256,15 +257,18 @@ namespace Xamarin.Forms.Platform.Android
 				if (CanNavigateBack)
 				{
 					_drawerToggle.DrawerIndicatorEnabled = false;
-					var icon = new DrawerArrowDrawable(activity.SupportActionBar.ThemedContext);
-					icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-					icon.Progress = 1;
-					toolbar.NavigationIcon = icon;
+					using (var icon = new DrawerArrowDrawable(activity.SupportActionBar.ThemedContext))
+					{
+						icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+						icon.Progress = 1;
+						toolbar.NavigationIcon = icon;
+					}
 				}
 				else if (_flyoutBehavior == FlyoutBehavior.Flyout)
 				{
 					toolbar.NavigationIcon = null;
-					_drawerToggle.DrawerArrowDrawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+					using (var drawable = _drawerToggle.DrawerArrowDrawable)
+						drawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					_drawerToggle.DrawerIndicatorEnabled = true;
 				}
 				else
@@ -392,6 +396,8 @@ namespace Xamarin.Forms.Platform.Android
 					_searchView = null;
 				}
 			}
+
+			menu.Dispose();
 		}
 
 		private void OnSearchViewAttachedToWindow(object sender, AView.ViewAttachedToWindowEventArgs e)
@@ -410,6 +416,8 @@ namespace Xamarin.Forms.Platform.Android
 					{
 						button.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					}
+
+					button.Dispose();
 				}
 			}
 		}

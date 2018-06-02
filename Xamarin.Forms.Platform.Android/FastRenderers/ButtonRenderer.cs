@@ -170,7 +170,6 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		void IVisualElementRenderer.UpdateLayout()
 		{
-			var reference = Guid.NewGuid().ToString();
 			_tracker?.UpdateLayout();
 		}
 
@@ -466,7 +465,9 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 			string oldText = Text;
 			string newText = Button.Text;
-			Text = newText;
+
+			if (oldText != newText)
+				Text = newText;
 
 			// If we went from or to having no text, we need to update the image position
 			if (IsNullOrEmpty(oldText) != IsNullOrEmpty(newText))

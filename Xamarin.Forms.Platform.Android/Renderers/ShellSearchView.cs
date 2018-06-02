@@ -291,7 +291,9 @@ namespace Xamarin.Forms.Platform.Android
 			if (image != null)
 				button.SetImageDrawable(await Context.GetFormsDrawable(image).ConfigureAwait(false));
 			else if (defaultValue > 0)
-				button.SetImageResource(defaultValue);
+			{
+				await Task.Run(() => button.SetImageResource(defaultValue)).ConfigureAwait(false);
+			}
 			else
 				button.SetImageDrawable(null);
 		}

@@ -73,8 +73,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public void UpdateLayout()
 		{
-			var reference = Guid.NewGuid().ToString();
-			Performance.Start(reference);
+			Performance.Start(out var reference);
 
 			VisualElement view = _renderer.Element;
 			AView aview = _renderer.View;

@@ -5,9 +5,11 @@ using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using AColor = Android.Graphics.Color;
 using AView = Android.Views.View;
 using ColorStateList = Android.Content.Res.ColorStateList;
@@ -275,7 +277,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void ResetAppearance() => _appearanceTracker.ResetAppearance(_bottomView);
 
-		protected virtual void SetupMenu(IMenu menu, int maxBottomItems, ShellItem shellItem)
+		protected virtual async void SetupMenu(IMenu menu, int maxBottomItems, ShellItem shellItem)
 		{
 			menu.Clear();
 			bool showMore = ShellItem.Items.Count > maxBottomItems;
@@ -284,11 +286,14 @@ namespace Xamarin.Forms.Platform.Android
 
 			var currentIndex = shellItem.Items.IndexOf(ShellSection);
 
+			List<IMenuItem> menuItems = new List<IMenuItem>();
+			List<Task> loadTasks = new List<Task>();
 			for (int i = 0; i < end; i++)
 			{
 				var item = shellItem.Items[i];
 				var menuItem = menu.Add(0, i, 0, new Java.Lang.String(item.Title));
-				SetMenuItemIcon(menuItem, item.Icon);
+				menuItems.Add(menuItem);
+				loadTasks.Add(SetMenuItemIcon(menuItem, item.Icon));
 				UpdateShellSectionEnabled(item, menuItem);
 				if (item == ShellSection)
 				{
@@ -307,6 +312,12 @@ namespace Xamarin.Forms.Platform.Android
 			_bottomView.Visibility = end == 1 ? ViewStates.Gone : ViewStates.Visible;
 
 			_bottomView.SetShiftMode(false, false);
+
+			if (loadTasks.Count > 0)
+				await Task.WhenAll(loadTasks);
+
+			foreach (var menuItem in menuItems)
+				menuItem.Dispose();
 		}
 
 		protected virtual void UpdateShellSectionEnabled(ShellSection shellSection, IMenuItem menuItem)
@@ -327,7 +338,7 @@ namespace Xamarin.Forms.Platform.Android
 			image.SetImageDrawable(await Context.GetFormsDrawable(source));
 		}
 
-		private async void SetMenuItemIcon(IMenuItem menuItem, ImageSource source)
+		private async Task SetMenuItemIcon(IMenuItem menuItem, ImageSource source)
 		{
 			if (source == null)
 				return;

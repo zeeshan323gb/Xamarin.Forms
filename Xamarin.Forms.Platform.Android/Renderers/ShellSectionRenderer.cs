@@ -130,6 +130,8 @@ namespace Xamarin.Forms.Platform.Android
 
 			HookEvents();
 
+			scrollview.Dispose();
+
 			return _rootView = root;
 		}
 
