@@ -9,6 +9,7 @@ using Android.Views;
 using Android.Widget;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using AColor = Android.Graphics.Color;
 using AView = Android.Views.View;
 using LP = Android.Views.ViewGroup.LayoutParams;
@@ -262,11 +263,14 @@ namespace Xamarin.Forms.Platform.Android
 			SwitchFragment(FragmentManager, _frameLayout, shell.CurrentItem, false);
 		}
 
-		protected virtual void SwitchFragment(FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
+		IShellItemRenderer _currentRenderer;
+
+		protected virtual async void SwitchFragment(FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
 		{
-			var shellItemRenderer = CreateShellItemRenderer(newItem);
-			shellItemRenderer.ShellItem = newItem;
-			var fragment = shellItemRenderer.Fragment;
+			var previousRenderer = _currentRenderer;
+			_currentRenderer = CreateShellItemRenderer(newItem);
+			_currentRenderer.ShellItem = newItem;
+			var fragment = _currentRenderer.Fragment;
 
 			FragmentTransaction transaction = manager.BeginTransaction();
 
@@ -275,6 +279,11 @@ namespace Xamarin.Forms.Platform.Android
 
 			transaction.Replace(_frameLayout.Id, fragment);
 			transaction.CommitAllowingStateLoss();
+
+			await Task.Delay(1000);
+
+			previousRenderer?.Dispose();
+			previousRenderer = null;
 		}
 
 		private async void GoTo(ShellItem item, ShellSection shellSection, ShellContent shellContent)
@@ -395,6 +404,8 @@ namespace Xamarin.Forms.Platform.Android
 				canvas.DrawRect(new Rect(0, 0, bounds.Right, _topSize), paint);
 
 				canvas.DrawRect(new Rect(0, bounds.Bottom - _bottomSize, bounds.Right, bounds.Bottom), paint);
+
+				paint.Dispose();
 			}
 
 			public override void SetAlpha(int alpha)

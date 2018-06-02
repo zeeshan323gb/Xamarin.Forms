@@ -51,6 +51,8 @@ namespace Xamarin.Forms.Platform.Android
 			bottomView.ItemTextColor = colorStateList;
 			bottomView.ItemIconTintList = colorStateList;
 
+			colorStateList.Dispose();
+
 			SetBackgroundColor(bottomView, background);
 		}
 
@@ -59,22 +61,27 @@ namespace Xamarin.Forms.Platform.Android
 			if (_lastColor.IsDefault)
 				_lastColor = color;
 
-			var menuView = bottomView.GetChildAt(0) as BottomNavigationMenuView;
-
-			if (menuView == null)
+			using (var menuView = bottomView.GetChildAt(0) as BottomNavigationMenuView)
 			{
-				bottomView.SetBackground(new ColorDrawable(color.ToAndroid()));
-			}
-			else
-			{
-				var index = _shellItem.Items.IndexOf(_shellItem.CurrentItem);
-				index = Math.Min(index, bottomView.Menu.Size() - 1);
+				if (menuView == null)
+				{
+					bottomView.SetBackground(new ColorDrawable(color.ToAndroid()));
+				}
+				else
+				{
+					var index = _shellItem.Items.IndexOf(_shellItem.CurrentItem);
+					using (var menu = bottomView.Menu)
+						index = Math.Min(index, menu.Size() - 1);
 
-				var child = menuView.GetChildAt(index);
-				var touchPoint = new Point(child.Left + (child.Right - child.Left) / 2, child.Top + (child.Bottom - child.Top) / 2);
+					using (var child = menuView.GetChildAt(index))
+					{
+						var touchPoint = new Point(child.Left + (child.Right - child.Left) / 2, child.Top + (child.Bottom - child.Top) / 2);
 
-				bottomView.SetBackground(new ColorChangeRevealDrawable(_lastColor.ToAndroid(), color.ToAndroid(), touchPoint));
-				_lastColor = color;
+						bottomView.Background?.Dispose();
+						bottomView.SetBackground(new ColorChangeRevealDrawable(_lastColor.ToAndroid(), color.ToAndroid(), touchPoint));
+						_lastColor = color;
+					}
+				}
 			}
 		}
 

@@ -116,6 +116,8 @@ namespace Xamarin.Forms.Platform.Android
 				OnNavigateBack();
 			else
 				_shellContext.Shell.FlyoutIsPresented = !_shellContext.Shell.FlyoutIsPresented;
+
+			v.Dispose();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -196,7 +198,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void OnPageToolbarItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
-			UpdateToolbarItems(_toolbar, Page);
+			UpdateToolbarItems();
 		}
 
 		protected virtual void OnSearchConfirmed(object sender, EventArgs e)
@@ -222,7 +224,7 @@ namespace Xamarin.Forms.Platform.Android
 			if (e.PropertyName == SearchHandler.SearchBoxVisibilityProperty.PropertyName ||
 				e.PropertyName == SearchHandler.IsSearchEnabledProperty.PropertyName)
 			{
-				UpdateToolbarItems(_toolbar, Page);
+				UpdateToolbarItems();
 			}
 		}
 
@@ -284,12 +286,13 @@ namespace Xamarin.Forms.Platform.Android
 			FileImageSource icon = toolBarItem.Icon;
 			if (!string.IsNullOrEmpty(icon))
 			{
-				Drawable iconDrawable = context.GetFormsDrawable(icon).GetConstantState().NewDrawable().Mutate();
-				iconDrawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
-				if (iconDrawable != null)
+				using (var baseDrawable = context.GetFormsDrawable(icon))
+				using (var constant = baseDrawable.GetConstantState())
+				using (var newDrawable = constant.NewDrawable())
+				using (var iconDrawable = newDrawable.Mutate())
 				{
+					iconDrawable.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					menuItem.SetIcon(iconDrawable);
-					iconDrawable.Dispose();
 				}
 			}
 		}
@@ -341,11 +344,15 @@ namespace Xamarin.Forms.Platform.Android
 
 			foreach (var item in page.ToolbarItems)
 			{
-				var menuitem = menu.Add(item.Text);
-				UpdateMenuItemIcon(_shellContext.AndroidContext, menuitem, item);
-				menuitem.SetEnabled(item.IsEnabled);
-				menuitem.SetShowAsAction(ShowAsAction.Always);
-				menuitem.SetOnMenuItemClickListener(new GenericMenuClickListener(item.Activate));
+				using (var title = new Java.Lang.String(item.Text))
+				{
+					var menuitem = menu.Add(title);
+					UpdateMenuItemIcon(_shellContext.AndroidContext, menuitem, item);
+					menuitem.SetEnabled(item.IsEnabled);
+					menuitem.SetShowAsAction(ShowAsAction.Always);
+					menuitem.SetOnMenuItemClickListener(new GenericMenuClickListener(item.Activate));
+					menuitem.Dispose();
+				}
 			}
 
 			SearchHandler = Shell.GetSearchHandler(page);
@@ -360,16 +367,22 @@ namespace Xamarin.Forms.Platform.Android
 					_searchView.LoadView();
 					_searchView.View.ViewAttachedToWindow += OnSearchViewAttachedToWindow;
 
-					_searchView.View.LayoutParameters = new LP(LP.MatchParent, LP.MatchParent);
+					var lp = new LP(LP.MatchParent, LP.MatchParent);
+					_searchView.View.LayoutParameters = lp;
+					lp.Dispose();
 					_searchView.SearchConfirmed += OnSearchConfirmed;
 				}
 
 				if (SearchHandler.SearchBoxVisibility == SearchBoxVisiblity.Collapsable)
 				{
-					var item = menu.Add(new Java.Lang.String(SearchHandler.Placeholder));
+					var placeholder = new Java.Lang.String(SearchHandler.Placeholder);
+					var item = menu.Add(placeholder);
+					placeholder.Dispose();
+
 					item.SetEnabled(SearchHandler.IsSearchEnabled);
 					item.SetIcon(Resource.Drawable.abc_ic_search_api_material);
-					item.Icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
+					using (var icon = item.Icon)
+						icon.SetColorFilter(TintColor.ToAndroid(Color.White), PorterDuff.Mode.SrcAtop);
 					item.SetShowAsAction(ShowAsAction.IfRoom | ShowAsAction.CollapseActionView);
 
 					if (_searchView.View.Parent != null)
@@ -377,6 +390,7 @@ namespace Xamarin.Forms.Platform.Android
 
 					_searchView.ShowKeyboardOnAttached = true;
 					item.SetActionView(_searchView.View);
+					item.Dispose();
 				}
 				else if (SearchHandler.SearchBoxVisibility == SearchBoxVisiblity.Expanded)
 				{

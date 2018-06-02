@@ -2,9 +2,11 @@
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Support.V7.Widget;
+using Android.Text;
 using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
+using Java.Lang;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -16,7 +18,7 @@ using LP = Android.Views.ViewGroup.LayoutParams;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellSearchView : FrameLayout, IShellSearchView, TextView.IOnEditorActionListener
+	public class ShellSearchView : FrameLayout, IShellSearchView, TextView.IOnEditorActionListener, ITextWatcher
 	{
 		#region IShellSearchView
 
@@ -43,7 +45,45 @@ namespace Xamarin.Forms.Platform.Android
 
 		#endregion IShellSearchView
 
-		private readonly IShellContext _shellContext;
+		#region ITextWatcher
+
+		void ITextWatcher.AfterTextChanged(IEditable s)
+		{
+			var text = _textBlock.Text;
+
+			if (text == ShellSearchViewAdapter.DoNotUpdateMarker)
+			{
+				return;
+			}
+
+			UpdateClearButtonState();
+
+			SearchHandler.SetValueCore(SearchHandler.QueryProperty, text);
+
+			if (SearchHandler.ShowsResults)
+			{
+				if (string.IsNullOrEmpty(text))
+				{
+					_textBlock.DismissDropDown();
+				}
+				else
+				{
+					_textBlock.ShowDropDown();
+				}
+			}
+		}
+
+		void ITextWatcher.BeforeTextChanged(ICharSequence s, int start, int count, int after)
+		{
+		}
+
+		void ITextWatcher.OnTextChanged(ICharSequence s, int start, int before, int count)
+		{
+		}
+
+		#endregion ITextWatcher
+
+		private IShellContext _shellContext;
 		private CardView _cardView;
 		private ImageButton _clearButton;
 		private ImageButton _clearPlaceholderButton;
@@ -82,7 +122,32 @@ namespace Xamarin.Forms.Platform.Android
 				_disposed = true;
 
 				SearchHandler.PropertyChanged -= OnSearchHandlerPropertyChanged;
+
+				_textBlock.ItemClick -= OnTextBlockItemClicked;
+				_textBlock.RemoveTextChangedListener(this);
+				_textBlock.SetOnEditorActionListener(null);
+				_textBlock.Adapter.Dispose();
+				_textBlock.Adapter = null;
+				_textBlock.DropDownBackground.Dispose();
+				_textBlock.SetDropDownBackgroundDrawable(null);
+
+				_clearButton.Click -= OnClearButtonClicked;
+				_clearPlaceholderButton.Click -= OnClearPlaceholderButtonClicked;
+				_searchButton.Click -= OnSearchButtonClicked;
+
+				_textBlock.Dispose();
+				_clearButton.Dispose();
+				_searchButton.Dispose();
+				_cardView.Dispose();
+				_clearPlaceholderButton.Dispose();
 			}
+
+			_textBlock = null;
+			_clearButton = null;
+			_searchButton = null;
+			_cardView = null;
+			_clearPlaceholderButton = null;
+			_shellContext = null;
 
 			SearchHandler = null;
 		}
@@ -95,19 +160,17 @@ namespace Xamarin.Forms.Platform.Android
 			var query = searchHandler.Query;
 			var placeholder = searchHandler.Placeholder;
 
-			searchHandler.PropertyChanged += OnSearchHandlerPropertyChanged;
-
+			LP lp;
 			var context = Context;
-			_cardView = new CardView(context)
-			{
-				LayoutParameters = new LayoutParams(LP.MatchParent, LP.MatchParent)
-			};
+			_cardView = new CardView(context);
+			using (lp = new LayoutParams(LP.MatchParent, LP.MatchParent))
+				_cardView.LayoutParameters = lp;
 
-			var linearLayout = new LinearLayout(context)
-			{
-				LayoutParameters = new LP(LP.MatchParent, LP.MatchParent),
-				Orientation = Orientation.Horizontal
-			};
+
+			var linearLayout = new LinearLayout(context);
+			using (lp = new LP(LP.MatchParent, LP.MatchParent))
+				linearLayout.LayoutParameters = lp;
+			linearLayout.Orientation = Orientation.Horizontal;
 
 			_cardView.AddView(linearLayout);
 
@@ -115,17 +178,19 @@ namespace Xamarin.Forms.Platform.Android
 
 			_searchButton = CreateImageButton(context, searchImage, Resource.Drawable.abc_ic_search_api_material, padding, 0);
 
+			lp = new LinearLayout.LayoutParams(0, LP.MatchParent)
+			{
+				Gravity = GravityFlags.Fill,
+				Weight = 1
+			};
 			_textBlock = new AppCompatAutoCompleteTextView(context)
 			{
-				LayoutParameters = new LinearLayout.LayoutParams(0, LP.MatchParent)
-				{
-					Gravity = GravityFlags.Fill,
-					Weight = 1
-				},
+				LayoutParameters = lp,
 				Text = query,
 				Hint = placeholder,
 				ImeOptions = ImeAction.Done
 			};
+			lp.Dispose();
 			_textBlock.Enabled = searchHandler.IsSearchEnabled;
 			_textBlock.SetBackground(null);
 			_textBlock.SetPadding(padding, 0, padding, 0);
@@ -149,13 +214,16 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateClearButtonState();
 
 			// hook all events down here to avoid getting events while doing setup
-			_textBlock.AfterTextChanged += TextChanged;
+			searchHandler.PropertyChanged += OnSearchHandlerPropertyChanged;
+			_textBlock.AddTextChangedListener(this);
 			_textBlock.SetOnEditorActionListener(this);
 			_clearButton.Click += OnClearButtonClicked;
 			_clearPlaceholderButton.Click += OnClearPlaceholderButtonClicked;
 			_searchButton.Click += OnSearchButtonClicked;
 
 			AddView(_cardView);
+
+			linearLayout.Dispose();
 		}
 
 		protected virtual void OnSearchHandlerPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -210,7 +278,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			_textBlock.DropDownHorizontalOffset = -_textBlock.Left;
-			_textBlock.DropDownVerticalOffset = -(int)Math.Ceiling(_cardView.Radius);
+			_textBlock.DropDownVerticalOffset = -(int)System.Math.Ceiling(_cardView.Radius);
 			_textBlock.DropDownWidth = width;
 		}
 
@@ -227,32 +295,6 @@ namespace Xamarin.Forms.Platform.Android
 		{
 		}
 
-		protected virtual void TextChanged(object sender, global::Android.Text.AfterTextChangedEventArgs e)
-		{
-			var text = _textBlock.Text;
-
-			if (text == ShellSearchViewAdapter.DoNotUpdateMarker)
-			{
-				return;
-			}
-
-			UpdateClearButtonState();
-
-			SearchHandler.SetValueCore(SearchHandler.QueryProperty, text);
-
-			if (SearchHandler.ShowsResults)
-			{
-				if (string.IsNullOrEmpty(text))
-				{
-					_textBlock.DismissDropDown();
-				}
-				else
-				{
-					_textBlock.ShowDropDown();
-				}
-			}
-		}
-
 		private ImageButton CreateImageButton(Context context, ImageSource image, int defaultImage, int leftMargin, int rightMargin)
 		{
 			var result = new ImageButton(context);
@@ -264,11 +306,13 @@ namespace Xamarin.Forms.Platform.Android
 			AutomationPropertiesProvider.SetContentDescription(result, image, ref defaultDescription, ref defaultHint);
 
 			SetImage(result, image, defaultImage);
-			result.LayoutParameters = new LinearLayout.LayoutParams((int)Context.ToPixels(22), LP.MatchParent)
+			var lp = new LinearLayout.LayoutParams((int)Context.ToPixels(22), LP.MatchParent)
 			{
 				LeftMargin = leftMargin,
 				RightMargin = rightMargin
 			};
+			result.LayoutParameters = lp;
+			lp.Dispose();
 			result.SetBackground(null);
 
 			return result;
@@ -289,13 +333,18 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			button.SetScaleType(ImageView.ScaleType.FitCenter);
 			if (image != null)
-				button.SetImageDrawable(await Context.GetFormsDrawable(image).ConfigureAwait(false));
+			{
+				using (var drawable = await Context.GetFormsDrawable(image))
+					button.SetImageDrawable(drawable);
+			}
 			else if (defaultValue > 0)
 			{
 				await Task.Run(() => button.SetImageResource(defaultValue)).ConfigureAwait(false);
 			}
 			else
+			{
 				button.SetImageDrawable(null);
+			}
 		}
 
 		private void UpdateClearButtonState()

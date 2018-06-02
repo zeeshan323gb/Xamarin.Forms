@@ -29,7 +29,7 @@ namespace Xamarin.Forms.Platform.Android
 		public override Fragment GetItem(int position)
 		{
 			var shellContent = _shellSection.Items[position];
-			return new ShellFragmentContainer(shellContent) { Arguments = new Bundle() };
+			return new ShellFragmentContainer(shellContent) { Arguments = Bundle.Empty };
 		}
 
 		public override long GetItemId(int position)

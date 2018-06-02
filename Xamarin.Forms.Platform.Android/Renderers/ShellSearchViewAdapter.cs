@@ -13,8 +13,8 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		public const string DoNotUpdateMarker = "__DO_NOT_UPDATE__";
 
-		private readonly SearchHandler _searchHandler;
-		private readonly IShellContext _shellContext;
+		private SearchHandler _searchHandler;
+		private IShellContext _shellContext;
 		private DataTemplate _defaultTemplate;
 
 		public ShellSearchViewAdapter(SearchHandler searchHandler, IShellContext shellContext)
@@ -23,6 +23,23 @@ namespace Xamarin.Forms.Platform.Android
 			_shellContext = shellContext ?? throw new ArgumentNullException(nameof(shellContext));
 			SearchController.ListProxyChanged += OnListPropxyChanged;
 			_searchHandler.PropertyChanged += OnSearchHandlerPropertyChanged;
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			if (disposing)
+			{
+				SearchController.ListProxyChanged -= OnListPropxyChanged;
+				_searchHandler.PropertyChanged -= OnSearchHandlerPropertyChanged;
+				_filter.Dispose();
+			}
+
+			_filter = null;
+			_shellContext = null;
+			_searchHandler = null;
+			_defaultTemplate = null;
 		}
 
 		private Filter _filter;
