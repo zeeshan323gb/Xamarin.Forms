@@ -30,12 +30,6 @@ namespace Xamarin.Forms.Platform.iOS
 			};
 		}
 
-		void IShellFlyoutRenderer.CloseFlyout()
-		{
-			if (_isPresented && _flyoutBehavior == FlyoutBehavior.Flyout)
-				ToggleFlyout();
-		}
-
 		#endregion
 
 		#region IFlyoutBehaviorObserver

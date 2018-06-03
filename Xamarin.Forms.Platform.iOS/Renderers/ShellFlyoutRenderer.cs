@@ -37,15 +37,6 @@ namespace Xamarin.Forms.Platform.iOS
 			};
 		}
 
-		void IShellFlyoutRenderer.CloseFlyout()
-		{
-			if (_flyoutBehavior == FlyoutBehavior.Flyout)
-			{
-				IsOpen = false;
-				LayoutSidebar(true);
-			}
-		}
-
 		#endregion IShellFlyoutRenderer
 
 		#region IFlyoutBehaviorObserver

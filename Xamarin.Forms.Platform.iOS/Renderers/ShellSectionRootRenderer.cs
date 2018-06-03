@@ -124,7 +124,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			base.Dispose(disposing);
 
-			if (disposing)
+			if (disposing && ShellSection != null)
 			{
 				ShellSection.PropertyChanged -= OnShellSectionPropertyChanged;
 				((INotifyCollectionChanged)ShellSection.Items).CollectionChanged -= OnShellSectionItemsChanged;
@@ -134,11 +134,13 @@ namespace Xamarin.Forms.Platform.iOS
 
 				foreach (var shellContent in ShellSection.Items)
 				{
-					var oldRenderer = _renderers[shellContent];
-					_renderers.Remove(shellContent);
-					oldRenderer.NativeView.RemoveFromSuperview();
-					oldRenderer.ViewController.RemoveFromParentViewController();
-					oldRenderer.Dispose();
+					if (_renderers.TryGetValue(shellContent, out var oldRenderer))
+					{
+						_renderers.Remove(shellContent);
+						oldRenderer.NativeView.RemoveFromSuperview();
+						oldRenderer.ViewController.RemoveFromParentViewController();
+						oldRenderer.Dispose();
+					}
 				}
 			}
 

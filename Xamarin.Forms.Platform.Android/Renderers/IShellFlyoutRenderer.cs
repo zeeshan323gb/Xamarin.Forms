@@ -7,7 +7,5 @@ namespace Xamarin.Forms.Platform.Android
 		AView AndroidView { get; }
 
 		void AttachFlyout(IShellContext context, AView content);
-
-		void CloseFlyout();
 	}
 }

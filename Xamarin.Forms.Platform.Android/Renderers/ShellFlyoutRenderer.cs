@@ -20,11 +20,6 @@ namespace Xamarin.Forms.Platform.Android
 			AttachFlyout(context, content);
 		}
 
-		void IShellFlyoutRenderer.CloseFlyout()
-		{
-			CloseDrawers();
-		}
-
 		#endregion IShellFlyoutRenderer
 
 		#region IDrawerListener

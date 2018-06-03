@@ -325,6 +325,10 @@ namespace Xamarin.Forms
 				shellContent = shellSection?.CurrentItem;
 
 			var state = GetNavigationState(shellItem, shellSection, shellContent, null);
+
+			if (FlyoutIsPresented)
+				SetValueFromRenderer(FlyoutIsPresentedProperty, false);
+
 			await GoToAsync(state).ConfigureAwait(false);
 		}
 

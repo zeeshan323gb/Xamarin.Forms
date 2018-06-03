@@ -10,7 +10,5 @@ namespace Xamarin.Forms.Platform.iOS
 		UIView View { get; }
 
 		void AttachFlyout(IShellContext context, UIViewController content);
-
-		void CloseFlyout();
 	}
 }
