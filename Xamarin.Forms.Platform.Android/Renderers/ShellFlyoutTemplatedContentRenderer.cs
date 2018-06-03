@@ -16,8 +16,6 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		#region IShellFlyoutContentRenderer
 
-		public event EventHandler<ElementSelectedEventArgs> ElementSelected;
-
 		public AView AndroidView { get; set; }
 
 		#endregion IShellFlyoutContentRenderer
@@ -80,10 +78,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected void OnElementSelected(Element element)
 		{
-			ElementSelected?.Invoke(this, new ElementSelectedEventArgs
-			{
-				Element = element
-			});
+			((IShellController)_shellContext.Shell).OnFlyoutItemSelected(element);
 		}
 
 		protected virtual void OnShellPropertyChanged(object sender, PropertyChangedEventArgs e)

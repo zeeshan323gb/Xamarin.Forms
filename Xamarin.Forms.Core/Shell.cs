@@ -285,6 +285,49 @@ namespace Xamarin.Forms
 			return GetNavigationState(shellItem, shellSection, shellContent, includeStack ? shellSection.Stack.ToList() : null);
 		}
 
+		async void IShellController.OnFlyoutItemSelected(Element element)
+		{
+			ShellItem shellItem = null;
+			ShellSection shellSection = null;
+			ShellContent shellContent = null;
+
+			if (element is ShellItem.MenuShellItem menuShellItem)
+			{
+				menuShellItem.MenuItem.Activate();
+			}
+			else if (element is ShellItem i)
+			{
+				shellItem = i;
+			}
+			else if (element is ShellSection s)
+			{
+				shellItem = s.Parent as ShellItem;
+				shellSection = s;
+			}
+			else if (element is ShellContent c)
+			{
+				shellItem = c.Parent.Parent as ShellItem;
+				shellSection = c.Parent as ShellSection;
+				shellContent = c;
+			}
+			else if (element is MenuItem m)
+			{
+				m.Activate();
+			}
+
+			if (shellItem == null || !shellItem.IsEnabled)
+				return;
+
+			if (shellSection == null)
+				shellSection = shellItem.CurrentItem;
+
+			if (shellContent == null)
+				shellContent = shellSection?.CurrentItem;
+
+			var state = GetNavigationState(shellItem, shellSection, shellContent, null);
+			await GoToAsync(state).ConfigureAwait(false);
+		}
+
 		bool IShellController.ProposeNavigation(ShellNavigationSource source, ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, IReadOnlyList<Page> stack, bool canCancel)
 		{
 			var proposedState = GetNavigationState(shellItem, shellSection, shellContent, stack);

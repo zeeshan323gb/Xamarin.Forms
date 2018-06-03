@@ -31,6 +31,8 @@ namespace Xamarin.Forms
 
 		ShellNavigationState GetNavigationState(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent, bool includeStack = true);
 
+		void OnFlyoutItemSelected(Element element);
+
 		bool ProposeNavigation(ShellNavigationSource source, ShellItem item, ShellSection shellSection, ShellContent shellContent, IReadOnlyList<Page> stack, bool canCancel);
 
 		bool RemoveAppearanceObserver(IAppearanceObserver observer);

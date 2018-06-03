@@ -33,11 +33,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
 		{
-			var content = CreateShellFlyoutContentRenderer();
-
-			content.ElementSelected += OnFlyoutItemSelected;
-
-			return content;
+			return CreateShellFlyoutContentRenderer();
 		}
 
 		IShellSearchResultsRenderer IShellContext.CreateShellSearchResultsRenderer()
@@ -246,54 +242,6 @@ namespace Xamarin.Forms.Platform.iOS
 				color = Color.Black;
 
 			FlyoutRenderer.View.BackgroundColor = color.ToUIColor();
-		}
-
-		private async void GoTo(ShellItem shellItem, ShellSection shellSection, ShellContent shellContent)
-		{
-			if (shellSection == null)
-				shellSection = shellItem.CurrentItem;
-
-			if (shellContent == null)
-				shellContent = shellSection?.CurrentItem;
-
-			var state = ((IShellController)Shell).GetNavigationState(shellItem, shellSection, shellContent, false);
-			await Shell.GoToAsync(state);
-		}
-
-		private void OnFlyoutItemSelected(object sender, ElementSelectedEventArgs e)
-		{
-			var element = e.Element;
-			ShellItem shellItem = null;
-			ShellSection shellSection = null;
-			ShellContent shellContent = null;
-
-			if (element is ShellItem.MenuShellItem menuShellItem)
-			{
-				menuShellItem.MenuItem.Activate();
-			}
-			else if (element is ShellItem i)
-			{
-				shellItem = i;
-			}
-			else if (element is ShellSection s)
-			{
-				shellItem = s.Parent as ShellItem;
-				shellSection = s;
-			}
-			else if (element is ShellContent c)
-			{
-				shellItem = c.Parent.Parent as ShellItem;
-				shellSection = c.Parent as ShellSection;
-				shellContent = c;
-			}
-			else if (element is MenuItem m)
-			{
-				m.Activate();
-			}
-
-			FlyoutRenderer.CloseFlyout();
-			if (shellItem != null && shellItem.IsEnabled)
-				GoTo(shellItem, shellSection, shellContent);
 		}
 
 		private void SetupCurrentShellItem()

@@ -13,8 +13,6 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		#region IShellFlyoutContentRenderer
 
-		public event EventHandler<ElementSelectedEventArgs> ElementSelected;
-
 		AView IShellFlyoutContentRenderer.AndroidView => this;
 
 		#endregion IShellFlyoutContentRenderer
@@ -46,7 +44,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (_lookupTable.TryGetValue(menuItem, out var element))
 			{
-				ElementSelected?.Invoke(this, new ElementSelectedEventArgs { Element = element });
+				((IShellController)_shellContext.Shell).OnFlyoutItemSelected(element);
 				return true;
 			}
 			return false;

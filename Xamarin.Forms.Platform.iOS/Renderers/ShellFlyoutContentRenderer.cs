@@ -8,7 +8,7 @@ namespace Xamarin.Forms.Platform.iOS
 	public class ShellFlyoutContentRenderer : UIViewController, IShellFlyoutContentRenderer
 	{
 		private UIVisualEffectView _blurView;
-		private readonly IShellContext _context;
+		private readonly IShellContext _shellContext;
 		private UIView _headerView;
 		private ShellTableViewController _tableViewController;
 
@@ -24,7 +24,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			context.Shell.PropertyChanged += HandleShellPropertyChanged;
 
-			_context = context;
+			_shellContext = context;
 		}
 
 		protected virtual void HandleShellPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -35,7 +35,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void UpdateBackgroundColor()
 		{
-			var color = _context.Shell.FlyoutBackgroundColor;
+			var color = _shellContext.Shell.FlyoutBackgroundColor;
 			View.BackgroundColor = color.ToUIColor(Color.White);
 
 			if (View.BackgroundColor.CGColor.Alpha < 1)
@@ -48,8 +48,6 @@ namespace Xamarin.Forms.Platform.iOS
 					_blurView.RemoveFromSuperview();
 			}
 		}
-
-		public event EventHandler<ElementSelectedEventArgs> ElementSelected;
 
 		public UIViewController ViewController => this;
 
@@ -94,7 +92,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		private void OnElementSelected(Element element)
 		{
-			ElementSelected?.Invoke(this, new ElementSelectedEventArgs { Element = element });
+			((IShellController)_shellContext.Shell).OnFlyoutItemSelected(element);
 		}
 	}
 }

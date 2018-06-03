@@ -127,11 +127,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		IShellFlyoutContentRenderer IShellContext.CreateShellFlyoutContentRenderer()
 		{
-			var content = CreateShellFlyoutContentRenderer();
-
-			content.ElementSelected += OnFlyoutItemSelected;
-
-			return content;
+			return CreateShellFlyoutContentRenderer();
 		}
 
 		IShellItemRenderer IShellContext.CreateShellItemRenderer(ShellItem shellItem)
@@ -149,9 +145,9 @@ namespace Xamarin.Forms.Platform.Android
 			return CreateToolbarAppearanceTracker();
 		}
 
-		IShellTabLayoutAppearanceTracker IShellContext.CreateTabLayoutAppearanceTracker(ShellSection shellContent)
+		IShellTabLayoutAppearanceTracker IShellContext.CreateTabLayoutAppearanceTracker(ShellSection shellSection)
 		{
-			return CreateTabLayoutAppearanceTracker(shellContent);
+			return CreateTabLayoutAppearanceTracker(shellSection);
 		}
 
 		IShellBottomNavViewAppearanceTracker IShellContext.CreateBottomNavViewAppearanceTracker(ShellItem shellItem)
@@ -283,16 +279,6 @@ namespace Xamarin.Forms.Platform.Android
 			previousRenderer = null;
 		}
 
-		private async void GoTo(ShellItem item, ShellSection shellSection, ShellContent shellContent)
-		{
-			if (shellSection == null)
-				shellSection = item?.CurrentItem;
-			if (shellContent == null)
-				shellContent = shellSection?.CurrentItem;
-			var state = ((IShellController)Element).GetNavigationState(item, shellSection, shellContent, false);
-			await Element.GoToAsync(state).ConfigureAwait(false);
-		}
-
 		private void OnElementSizeChanged(object sender, EventArgs e)
 		{
 			int width = (int)AndroidContext.ToPixels(Element.Width);
@@ -300,42 +286,6 @@ namespace Xamarin.Forms.Platform.Android
 			_flyoutRenderer.AndroidView.Measure(MeasureSpecFactory.MakeMeasureSpec(width, MeasureSpecMode.Exactly), 
 				MeasureSpecFactory.MakeMeasureSpec(height, MeasureSpecMode.Exactly));
 			_flyoutRenderer.AndroidView.Layout(0, 0, width, height);
-		}
-
-		private void OnFlyoutItemSelected(object sender, ElementSelectedEventArgs e)
-		{
-			var element = e.Element;
-			ShellItem shellItem = null;
-			ShellSection shellSection = null;
-			ShellContent shellContent = null;
-
-			if (element is ShellItem.MenuShellItem menuShellItem)
-			{
-				menuShellItem.MenuItem.Activate();
-			}
-			else if (element is ShellItem i)
-			{
-				shellItem = i;
-			}
-			else if (element is ShellSection s)
-			{
-				shellItem = s.Parent as ShellItem;
-				shellSection = s;
-			}
-			else if (element is ShellContent c)
-			{
-				shellItem = c.Parent.Parent as ShellItem;
-				shellSection = c.Parent as ShellSection;
-				shellContent = c;
-			}
-			else if (element is MenuItem m)
-			{
-				m.Activate();
-			}
-
-			_flyoutRenderer.CloseFlyout();
-			if (shellItem != null && shellItem.IsEnabled)
-				GoTo(shellItem, shellSection, shellContent);
 		}
 
 		private void UpdateStatusBarColor(ShellAppearance appearance)
