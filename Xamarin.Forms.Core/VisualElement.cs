@@ -848,12 +848,10 @@ namespace Xamarin.Forms
 		{
 			SetFlowDirectionFromParent(this);
 
-			foreach (var element in LogicalChildren)
+			for (int i = 0; i < LogicalChildren.Count; i++)
 			{
-				var view = element as IFlowDirectionController;
-				if (view == null)
-					continue;
-				view.NotifyFlowDirectionChanged();
+				if (LogicalChildren[i] is IFlowDirectionController view)
+					view.NotifyFlowDirectionChanged();
 			}
 		}
 

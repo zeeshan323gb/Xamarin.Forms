@@ -283,7 +283,16 @@ namespace Xamarin.Forms
 					part.SetterType = sourceType.GetElementType();
 				}
 
-				DefaultMemberAttribute defaultMember = sourceType.GetCustomAttributes(typeof(DefaultMemberAttribute), true).OfType<DefaultMemberAttribute>().FirstOrDefault();
+				DefaultMemberAttribute defaultMember = null;
+				foreach (var attrib in sourceType.GetCustomAttributes(typeof(DefaultMemberAttribute), true))
+				{
+					if (attrib is DefaultMemberAttribute d)
+					{
+						defaultMember = d;
+						break;
+					}
+				}
+
 				string indexerName = defaultMember != null ? defaultMember.MemberName : "Item";
 
 				part.IndexerName = indexerName;
@@ -317,7 +326,14 @@ namespace Xamarin.Forms
 
 				if (property != null)
 				{
-					ParameterInfo parameter = property.GetIndexParameters().FirstOrDefault();
+					ParameterInfo parameter = null;
+					ParameterInfo[] array = property.GetIndexParameters();
+					for (int i = 0; i < array.Length; i++)
+					{
+						parameter = array[i];
+						break;
+					}
+
 					if (parameter != null)
 					{
 						try
