@@ -21,6 +21,8 @@ namespace Xamarin.Forms
 
 		#region IShellSectionController
 
+		private readonly List<(object Observer, Action<Page> Callback)> _displayedPageObservers =
+			new List<(object Observer, Action<Page> Callback)>();
 		private readonly List<IShellContentInsetObserver> _observers = new List<IShellContentInsetObserver>();
 		private Thickness _lastInset;
 		private double _lastTabThickness;
@@ -49,6 +51,12 @@ namespace Xamarin.Forms
 				_observers.Add(observer);
 
 			observer.OnInsetChanged(_lastInset, _lastTabThickness);
+		}
+
+		void IShellSectionController.AddDisplayedPageObserver(object observer, Action<Page> callback)
+		{
+			_displayedPageObservers.Add((observer, callback));
+			callback(DisplayedPage);
 		}
 
 		Task IShellSectionController.GoToPart(List<string> parts, Dictionary<string, string> queryData)
@@ -82,6 +90,18 @@ namespace Xamarin.Forms
 			return _observers.Remove(observer);
 		}
 
+		bool IShellSectionController.RemoveDisplayedPageObserver(object observer)
+		{
+			foreach (var item in _displayedPageObservers)
+			{
+				if (item.Observer == observer)
+				{
+					return _displayedPageObservers.Remove(item);
+				}
+			}
+			return false;
+		}
+
 		void IShellSectionController.SendInsetChanged(Thickness inset, double tabThickness)
 		{
 			foreach (var observer in _observers)
@@ -113,6 +133,7 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty ItemsProperty = ItemsPropertyKey.BindableProperty;
 
+		private Page _displayedPage;
 		private IList<Element> _logicalChildren = new List<Element>();
 
 		private ReadOnlyCollection<Element> _logicalChildrenReadOnly;
@@ -136,6 +157,20 @@ namespace Xamarin.Forms
 		public IReadOnlyList<Page> Stack => _navStack;
 
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
+
+		private Page DisplayedPage
+		{
+			get { return _displayedPage; }
+			set
+			{
+				if (_displayedPage == value)
+					return;
+				_displayedPage = value;
+
+				foreach (var item in _displayedPageObservers)
+					item.Callback(_displayedPage);
+			}
+		}
 
 		private Shell Shell => Parent?.Parent as Shell;
 
@@ -207,11 +242,29 @@ namespace Xamarin.Forms
 
 		protected virtual IReadOnlyList<Page> GetNavigationStack() => _navStack;
 
+		internal void UpdateDisplayedPage()
+		{
+			var stack = Stack;
+			if (stack.Count > 1)
+			{
+				DisplayedPage = stack[stack.Count - 1];
+			}
+			else
+			{
+				IShellContentController currentItem = CurrentItem;
+				if (currentItem.Page != null)
+					DisplayedPage = currentItem.Page;
+			}
+
+		}
+
 		protected override void OnChildAdded(Element child)
 		{
 			base.OnChildAdded(child);
 			if (CurrentItem == null && Items.Contains(child))
 				SetValueFromRenderer(CurrentItemProperty, child);
+
+			UpdateDisplayedPage();
 		}
 
 		protected override void OnChildRemoved(Element child)
@@ -231,6 +284,8 @@ namespace Xamarin.Forms
 					});
 				}
 			}
+
+			UpdateDisplayedPage();
 		}
 
 		protected virtual void OnInsertPageBefore(Page page, Page before)
@@ -378,15 +433,17 @@ namespace Xamarin.Forms
 
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
 		{
-			var shellContent = (ShellSection)bindable;
+			var shellSection = (ShellSection)bindable;
 
-			if (shellContent.Parent?.Parent is IShellController shell)
+			if (shellSection.Parent?.Parent is IShellController shell)
 			{
 				shell.UpdateCurrentState(ShellNavigationSource.ShellSectionChanged);
 			}
 
-			shellContent.SendStructureChanged();
-			((IShellController)shellContent?.Parent?.Parent)?.AppearanceChanged(shellContent, false);
+			shellSection.SendStructureChanged();
+			((IShellController)shellSection?.Parent?.Parent)?.AppearanceChanged(shellSection, false);
+
+			shellSection.UpdateDisplayedPage();
 		}
 
 		private void AddPage(Page page)

@@ -94,6 +94,16 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				UpdateTitle();
 			}
+			else if (e.PropertyName == Shell.TabBarVisibleProperty.PropertyName)
+			{
+				UpdateTabBarVisible();
+			}
+		}
+
+		protected virtual void UpdateTabBarVisible()
+		{
+			bool tabBarVisible = Shell.GetTabBarVisible(Page);
+			ViewController.HidesBottomBarWhenPushed = !tabBarVisible;
 		}
 
 		protected virtual void UpdateTitle()
@@ -118,6 +128,7 @@ namespace Xamarin.Forms.Platform.iOS
 				SearchHandler = Shell.GetSearchHandler(newPage);
 				UpdateTitleView();
 				UpdateTitle();
+				UpdateTabBarVisible();
 			}
 
 			if (oldPage == null)

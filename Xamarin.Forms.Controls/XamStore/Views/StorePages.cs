@@ -197,8 +197,35 @@ namespace Xamarin.Forms.Controls.XamStore
 					RemoveTopTab),
 				1, 13);
 
+			grid.Children.Add(MakeSwitch("Nav Visible", out _navBarVisibleSwitch), 0, 14);
+			grid.Children.Add(MakeSwitch("Tab Visible", out _tabBarVisibleSwitch), 1, 14);
+
+			grid.Children.Add(MakeButton("Push Special",
+					() => {
+					var page = (Page)Activator.CreateInstance(GetType());
+						Shell.SetNavBarVisible (page, _navBarVisibleSwitch.IsToggled);
+						Shell.SetTabBarVisible(page, _tabBarVisibleSwitch.IsToggled);
+						Navigation.PushAsync(page);
+					}),
+				2, 14);
+
 
 			Content = new ScrollView { Content = grid };
+		}
+
+		Switch _navBarVisibleSwitch;
+		Switch _tabBarVisibleSwitch;
+
+		private View MakeSwitch (string label, out Switch control)
+		{
+			return new StackLayout
+			{
+				Children =
+				{
+					new Label {Text = label},
+					(control = new Switch {IsToggled = true})
+				}
+			};
 		}
 
 		private void RemoveTopTab()

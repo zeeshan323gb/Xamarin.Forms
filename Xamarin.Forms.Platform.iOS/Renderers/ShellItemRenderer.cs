@@ -1,4 +1,5 @@
 ﻿using CoreGraphics;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -40,6 +41,8 @@ namespace Xamarin.Forms.Platform.iOS
 		private readonly IShellContext _context;
 		private readonly Dictionary<UIViewController, IShellSectionRenderer> _sectionRenderers = new Dictionary<UIViewController, IShellSectionRenderer>();
 		private IShellTabBarAppearanceTracker _appearanceTracker;
+		private ShellSection _currentSection;
+		private Page _displayedPage;
 		private bool _disposed;
 		private ShellItem _shellItem;
 
@@ -113,12 +116,23 @@ namespace Xamarin.Forms.Platform.iOS
 					RemoveRenderer(renderer);
 					renderer.Dispose();
 				}
+
+				if (_displayedPage != null)
+					_displayedPage.PropertyChanged -= OnDisplayedPagePropertyChanged;
+
+				if (_currentSection != null)
+					((IShellSectionController)_currentSection).RemoveDisplayedPageObserver(this);
+
+
 				_sectionRenderers.Clear();
-				CurrentRenderer = null;
 				ShellItem.PropertyChanged -= OnElementPropertyChanged;
 				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
 				((INotifyCollectionChanged)ShellItem.Items).CollectionChanged -= OnItemsCollectionChanged;
+
+				CurrentRenderer = null;
 				_shellItem = null;
+				_currentSection = null;
+				_displayedPage = null;
 			}
 		}
 
@@ -183,15 +197,15 @@ namespace Xamarin.Forms.Platform.iOS
 			SetTabBarHidden(ViewControllers.Length == 1);
 		}
 
-		protected virtual void OnShellItemSet(ShellItem item)
+		protected virtual void OnShellItemSet(ShellItem shellItem)
 		{
 			_appearanceTracker = _context.CreateTabBarAppearanceTracker();
-			item.PropertyChanged += OnElementPropertyChanged;
-			((IShellController)_context.Shell).AddAppearanceObserver(this, item);
-			((INotifyCollectionChanged)item.Items).CollectionChanged += OnItemsCollectionChanged;
+			shellItem.PropertyChanged += OnElementPropertyChanged;
+			((IShellController)_context.Shell).AddAppearanceObserver(this, shellItem);
+			((INotifyCollectionChanged)shellItem.Items).CollectionChanged += OnItemsCollectionChanged;
 		}
 
-		protected virtual void OnShellContentPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == BaseShellItem.IsEnabledProperty.PropertyName)
 			{
@@ -217,7 +231,7 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_sectionRenderers.ContainsKey(renderer.ViewController))
 				return;
 			_sectionRenderers[renderer.ViewController] = renderer;
-			renderer.ShellSection.PropertyChanged += OnShellContentPropertyChanged;
+			renderer.ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
 		}
 
 		private void CreateTabRenderers()
@@ -258,21 +272,67 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		bool _switched = true;
 		private void GoTo(ShellSection shellSection)
 		{
-			if (shellSection == null)
+			if (shellSection == null || _currentSection == shellSection)
 				return;
 			var renderer = RendererForShellContent(shellSection);
 			if (renderer?.ViewController != SelectedViewController)
 				SelectedViewController = renderer.ViewController;
 			CurrentRenderer = renderer;
+
+			if (_currentSection != null)
+			{
+				((IShellSectionController)_currentSection).RemoveDisplayedPageObserver(this);
+			}
+
+			_currentSection = shellSection;
+
+			if (_currentSection != null)
+			{
+				((IShellSectionController)_currentSection).AddDisplayedPageObserver(this, OnDisplayedPageChanged);
+				_switched = true;
+			}
+		}
+
+		private void OnDisplayedPageChanged(Page page)
+		{
+			if (page == _displayedPage)
+				return;
+
+			if (_displayedPage != null)
+			{
+				_displayedPage.PropertyChanged -= OnDisplayedPagePropertyChanged;
+			}
+
+			_displayedPage = page;
+
+			if (_displayedPage != null)
+			{
+				_displayedPage.PropertyChanged += OnDisplayedPagePropertyChanged;
+
+				if (!_currentSection.Stack.Contains(_displayedPage) || _switched)
+				{
+					_switched = false;
+					UpdateTabBarHidden();
+				}
+			}
+		}
+
+		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == Shell.TabBarVisibleProperty.PropertyName)
+			{
+				UpdateTabBarHidden();
+			}
 		}
 
 		private void RemoveRenderer(IShellSectionRenderer renderer)
 		{
 			if (_sectionRenderers.Remove(renderer.ViewController))
 			{
-				renderer.ShellSection.PropertyChanged -= OnShellContentPropertyChanged;
+				renderer.ShellSection.PropertyChanged -= OnShellSectionPropertyChanged;
 			}
 		}
 
@@ -311,6 +371,18 @@ namespace Xamarin.Forms.Platform.iOS
 
 			// and quick as a whip we return it back to what it was with its insets being all proper
 			CurrentRenderer.ViewController.View.Frame = View.Bounds;
+		}
+
+		private void UpdateTabBarHidden()
+		{
+			if (_displayedPage == null || ShellItem == null)
+				return;
+
+			var hidden = !Shell.GetTabBarVisible(_displayedPage);
+			if (ShellItem.Items.Count > 1)
+			{
+				SetTabBarHidden(hidden);
+			}
 		}
 	}
 }

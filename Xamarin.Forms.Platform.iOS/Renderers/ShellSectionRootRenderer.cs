@@ -67,11 +67,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			View.AddSubview(_blurView);
 
-			_header = new ShellSectionRootHeader(_shellContext);
-			_header.ShellSection = ShellSection;
-
-			AddChildViewController(_header);
-			View.AddSubview(_header.View);
+			
 
 			UpdateHeaderVisibility();
 
@@ -230,11 +226,39 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void UpdateHeaderVisibility()
 		{
-			_header.View.Hidden = _blurView.Hidden = ShellSection.Items.Count <= 1;
+			bool visible = ShellSection.Items.Count > 1;
+
+			if (visible)
+			{
+				if (_header == null)
+				{
+					_header = new ShellSectionRootHeader(_shellContext);
+					_header.ShellSection = ShellSection;
+
+					AddChildViewController(_header);
+					View.AddSubview(_header.View);
+				}
+				_blurView.Hidden = false;
+				LayoutHeader();
+			}
+			else
+			{
+				if (_header != null)
+				{
+					_header.View.RemoveFromSuperview();
+					_header.RemoveFromParentViewController();
+					_header.Dispose();
+					_header = null;
+				}
+				_blurView.Hidden = true;
+			}
 		}
 
 		private void LayoutHeader()
 		{
+			if (_header == null)
+				return;
+
 			CGRect frame;
 			if (Forms.IsiOS11OrNewer)
 				frame = new CGRect(View.Bounds.X, View.SafeAreaInsets.Top, View.Bounds.Width, HeaderHeight);

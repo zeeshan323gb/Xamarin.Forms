@@ -18,7 +18,7 @@ namespace Xamarin.Forms
 
 		#region IShellContentController
 
-		Page IShellContentController.Page => _contentCache;
+		Page IShellContentController.Page => ContentCache;
 
 		Page IShellContentController.GetOrCreateContent()
 		{
@@ -33,8 +33,8 @@ namespace Xamarin.Forms
 			}
 			else
 			{
-				result = _contentCache ?? (Page)template.CreateContent(content, this);
-				_contentCache = result;
+				result = ContentCache ?? (Page)template.CreateContent(content, this);
+				ContentCache = result;
 			}
 
 			if (result != null && result.Parent != this)
@@ -45,10 +45,10 @@ namespace Xamarin.Forms
 
 		void IShellContentController.RecyclePage(Page page)
 		{
-			if (_contentCache == page)
+			if (ContentCache == page)
 			{
 				OnChildRemoved(page);
-				_contentCache = null;
+				ContentCache = null;
 			}
 		}
 
@@ -86,6 +86,16 @@ namespace Xamarin.Forms
 		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
 
+		public Page ContentCache {
+			get { return _contentCache; }
+			set
+			{
+				_contentCache = value;
+				if (Parent != null)
+					((ShellSection)Parent).UpdateDisplayedPage();
+			}
+		}
+
 		public static implicit operator ShellContent(TemplatedPage page)
 		{
 			var shellContent = new ShellContent();
@@ -111,7 +121,7 @@ namespace Xamarin.Forms
 				if (oldValue is Page oldElement)
 				{
 					shellContent.OnChildRemoved(oldElement);
-					shellContent._contentCache = null;
+					shellContent.ContentCache = null;
 				}
 
 				// make sure LogicalChildren collection stays consisten
@@ -119,7 +129,7 @@ namespace Xamarin.Forms
 				if (newValue is Page newElement)
 				{
 					shellContent._logicalChildren.Add((Element)newValue);
-					shellContent._contentCache = newElement;
+					shellContent.ContentCache = newElement;
 					// parent new item
 					shellContent.OnChildAdded(newElement);
 				}

@@ -1,5 +1,4 @@
-﻿using CoreGraphics;
-using Foundation;
+﻿using Foundation;
 using ObjCRuntime;
 using System;
 using System.Collections.Generic;
@@ -26,7 +25,7 @@ namespace Xamarin.Forms.Platform.iOS
 					return;
 				_shellSection = value;
 				LoadPages();
-				OnShellContentSet();
+				OnShellSectionSet();
 				_shellSection.PropertyChanged += HandlePropertyChanged;
 				((IShellSectionController)_shellSection).NavigationRequested += OnNavigationRequested;
 			}
@@ -58,6 +57,7 @@ namespace Xamarin.Forms.Platform.iOS
 		private Dictionary<UIViewController, TaskCompletionSource<bool>> _completionTasks =
 							new Dictionary<UIViewController, TaskCompletionSource<bool>>();
 
+		private Page _displayedPage;
 		private bool _disposed;
 
 		private bool _firstLayoutCompleted;
@@ -143,10 +143,16 @@ namespace Xamarin.Forms.Platform.iOS
 				_renderer.Dispose();
 				_appearanceTracker.Dispose();
 				_shellSection.PropertyChanged -= HandlePropertyChanged;
+
+				if (_displayedPage != null)
+					_displayedPage.PropertyChanged -= OnDisplayedPagePropertyChanged;
+
 				((IShellSectionController)_shellSection).NavigationRequested -= OnNavigationRequested;
 				((IShellController)_context.Shell).RemoveAppearanceObserver(this);
+				((IShellSectionController)ShellSection).RemoveDisplayedPageObserver(this);
 			}
 
+			_displayedPage = null;
 			_shellSection = null;
 			_appearanceTracker = null;
 			_renderer = null;
@@ -170,6 +176,26 @@ namespace Xamarin.Forms.Platform.iOS
 			for (int i = 1; i < stack.Count; i++)
 			{
 				PushPage(stack[i], false);
+			}
+		}
+
+		protected virtual void OnDisplayedPageChanged(Page page)
+		{
+			if (_displayedPage == page)
+				return;
+
+			if (_displayedPage != null)
+			{
+				_displayedPage.PropertyChanged -= OnDisplayedPagePropertyChanged;
+			}
+
+			_displayedPage = page;
+
+			if (_displayedPage != null)
+			{
+				_displayedPage.PropertyChanged += OnDisplayedPagePropertyChanged;
+				if (!ShellSection.Stack.Contains(_displayedPage))
+					UpdateNavigationBarHidden();
 			}
 		}
 
@@ -284,11 +310,12 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual void OnShellContentSet()
+		protected virtual void OnShellSectionSet()
 		{
 			_appearanceTracker = _context.CreateNavBarAppearanceTracker();
 			UpdateTabBarItem();
 			((IShellController)_context.Shell).AddAppearanceObserver(this, ShellSection);
+			((IShellSectionController)ShellSection).AddDisplayedPageObserver(this, OnDisplayedPageChanged);
 		}
 
 		protected virtual async void UpdateTabBarItem()
@@ -337,13 +364,16 @@ namespace Xamarin.Forms.Platform.iOS
 			return null;
 		}
 
+		private void OnDisplayedPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == Shell.NavBarVisibleProperty.PropertyName)
+				UpdateNavigationBarHidden();
+		}
+
 		private void PushPage(Page page, bool animated, TaskCompletionSource<bool> completionSource = null)
 		{
 			var renderer = Platform.CreateRenderer(page);
 			Platform.SetRenderer(page, renderer);
-
-			bool tabBarVisible = Shell.GetTabBarVisible(page);
-			renderer.ViewController.HidesBottomBarWhenPushed = !tabBarVisible;
 
 			var tracker = _context.CreatePageRendererTracker();
 			tracker.ViewController = renderer.ViewController;
@@ -381,6 +411,11 @@ namespace Xamarin.Forms.Platform.iOS
 			stack.RemoveAt(stack.Count - 1);
 
 			return ((IShellController)_context.Shell).ProposeNavigation(ShellNavigationSource.Pop, shellItem, shellSection, shellContent, stack, true);
+		}
+
+		private void UpdateNavigationBarHidden()
+		{
+			SetNavigationBarHidden(!Shell.GetNavBarVisible(_displayedPage), true);
 		}
 
 		private void UpdateShadowImages()
@@ -438,13 +473,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 				bool navBarVisible;
 				if (element is ShellSection)
-				{
 					navBarVisible = _self._renderer.ShowNavBar;
-				}
 				else
-				{
 					navBarVisible = Shell.GetNavBarVisible(element);
-				}
 
 				navigationController.SetNavigationBarHidden(!navBarVisible, true);
 			}
