@@ -198,9 +198,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected override ViewGroup GetNavigationTarget() => _navigationArea;
 
-		protected override void OnCurrentContentChanged()
+		protected override void OnShellSectionChanged()
 		{
-			base.OnCurrentContentChanged();
+			base.OnShellSectionChanged();
 
 			var index = ShellItem.Items.IndexOf(ShellSection);
 			using (var menu = _bottomView.Menu)
@@ -259,7 +259,7 @@ namespace Xamarin.Forms.Platform.Android
 			dialog.Dispose();
 		}
 
-		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e) => OnCurrentContentChanged();
+		protected virtual void OnMoreSheetDismissed(object sender, EventArgs e) => OnShellSectionChanged();
 
 		protected override void OnShellItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{

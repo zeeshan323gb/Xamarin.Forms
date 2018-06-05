@@ -40,10 +40,19 @@ namespace Xamarin.Forms.Platform.Android
 			get => _shellSection;
 			set
 			{
+				if (_shellSection == value)
+					return;
+
+				if (_shellSection != null)
+				{
+					((IShellSectionController)_shellSection).RemoveDisplayedPageObserver(this);
+				}
+
 				_shellSection = value;
 				if (value != null)
 				{
-					OnCurrentContentChanged();
+					OnShellSectionChanged();
+					((IShellSectionController)ShellSection).AddDisplayedPageObserver(this, UpdateDisplayedPage);
 				}
 			}
 		}
@@ -78,6 +87,8 @@ namespace Xamarin.Forms.Platform.Android
 			foreach (var item in _fragmentMap)
 				item.Value.Fragment.Dispose();
 			_fragmentMap.Clear();
+
+			ShellSection = null;
 			DisplayedPage = null;
 		}
 
@@ -224,10 +235,6 @@ namespace Xamarin.Forms.Platform.Android
 
 			_currentFragment = target;
 
-			if (targetElement is Page targetPage)
-				DisplayedPage = targetPage;
-			else if (targetElement is ShellSection targetSection)
-				DisplayedPage = ((IShellContentController)targetSection.CurrentItem).GetOrCreateContent();
 
 			return result.Task;
 		}
@@ -250,9 +257,14 @@ namespace Xamarin.Forms.Platform.Android
 			shellSection.PropertyChanged += OnShellSectionPropertyChanged;
 		}
 
-		protected virtual void OnCurrentContentChanged()
+		protected virtual void OnShellSectionChanged()
 		{
 			HandleFragmentUpdate(ShellNavigationSource.ShellSectionChanged, ShellSection, null, false);
+		}
+
+		private void UpdateDisplayedPage(Page page)
+		{
+			DisplayedPage = page;
 		}
 
 		protected virtual void OnDisplayedPageChanged(Page newPage, Page oldPage)
@@ -324,13 +336,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void OnShellSectionPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == ShellSection.CurrentItemProperty.PropertyName)
-			{
-				if (ShellSection == sender)
-				{
-					DisplayedPage = ((IShellSectionController)ShellSection).PresentedPage;
-				}
-			}
 		}
 
 		private void RemoveAllButCurrent(Fragment skip)
