@@ -52,9 +52,11 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty ClearIconHelpTextProperty =
 			BindableProperty.Create(nameof(ClearIconHelpText), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
 				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+
 		public static readonly BindableProperty ClearIconNameProperty =
 			BindableProperty.Create(nameof(ClearIconName), typeof(string), typeof(SearchHandler), null, BindingMode.OneTime,
 				propertyChanged: (b, o, n) => ((SearchHandler)b).UpdateAutomationProperties());
+
 		public static readonly BindableProperty ClearIconProperty =
 							BindableProperty.Create(nameof(ClearIcon), typeof(ImageSource), typeof(SearchHandler), null, BindingMode.OneTime);
 

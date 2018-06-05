@@ -86,7 +86,7 @@ namespace Xamarin.Forms
 		public MenuItemCollection MenuItems => (MenuItemCollection)GetValue(MenuItemsProperty);
 		internal override ReadOnlyCollection<Element> LogicalChildrenInternal => _logicalChildrenReadOnly ?? (_logicalChildrenReadOnly = new ReadOnlyCollection<Element>(_logicalChildren));
 
-		public Page ContentCache {
+		private Page ContentCache {
 			get { return _contentCache; }
 			set
 			{

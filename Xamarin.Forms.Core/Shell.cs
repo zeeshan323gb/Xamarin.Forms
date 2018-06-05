@@ -190,9 +190,6 @@ namespace Xamarin.Forms
 		private static readonly BindablePropertyKey MenuItemsPropertyKey =
 			BindableProperty.CreateReadOnly(nameof(MenuItems), typeof(MenuItemCollection), typeof(Shell), null, defaultValueCreator: bo => new MenuItemCollection());
 
-		private static readonly BindablePropertyKey ShellNavigationStatePropertyKey =
-			BindableProperty.CreateReadOnly(nameof(ShellNavigationState), typeof(ShellNavigationState), typeof(Shell), null);
-
 		#endregion PropertyKeys
 
 		#region IShellController
@@ -637,8 +634,6 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty MenuItemTemplateProperty =
 			BindableProperty.Create(nameof(MenuItemTemplate), typeof(DataTemplate), typeof(Shell), null, BindingMode.OneTime);
 
-		public static readonly BindableProperty ShellNavigationStateProperty = ShellNavigationStatePropertyKey.BindableProperty;
-
 		private ShellNavigatedEventArgs _accumulatedEvent;
 
 		private bool _accumulateNavigatedEvents;
@@ -729,8 +724,6 @@ namespace Xamarin.Forms
 		public string RouteHost { get; set; }
 
 		public string RouteScheme { get; set; } = "app";
-
-		public ShellNavigationState ShellNavigationState => (ShellNavigationState)GetValue(ShellNavigationStateProperty);
 
 		private View FlyoutHeaderView
 		{
