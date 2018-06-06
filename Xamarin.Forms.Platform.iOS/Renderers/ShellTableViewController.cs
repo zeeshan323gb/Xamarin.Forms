@@ -16,6 +16,12 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public ShellTableViewController(IShellContext context, UIView headerView, Action<Element> onElementSelected)
 		{
+			if (headerView == null)
+			{
+				_headerMax = 20;
+				_headerMin = 0;
+			}
+
 			_headerSize = _headerMax;
 			_context = context;
 			_headerView = headerView;
@@ -36,7 +42,8 @@ namespace Xamarin.Forms.Platform.iOS
 			var parent = TableView.Superview;
 
 			TableView.Frame = parent.Bounds;
-			_headerView.Frame = new CGRect(0, _headerOffset, parent.Frame.Width, _headerSize);
+			if (_headerView != null)
+				_headerView.Frame = new CGRect(0, _headerOffset, parent.Frame.Width, _headerSize);
 		}
 
 		public override void ViewDidLoad()

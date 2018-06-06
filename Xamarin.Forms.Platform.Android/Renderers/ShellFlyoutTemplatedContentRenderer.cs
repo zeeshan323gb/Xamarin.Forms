@@ -54,6 +54,8 @@ namespace Xamarin.Forms.Platform.Android
 			appBar.AddView(_headerView);
 
 			var adapter = new ShellFlyoutRecyclerAdapter(shellContext, OnElementSelected);
+			recycler.SetPadding(0, (int)context.ToPixels(20), 0, 0);
+			recycler.SetClipToPadding(false);
 			recycler.SetBackgroundColor(Color.White.ToAndroid());
 			recycler.SetLayoutManager(new LinearLayoutManager(context, (int)Orientation.Vertical, false));
 			recycler.SetAdapter(adapter);

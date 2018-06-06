@@ -71,11 +71,17 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void LayoutView(double x, double y, double width, double height)
 		{
-			View.Layout(new Rectangle(x, y, width, height));
+			View?.Layout(new Rectangle(x, y, width, height));
 		}
 
 		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)
 		{
+			if (View == null)
+			{
+				SetMeasuredDimension(0, 0);
+				return;
+			}
+
 			// chain on down
 			_renderer.View.Measure(widthMeasureSpec, heightMeasureSpec);
 
@@ -93,10 +99,20 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void OnViewSet(View view)
 		{
-			_renderer = Platform.CreateRenderer(view, Context);
-			Platform.SetRenderer(view, _renderer);
+			if (_renderer != null)
+			{
+				_renderer.View.RemoveFromParent();
+				_renderer.Dispose();
+				_renderer = null;
+			}
 
-			AddView(_renderer.View);
+			if (view != null)
+			{
+				_renderer = Platform.CreateRenderer(view, Context);
+				Platform.SetRenderer(view, _renderer);
+
+				AddView(_renderer.View);
+			}
 		}
 	}
 }

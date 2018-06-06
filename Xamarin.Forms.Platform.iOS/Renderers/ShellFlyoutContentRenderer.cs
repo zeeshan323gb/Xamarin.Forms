@@ -17,7 +17,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public ShellFlyoutContentRenderer(IShellContext context)
 		{
-			_headerView = new UIContainerView(((IShellController)context.Shell).FlyoutHeader);
+			var header = ((IShellController)context.Shell).FlyoutHeader;
+			if (header != null)
+				_headerView = new UIContainerView(((IShellController)context.Shell).FlyoutHeader);
 			_tableViewController = new ShellTableViewController(context, _headerView, OnElementSelected);
 
 			AddChildViewController(_tableViewController);
@@ -64,7 +66,8 @@ namespace Xamarin.Forms.Platform.iOS
 			base.ViewDidLoad();
 
 			View.AddSubview(_tableViewController.View);
-			View.AddSubview(_headerView);
+			if (_headerView != null)
+				View.AddSubview(_headerView);
 
 			_tableViewController.TableView.BackgroundView = null;
 			_tableViewController.TableView.BackgroundColor = UIColor.Clear;
