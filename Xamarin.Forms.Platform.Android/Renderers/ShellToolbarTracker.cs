@@ -26,7 +26,9 @@ namespace Xamarin.Forms.Platform.Android
 			if (_flyoutBehavior == behavior)
 				return;
 			_flyoutBehavior = behavior;
-			UpdateLeftBarButtonItem();
+
+			if (Page != null)
+				UpdateLeftBarButtonItem();
 		}
 
 		#endregion IFlyoutBehaviorObserver

@@ -1020,6 +1020,9 @@ namespace Xamarin.Forms
 
 		private void NotifyFlyoutBehaviorObservers()
 		{
+			if (CurrentItem == null)
+				return;
+
 			var behavior = GetEffectiveFlyoutBehavior();
 			foreach (var observer in _flyoutBehaviorObservers)
 				observer.OnFlyoutBehaviorChanged(behavior);

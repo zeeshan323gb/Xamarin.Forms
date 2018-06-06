@@ -193,6 +193,14 @@ namespace Xamarin.Forms
 			return shellSection;
 		}
 
+#if DEBUG
+		[Obsolete("Please dont use this in core code... its SUPER hard to debug when this happens", true)]
+#endif
+		public static implicit operator ShellSection(TemplatedPage page)
+		{
+			return (ShellSection)(ShellContent)page;
+		}
+
 		public virtual async Task GoToAsync(List<string> routes, IDictionary<string, string> queryData, bool animate)
 		{
 			if (routes == null || routes.Count == 0)

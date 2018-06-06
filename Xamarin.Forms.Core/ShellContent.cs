@@ -105,8 +105,8 @@ namespace Xamarin.Forms
 			shellContent.Route = Routing.GenerateImplicitRoute(pageRoute);
 
 			shellContent.Content = page;
-			shellContent.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay));
-			shellContent.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay));
+			shellContent.SetBinding(TitleProperty, new Binding("Title", BindingMode.OneWay, source: page));
+			shellContent.SetBinding(IconProperty, new Binding("Icon", BindingMode.OneWay, source: page));
 
 			return shellContent;
 		}
