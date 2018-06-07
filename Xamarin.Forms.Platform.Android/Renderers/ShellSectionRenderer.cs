@@ -16,7 +16,7 @@ using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class ShellSectionRenderer : Fragment, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
+	public class ShellSectionRenderer : Fragment, IShellSectionRenderer, ViewPager.IOnPageChangeListener, AView.IOnClickListener, IShellObservableFragment, IAppearanceObserver
 	{
 		#region IOnPageChangeListener
 

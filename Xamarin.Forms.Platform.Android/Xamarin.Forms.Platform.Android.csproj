@@ -190,6 +190,7 @@
     <Compile Include="Renderers\ColorChangeRevealDrawable.cs" />
     <Compile Include="Renderers\ConditionalFocusLayout.cs" />
     <Compile Include="Renderers\ContainerView.cs" />
+    <Compile Include="Renderers\CustomFrameLayout.cs" />
     <Compile Include="Renderers\DescendantFocusToggler.cs" />
     <Compile Include="Renderers\ElementSelectedEventArgs.cs" />
     <Compile Include="Renderers\FormsEditText.cs" />
@@ -210,6 +211,7 @@
     <Compile Include="Renderers\IShellItemRenderer.cs" />
     <Compile Include="Renderers\IShellObservableFragment.cs" />
     <Compile Include="Renderers\IShellSearchView.cs" />
+    <Compile Include="Renderers\IShellSectionRenderer.cs" />
     <Compile Include="Renderers\IShellTabLayoutAppearanceTracker.cs" />
     <Compile Include="Renderers\IShellToolbarAppearanceTracker.cs" />
     <Compile Include="Renderers\IShellToolbarTracker.cs" />

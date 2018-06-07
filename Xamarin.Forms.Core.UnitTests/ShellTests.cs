@@ -120,5 +120,19 @@ namespace Xamarin.Forms.Core.UnitTests
 
 			Assume.That(shell.CurrentState.Location.ToString(), Is.EqualTo("app:///s/one/tabone/content/"));
 		}
+
+		[Test]
+		public void BackButtonBehaviorSet()
+		{
+			var page = new ContentPage();
+
+			Assert.IsNull(Shell.GetBackButtonBehavior(page));
+
+			var backButtonBehavior = new BackButtonBehavior();
+
+			Shell.SetBackButtonBehavior(page, backButtonBehavior);
+
+			Assert.AreEqual(backButtonBehavior, Shell.GetBackButtonBehavior(page));
+		}
 	}
 }

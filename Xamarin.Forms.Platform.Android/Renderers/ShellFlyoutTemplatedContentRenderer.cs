@@ -1,4 +1,5 @@
 ﻿using Android.Content;
+using Android.Graphics.Drawables;
 using Android.Runtime;
 using Android.Support.Design.Widget;
 using Android.Support.V7.Widget;
@@ -16,27 +17,31 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		#region IShellFlyoutContentRenderer
 
-		public AView AndroidView { get; set; }
+		public AView AndroidView => _rootView;
 
 		#endregion IShellFlyoutContentRenderer
 
 		private IShellContext _shellContext;
 		private bool _disposed;
 		private HeaderContainer _headerView;
+		private AView _rootView;
+		private Drawable _defaultBackground;
 
 		public ShellFlyoutTemplatedContentRenderer(IShellContext shellContext)
 		{
 			_shellContext = shellContext;
 
-			AndroidView = LoadView(shellContext);
+			LoadView(shellContext);
 		}
 
-		protected virtual AView LoadView(IShellContext shellContext)
+		protected virtual void LoadView(IShellContext shellContext)
 		{
 			var context = shellContext.AndroidContext;
 			var coordinator = LayoutInflater.FromContext(context).Inflate(Resource.Layout.FlyoutContent, null);
 			var recycler = coordinator.FindViewById<RecyclerView>(Resource.Id.flyoutcontent_recycler);
 			var appBar = coordinator.FindViewById<AppBarLayout>(Resource.Id.flyoutcontent_appbar);
+
+			_rootView = coordinator;
 
 			appBar.AddOnOffsetChangedListener(this);
 
@@ -56,7 +61,6 @@ namespace Xamarin.Forms.Platform.Android
 			var adapter = new ShellFlyoutRecyclerAdapter(shellContext, OnElementSelected);
 			recycler.SetPadding(0, (int)context.ToPixels(20), 0, 0);
 			recycler.SetClipToPadding(false);
-			recycler.SetBackgroundColor(Color.White.ToAndroid());
 			recycler.SetLayoutManager(new LinearLayoutManager(context, (int)Orientation.Vertical, false));
 			recycler.SetAdapter(adapter);
 
@@ -75,7 +79,7 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateFlyoutHeaderBehavior();
 			_shellContext.Shell.PropertyChanged += OnShellPropertyChanged;
 
-			return coordinator;
+			UpdateFlyoutBackgroundColor();
 		}
 
 		protected void OnElementSelected(Element element)
@@ -87,6 +91,23 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (e.PropertyName == Shell.FlyoutHeaderBehaviorProperty.PropertyName)
 				UpdateFlyoutHeaderBehavior();
+			else if (e.PropertyName == Shell.FlyoutBackgroundColorProperty.PropertyName)
+				UpdateFlyoutBackgroundColor();
+		}
+
+		protected virtual void UpdateFlyoutBackgroundColor()
+		{
+			var color = _shellContext.Shell.FlyoutBackgroundColor;
+			if (_defaultBackground == null && color.IsDefault)
+				return;
+
+			if (_defaultBackground == null)
+				_defaultBackground = _rootView.Background;
+
+			if (color.IsDefault)
+				_rootView.Background = _defaultBackground;
+			else
+				_rootView.Background = new ColorDrawable(color.ToAndroid());
 		}
 
 		protected virtual void UpdateFlyoutHeaderBehavior()
@@ -133,8 +154,12 @@ namespace Xamarin.Forms.Platform.Android
 				{
 					_shellContext.Shell.PropertyChanged -= OnShellPropertyChanged;
 					_headerView.Dispose();
+					_rootView.Dispose();
+					_defaultBackground?.Dispose();
 				}
 
+				_defaultBackground = null;
+				_rootView = null;
 				_headerView = null;
 				_shellContext = null;
 				_disposed = true;

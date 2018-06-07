@@ -96,10 +96,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual IShellObservableFragment GetOrCreateFragmentForTab(ShellSection shellSection)
 		{
-			return new ShellSectionRenderer(ShellContext)
-			{
-				ShellSection = shellSection
-			};
+			var renderer = ShellContext.CreateShellSectionRenderer(shellSection);
+			renderer.ShellSection = shellSection;
+			return renderer;
 		}
 
 		protected virtual Task<bool> HandleFragmentUpdate(ShellNavigationSource navSource, ShellSection shellSection, Page page, bool animated)
