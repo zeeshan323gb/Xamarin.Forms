@@ -765,7 +765,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		{
 			// pop
 			if (removed)
-				return _fragmentStack[_fragmentStack.Count - 2];
+				return _fragmentStack[Math.Max(0,_fragmentStack.Count - 2)];
 
 			// pop to root
 			if (popToRoot)
