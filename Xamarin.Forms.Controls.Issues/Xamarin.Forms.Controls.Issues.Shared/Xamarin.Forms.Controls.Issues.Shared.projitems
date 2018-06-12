@@ -242,9 +242,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59457.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59580.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Effects\AttachedStateEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Effects\AttachedStateEffectLabel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Effects\AttachedStateEffectList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GitHub1702.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GitHub2598.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue2767.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GitHub1878.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\ISampleNativeControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\ViewHelper.cs" />
@@ -255,8 +257,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Issue1705_2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1396.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1415.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue2829.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2653.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1942.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue2763.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2247.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GroupListViewHeaderIndexOutOfRange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1760.cs" />
@@ -320,6 +324,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Issue2681.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue2929.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2983.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2963.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2981.cs" />
@@ -743,6 +748,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Issue1323.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2399.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1729.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue2728.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1667.cs" />
   </ItemGroup>
   <ItemGroup>

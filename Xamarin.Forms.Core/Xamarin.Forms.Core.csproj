@@ -18,4 +18,8 @@
   </ItemGroup>
   <Import Project="..\Xamarin.Flex\Xamarin.Flex.projitems" Label="Shared" Condition="Exists('..\Xamarin.Flex\Xamarin.Flex.projitems')" />
   <Import Project="..\Xamarin.Forms.CarouselView\Xamarin.Forms.CarouselView.projitems" Label="Shared" />
+  <UsingTask TaskName="XFCorePostProcessor.Tasks.FixXFCoreAssembly" AssemblyFile="..\XFCorePostProcessor.Tasks\bin\Debug\netstandard2.0\XFCorePostProcessor.Tasks.dll" />
+  <Target AfterTargets="AfterCompile" Name="ShameHat">
+	<FixXFCoreAssembly Assembly="$(IntermediateOutputPath)$(TargetFileName)" ReferencePath="@(ReferencePath)" />
+  </Target>
 </Project>
