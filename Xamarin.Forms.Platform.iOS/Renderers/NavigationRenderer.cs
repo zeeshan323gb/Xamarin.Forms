@@ -320,16 +320,16 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (poppedViewController == null)
 			{
-				// this happens only when the user does something REALLY dumb like pop right after putting the page as visible.
-				poppedViewController = TopViewController;
-				var newControllers = ViewControllers.Remove(poppedViewController);
-				ViewControllers = newControllers;
+				//// this happens only when the user does something REALLY dumb like pop right after putting the page as visible.
+				//poppedViewController = TopViewController;
+				//var newControllers = ViewControllers.Remove(poppedViewController);
+				//ViewControllers = newControllers;
 				actuallyRemoved = true;
 			}
 			else
 				actuallyRemoved = !await task;
 
-			poppedViewController.Dispose();
+			poppedViewController?.Dispose();
 
 			UpdateToolBarVisible();
 			return actuallyRemoved;
