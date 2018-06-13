@@ -242,10 +242,16 @@ namespace Xamarin.Forms.Platform.Android
 			transaction.Replace(_frameLayout.Id, fragment);
 			transaction.CommitAllowingStateLoss();
 
-			//await Task.Delay(1000);
+			void OnDestroyed (object sender, EventArgs args)
+			{
+				previousRenderer.Destroyed -= OnDestroyed;
 
-			//previousRenderer?.Dispose();
-			//previousRenderer = null;
+				previousRenderer.Dispose();
+				previousRenderer = null;
+			}
+
+			if (previousRenderer != null)
+				previousRenderer.Destroyed += OnDestroyed;
 		}
 
 		private void OnElementSizeChanged(object sender, EventArgs e)

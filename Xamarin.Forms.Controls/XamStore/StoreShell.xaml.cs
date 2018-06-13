@@ -19,15 +19,15 @@ namespace Xamarin.Forms.Controls.XamStore
 			CurrentItem = _storeItem;
 		}
 
-		bool allow = false;
+		//bool allow = false;
 
-		protected override void OnNavigating(ShellNavigatingEventArgs args)
-		{
-			if (allow)
-				args.Cancel();
+		//protected override void OnNavigating(ShellNavigatingEventArgs args)
+		//{
+		//	if (allow)
+		//		args.Cancel();
 
-			allow = !allow;
-			base.OnNavigating(args);
-		}
+		//	allow = !allow;
+		//	base.OnNavigating(args);
+		//}
 	}
 }

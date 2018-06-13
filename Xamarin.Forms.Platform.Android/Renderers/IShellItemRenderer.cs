@@ -9,5 +9,7 @@ namespace Xamarin.Forms.Platform.Android
 		Fragment Fragment { get; }
 
 		ShellItem ShellItem { get; set; }
+
+		event EventHandler Destroyed;
 	}
 }

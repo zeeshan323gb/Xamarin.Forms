@@ -23,6 +23,8 @@ namespace Xamarin.Forms.Platform.Android
 			set { ShellItem = value; }
 		}
 
+		public event EventHandler Destroyed;
+
 		#endregion IShellItemRenderer
 
 		private readonly Dictionary<Element, IShellObservableFragment> _fragmentMap = new Dictionary<Element, IShellObservableFragment>();
@@ -90,6 +92,8 @@ namespace Xamarin.Forms.Platform.Android
 
 			ShellSection = null;
 			DisplayedPage = null;
+
+			Destroyed?.Invoke(this, EventArgs.Empty);
 		}
 
 		protected abstract ViewGroup GetNavigationTarget();
