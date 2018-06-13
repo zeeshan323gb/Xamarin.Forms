@@ -63,8 +63,10 @@ namespace Xamarin.Forms
 		{
 			var shellContentRoute = parts[0];
 
-			foreach (var shellContent in Items)
+			var items = Items;
+			for (int i = 0; i < items.Count; i++)
 			{
+				ShellContent shellContent = items[i];
 				if (Routing.CompareRoutes(shellContent.Route, shellContentRoute, out var isImplicit))
 				{
 					Shell.ApplyQueryAttributes(shellContent, queryData, parts.Count == 1);

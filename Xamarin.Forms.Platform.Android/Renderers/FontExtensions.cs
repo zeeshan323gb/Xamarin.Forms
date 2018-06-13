@@ -42,7 +42,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public static Typeface ToTypeface(this Font self)
 		{
-			if (self.IsDefault)
+			if (self.IsDefault || (self.FontAttributes == FontAttributes.None && string.IsNullOrEmpty(self.FontFamily)))
 				return s_defaultTypeface ?? (s_defaultTypeface = Typeface.Default);
 
 			var key = new Tuple<string, FontAttributes>(self.FontFamily, self.FontAttributes);

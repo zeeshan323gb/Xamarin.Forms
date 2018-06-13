@@ -40,7 +40,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				if (handler is FileImageSourceHandler)
 				{
-					drawable = imageView.Context.GetDrawable((FileImageSource)source);
+					drawable = await Task.Run(() => imageView.Context.GetDrawable((FileImageSource)source));
 				}
 
 				if (drawable == null)
@@ -83,7 +83,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public static async Task UpdateBitmap(this AImageView imageView, Image newImage, Image previousImage = null)
 		{
-			await UpdateBitmap(imageView, newImage, newImage?.Source, previousImage, previousImage?.Source);
+			await UpdateBitmap(imageView, newImage, newImage?.Source, previousImage, previousImage?.Source).ConfigureAwait(false);
 
 		}
 	}

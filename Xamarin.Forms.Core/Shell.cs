@@ -403,8 +403,10 @@ namespace Xamarin.Forms
 			var shellItemRoute = parts[0];
 			ApplyQueryAttributes(this, queryData, false);
 
-			foreach (var shellItem in Items)
+			var items = Items;
+			for (int i = 0; i < items.Count; i++)
 			{
+				var shellItem = items[i];
 				if (Routing.CompareRoutes(shellItem.Route, shellItemRoute, out var isImplicit))
 				{
 					ApplyQueryAttributes(shellItem, queryData, parts.Count == 1);
@@ -973,7 +975,7 @@ namespace Xamarin.Forms
 
 		private static Dictionary<string, string> ParseQueryString(string query)
 		{
-			if (query.StartsWith("?"))
+			if (query.StartsWith("?", StringComparison.Ordinal))
 				query = query.Substring(1);
 			Dictionary<string, string> lookupDict = new Dictionary<string, string>();
 			if (query == null)
@@ -1052,8 +1054,8 @@ namespace Xamarin.Forms
 				return;
 
 			var behavior = GetEffectiveFlyoutBehavior();
-			foreach (var observer in _flyoutBehaviorObservers)
-				observer.OnFlyoutBehaviorChanged(behavior);
+			for (int i = 0; i < _flyoutBehaviorObservers.Count; i++)
+				_flyoutBehaviorObservers[i].OnFlyoutBehaviorChanged(behavior);
 		}
 
 		private void OnFlyoutHeaderChanged(object oldVal, object newVal)

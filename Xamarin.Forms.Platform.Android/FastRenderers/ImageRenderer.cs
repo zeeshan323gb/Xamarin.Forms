@@ -210,7 +210,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 				return;
 			}
 
-			await Control.UpdateBitmap(_element, previous);
+			await Control.UpdateBitmap(_element, previous).ConfigureAwait(false);
 		}
 
 		void UpdateAspect()

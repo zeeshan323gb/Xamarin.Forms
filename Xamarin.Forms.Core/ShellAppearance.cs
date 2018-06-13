@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace Xamarin.Forms
 {
 	[EditorBrowsable(EditorBrowsableState.Never)]
-	public class ShellAppearance : BindableObject, IShellAppearanceController
+	public class ShellAppearance : IShellAppearanceController
 	{
 		static BindableProperty[] IngestArray = new[]
 		{

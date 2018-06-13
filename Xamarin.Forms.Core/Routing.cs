@@ -19,10 +19,10 @@ namespace Xamarin.Forms
 
 		internal static bool CompareRoutes(string route, string compare, out bool isImplicit)
 		{
-			if (isImplicit = route.StartsWith(ImplicitPrefix))
+			if (isImplicit = route.StartsWith(ImplicitPrefix, StringComparison.Ordinal))
 				route = route.Substring(ImplicitPrefix.Length);
 
-			if (compare.StartsWith(ImplicitPrefix))
+			if (compare.StartsWith(ImplicitPrefix, StringComparison.Ordinal))
 				throw new Exception();
 
 			return route == compare;
