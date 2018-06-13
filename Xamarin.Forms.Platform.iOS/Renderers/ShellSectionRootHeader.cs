@@ -11,6 +11,12 @@ namespace Xamarin.Forms.Platform.iOS
 	{
 		#region IAppearanceObserver
 
+		private Color _defaultBackgroundColor = new Color(0.964);
+
+		private Color _defaultForegroundColor = Color.Black;
+
+		private Color _defaultUnselectedColor = Color.Black.MultiplyAlpha(0.7);
+
 		void IAppearanceObserver.OnAppearanceChanged(ShellAppearance appearance)
 		{
 			if (appearance == null)
@@ -19,9 +25,10 @@ namespace Xamarin.Forms.Platform.iOS
 				SetAppearance(appearance);
 		}
 
-		Color _defaultBackgroundColor = new Color(0.964);
-		Color _defaultForegroundColor = Color.Black;
-		Color _defaultUnselectedColor = Color.Black.MultiplyAlpha(0.7);
+		protected virtual void ResetAppearance()
+		{
+			SetValues(_defaultBackgroundColor, _defaultForegroundColor, _defaultUnselectedColor);
+		}
 
 		protected virtual void SetAppearance(ShellAppearance appearance)
 		{
@@ -30,17 +37,12 @@ namespace Xamarin.Forms.Platform.iOS
 				appearance.UnselectedColor.IsDefault ? _defaultUnselectedColor : appearance.UnselectedColor);
 		}
 
-		protected virtual void ResetAppearance()
-		{
-			SetValues(_defaultBackgroundColor, _defaultForegroundColor, _defaultUnselectedColor);
-		}
-
 		private void SetValues(Color backgroundColor, Color foregroundColor, Color unselectedColor)
 		{
 			CollectionView.BackgroundColor = new Color(backgroundColor.R, backgroundColor.G, backgroundColor.B, .863).ToUIColor();
 
 			bool reloadData = _selectedColor != foregroundColor || _unselectedColor != unselectedColor;
-			
+
 			_selectedColor = foregroundColor;
 			_unselectedColor = unselectedColor;
 
@@ -48,17 +50,15 @@ namespace Xamarin.Forms.Platform.iOS
 				CollectionView.ReloadData();
 		}
 
-		#endregion
+		#endregion IAppearanceObserver
 
 		private static readonly NSString CellId = new NSString("HeaderCell");
 
-		public ShellSection ShellSection { get; set; }
-
+		private readonly IShellContext _shellContext;
 		private UIView _bar;
+		private UIView _bottomShadow;
 		private Color _selectedColor;
 		private Color _unselectedColor;
-		private UIView _bottomShadow;
-		private readonly IShellContext _shellContext;
 
 		public ShellSectionRootHeader(IShellContext shellContext) : base(new UICollectionViewFlowLayout())
 		{
@@ -66,6 +66,7 @@ namespace Xamarin.Forms.Platform.iOS
 		}
 
 		public double SelectedIndex { get; set; }
+		public ShellSection ShellSection { get; set; }
 
 		public override bool CanMoveItem(UICollectionView collectionView, NSIndexPath indexPath)
 		{
@@ -119,6 +120,17 @@ namespace Xamarin.Forms.Platform.iOS
 			return 1;
 		}
 
+		public override bool ShouldSelectItem(UICollectionView collectionView, NSIndexPath indexPath)
+		{
+			var row = indexPath.Row;
+			var item = ShellSection.Items[row];
+			IShellController shellController = _shellContext.Shell;
+
+			if (item == ShellSection.CurrentItem)
+				return true;
+			return shellController.ProposeNavigation(ShellNavigationSource.ShellContentChanged, (ShellItem)ShellSection.Parent, ShellSection, item, ShellSection.Stack, true);
+		}
+
 		public override void ViewDidLayoutSubviews()
 		{
 			base.ViewDidLayoutSubviews();
@@ -131,7 +143,7 @@ namespace Xamarin.Forms.Platform.iOS
 		public override void ViewDidLoad()
 		{
 			base.ViewDidLoad();
-			
+
 			CollectionView.ScrollsToTop = false;
 			CollectionView.Bounces = false;
 			CollectionView.AlwaysBounceHorizontal = false;
@@ -161,11 +173,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 			UpdateSelectedIndex();
 			ShellSection.PropertyChanged += OnShellSectionPropertyChanged;
-		}
-
-		private void OnShellSectionItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
-		{
-			CollectionView.ReloadData();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -215,6 +222,11 @@ namespace Xamarin.Forms.Platform.iOS
 			LayoutBar();
 
 			CollectionView.SelectItem(NSIndexPath.FromItemSection((int)SelectedIndex, 0), false, UICollectionViewScrollPosition.CenteredHorizontally);
+		}
+
+		private void OnShellSectionItemsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			CollectionView.ReloadData();
 		}
 
 		public class ShellSectionHeaderCell : UICollectionViewCell

@@ -45,6 +45,27 @@ namespace Xamarin.Forms
 			return Task.FromResult(true);
 		}
 
+		bool IShellItemController.ProposeSection(ShellSection shellSection, bool setValue)
+		{
+			var controller = (IShellController)Parent;
+
+			if (controller == null)
+				return false;
+
+			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellSectionChanged,
+				this,
+				shellSection,
+				shellSection?.CurrentItem,
+				shellSection.Stack,
+				true
+			);
+
+			if (accept && setValue)
+				SetValueFromRenderer(CurrentItemProperty, shellSection);
+
+			return accept;
+		}
+
 		#endregion IShellItemController
 
 		public static readonly BindableProperty CurrentItemProperty =

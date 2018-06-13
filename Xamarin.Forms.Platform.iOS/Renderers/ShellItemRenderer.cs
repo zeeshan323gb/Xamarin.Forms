@@ -85,19 +85,7 @@ namespace Xamarin.Forms.Platform.iOS
 				bool accept = true;
 				var r = RendererForViewController(viewController);
 				if (r != null)
-				{
-					var controller = (IShellController)_context.Shell;
-					// This is the part where we get down on one knee and ask the deveoper
-					// to navigate us. If they dont cancel our proposal we will be engaged
-					// to navigate together.
-					accept = controller.ProposeNavigation(ShellNavigationSource.ShellSectionChanged,
-						ShellItem,
-						r.ShellSection,
-						r.ShellSection?.CurrentItem,
-						r.ShellSection.Stack.ToList(),
-						true
-					);
-				}
+					accept = ((IShellItemController)ShellItem).ProposeSection(r.ShellSection, false);
 
 				return accept;
 			};

@@ -227,7 +227,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		IShellItemRenderer _currentRenderer;
 
-		protected virtual async void SwitchFragment(FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
+		protected virtual void SwitchFragment(FragmentManager manager, AView targetView, ShellItem newItem, bool animate = true)
 		{
 			var previousRenderer = _currentRenderer;
 			_currentRenderer = CreateShellItemRenderer(newItem);
@@ -242,10 +242,10 @@ namespace Xamarin.Forms.Platform.Android
 			transaction.Replace(_frameLayout.Id, fragment);
 			transaction.CommitAllowingStateLoss();
 
-			await Task.Delay(1000);
+			//await Task.Delay(1000);
 
-			previousRenderer?.Dispose();
-			previousRenderer = null;
+			//previousRenderer?.Dispose();
+			//previousRenderer = null;
 		}
 
 		private void OnElementSizeChanged(object sender, EventArgs e)

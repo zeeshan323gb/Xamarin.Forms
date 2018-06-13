@@ -102,19 +102,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void SetAppearance(ShellAppearance appearance) => _appearanceTracker.SetAppearance(_bottomView, appearance);
 
-		protected virtual void ChangeSection(ShellSection shellSection)
+		protected virtual bool ChangeSection(ShellSection shellSection)
 		{
-			var controller = (IShellController)ShellContext.Shell;
-			bool accept = controller.ProposeNavigation(ShellNavigationSource.ShellSectionChanged,
-				ShellItem,
-				shellSection,
-				shellSection?.CurrentItem,
-				shellSection.Stack.ToList(),
-				true
-			);
-
-			if (accept)
-				ShellItem.SetValueFromRenderer(ShellItem.CurrentItemProperty, shellSection);
+			return ((IShellItemController)ShellItem).ProposeSection(shellSection);
 		}
 
 		protected virtual Drawable CreateItemBackgroundDrawable()
@@ -244,7 +234,7 @@ namespace Xamarin.Forms.Platform.Android
 				}
 				else
 				{
-					ChangeSection(shellSection);
+					return ChangeSection(shellSection);
 				}
 			}
 

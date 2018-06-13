@@ -302,13 +302,30 @@ namespace Xamarin.Forms
 			if (index == -1)
 				throw new ArgumentException("Page not found in nav stack");
 
+			var stack = _navStack.ToList();
+			stack.Insert(index, page);
+
+			var allow = ((IShellController)Shell).ProposeNavigation(
+				ShellNavigationSource.Insert,
+				Parent as ShellItem,
+				this,
+				CurrentItem,
+				stack,
+				true
+			);
+
+			if (!allow)
+				return;
+
+			_navStack.Insert(index, page);
+			AddPage(page);
+			SendAppearanceChanged();
+
 			var args = new NavigationRequestedEventArgs(page, before, false)
 			{
 				RequestType = NavigationRequestType.Insert
 			};
-			_navStack.Insert(index, page);
-			AddPage(page);
-			SendAppearanceChanged();
+
 			_navigationRequested?.Invoke(this, args);
 
 			SendUpdateCurrentState(ShellNavigationSource.Insert);
@@ -425,8 +442,24 @@ namespace Xamarin.Forms
 
 		protected virtual void OnRemovePage(Page page)
 		{
-			if (!_navStack.Remove(page))
+			if (!_navStack.Contains(page))
 				return;
+
+			var stack = _navStack.ToList();
+			stack.Remove(page);
+			var allow = ((IShellController)Shell).ProposeNavigation(
+				ShellNavigationSource.Remove,
+				ShellItem,
+				this,
+				CurrentItem,
+				stack,
+				true
+			);
+
+			if (!allow)
+				return;
+
+			_navStack.Remove(page);
 
 			SendAppearanceChanged();
 			RemovePage(page);

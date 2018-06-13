@@ -134,5 +134,31 @@ namespace Xamarin.Forms.Core.UnitTests
 
 			Assert.AreEqual(backButtonBehavior, Shell.GetBackButtonBehavior(page));
 		}
+
+		[Test]
+		public void FlyoutHeaderProjection()
+		{
+			var shell = new Shell();
+
+			var label = new Label();
+
+			shell.FlyoutHeader = label;
+
+			Assert.AreEqual(((IShellController)shell).FlyoutHeader, label);
+
+			Label label2 = null;
+
+			shell.FlyoutHeaderTemplate = new DataTemplate(() =>
+			{
+				return label2 = new Label();
+			});
+
+			Assert.AreEqual(((IShellController)shell).FlyoutHeader, label2);
+			Assert.AreEqual(((IShellController)shell).FlyoutHeader.BindingContext, label);
+
+			shell.FlyoutHeaderTemplate = null;
+
+			Assert.AreEqual(((IShellController)shell).FlyoutHeader, label);
+		}
 	}
 }

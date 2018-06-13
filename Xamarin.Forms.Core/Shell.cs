@@ -323,7 +323,7 @@ namespace Xamarin.Forms
 
 			var state = GetNavigationState(shellItem, shellSection, shellContent, null);
 
-			if (FlyoutIsPresented)
+			if (FlyoutIsPresented && FlyoutBehavior == FlyoutBehavior.Flyout)
 				SetValueFromRenderer(FlyoutIsPresentedProperty, false);
 
 			await GoToAsync(state).ConfigureAwait(false);
@@ -601,6 +601,7 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty CurrentItemProperty =
 			BindableProperty.Create(nameof(CurrentItem), typeof(ShellItem), typeof(Shell), null, BindingMode.TwoWay,
+				propertyChanging: OnCurrentItemChanging,
 				propertyChanged: OnCurrentItemChanged);
 
 		public static readonly BindableProperty CurrentStateProperty = CurrentStatePropertyKey.BindableProperty;
@@ -837,7 +838,7 @@ namespace Xamarin.Forms
 
 			if (child is ShellItem shellItem && CurrentItem == null && !(child is ShellItem.MenuShellItem))
 			{
-				SetValueFromRenderer(CurrentItemProperty, shellItem);
+				((IShellController)this).OnFlyoutItemSelected(shellItem);
 			}
 		}
 
@@ -845,10 +846,9 @@ namespace Xamarin.Forms
 		{
 			base.OnChildRemoved(child);
 
-			if (child == CurrentItem)
+			if (child == CurrentItem && Items.Count > 0)
 			{
-				if (Items.Count > 0)
-					SetValueFromRenderer(CurrentItemProperty, Items[0]);
+				((IShellController)this).OnFlyoutItemSelected(Items[0]);
 			}
 		}
 
@@ -860,14 +860,20 @@ namespace Xamarin.Forms
 			}
 			else
 			{
+				if (args.Current.Location.AbsolutePath != _lastNavigating.Location.AbsolutePath)
+				{
+					throw new Exception();
+				}
 				Navigated?.Invoke(this, args);
 				//System.Diagnostics.Debug.WriteLine("Navigated: " + args.Current.Location);
 			}
 		}
 
+		private ShellNavigationState _lastNavigating;
 		protected virtual void OnNavigating(ShellNavigatingEventArgs args)
 		{
 			Navigating?.Invoke(this, args);
+			_lastNavigating = args.Target;
 		}
 
 		private static void OnCurrentItemChanged(BindableObject bindable, object oldValue, object newValue)
@@ -877,6 +883,22 @@ namespace Xamarin.Forms
 
 			((IShellController)shell).AppearanceChanged(shell, false);
 			((IShellController)shell).UpdateCurrentState(ShellNavigationSource.ShellItemChanged);
+		}
+
+		private static void OnCurrentItemChanging(BindableObject bindable, object oldValue, object newValue)
+		{
+			var shell = (Shell)bindable;
+			if (!shell._accumulateNavigatedEvents)
+			{
+				// We are not in the middle of a GoToAsync so this is a user requested change.
+				// We need to emit the Navigating event since GoToAsync wont be emitting it.
+
+				var shellItem = (ShellItem)newValue;
+				var shellSection = shellItem.CurrentItem;
+				var shellContent = shellSection.CurrentItem;
+				var stack = shellSection.Stack;
+				((IShellController)shell).ProposeNavigation(ShellNavigationSource.ShellItemChanged, shellItem, shellSection, shellContent, stack, false);
+			}
 		}
 
 		private static void UpdateChecked(Element root, bool isChecked = true)

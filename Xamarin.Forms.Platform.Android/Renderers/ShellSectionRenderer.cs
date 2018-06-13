@@ -30,15 +30,41 @@ namespace Xamarin.Forms.Platform.Android
 
 		void ViewPager.IOnPageChangeListener.OnPageSelected(int position)
 		{
+			if (_selecting)
+				return;
+
 			// TODO : Find a way to make this cancellable
-			var shellContent = ShellSection;
-			var shellContentTab = shellContent.Items[position];
-			//var stack = shellContent.Stack.ToList();
-			//ShellController.ProposeNavigation(ShellNavigationSource.ShellContentChanged, shellContent, shellContentTab, null, false);
+			var shellSection = ShellSection;
+			var shellContent = shellSection.Items[position];
 
-			ShellSection.SetValueFromRenderer(ShellSection.CurrentItemProperty, shellContentTab);
+			if (shellContent == shellSection.CurrentItem)
+				return;
 
-			_toolbarTracker.Page = ((IShellContentController)shellContentTab).Page;
+			var stack = shellSection.Stack.ToList();
+			bool result = ((IShellController)_shellContext.Shell).ProposeNavigation(ShellNavigationSource.ShellContentChanged, 
+				(ShellItem)shellSection.Parent, shellSection, shellContent, stack, true);
+
+			if (result)
+			{
+				ShellSection.SetValueFromRenderer(ShellSection.CurrentItemProperty, shellContent);
+
+				_toolbarTracker.Page = ((IShellContentController)shellContent).Page;
+			}
+			else
+			{
+				_selecting = true;
+				var index = ShellSection.Items.IndexOf(ShellSection.CurrentItem);
+
+				// Android doesn't really appreciate you calling SetCurrentItem inside a OnPageSelected callback.
+				// It wont crash but the way its programmed doesn't really anticipate re-entrancy around that method
+				// and it ends up going to the wrong location. Thus we must invoke.
+
+				Device.BeginInvokeOnMainThread(() =>
+				{
+					_viewPager.SetCurrentItem(index, false);
+					_selecting = false;
+				});
+			}
 		}
 
 		#endregion IOnPageChangeListener
@@ -65,6 +91,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		private readonly IShellContext _shellContext;
 		private AView _rootView;
+		private bool _selecting;
 		private TabLayout _tablayout;
 		private IShellTabLayoutAppearanceTracker _tabLayoutAppearanceTracker;
 		private Toolbar _toolbar;
