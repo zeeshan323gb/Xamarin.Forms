@@ -117,12 +117,12 @@ namespace Xamarin.Forms.Platform.UWP
 					if (e.NewStartingIndex >= SourceItems.Count)
 					{
 						for (int i = 0; i < e.NewItems.Count; i++)
-							SourceItems.Add(e.NewItems[i]);
+							SourceItems.Add((e.NewItems[i] as BindableObject).BindingContext);
 					}
 					else
 					{
 						for (int i = e.NewItems.Count - 1; i >= 0; i--)
-							SourceItems.Insert(e.NewStartingIndex, e.NewItems[i]);
+							SourceItems.Insert(e.NewStartingIndex, (e.NewItems[i] as BindableObject).BindingContext);
 					}
 
 					break;
