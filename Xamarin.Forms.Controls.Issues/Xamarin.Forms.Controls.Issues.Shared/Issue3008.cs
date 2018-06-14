@@ -24,9 +24,10 @@ namespace Xamarin.Forms.Controls.Issues
 		ListView _listView;
 		ListView _listViewIsGrouped;
 		const string success1 = "InitialLoad: you should see a grouped and not grouped list view";
-		const string successEmpty1 = "Source is null: you should see nothing";
+		const string successEmpty1 = "Source is set to null: you should see nothing";
 		const string success2 = "Reload1: you should see a grouped and not grouped list view";
 		const string successEmpty2 = "If you see nothing now test has passed";
+		const string successEmpty3 = "List loaded and ItemSource not set: you should see nothing";
 
 
 		[Preserve(AllMembers = true)]
@@ -145,6 +146,19 @@ namespace Xamarin.Forms.Controls.Issues
 									label.Text = success2;
 								}
 							}
+							else if(clickCount <= 5)
+							{
+								if(_listViewIsGrouped.ItemsSource != null)
+								{
+									ReloadListViews();
+									label.Text = successEmpty3;
+								}
+								else
+								{
+									LoadData();
+									label.Text = success2;
+								}
+							}
 							else
 							{
 								if(_listViewIsGrouped.ItemsSource != null)
@@ -176,6 +190,14 @@ namespace Xamarin.Forms.Controls.Issues
 			RunningApp.WaitForElement("Not Grouped Item");
 			RunningApp.WaitForElement("Grouped Item");
 
+			RunningApp.Tap("Click Until Success");
+			RunningApp.WaitForNoElement("Not Grouped Item");
+			RunningApp.WaitForNoElement("Grouped Item");
+
+			RunningApp.Tap("Click Until Success");
+			RunningApp.WaitForElement("Not Grouped Item");
+			RunningApp.WaitForElement("Grouped Item");
+		
 			RunningApp.Tap("Click Until Success");
 			RunningApp.WaitForNoElement("Not Grouped Item");
 			RunningApp.WaitForNoElement("Grouped Item");
