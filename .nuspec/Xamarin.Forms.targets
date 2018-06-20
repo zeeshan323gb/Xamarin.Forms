@@ -38,7 +38,7 @@
 		</GetTasksAbi >
 
 		<PropertyGroup>
-			<_XFTasksExpectedAbi>4</_XFTasksExpectedAbi>
+			<_XFTasksExpectedAbi>5</_XFTasksExpectedAbi>
 		</PropertyGroup>
 
 		<Error
@@ -64,18 +64,23 @@
 		</CoreCompileDependsOn>
 	</PropertyGroup>
 
-	<Target Name="XamlG" BeforeTargets="BeforeCompile" DependsOnTargets="PrepareResourceNames" Condition="'$(_XamlGAlreadyExecuted)'!='true'">
-		<PropertyGroup>
-			<_XamlGAlreadyExecuted>true</_XamlGAlreadyExecuted>
-		</PropertyGroup>
+	<Target Name="_FindXamlGFiles" DependsOnTargets="PrepareResourceNames">
+		<ItemGroup>
+			<_XamlGInputs Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.xaml' AND '$(DefaultLanguageSourceExtension)' == '.cs' AND '%(TargetPath)' != ''" />
+			<_XamlGOutputs Include="@(_XamlGInputs->'$(IntermediateOutputPath)%(TargetPath).g.cs')" />
+		</ItemGroup>
+	</Target>
+
+	<Target Name="XamlG" BeforeTargets="BeforeCompile" DependsOnTargets="_FindXamlGFiles" Inputs="@(_XamlGInputs)" Outputs="@(_XamlGOutputs)">
 		<XamlGTask
-			XamlFiles="@(EmbeddedResource)" Condition="'%(Extension)' == '.xaml' AND '$(DefaultLanguageSourceExtension)' == '.cs'"
-			Language = "$(Language)"
-			AssemblyName = "$(AssemblyName)"
-			OutputPath = "$(IntermediateOutputPath)">
-			<Output ItemName="FilesWrite" TaskParameter="GeneratedCodeFiles" />
-			<Output ItemName="Compile" TaskParameter="GeneratedCodeFiles" />
-		</XamlGTask>
+			XamlFiles="@(_XamlGInputs)"
+			OutputFiles="@(_XamlGOutputs)"
+			Language="$(Language)"
+			AssemblyName="$(AssemblyName)" />
+		<ItemGroup>
+			<FileWrites Include="@(_XamlGOutputs)" />
+			<Compile Include="@(_XamlGOutputs)" />
+		</ItemGroup>
 	</Target>
 
 	<!-- XamlC -->
@@ -86,7 +91,7 @@
 		</CompileDependsOn>
 	</PropertyGroup>
 
-	<Target Name="XamlC" AfterTargets="AfterCompile" Inputs="$(IntermediateOutputPath)$(TargetFileName)" Outputs="$(IntermediateOutputPath)XamlC.stamp">
+	<Target Name="XamlC" AfterTargets="AfterCompile" Inputs="$(IntermediateOutputPath)$(TargetFileName)" Outputs="$(IntermediateOutputPath)XamlC.stamp" Condition=" '$(DesignTimeBuild)' != 'True' ">
 		<XamlCTask
 			Assembly = "$(IntermediateOutputPath)$(TargetFileName)"
 			ReferencePath = "@(ReferencePath)"
@@ -94,9 +99,10 @@
 			DebugSymbols = "$(DebugSymbols)"
 			DebugType = "$(DebugType)"
 			KeepXamlResources = "$(XFKeepXamlResources)" />
-		<Touch Files="$(IntermediateOutputPath)XamlC.stamp" AlwaysCreate="True">
-			<Output TaskParameter="TouchedFiles" ItemName="FileWrites"/>
-		</Touch>
+		<Touch Files="$(IntermediateOutputPath)XamlC.stamp" AlwaysCreate="True" />
+		<ItemGroup>
+			<FileWrites Include="$(IntermediateOutputPath)XamlC.stamp" />
+		</ItemGroup>
 	</Target>
 
 	<!-- CssG -->
@@ -106,17 +112,23 @@
 			$(CoreCompileDependsOn);
 		</CoreCompileDependsOn>
 	</PropertyGroup>
-	<Target Name="CssG" BeforeTargets="BeforeCompile"  DependsOnTargets="PrepareResourceNames" Condition="'$(_CssGAlreadyExecuted)'!='true'">
-		<PropertyGroup>
-			<_CssGAlreadyExecuted>true</_CssGAlreadyExecuted>
-		</PropertyGroup>
+
+	<Target Name="_FindCSSFiles" DependsOnTargets="PrepareResourceNames">
+		<ItemGroup>
+ 			<_CSSInputs Include="@(EmbeddedResource)" Condition="'%(Extension)' == '.css' AND '$(DefaultLanguageSourceExtension)' == '.cs' AND '%(TargetPath)' != ''" />
+ 			<_CSSOutputs Include="@(_CSSInputs->'$(IntermediateOutputPath)%(TargetPath).g.cs')" />
+ 		</ItemGroup>
+	</Target>
+
+	<Target Name="CssG" BeforeTargets="BeforeCompile"  DependsOnTargets="_FindCSSFiles" Inputs="@(_CSSInputs)" Outputs="@(_CSSOutputs)">
 		<CssGTask
-			XamlFiles="@(EmbeddedResource)" Condition="'%(Extension)' == '.css' AND '$(DefaultLanguageSourceExtension)' == '.cs'"
+			CSSFiles="@(_CSSInputs)"
+			OutputFiles="@(_CSSOutputs)"
 			Language = "$(Language)"
-			AssemblyName = "$(AssemblyName)"
-			OutputPath = "$(IntermediateOutputPath)">
-			<Output ItemName="FilesWrite" TaskParameter="GeneratedCodeFiles" />
-			<Output ItemName="Compile" TaskParameter="GeneratedCodeFiles" />
-		</CssGTask>
+			AssemblyName = "$(AssemblyName)" />
+		<ItemGroup>
+ 			<FileWrites Include="@(_CSSOutputs)" />
+ 			<Compile Include="@(_CSSOutputs)" />
+ 		</ItemGroup>
 	</Target>
 </Project>

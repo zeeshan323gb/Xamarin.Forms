@@ -18,12 +18,15 @@ using WApp = Windows.UI.Xaml.Application;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 using Specifics = Xamarin.Forms.PlatformConfiguration.WindowsSpecific.ListView;
+using System.Collections.ObjectModel;
 
 namespace Xamarin.Forms.Platform.UWP
 {
 	public class ListViewRenderer : ViewRenderer<ListView, FrameworkElement>
 	{
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
+		ObservableCollection<object> SourceItems => _context?.Source as ObservableCollection<object>;
+		CollectionViewSource _context;
 		bool _itemWasClicked;
 		bool _subscribedToItemClick;
 		bool _subscribedToTapped;
@@ -65,8 +68,7 @@ namespace Xamarin.Forms.Platform.UWP
 					List.SetBinding(ItemsControl.ItemsSourceProperty, "");
 				}
 
-				// WinRT throws an exception if you set ItemsSource directly to a CVS, so bind it.
-				List.DataContext = new CollectionViewSource { Source = Element.ItemsSource, IsSourceGrouped = Element.IsGroupingEnabled };
+				ReloadData();
 
 				if (Element.SelectedItem != null)
 					OnElementItemSelected(null, new SelectedItemChangedEventArgs(Element.SelectedItem));
@@ -80,15 +82,79 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 		}
 
-		void OnCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		void ReloadData()
 		{
-			if (e.Action == NotifyCollectionChangedAction.Reset)
+			if (Element?.ItemsSource == null && _context != null)
+				_context.Source = null;
+
+			var allSourceItems = new ObservableCollection<object>();
+
+			if (Element?.ItemsSource != null)
 			{
-				List.DataContext =
-					new CollectionViewSource { Source = Element.ItemsSource, IsSourceGrouped = Element.IsGroupingEnabled };
+				foreach (var item in Element.ItemsSource)
+					allSourceItems.Add(item);
 			}
 
-			List.UpdateLayout();
+			// WinRT throws an exception if you set ItemsSource directly to a CVS, so bind it.
+			List.DataContext = _context = new CollectionViewSource
+			{
+				Source = allSourceItems,
+				IsSourceGrouped = Element.IsGroupingEnabled
+			};
+		}
+
+		void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			switch (e.Action)
+			{
+				case NotifyCollectionChangedAction.Add:
+					if (e.NewStartingIndex < 0)
+						goto case NotifyCollectionChangedAction.Reset;
+
+					// if a NewStartingIndex that's too high is passed in just add the items.
+					// I realize this is enforcing bad behavior but prior to this synchronization
+					// code being added it wouldn't cause the app to crash whereas now it does
+					// so this code accounts for that in order to ensure smooth sailing for the user
+					if (e.NewStartingIndex >= SourceItems.Count)
+					{
+						for (int i = 0; i < e.NewItems.Count; i++)
+							SourceItems.Add((e.NewItems[i] as BindableObject).BindingContext);
+					}
+					else
+					{
+						for (int i = e.NewItems.Count - 1; i >= 0; i--)
+							SourceItems.Insert(e.NewStartingIndex, (e.NewItems[i] as BindableObject).BindingContext);
+					}
+
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					for (int i = e.OldItems.Count - 1; i >= 0; i--)
+						SourceItems.RemoveAt(e.OldStartingIndex);
+					break;
+				case NotifyCollectionChangedAction.Move:
+					for (var i = 0; i < e.OldItems.Count; i++)
+					{
+						var oldi = e.OldStartingIndex;
+						var newi = e.NewStartingIndex;
+
+						if (e.NewStartingIndex < e.OldStartingIndex)
+						{
+							oldi += i;
+							newi += i;
+						}
+
+						SourceItems.Move(oldi, newi);
+					}
+					break;
+				case NotifyCollectionChangedAction.Replace:
+				case NotifyCollectionChangedAction.Reset:
+				default:
+					ClearSizeEstimate();
+					ReloadData();
+					break;
+			}
+
+			Device.BeginInvokeOnMainThread(() => List.UpdateLayout());
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -119,12 +185,7 @@ namespace Xamarin.Forms.Platform.UWP
 			{
 				ClearSizeEstimate();
 			}
-			else if (e.PropertyName == ListView.ItemsSourceProperty.PropertyName)
-			{
-				ClearSizeEstimate();
-				((CollectionViewSource)List.DataContext).Source = Element.ItemsSource;
-			}
-			else if (e.PropertyName == ListView.SelectionModeProperty.PropertyName)
+			else if (e.PropertyName == Specifics.SelectionModeProperty.PropertyName)
 			{
 				UpdateSelectionMode();
 			}
@@ -236,7 +297,8 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			bool grouping = Element.IsGroupingEnabled;
 
-			((CollectionViewSource)List.DataContext).IsSourceGrouped = grouping;
+			if (_context != null)
+				_context.IsSourceGrouped = grouping;
 
 			var templatedItems = TemplatedItemsView.TemplatedItems;
 			if (grouping && templatedItems.ShortNames != null)
