@@ -256,7 +256,7 @@ namespace Xamarin.Forms
 		internal object[] GetValues(params BindableProperty[] properties)
 		{
 			var values = new object[properties.Length];
-			for (var i = 0; i < _properties.Count; i++) {
+			for (var i = 0; i < properties.Length; i++) {
 				var prop = properties[i];
 				if (_properties.TryGetValue(prop, out var context))
 					values[i] = context.Value;
