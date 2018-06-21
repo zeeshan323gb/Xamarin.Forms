@@ -134,7 +134,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (disposing && !_disposed)
 			{
-				if (Control != null)
+				if (Control != null && ManageNativeControlLifetime)
 				{
 					Control.OnFocusChangeListener = null;
 				}
@@ -146,8 +146,11 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				if (_container != null && _container != this)
 				{
-					_container.RemoveFromParent();
-					_container.Dispose();
+					if (_container.Handle != IntPtr.Zero)
+					{
+						_container.RemoveFromParent();
+						_container.Dispose();
+					}
 					_container = null;
 				}
 
