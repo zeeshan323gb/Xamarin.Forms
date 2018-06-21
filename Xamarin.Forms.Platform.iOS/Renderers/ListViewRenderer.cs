@@ -532,7 +532,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			// This means the UITableView hasn't rendered any cells yet
 			// so there's no need to synchronize the rows on the UITableView
-			if (Control.IndexPathsForVisibleRows == null)
+			if (Control.IndexPathsForVisibleRows == null && e.Action != NotifyCollectionChangedAction.Reset)
 				return;
 
 			var groupReset = resetWhenGrouped && Element.IsGroupingEnabled;
