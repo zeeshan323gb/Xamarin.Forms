@@ -440,13 +440,18 @@ namespace Xamarin.Forms
 			if (!isLastItem)
 			{
 				var route = Routing.GetRoute(element);
-				if (string.IsNullOrEmpty(route))
+				if (string.IsNullOrEmpty(route) || route.StartsWith(Routing.ImplicitPrefix, StringComparison.Ordinal))
 					return;
 				prefix = route + ".";
 			}
 
-			var typeInfo = element.GetType().GetTypeInfo();
-			object[] effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+			var type = element.GetType();
+			var typeInfo = type.GetTypeInfo();
+#if NETSTANDARD1_0
+			var effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
+#else
+			var effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true);
+#endif
 
 			if (effectAttributes.Length == 0)
 				return;
@@ -457,13 +462,7 @@ namespace Xamarin.Forms
 				{
 					if (query.TryGetValue(prefix + attrib.QueryId, out var value))
 					{
-						PropertyInfo prop = null;
-
-						while (prop == null && typeInfo != null)
-						{
-							prop = typeInfo.GetDeclaredProperty(attrib.Name);
-							typeInfo = typeInfo.BaseType.GetTypeInfo();
-						}
+						PropertyInfo prop = type.GetRuntimeProperty(attrib.Name);
 
 						if (prop != null && prop.CanWrite && prop.SetMethod.IsPublic)
 						{
@@ -498,17 +497,18 @@ namespace Xamarin.Forms
 			if (!isLastItem)
 			{
 				var route = Routing.GetRoute(element);
-				if (string.IsNullOrEmpty(route))
+				if (string.IsNullOrEmpty(route) || route.StartsWith(Routing.ImplicitPrefix, StringComparison.Ordinal))
 					return;
 				prefix = route + ".";
 			}
 
-			var typeInfo = element.GetType().GetTypeInfo();
+			var type = element.GetType();
+			var typeInfo = type.GetTypeInfo();
 
 #if NETSTANDARD1_0
 			var effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true).ToArray();
 #else
-			var effectAttributes = typeInfo.GetCustomAttributes(typeof(QueryPropertyAttribute), true);
+			var effectAttributes = type.GetCustomAttributes(typeof(QueryPropertyAttribute), true);
 #endif
 
 			if (effectAttributes.Length == 0)
@@ -516,16 +516,9 @@ namespace Xamarin.Forms
 
 			for (int i = 0; i < effectAttributes.Length; i++)
 			{
-				object a = effectAttributes[i];
-				if (a is QueryPropertyAttribute attrib)
+				if (effectAttributes[i] is QueryPropertyAttribute attrib)
 				{
-					PropertyInfo prop = null;
-
-					while (prop == null && typeInfo != null)
-					{
-						prop = typeInfo.GetDeclaredProperty(attrib.Name);
-						typeInfo = typeInfo.BaseType.GetTypeInfo();
-					}
+					PropertyInfo prop = type.GetRuntimeProperty(attrib.Name);
 
 					if (prop != null && prop.CanRead && prop.GetMethod.IsPublic)
 					{
@@ -907,6 +900,8 @@ namespace Xamarin.Forms
 		{
 			if (root is BaseShellItem baseItem)
 			{
+				if (!isChecked && !baseItem.IsChecked)
+					return;
 				baseItem.SetValue(BaseShellItem.IsCheckedPropertyKey, isChecked);
 			}
 
