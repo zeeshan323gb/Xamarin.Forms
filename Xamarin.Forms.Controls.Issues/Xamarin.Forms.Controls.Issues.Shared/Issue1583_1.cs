@@ -34,6 +34,9 @@ namespace Xamarin.Forms.Controls.Issues
 			var queryButton = new Button { Text = "3:query", HorizontalOptions = LayoutOptions.FillAndExpand, AutomationId = "queryButton" };
 			queryButton.Clicked += (sender, args) => Load("https://www.google.com/search?q=http%3A%2F%2Fmicrosoft.com");
 
+			var portButton = new Button { Text = "4:port", HorizontalOptions = LayoutOptions.FillAndExpand, AutomationId = "portButton" };
+			portButton.Clicked += (sender, args) => Load("http://portquiz.net:666");
+
 			Content = new StackLayout
 			{
 				Children =
@@ -42,7 +45,7 @@ namespace Xamarin.Forms.Controls.Issues
 					new StackLayout
 					{
 						Orientation = StackOrientation.Horizontal,
-						Children = { hashButton, unicodeButton, queryButton }
+						Children = { hashButton, unicodeButton, queryButton, portButton  }
 					},
 					_webview
 				}
@@ -74,6 +77,9 @@ namespace Xamarin.Forms.Controls.Issues
 			RunningApp.Tap("queryButton");
 			await Task.Delay(TimeSpan.FromSeconds(3));
 			RunningApp.Screenshot ("I didn't crash and i can see google search for http://microsoft.com");
+			RunningApp.Tap("portButton");
+			await Task.Delay(TimeSpan.FromSeconds(3));
+			RunningApp.Screenshot ("I didn't crash and i can see that i visited port 666");
 		}
 #endif
 	}
