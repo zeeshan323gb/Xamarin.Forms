@@ -68,6 +68,7 @@ namespace Xamarin.Forms.Controls.Issues
 		[Test]
 		public void Issue1583Test ()
 		{
+			Task.Delay(TimeSpan.FromSeconds(3)).Wait();
 			RunningApp.WaitForElement (q => q.Marked ("label"));
 			Task.Delay(TimeSpan.FromSeconds(3)).Wait();
 			RunningApp.Screenshot ("I didn't crash and i can see Skøyen");
