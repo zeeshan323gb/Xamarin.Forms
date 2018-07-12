@@ -61,6 +61,8 @@
     <Compile Include="ITitleIconProvider.cs" />
     <Compile Include="ITitleViewProvider.cs" />
     <Compile Include="Items\FormsGridView.cs" />
+    <Compile Include="Items\ItemTemplateEnumerator.cs" />
+    <Compile Include="Items\ItemTemplatePair.cs" />
     <Compile Include="ITitleProvider.cs" />
     <Compile Include="IToolbarProvider.cs" />
     <Compile Include="NativeBindingExtensions.cs" />

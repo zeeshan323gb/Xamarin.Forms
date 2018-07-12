@@ -147,6 +147,8 @@ namespace Xamarin.Forms
 			}
 		}
 
+		// TODO hartez 2018/07/11 21:30:51 Give some serious thought to a way that we don't have to set this on every element	
+
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public IPlatform Platform
 		{
@@ -496,6 +498,7 @@ namespace Xamarin.Forms
 			}
 		}
 
+		// TODO hartez 2018/07/11 21:20:52 Figure out what the heck this is for; literally the only thing using it is one unit test	
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public event EventHandler PlatformSet;
 
