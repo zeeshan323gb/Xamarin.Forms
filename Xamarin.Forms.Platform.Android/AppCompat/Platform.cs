@@ -206,6 +206,9 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 		void IPlatformLayout.OnLayout(bool changed, int l, int t, int r, int b)
 		{
+			if (Page == null)
+				return;
+
 			if (changed)
 			{
 				LayoutRootPage(Page, r - l, b - t);
@@ -287,6 +290,9 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		}
 		void AddChild(Page page, bool layout = false)
 		{
+			if (page == null)
+				return;
+
 			if (Android.Platform.GetRenderer(page) != null)
 				return;
 
