@@ -32,14 +32,7 @@ namespace Xamarin.Forms.Controls
 
 			SetMainPage(CreateDefaultMainPage());
 
-			TestMainPageSwitches();
-		}
-
-		async Task TestMainPageSwitches()
-		{
-			await TestBugzilla45702();
-
-			await TestBugzilla44596();
+			//TestMainPageSwitches();
 		}
 
 		protected override void OnStart()
@@ -82,6 +75,13 @@ namespace Xamarin.Forms.Controls
 			view.Navigated += (s, e) => MainPage.DisplayAlert("Navigated", $"If this popup appears multiple times, this test has failed", "ok"); ;
 
 			MainPage.Navigation.PushAsync(new ContentPage { Content = view, Title = "Issue 2393" });
+		}
+
+		async Task TestMainPageSwitches()
+		{
+			await TestBugzilla45702();
+
+			await TestBugzilla44596();
 		}
 
 		public Page CreateDefaultMainPage()
