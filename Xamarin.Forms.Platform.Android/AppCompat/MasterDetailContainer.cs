@@ -119,12 +119,8 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 				new Handler(Looper.MainLooper).PostAtFrontOfQueue(() =>
 				{
-					if (_pageContainer == null)
-					{
-						// The view we're hosting in the fragment was never created (possibly we're already 
-						// navigating to another page?) so there's nothing to commit
-						return;
-					}
+					// NOTE: If we delay ExecutePendingTransactions in any way in order to wait for the _pageContainer to be created,
+					// then we regress 44596/1373 by introducing the white screen flashing between main page changes to an MDP.
 
 					FragmentManager.ExecutePendingTransactionsEx();
 				});
