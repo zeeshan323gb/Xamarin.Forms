@@ -13,8 +13,6 @@ using Windows.UI.Xaml.Media.Animation;
 using Xamarin.Forms.Internals;
 using static Xamarin.Forms.PlatformConfiguration.WindowsSpecific.Page;
 using WImageSource = Windows.UI.Xaml.Media.ImageSource;
-
-
 using Windows.UI.Core;
 using Windows.UI.Xaml.Data;
 
