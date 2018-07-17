@@ -46,6 +46,10 @@ namespace Xamarin.Forms.Controls.GalleryPages.PlatformSpecificsGalleries
 			content.Title = "Content in a Nav Page";
 			var navpage = new NavigationPage(content);
 			navpage.Title = "Nav Page";
+
+			navpage.BarBackgroundColor = Color.DarkSalmon;
+			navpage.BarTextColor = Color.WhiteSmoke;
+
 			WindowsPlatformSpecificsGalleryHelpers.AddToolBarItems(navpage);
 			return navpage;
 		}

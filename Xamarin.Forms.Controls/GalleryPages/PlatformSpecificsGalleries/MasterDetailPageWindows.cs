@@ -172,6 +172,9 @@ namespace Xamarin.Forms.Controls.GalleryPages.PlatformSpecificsGalleries
 
 			page.PushAsync(CreateNavSubPage());
 
+			page.BarBackgroundColor = Color.MediumPurple;
+			page.BarTextColor = Color.AntiqueWhite;
+
 			return page;
 		}
 
@@ -180,7 +183,7 @@ namespace Xamarin.Forms.Controls.GalleryPages.PlatformSpecificsGalleries
 			var page = new ContentPage();
 
 			var label = new Label { Text = "This is content in a nav page" };
-			var button = new Button() { Text = "Push Another Page"};
+			var button = new Button { Text = "Push Another Page"};
 
 			button.Clicked += (sender, args) => page.Navigation.PushAsync(CreateNavSubPage());
 
