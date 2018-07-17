@@ -19,7 +19,7 @@ using Windows.UI.Xaml.Data;
 namespace Xamarin.Forms.Platform.UWP
 {
 	public class NavigationPageRenderer : IVisualElementRenderer, ITitleProvider, ITitleIconProvider, 
-		ITitleViewProvider, IToolbarProvider, IToolBarForegroundBinder
+		ITitleViewProvider, IToolBarForegroundBinder
 	{
 		PageControl _container;
 		Page _currentPage;

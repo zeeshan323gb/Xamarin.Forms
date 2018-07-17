@@ -2,7 +2,7 @@
 
 namespace Xamarin.Forms.Platform.UWP
 {
-	internal interface IToolBarForegroundBinder
+	internal interface IToolBarForegroundBinder : IToolbarProvider
 	{
 		void BindForegroundColor(AppBar appBar);
 		void BindForegroundColor(AppBarButton button);

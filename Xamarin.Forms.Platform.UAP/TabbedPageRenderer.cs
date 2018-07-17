@@ -22,7 +22,7 @@ using Windows.UI.Xaml.Input;
 
 namespace Xamarin.Forms.Platform.UWP
 {
-	public class TabbedPageRenderer : IVisualElementRenderer, ITitleProvider, IToolbarProvider, 
+	public class TabbedPageRenderer : IVisualElementRenderer, ITitleProvider, 
 		IToolBarForegroundBinder
 	{
 		const string TabBarHeaderStackPanelName = "TabbedPageHeaderStackPanel";
