@@ -631,7 +631,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 			if (_showTitle || (render != null && render.ShowTitle))
 			{
-				var platform = Element.Platform as Platform;
+				var platform = Platform.Current;
 				if (platform != null)
 				{
 					await platform.UpdateToolbarItems();
