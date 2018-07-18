@@ -78,6 +78,14 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void OnBackRequested(object sender, BackRequestedEventArgs e)
 		{
+			Application app = Application.Current;
+			if (app == null)
+				return;
+
+			Page page = app.MainPage;
+			if (page == null)
+				return;
+
 			e.Handled = BackButtonPressed();
 		}
 
