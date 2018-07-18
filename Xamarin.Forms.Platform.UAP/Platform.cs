@@ -392,14 +392,6 @@ namespace Xamarin.Forms.Platform.UWP
 			commandBar.PrimaryCommands.Clear();
 			commandBar.SecondaryCommands.Clear();
 
-			if (_page.BottomAppBar != null || _page.TopAppBar != null)
-			{
-				_page.BottomAppBar = null;
-				_page.TopAppBar = null;
-				_page.InvalidateMeasure();
-			}
-
-			// TODO hartez 2018/07/16 16:05:10 Should IToolBarForegroundBinder be a subclass of IToolbarProvider?	
 			var toolBarForegroundBinder = toolbarProvider as IToolBarForegroundBinder;
 
 			foreach (ToolbarItem item in _toolbarTracker.ToolbarItems.OrderBy(ti => ti.Priority))
