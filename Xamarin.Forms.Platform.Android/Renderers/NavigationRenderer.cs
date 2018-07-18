@@ -256,7 +256,6 @@ namespace Xamarin.Forms.Platform.Android
 							RemoveView(containerToRemove);
 
 							tcs.TrySetResult(true);
-							((Platform)Element.Platform).NavAnimationInProgress = false;
 
 							VisualElement removedElement = rendererToRemove.Element;
 							rendererToRemove.Dispose();
@@ -297,10 +296,6 @@ namespace Xamarin.Forms.Platform.Android
 						}
 						s_currentAnimation = null;
 						tcs.TrySetResult(true);
-						if (Element?.Platform != null)
-						{
-							((Platform)Element.Platform).NavAnimationInProgress = false;
-						}
 					} });
 				}
 			}
@@ -328,10 +323,9 @@ namespace Xamarin.Forms.Platform.Android
 
 				containerToAdd.Visibility = ViewStates.Visible;
 				tcs.SetResult(true);
-				((Platform)Element.Platform).NavAnimationInProgress = false;
 			}
 
-			return tcs.Task;
+			return tcs.Task.ContinueWith(task => ((Platform)Element.Platform).NavAnimationInProgress = false);
 		}
 	}
 }
