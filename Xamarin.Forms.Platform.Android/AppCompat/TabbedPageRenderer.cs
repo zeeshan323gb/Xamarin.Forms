@@ -44,6 +44,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		int[] _emptyStateSet = null;
 		int _defaultARGBColor = Color.Default.ToAndroid().ToArgb();
 		AColor _defaultAndroidColor = Color.Default.ToAndroid();
+		Platform _platform;
 
 		public TabbedPageRenderer(Context context) : base(context)
 		{
@@ -54,6 +55,22 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		public TabbedPageRenderer()
 		{
 			AutoPackage = false;
+		}
+
+		Platform Platform
+		{
+			get
+			{
+				if (_platform == null)
+				{
+					if (Context is FormsAppCompatActivity activity)
+					{
+						_platform = activity.Platform;
+					}
+				}
+
+				return _platform;
+			}
 		}
 
 		FragmentManager FragmentManager => _fragmentManager ?? (_fragmentManager = ((FormsAppCompatActivity)Context).SupportFragmentManager);
@@ -507,9 +524,9 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 		void ScrollToCurrentPage()
 		{
-			((Platform)Element.Platform).NavAnimationInProgress = true;
+			Platform.NavAnimationInProgress = true;
 			_viewPager.SetCurrentItem(Element.Children.IndexOf(Element.CurrentPage), UseAnimations);
-			((Platform)Element.Platform).NavAnimationInProgress = false;
+			Platform.NavAnimationInProgress = false;
 		}
 
 		void UpdateIgnoreContainerAreas()
