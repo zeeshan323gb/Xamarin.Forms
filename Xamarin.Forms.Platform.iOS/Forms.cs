@@ -351,6 +351,21 @@ namespace Xamarin.Forms
 				NSApplication.SharedApplication.Terminate(new NSObject());
 #endif
 			}
+
+			public SizeRequest GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
+			{
+				Performance.Start(out string reference);
+#if __MACOS__
+				var renderView = Xamarin.Forms.Platform.MacOS.Platform.GetRenderer(view);
+#else
+				var renderView = Xamarin.Forms.Platform.iOS.Platform.GetRenderer(view);
+#endif
+				if (renderView == null || renderView.NativeView == null)
+					return new SizeRequest(Size.Zero);
+
+				Performance.Stop(reference);
+				return renderView.GetDesiredSize(widthConstraint, heightConstraint);
+			}
 		}
 	}
 }

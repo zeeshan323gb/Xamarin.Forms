@@ -21,7 +21,7 @@ using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	public class Platform : BindableObject, IPlatform, INavigation, IDisposable, IPlatformLayout
+	public class Platform : BindableObject, INavigation, IDisposable, IPlatformLayout
 	{
 		internal const string CloseContextActionsSignalName = "Xamarin.CloseContextActions";
 
@@ -281,8 +281,6 @@ namespace Xamarin.Forms.Platform.Android
 
 			_navModel.PushModal(modal);
 
-			modal.Platform = this;
-
 			await PresentModal(modal, animated);
 
 			// Verify that the modal is still on the stack
@@ -465,7 +463,6 @@ namespace Xamarin.Forms.Platform.Android
 			_navModel.Push(newRoot, null);
 
 			Page = newRoot;
-			Page.Platform = this;
 			AddChild(Page, layout);
 
 			Application.Current.NavigationProxy.Inner = this;
@@ -1266,45 +1263,6 @@ namespace Xamarin.Forms.Platform.Android
 
 			foreach (IVisualElementRenderer view in _navModel.Roots.Select(GetRenderer))
 				view?.UpdateLayout();
-		}
-
-		SizeRequest IPlatform.GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
-		{
-			Performance.Start(out string reference);
-
-			// FIXME: potential crash
-			IVisualElementRenderer visualElementRenderer = GetRenderer(view);
-
-			// negative numbers have special meanings to android they don't to us
-			widthConstraint = widthConstraint <= -1 ? double.PositiveInfinity : _context.ToPixels(widthConstraint);
-			heightConstraint = heightConstraint <= -1 ? double.PositiveInfinity : _context.ToPixels(heightConstraint);
-
-			bool widthConstrained = !double.IsPositiveInfinity(widthConstraint);
-			bool heightConstrained = !double.IsPositiveInfinity(heightConstraint);
-
-			int widthMeasureSpec = widthConstrained
-							? MeasureSpecFactory.MakeMeasureSpec((int)widthConstraint, MeasureSpecMode.AtMost)
-							: MeasureSpecFactory.MakeMeasureSpec(0, MeasureSpecMode.Unspecified);
-
-			int heightMeasureSpec = heightConstrained
-							 ? MeasureSpecFactory.MakeMeasureSpec((int)heightConstraint, MeasureSpecMode.AtMost)
-							 : MeasureSpecFactory.MakeMeasureSpec(0, MeasureSpecMode.Unspecified);
-
-			SizeRequest rawResult = visualElementRenderer.GetDesiredSize(widthMeasureSpec, heightMeasureSpec);
-			if (rawResult.Minimum == Size.Zero)
-				rawResult.Minimum = rawResult.Request;
-			var result = new SizeRequest(new Size(_context.FromPixels(rawResult.Request.Width), _context.FromPixels(rawResult.Request.Height)),
-				new Size(_context.FromPixels(rawResult.Minimum.Width), _context.FromPixels(rawResult.Minimum.Height)));
-
-			if ((widthConstrained && result.Request.Width < widthConstraint)
-				|| (heightConstrained && result.Request.Height < heightConstraint))
-			{
-				// Do a final exact measurement in case the native control needs to fill the container
-				(visualElementRenderer as IViewRenderer)?.MeasureExactly();
-			}
-
-			Performance.Stop(reference);
-			return result;
 		}
 
 		bool _navAnimationInProgress;

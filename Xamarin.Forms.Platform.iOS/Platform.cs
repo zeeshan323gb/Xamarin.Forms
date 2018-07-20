@@ -10,7 +10,7 @@ using RectangleF = CoreGraphics.CGRect;
 
 namespace Xamarin.Forms.Platform.iOS
 {
-	public class Platform : BindableObject, IPlatform, INavigation, IDisposable
+	public class Platform : BindableObject, INavigation, IDisposable
 	{
 		internal static readonly BindableProperty RendererProperty = BindableProperty.CreateAttached("Renderer", typeof(IVisualElementRenderer), typeof(Platform), default(IVisualElementRenderer),
 			propertyChanged: (bindable, oldvalue, newvalue) =>
@@ -166,7 +166,6 @@ namespace Xamarin.Forms.Platform.iOS
 			EndEditing();
 
 			_modals.Add(modal);
-			modal.Platform = this;
 
 			modal.DescendantRemoved += HandleChildRemoved;
 
@@ -178,18 +177,6 @@ namespace Xamarin.Forms.Platform.iOS
 		void INavigation.RemovePage(Page page)
 		{
 			throw new InvalidOperationException("RemovePage is not supported globally on iOS, please use a NavigationPage.");
-		}
-
-		SizeRequest IPlatform.GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
-		{
-			Performance.Start(out string reference);
-
-			var renderView = GetRenderer(view);
-			if (renderView == null || renderView.NativeView == null)
-				return new SizeRequest(Size.Zero);
-
-			Performance.Stop(reference);
-			return renderView.GetDesiredSize(widthConstraint, heightConstraint);
 		}
 
 		public static IVisualElementRenderer CreateRenderer(VisualElement element)
@@ -247,7 +234,6 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_appeared == false)
 				return;
 
-			Page.Platform = this;
 			AddChild(Page);
 
 			Page.DescendantRemoved += HandleChildRemoved;
@@ -263,7 +249,6 @@ namespace Xamarin.Forms.Platform.iOS
 			_renderer.View.BackgroundColor = UIColor.White;
 			_renderer.View.ContentMode = UIViewContentMode.Redraw;
 
-			Page.Platform = this;
 			AddChild(Page);
 
 			Page.DescendantRemoved += HandleChildRemoved;

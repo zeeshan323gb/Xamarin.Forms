@@ -6,7 +6,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.MacOS
 {
-	public class Platform : BindableObject, IPlatform, IDisposable
+	public class Platform : BindableObject, IDisposable
 	{
 		internal static readonly BindableProperty RendererProperty = BindableProperty.CreateAttached("Renderer",
 			typeof(IVisualElementRenderer), typeof(Platform), default(IVisualElementRenderer),
@@ -68,15 +68,6 @@ namespace Xamarin.Forms.Platform.MacOS
 
 				arguments.SetResult(titleResult);
 			});
-		}
-
-		SizeRequest IPlatform.GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
-		{
-			var renderView = GetRenderer(view);
-			if (renderView == null || renderView.NativeView == null)
-				return new SizeRequest(Size.Zero);
-
-			return renderView.GetDesiredSize(widthConstraint, heightConstraint);
 		}
 
 		Page Page { get; set; }
@@ -195,7 +186,6 @@ namespace Xamarin.Forms.Platform.MacOS
 			if (_appeared == false)
 				return;
 
-			Page.Platform = this;
 			AddChild(Page);
 
 			Page.DescendantRemoved += HandleChildRemoved;
@@ -215,7 +205,6 @@ namespace Xamarin.Forms.Platform.MacOS
 			if (_appeared)
 				return;
 
-			Page.Platform = this;
 			AddChild(Page);
 
 			Page.DescendantRemoved += HandleChildRemoved;

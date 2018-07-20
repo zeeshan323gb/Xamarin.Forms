@@ -110,5 +110,15 @@ namespace Xamarin.Forms.Platform.GTK
 		{
 			Gtk.Application.Quit();
 		}
+
+		public SizeRequest GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
+		{
+			var renderView = Platform.GetRenderer(view);
+
+			if (renderView == null || renderView.Container == null)
+				return new SizeRequest(Size.Zero);
+
+			return renderView.GetDesiredSize(widthConstraint, heightConstraint);
+		}
 	}
 }

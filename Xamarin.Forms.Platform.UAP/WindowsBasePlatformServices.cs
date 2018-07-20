@@ -138,5 +138,17 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			Log.Warning(nameof(WindowsBasePlatformServices), "Platform doesn't implement QuitApp");
 		}
+
+		public SizeRequest GetNativeSize(VisualElement element, double widthConstraint, double heightConstraint)
+		{
+			if (widthConstraint > 0 && heightConstraint > 0)
+			{
+				IVisualElementRenderer elementRenderer = Platform.GetRenderer(element);
+				if (elementRenderer != null)
+					return elementRenderer.GetDesiredSize(widthConstraint, heightConstraint);
+			}
+
+			return new SizeRequest();
+		}
 	}
 }

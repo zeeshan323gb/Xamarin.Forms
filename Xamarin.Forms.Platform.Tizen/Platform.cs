@@ -65,7 +65,7 @@ namespace Xamarin.Forms.Platform.Tizen
 	}
 
 	[EditorBrowsable(EditorBrowsableState.Never)]
-	public interface ITizenPlatform : IPlatform, IDisposable
+	public interface ITizenPlatform : IDisposable
 	{
 		void SetPage(Page page);
 		bool SendBackButtonPressed();
@@ -157,7 +157,6 @@ namespace Xamarin.Forms.Platform.Tizen
 			_navModel.Push(newRoot, null);
 
 			Page = newRoot;
-			Page.Platform = this;
 
 			IVisualElementRenderer pageRenderer = Platform.CreateRenderer(Page);
 			var naviItem = _internalNaviframe.Push(pageRenderer.NativeView);
@@ -178,17 +177,6 @@ namespace Xamarin.Forms.Platform.Tizen
 				CurrentPageController?.SendAppearing();
 				return false;
 			});
-		}
-
-		public SizeRequest GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
-		{
-			widthConstraint = widthConstraint <= -1 ? double.PositiveInfinity : widthConstraint;
-			heightConstraint = heightConstraint <= -1 ? double.PositiveInfinity : heightConstraint;
-
-			double width = !double.IsPositiveInfinity(widthConstraint) ? widthConstraint : Int32.MaxValue;
-			double height = !double.IsPositiveInfinity(heightConstraint) ? heightConstraint : Int32.MaxValue;
-
-			return Platform.GetRenderer(view).GetDesiredSize(width, height);
 		}
 
 		public bool SendBackButtonPressed()
@@ -284,8 +272,6 @@ namespace Xamarin.Forms.Platform.Tizen
 			Device.BeginInvokeOnMainThread(() => previousPage?.SendDisappearing());
 
 			_navModel.PushModal(modal);
-
-			modal.Platform = this;
 
 			await PushModalInternal(modal, animated);
 

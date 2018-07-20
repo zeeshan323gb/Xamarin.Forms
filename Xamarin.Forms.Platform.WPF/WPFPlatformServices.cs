@@ -145,5 +145,16 @@ namespace Xamarin.Forms.Platform.WPF
 		{
 			System.Windows.Application.Current.Shutdown();
 		}
+
+		public SizeRequest GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
+		{
+			if (widthConstraint > 0 && heightConstraint > 0 && Platform.GetRenderer(view) != null)
+			{
+				IVisualElementRenderer element = Platform.GetRenderer(view);
+				return element.GetDesiredSize(widthConstraint, heightConstraint);
+			}
+
+			return new SizeRequest();
+		}
 	}
 }

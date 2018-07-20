@@ -161,7 +161,6 @@ namespace Xamarin.Forms.Core.UnitTests
 			public void AddDimensionTheory(string operations)
 			{
 				_grid = new Grid();
-				_grid.Platform = new UnitPlatform();
 
 				foreach (var op in operations)
 				{
@@ -200,13 +199,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestBasicVerticalLayout ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
 
 			layout.Children.AddVertical (new View[] {
 				label1,
@@ -227,13 +224,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestBasicHorizontalLayout ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
 
 			layout.Children.AddHorizontal (new View[] {
 				label1,
@@ -254,12 +249,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestVerticalExpandStart ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
 
 			layout.RowDefinitions = new RowDefinitionCollection {
 				new RowDefinition { Height = new GridLength (1, GridUnitType.Star) },
@@ -280,12 +273,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestHorizontalExpandStart ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label { Platform = platform, IsPlatformEnabled = true };
-			var label2 = new Label { Platform = platform, IsPlatformEnabled = true };
+			var label1 = new Label { IsPlatformEnabled = true };
+			var label2 = new Label { IsPlatformEnabled = true };
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection {
 				new ColumnDefinition { Width = new GridLength (1, GridUnitType.Star) },
@@ -306,12 +297,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestVerticalExpandEnd ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
 
 			layout.RowDefinitions = new RowDefinitionCollection {
 				new RowDefinition { Height = GridLength.Auto},
@@ -332,12 +321,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestHorizontalExpandEnd ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label { Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection {
 				new ColumnDefinition { Width = GridLength.Auto },
@@ -359,13 +346,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestVerticalExpandMiddle ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
 
 			layout.RowDefinitions = new RowDefinitionCollection {
 				new RowDefinition { Height = GridLength.Auto},
@@ -389,13 +374,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestHorizontalExpandMiddle ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection {
 				new ColumnDefinition { Width = GridLength.Auto },
@@ -420,14 +403,12 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestTableNoExpand ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label4 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
+			var label4 = new Label {IsPlatformEnabled = true};
 
 			layout.Children.Add (label1, 0, 0);
 			layout.Children.Add (label2, 1, 0);
@@ -457,14 +438,12 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestTableExpand ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label4 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
+			var label4 = new Label {IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition { Width = GridLength.Auto },
@@ -490,13 +469,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestTableSpan ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
 
 			layout.Children.Add (label1, 0, 2, 0, 1);
 			layout.Children.Add (label2, 0, 1, 1, 2);
@@ -524,13 +501,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestTableExpandedSpan ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
+			var label2 = new Label {IsPlatformEnabled = true};
+			var label3 = new Label {IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition { Width = new GridLength (1, GridUnitType.Star) },
@@ -558,11 +533,9 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestInvalidSet ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label {IsPlatformEnabled = true};
 
 			bool thrown = false;
 
@@ -578,11 +551,9 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestCentering ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
+			var label1 = new Label {IsPlatformEnabled = true, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition () {Width = new GridLength (1, GridUnitType.Star)},
 			};
@@ -600,11 +571,9 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestStart ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label { Platform = platform, IsPlatformEnabled = true, HorizontalOptions = LayoutOptions.Start, VerticalOptions = LayoutOptions.StartAndExpand };
+			var label1 = new Label { IsPlatformEnabled = true, HorizontalOptions = LayoutOptions.Start, VerticalOptions = LayoutOptions.StartAndExpand };
 
 			layout.Children.AddVertical (label1);
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
@@ -622,11 +591,9 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestEnd ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label { Platform = platform, IsPlatformEnabled = true, HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.EndAndExpand };
+			var label1 = new Label { IsPlatformEnabled = true, HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.EndAndExpand };
 
 			layout.Children.AddVertical (label1);
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
@@ -736,7 +703,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestZeroSizeConstraints ()
 		{
-			var layout = new Grid {Platform = new UnitPlatform ()};
+			var layout = new Grid();
 
 			Assert.AreEqual (new Size (0, 0), layout.GetSizeRequest (0, 0).Request);
 			Assert.AreEqual (new Size (0, 0), layout.GetSizeRequest (0, 10).Request);
@@ -746,12 +713,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestSizeRequest ()
 		{
-			var platform = new UnitPlatform ();
-			var layout = new Grid {Platform = platform, IsPlatformEnabled = true};
+			var layout = new Grid {IsPlatformEnabled = true};
 			layout.Children.AddVertical (new[] {
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true}
+				new View {IsPlatformEnabled = true},
+				new View {IsPlatformEnabled = true},
+				new View {IsPlatformEnabled = true}
 			});
 
 			var result = layout.GetSizeRequest (double.PositiveInfinity, double.PositiveInfinity).Request;
@@ -761,12 +727,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestLimitedSizeRequest ()
 		{
-			var platform = new UnitPlatform ();
-			var layout = new Grid {Platform = platform, IsPlatformEnabled = true};
+			var layout = new Grid {IsPlatformEnabled = true};
 			layout.Children.AddVertical (new[] {
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true}
+				new View {IsPlatformEnabled = true},
+				new View {IsPlatformEnabled = true},
+				new View {IsPlatformEnabled = true}
 			});
 
 			var result = layout.GetSizeRequest (10, 10).Request;
@@ -776,12 +741,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestLimitedWidthSizeRequest ()
 		{
-			var platform = new UnitPlatform ();
-			var layout = new Grid {Platform = platform, IsPlatformEnabled = true};
+			var layout = new Grid {IsPlatformEnabled = true};
 			layout.Children.AddVertical (new[] {
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true}
+				new View {IsPlatformEnabled = true},
+				new View {IsPlatformEnabled = true},
+				new View {IsPlatformEnabled = true}
 			});
 
 			var result = layout.GetSizeRequest (10, double.PositiveInfinity).Request;
@@ -793,11 +757,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 
 			var platform = new UnitPlatform ();
-			var layout = new Grid {Platform = platform, IsPlatformEnabled = true};
+			var layout = new Grid { IsPlatformEnabled = true};
 			layout.Children.AddVertical (new[] {
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true}
+				new View { IsPlatformEnabled = true},
+				new View { IsPlatformEnabled = true},
+				new View { IsPlatformEnabled = true}
 			});
 
 			var result = layout.GetSizeRequest (double.PositiveInfinity, 10).Request;
@@ -807,11 +771,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void IgnoresInvisibleChildren ()
 		{
-			var platform = new UnitPlatform ();
-			var layout = new Grid {Platform = platform};
+			var layout = new Grid();
 
-			var label1 = new Label { Platform = platform, IsVisible = false, IsPlatformEnabled = true, VerticalOptions = LayoutOptions.FillAndExpand };
-			var label2 = new Label { Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label { IsVisible = false, IsPlatformEnabled = true, VerticalOptions = LayoutOptions.FillAndExpand };
+			var label2 = new Label { IsPlatformEnabled = true};
 
 			layout.Children.AddVertical (label1);
 			layout.Children.AddVertical (label2);
@@ -836,12 +799,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestSizeRequestWithPadding ()
 		{
-			var platform = new UnitPlatform ();
-			var layout = new Grid {Platform = platform, IsPlatformEnabled = true, Padding = new Thickness(20, 10, 15, 5)};
+			var layout = new Grid { IsPlatformEnabled = true, Padding = new Thickness(20, 10, 15, 5)};
 			layout.Children.AddVertical (new[] {
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true},
-				new View {Platform = platform, IsPlatformEnabled = true}
+				new View { IsPlatformEnabled = true},
+				new View { IsPlatformEnabled = true},
+				new View { IsPlatformEnabled = true}
 			});
 
 			var result = layout.GetSizeRequest (double.PositiveInfinity, double.PositiveInfinity).Request;
@@ -860,20 +822,17 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestAddedBP ()
 		{
-			var platform = new UnitPlatform ();
-
-			var labela0 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var labela1 = new Label { Platform = platform, IsPlatformEnabled = true };
+			var labela0 = new Label { IsPlatformEnabled = true};
+			var labela1 = new Label { IsPlatformEnabled = true };
 			Grid.SetColumn (labela1, 1);
-			var labelb1 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var labelb1 = new Label { IsPlatformEnabled = true};
 			Grid.SetRow (labelb1, 1);
 			Grid.SetColumn (labelb1, 1);
-			var labelc = new Label {Platform = platform, IsPlatformEnabled = true};
+			var labelc = new Label { IsPlatformEnabled = true};
 			Grid.SetRow (labelc, 2);
 			Grid.SetColumnSpan (labelc, 2);
 
 			var layout = new Grid {
-				Platform = platform,
 				Children = {
 					labela0,
 					labela1,
@@ -908,18 +867,17 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var platform = new UnitPlatform();
 			
-			var labela0 = new Label { Platform = platform, IsPlatformEnabled = true };
-			var labela1 = new Label { Platform = platform, IsPlatformEnabled = true };
+			var labela0 = new Label { IsPlatformEnabled = true };
+			var labela1 = new Label { IsPlatformEnabled = true };
 			Grid.SetColumn(labela1, 1);
-			var labelb1 = new Label { Platform = platform, IsPlatformEnabled = true };
+			var labelb1 = new Label { IsPlatformEnabled = true };
 			Grid.SetRow(labelb1, 1);
 			Grid.SetColumn(labelb1, 1);
-			var labelc = new Label { Platform = platform, IsPlatformEnabled = true };
+			var labelc = new Label { IsPlatformEnabled = true };
 			Grid.SetRow(labelc, 2);
 			Grid.SetColumnSpan(labelc, 2);
 
 			var layout = new Grid {
-				Platform = platform,
 				Children = {
 					labela0,
 					labela1,
@@ -935,13 +893,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestAbsoluteLayout ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = new GridLength (150)},
@@ -971,13 +927,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestAbsoluteLayoutWithSpans ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = new GridLength (150)},
@@ -1007,13 +961,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestStarLayout ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = new GridLength (1, GridUnitType.Star)},
@@ -1045,13 +997,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestStarLayoutWithSpans ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = new GridLength (1, GridUnitType.Star)},
@@ -1080,13 +1030,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestAutoLayout ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = GridLength.Auto},
@@ -1116,13 +1064,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestAutoLayoutWithSpans ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label { Platform = platform, IsPlatformEnabled = true, WidthRequest = 150, Text = "label1" };
-			var label2 = new Label { Platform = platform, IsPlatformEnabled = true, HeightRequest = 50, Text = "label2" };
-			var label3 = new Label { Platform = platform, IsPlatformEnabled = true, Text = "label3" };
+			var label1 = new Label { IsPlatformEnabled = true, WidthRequest = 150, Text = "label1" };
+			var label2 = new Label { IsPlatformEnabled = true, HeightRequest = 50, Text = "label2" };
+			var label3 = new Label { IsPlatformEnabled = true, Text = "label3" };
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = GridLength.Auto},
@@ -1151,16 +1097,14 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void AutoLayoutWithComplexSpans ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label4 = new Label {Platform = platform, IsPlatformEnabled = true, WidthRequest = 206};
-			var label5 = new Label {Platform = platform, IsPlatformEnabled = true, WidthRequest = 312};
-			var label6 = new Label {Platform = platform, IsPlatformEnabled = true, WidthRequest = 312};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true};
+			var label4 = new Label { IsPlatformEnabled = true, WidthRequest = 206};
+			var label5 = new Label { IsPlatformEnabled = true, WidthRequest = 312};
+			var label6 = new Label { IsPlatformEnabled = true, WidthRequest = 312};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition {Width = GridLength.Auto},
@@ -1189,13 +1133,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void AutoLayoutExpandColumns ()
 		{
-			var platform = new UnitPlatform ();
 			var layout = new Grid ();
-			layout.Platform = platform;
 
-			var label1 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label2 = new Label {Platform = platform, IsPlatformEnabled = true};
-			var label3 = new Label {Platform = platform, IsPlatformEnabled = true, WidthRequest = 300};
+			var label1 = new Label { IsPlatformEnabled = true};
+			var label2 = new Label { IsPlatformEnabled = true};
+			var label3 = new Label { IsPlatformEnabled = true, WidthRequest = 300};
 
 			layout.ColumnDefinitions = new ColumnDefinitionCollection { 
 				new ColumnDefinition { Width = GridLength.Auto },
@@ -1236,14 +1178,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void ChildrenLayoutRespectAlignment ()
 		{
-			var platform = new UnitPlatform ();
 			var grid = new Grid { 
 				ColumnDefinitions = { new ColumnDefinition { Width = new GridLength (300) } },
 				RowDefinitions = { new RowDefinition { Height = new GridLength (100) } },
-				Platform = platform,
 			};
 			var label = new Label { 
-				Platform = platform, 
 				IsPlatformEnabled = true,
 				VerticalOptions = LayoutOptions.Center,
 				HorizontalOptions = LayoutOptions.End,
@@ -1272,15 +1211,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		//Issue 1384
 		public void ImageInAutoCellIsProperlyConstrained ()
 		{
-			var platform = new UnitPlatform ();
-
 			var content = new Image { 
 				Aspect= Aspect.AspectFit,
-				Platform = platform, 
 				IsPlatformEnabled = true 
 			};
 			var grid = new Grid {
-				Platform = platform, 
 				IsPlatformEnabled = true,
 				BackgroundColor = Color.Red, 
 				VerticalOptions=LayoutOptions.Start,
@@ -1291,7 +1226,6 @@ namespace Xamarin.Forms.Core.UnitTests
 				ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto } }
 			};
 			var view = new ContentView {
-				Platform = platform, 
 				IsPlatformEnabled = true,
 				Content = grid,
 			};
@@ -1308,17 +1242,13 @@ namespace Xamarin.Forms.Core.UnitTests
 		//Issue 1384
 		public void ImageInStarCellIsProperlyConstrained ()
 		{
-			var platform = new UnitPlatform ();
-
 			var content = new Image { 
 				Aspect= Aspect.AspectFit,
-				Platform = platform,
 				MinimumHeightRequest = 10,
 				MinimumWidthRequest = 50,
 				IsPlatformEnabled = true 
 			};
 			var grid = new Grid {
-				Platform = platform, 
 				IsPlatformEnabled = true,
 				BackgroundColor = Color.Red, 
 				VerticalOptions=LayoutOptions.Start,
@@ -1327,7 +1257,6 @@ namespace Xamarin.Forms.Core.UnitTests
 				}
 			};
 			var view = new ContentView {
-				Platform = platform, 
 				IsPlatformEnabled = true,
 				Content = grid,
 			};
@@ -1343,8 +1272,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void SizeRequestForStar ()
 		{
-			var platform = new UnitPlatform ();
-
 			var grid = new Grid{ 
 				RowDefinitions = new RowDefinitionCollection {
 					new RowDefinition {Height = new GridLength (1, GridUnitType.Star)},
@@ -1355,10 +1282,10 @@ namespace Xamarin.Forms.Core.UnitTests
 					new ColumnDefinition {Width = GridLength.Auto},
 				}
 			};
-			grid.Children.Add (new Label {BackgroundColor = Color.Lime, Text="Foo", Platform = platform, IsPlatformEnabled = true});
-			grid.Children.Add (new Label {Text = "Bar", Platform = platform, IsPlatformEnabled = true},0,1);
-			grid.Children.Add (new Label {Text="Baz",XAlign = TextAlignment.End, Platform = platform, IsPlatformEnabled = true},1,0);
-			grid.Children.Add (new Label {Text="Qux", XAlign = TextAlignment.End, Platform = platform, IsPlatformEnabled = true},1,1);
+			grid.Children.Add (new Label {BackgroundColor = Color.Lime, Text="Foo", IsPlatformEnabled = true});
+			grid.Children.Add (new Label {Text = "Bar", IsPlatformEnabled = true},0,1);
+			grid.Children.Add (new Label {Text="Baz",XAlign = TextAlignment.End, IsPlatformEnabled = true},1,0);
+			grid.Children.Add (new Label {Text="Qux", XAlign = TextAlignment.End, IsPlatformEnabled = true},1,1);
 
 			var request = grid.GetSizeRequest (double.PositiveInfinity, double.PositiveInfinity);
 			Assert.AreEqual (206, request.Request.Width);
@@ -1375,13 +1302,11 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var platform = new UnitPlatform ();
 			var label = new Label { 
-				Platform = platform,
 				IsPlatformEnabled = true,
 			};
 			var Button = new Button {
 				HorizontalOptions = LayoutOptions.FillAndExpand,
 				VerticalOptions = LayoutOptions.EndAndExpand,
-				Platform = platform,
 				IsPlatformEnabled = true,
 			};
 			var grid = new Grid {
@@ -1392,7 +1317,6 @@ namespace Xamarin.Forms.Core.UnitTests
 				ColumnDefinitions = new ColumnDefinitionCollection {
 					new ColumnDefinition {Width = new GridLength(1, GridUnitType.Star)},
 				},
-				Platform = platform,
 				IsPlatformEnabled = true,
 			};
 
@@ -1416,7 +1340,6 @@ namespace Xamarin.Forms.Core.UnitTests
 					new ColumnDefinition {Width = new GridLength (1, GridUnitType.Auto)},
 					new ColumnDefinition {Width = new GridLength (1, GridUnitType.Star)}
 				},
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -1453,6 +1376,8 @@ namespace Xamarin.Forms.Core.UnitTests
 		//Issue 1893
 		public void EditorSpanningOnMultipleAutoRows ()
 		{
+			Device.PlatformServices = new MockPlatformServices (getNativeSizeFunc: GetResizableSize);
+
 			var grid0 = new Grid {
 				ColumnDefinitions = {
 					new ColumnDefinition { Width = GridLength.Auto },
@@ -1462,7 +1387,6 @@ namespace Xamarin.Forms.Core.UnitTests
 					new RowDefinition { Height = GridLength.Auto },
 					new RowDefinition { Height = GridLength.Auto },
 				},
-				Platform = new UnitPlatform (GetResizableSize),
 				IsPlatformEnabled = true,
 			};
 
@@ -1482,7 +1406,6 @@ namespace Xamarin.Forms.Core.UnitTests
 				RowDefinitions = {
 					new RowDefinition { Height = GridLength.Auto },
 				},
-				Platform = new UnitPlatform (GetResizableSize),
 				IsPlatformEnabled = true,
 			};
 
@@ -1498,6 +1421,8 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void WidthBoundRequestRespected ()
 		{
+			Device.PlatformServices = new MockPlatformServices (getNativeSizeFunc: GetResizableSize);
+
 			var grid = new Grid {
 				ColumnDefinitions = {
 					new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
@@ -1507,7 +1432,6 @@ namespace Xamarin.Forms.Core.UnitTests
 					new RowDefinition { Height = GridLength.Auto },
 					new RowDefinition { Height = GridLength.Auto },
 				},
-				Platform = new UnitPlatform (GetResizableSize),
 				IsPlatformEnabled = true,
 				RowSpacing = 0,
 				ColumnSpacing = 0,
@@ -1554,7 +1478,6 @@ namespace Xamarin.Forms.Core.UnitTests
 //					rowdef
 //				},
 				RowSpacing = 0,
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true,
 			};
 			grid.RowDefinitions.Add (new RowDefinition { Height = GridLength.Auto });
@@ -1578,7 +1501,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void InvalidationBlockedForAbsoluteCell ()
 		{
 			var grid = new Grid () {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true,
 				RowDefinitions = {
 					new RowDefinition { Height = new GridLength (100, GridUnitType.Absolute) }
@@ -1650,7 +1572,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		{
 			var grid = new Grid {
 				ComputedConstraint = (LayoutConstraint) gridConstraint,
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true,
 				RowDefinitions = {
 					new RowDefinition { Height = new GridLength (1, verticalType) }
@@ -1697,7 +1618,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void NestedInvalidateMeasureDoesNotCrash ()
 		{
 			var grid = new Grid {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 

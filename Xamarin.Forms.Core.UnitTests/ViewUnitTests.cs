@@ -15,7 +15,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		public override void Setup ()
 		{
 			base.Setup ();
-			Device.PlatformServices = new MockPlatformServices ();
+			Device.PlatformServices = new MockPlatformServices();
 		}
 
 		[TearDown]
@@ -41,8 +41,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void TestPreferredSize ()
 		{
 			View view = new View {
-				IsPlatformEnabled = true,
-				Platform = new UnitPlatform ()
+				IsPlatformEnabled = true
 			};
 
 			bool fired = false;
@@ -243,7 +242,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestFadeTo ()
 		{
-			var view = new View {IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.FadeTo (0.1);
@@ -254,7 +253,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestTranslateTo ()
 		{
-			var view = new View {IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.TranslateTo (100, 50);
@@ -266,7 +265,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void ScaleTo ()
 		{
-			var view = new View {IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.ScaleTo (2);
@@ -290,7 +289,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestRotateTo ()
 		{
-			var view = new View {IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.RotateTo (25);
@@ -301,7 +300,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestRotateYTo ()
 		{
-			var view = new View {IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.RotateYTo (25);
@@ -312,7 +311,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestRotateXTo ()
 		{
-			var view = new View {IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.RotateXTo (25);
@@ -323,7 +322,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestRelRotateTo ()
 		{
-			var view = new View {Rotation = 30, IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {Rotation = 30, IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.RelRotateTo (20);
@@ -334,7 +333,7 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void TestRelScaleTo ()
 		{
-			var view = new View {Scale = 1, IsPlatformEnabled = true, Platform = new UnitPlatform ()};
+			var view = new View {Scale = 1, IsPlatformEnabled = true};
 			Ticker.Default = new BlockingTicker ();
 
 			view.RelScaleTo (1);
@@ -526,18 +525,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		}
 
 		[Test]
-		public void PlatformSet ()
-		{
-			var view = new View ();
-			bool set = false;
-			view.PlatformSet += (sender, args) => set = true;
-
-			view.Platform = new UnitPlatform ();
-
-			Assert.True (set);
-		}
-
-		[Test]
 		public void TestFocusedEvent ()
 		{
 			var view = new View ();
@@ -641,7 +628,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void MinimumWidthRequestInSizeRequest ()
 		{
 			var view = new View {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -658,7 +644,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void MinimumHeightRequestInSizeRequest ()
 		{
 			var view = new View {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -796,13 +781,14 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void WidthRequestEffectsGetSizeRequest ()
 		{
-			var view = new View ();
-			view.IsPlatformEnabled = true;
-			view.Platform = new UnitPlatform ((ve, widthConstraint, heightConstraint) => {
+			Device.PlatformServices = new MockPlatformServices (getNativeSizeFunc: (ve, widthConstraint, heightConstraint) => {
 				if (widthConstraint < 30)
 					return new SizeRequest (new Size (40, 50));
 				return new SizeRequest(new Size(20, 100));
 			});
+
+			var view = new View ();
+			view.IsPlatformEnabled = true;
 
 			view.WidthRequest = 20;
 			var request = view.GetSizeRequest (double.PositiveInfinity, double.PositiveInfinity);
@@ -813,13 +799,14 @@ namespace Xamarin.Forms.Core.UnitTests
 		[Test]
 		public void HeightRequestEffectsGetSizeRequest ()
 		{
-			var view = new View ();
-			view.IsPlatformEnabled = true;
-			view.Platform = new UnitPlatform ((ve, widthConstraint, heightConstraint) => {
+			Device.PlatformServices = new MockPlatformServices (getNativeSizeFunc: (ve, widthConstraint, heightConstraint) => {
 				if (heightConstraint < 30)
 					return new SizeRequest (new Size (40, 50));
 				return new SizeRequest(new Size(20, 100));
 			});
+
+			var view = new View ();
+			view.IsPlatformEnabled = true;
 
 			view.HeightRequest = 20;
 			var request = view.GetSizeRequest (double.PositiveInfinity, double.PositiveInfinity);

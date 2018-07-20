@@ -56,7 +56,9 @@ namespace Xamarin.Forms.Platform.UWP
 
 			var root = new Windows.UI.Xaml.Controls.Page();
 
-			new WindowsPlatform(root).SetPlatformDisconnected(visualElement);
+			// ReSharper disable once ObjectCreationAsStatement - We need the platform to exist (and hook up a bunch
+			// of listeners to stuff on root), but we don't need any further references to it here
+			new WindowsPlatform(root);
 
 			var renderer = visualElement.GetOrCreateRenderer();
 

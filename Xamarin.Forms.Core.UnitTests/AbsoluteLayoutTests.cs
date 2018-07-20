@@ -15,12 +15,10 @@ namespace Xamarin.Forms.Core.UnitTests
 			Device.Info = mockDeviceInfo;
 		}
 
-
 		[Test]
 		public void Constructor ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -35,7 +33,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void AbsolutePositionAndSize ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -52,7 +49,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void AbsolutePositionRelativeSize ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -76,7 +72,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void RelativePositionAbsoluteSize (double width, double height, double relX, double relY)
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -98,7 +93,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void RelativePositionRelativeSize ([Values (0.0, 0.2, 0.5, 1.0)] double relX, [Values (0.0, 0.2, 0.5, 1.0)] double relY, [Values (0.0, 0.2, 0.5, 1.0)] double relHeight, [Values (0.0, 0.2, 0.5, 1.0)] double relWidth)
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -122,7 +116,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void SizeRequestWithNormalChild ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -141,7 +134,6 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void SizeRequestWithRelativePositionChild ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -160,12 +152,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void SizeRequestWithRelativeChild ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
 			var child = new View {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -182,12 +172,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void SizeRequestWithRelativeSizeChild ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
 			var child = new View {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -204,12 +192,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void MeasureInvalidatedFiresWhenFlagsChanged ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
 			var child = new View {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
@@ -227,12 +213,10 @@ namespace Xamarin.Forms.Core.UnitTests
 		public void MeasureInvalidatedFiresWhenBoundsChanged ()
 		{
 			var abs = new AbsoluteLayout {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 
 			var child = new View {
-				Platform = new UnitPlatform (),
 				IsPlatformEnabled = true
 			};
 

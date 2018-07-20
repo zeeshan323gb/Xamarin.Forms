@@ -11,7 +11,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.Android.AppCompat
 {
-	internal class Platform : BindableObject, IPlatform, IPlatformLayout, INavigation, IDisposable
+	internal class Platform : BindableObject, IPlatformLayout, INavigation, IDisposable
 	{
 		readonly Context _context;
 		readonly PlatformRenderer _renderer;
@@ -148,8 +148,6 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 			_navModel.PushModal(modal);
 
-			modal.Platform = this;
-
 			Task presentModal = PresentModal(modal, animated);
 
 			await presentModal;
@@ -162,46 +160,6 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		void INavigation.RemovePage(Page page)
 		{
 			throw new InvalidOperationException("RemovePage is not supported globally on Android, please use a NavigationPage.");
-		}
-
-		SizeRequest IPlatform.GetNativeSize(VisualElement view, double widthConstraint, double heightConstraint)
-		{
-			Performance.Start(out string reference);
-
-			// FIXME: potential crash
-			IVisualElementRenderer visualElementRenderer = Android.Platform.GetRenderer(view);
-
-			// negative numbers have special meanings to android they don't to us
-			widthConstraint = widthConstraint <= -1 ? double.PositiveInfinity : _context.ToPixels(widthConstraint);
-			heightConstraint = heightConstraint <= -1 ? double.PositiveInfinity : _context.ToPixels(heightConstraint);
-
-			bool widthConstrained = !double.IsPositiveInfinity(widthConstraint);
-			bool heightConstrained = !double.IsPositiveInfinity(heightConstraint);
-
-			int widthMeasureSpec = widthConstrained
-							? MeasureSpecFactory.MakeMeasureSpec((int)widthConstraint, MeasureSpecMode.AtMost)
-							: MeasureSpecFactory.MakeMeasureSpec(0, MeasureSpecMode.Unspecified);
-
-			int heightMeasureSpec = heightConstrained
-							 ? MeasureSpecFactory.MakeMeasureSpec((int)heightConstraint, MeasureSpecMode.AtMost)
-							 : MeasureSpecFactory.MakeMeasureSpec(0, MeasureSpecMode.Unspecified);
-
-			SizeRequest rawResult = visualElementRenderer.GetDesiredSize(widthMeasureSpec, heightMeasureSpec);
-			if (rawResult.Minimum == Size.Zero)
-				rawResult.Minimum = rawResult.Request;
-			var result = new SizeRequest(new Size(_context.FromPixels(rawResult.Request.Width), _context.FromPixels(rawResult.Request.Height)),
-				new Size(_context.FromPixels(rawResult.Minimum.Width), _context.FromPixels(rawResult.Minimum.Height)));
-
-			if ((widthConstrained && result.Request.Width < widthConstraint)
-				|| (heightConstrained && result.Request.Height < heightConstraint))
-			{
-				// Do a final exact measurement in case the native control needs to fill the container
-				(visualElementRenderer as IViewRenderer)?.MeasureExactly();
-			}
-
-			Performance.Stop(reference);
-
-			return result;
 		}
 
 		void IPlatformLayout.OnLayout(bool changed, int l, int t, int r, int b)
@@ -280,7 +238,6 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			_navModel.Push(newRoot, null);
 
 			Page = newRoot;
-			Page.Platform = this;
 			AddChild(Page, layout);
 
 			Application.Current.NavigationProxy.Inner = this;

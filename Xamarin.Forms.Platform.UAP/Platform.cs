@@ -14,7 +14,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.UWP
 {
-	public abstract class Platform : IPlatform, INavigation, IToolbarProvider
+	public abstract class Platform : INavigation, IToolbarProvider
 	{
 		static Task<bool> s_currentAlert;
 
@@ -101,11 +101,6 @@ namespace Xamarin.Forms.Platform.UWP
 			Application.Current.NavigationProxy.Inner = this;
 		}
 
-		internal void SetPlatformDisconnected(VisualElement visualElement)
-		{
-			visualElement.Platform = this;
-		}
-
 		public IReadOnlyList<Page> NavigationStack
 		{
 			get { return _navModel.Tree.Last(); }
@@ -187,21 +182,6 @@ namespace Xamarin.Forms.Platform.UWP
 			return tcs.Task;
 		}
 
-		SizeRequest IPlatform.GetNativeSize(VisualElement element, double widthConstraint, double heightConstraint)
-		{
-			// Hack around the fact that Canvas ignores the child constraints.
-			// It is entirely possible using Canvas as our base class is not wise.
-			// FIXME: This should not be an if statement. Probably need to define an interface here.
-			if (widthConstraint > 0 && heightConstraint > 0)
-			{
-				IVisualElementRenderer elementRenderer = GetRenderer(element);
-				if (elementRenderer != null)
-					return elementRenderer.GetDesiredSize(widthConstraint, heightConstraint);
-			}
-
-			return new SizeRequest();
-		}
-
 		internal virtual Rectangle ContainerBounds
 		{
 			get { return _bounds; }
@@ -279,8 +259,6 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			if (newPage == _currentPage)
 				return;
-
-			newPage.Platform = this;
 
 			if (_currentPage != null)
 			{
