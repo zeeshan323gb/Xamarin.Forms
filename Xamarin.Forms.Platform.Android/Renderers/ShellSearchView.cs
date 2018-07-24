@@ -299,7 +299,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			var result = new ImageButton(context);
 			result.SetPadding(0, 0, 0, 0);
-			result.SetFocusable(ViewFocusability.NotFocusable);
+			result.Focusable = false;
 
 			string defaultHint = null;
 			string defaultDescription = null;

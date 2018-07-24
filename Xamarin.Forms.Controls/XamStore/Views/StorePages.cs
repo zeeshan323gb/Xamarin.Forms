@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms.Internals;
@@ -211,6 +212,11 @@ namespace Xamarin.Forms.Controls.XamStore
 
 
 			Content = new ScrollView { Content = grid };
+
+			//var listView = new ListView();
+			//listView.ItemsSource = Enumerable.Range(0, 1000).ToList();
+
+			//Content = listView;
 		}
 
 		Switch _navBarVisibleSwitch;
