@@ -7,8 +7,6 @@ namespace Xamarin.Forms
 {
 	public partial class VisualElement : Element, IAnimatable, IVisualElementController, IResourcesProvider, IStyleElement, IFlowDirectionController
 	{
-		public static IPlatform Platform2 { get; set; }
-
 		internal static readonly BindablePropertyKey NavigationPropertyKey = BindableProperty.CreateReadOnly("Navigation", typeof(INavigation), typeof(VisualElement), default(INavigation));
 
 		public static readonly BindableProperty NavigationProperty = NavigationPropertyKey.BindableProperty;
@@ -681,11 +679,6 @@ namespace Xamarin.Forms
 		[Obsolete("OnSizeRequest is obsolete as of version 2.2.0. Please use OnMeasure instead.")]
 		protected virtual SizeRequest OnSizeRequest(double widthConstraint, double heightConstraint)
 		{
-			if (Platform2 != null && IsPlatformEnabled)
-			{
-				return Platform2.GetNativeSize(this, widthConstraint, heightConstraint);
-			}
-
 			if (Platform == null || !IsPlatformEnabled)
 			{
 				return new SizeRequest(new Size(-1, -1));
