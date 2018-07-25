@@ -34,8 +34,7 @@ namespace Xamarin.Forms.Controls.Issues
 			var buttonC = new Button() { Text = "EVAL", BackgroundColor = Color.LightBlue, AutomationId = "buttonC" };
 			var buttonD = new Button() { Text = "AEVAL", BackgroundColor = Color.LightBlue, AutomationId = "buttonD" };
 
-			//var url = "http://www.milliondollarhomepage.com/";
-			var url = "https://www.cnn.com/";
+			var url = "https://www.microsoft.com/";
 			var html = $"<html><body><a href=\"{url}\">Link</a></body></html>";
 
 			var webView = new WkWebView()
@@ -145,11 +144,6 @@ namespace Xamarin.Forms.Controls.Issues
 			// Initialize ui here instead of ctor
 			Content = grid;
 			BackgroundColor = Color.Gray;
-		}
-
-		private void WebView_Navigating(object sender, WebNavigatingEventArgs e)
-		{
-			throw new System.NotImplementedException();
 		}
 	}
 }
