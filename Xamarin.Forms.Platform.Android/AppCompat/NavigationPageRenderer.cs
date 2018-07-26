@@ -757,7 +757,11 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			Current?.SendDisappearing();
 			Current = page;
 
-			Platform.NavAnimationInProgress = true;
+			if (Platform != null)
+			{
+				Platform.NavAnimationInProgress = true;
+			}
+
 			FragmentTransaction transaction = FragmentManager.BeginTransactionEx();
 
 			if (animated)
@@ -827,7 +831,11 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 				AddTransitionTimer(tcs, fragment, FragmentManager, fragmentsToRemove, 1, true);
 
 			Context.HideKeyboard(this);
-			Platform.NavAnimationInProgress = false;
+			
+			if (Platform != null)
+			{
+				Platform.NavAnimationInProgress = false;
+			}
 
 			return tcs.Task;
 		}
