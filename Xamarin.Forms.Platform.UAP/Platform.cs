@@ -13,7 +13,7 @@ using Xamarin.Forms.Internals;
 
 namespace Xamarin.Forms.Platform.UWP
 {
-	public abstract class Platform : IPlatform, INavigation, IToolbarProvider
+	public abstract class Platform : IPlatform, INavigation
 	{
 		static Task<bool> s_currentAlert;
 
@@ -298,11 +298,6 @@ namespace Xamarin.Forms.Platform.UWP
 			await UpdateToolbarItems();
 		}
 
-		Task<CommandBar> IToolbarProvider.GetCommandBarAsync()
-		{
-			return GetCommandBarAsync();
-		}
-
 		async void OnToolbarItemsChanged(object sender, EventArgs e)
 		{
 			await UpdateToolbarItems();
@@ -365,7 +360,14 @@ namespace Xamarin.Forms.Platform.UWP
 
 		internal async Task UpdateToolbarItems()
 		{
-			CommandBar commandBar = await GetCommandBarAsync();
+			var toolbarProvider = GetToolbarProvider();
+			
+			if (toolbarProvider == null)
+			{
+				return;
+			}
+
+			CommandBar commandBar = await toolbarProvider.GetCommandBarAsync();
 
 			if (commandBar == null)
 			{
@@ -375,11 +377,11 @@ namespace Xamarin.Forms.Platform.UWP
 			commandBar.PrimaryCommands.Clear();
 			commandBar.SecondaryCommands.Clear();
 
-			var toolBarProvider = GetToolbarProvider() as IToolBarForegroundBinder;
+			var toolBarForegroundBinder = GetToolbarProvider() as IToolBarForegroundBinder;
 
 			foreach (ToolbarItem item in _toolbarTracker.ToolbarItems.OrderBy(ti => ti.Priority))
 			{
-				toolBarProvider?.BindForegroundColor(commandBar);
+				toolBarForegroundBinder?.BindForegroundColor(commandBar);
 
 				var button = new AppBarButton();
 				button.SetBinding(AppBarButton.LabelProperty, "Text");
@@ -390,7 +392,7 @@ namespace Xamarin.Forms.Platform.UWP
 				ToolbarItemOrder order = item.Order == ToolbarItemOrder.Default ? ToolbarItemOrder.Primary : item.Order;
 				if (order == ToolbarItemOrder.Primary)
 				{
-					toolBarProvider?.BindForegroundColor(button);
+					toolBarForegroundBinder?.BindForegroundColor(button);
 					commandBar.PrimaryCommands.Add(button);
 				}
 				else
@@ -416,17 +418,6 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 
 			return provider;
-		}
-
-		async Task<CommandBar> GetCommandBarAsync()
-		{
-			IToolbarProvider provider = GetToolbarProvider();
-			if (provider == null)
-			{
-				return null;
-			}
-
-			return await provider.GetCommandBarAsync();
 		}
 
 		internal static void SubscribeAlertsAndActionSheets()
