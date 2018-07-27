@@ -265,12 +265,16 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 		{
 			var layout = false;
 
+			var viewsToRemove = new List<global::Android.Views.View>();
+			var renderersToDispose = new List<IVisualElementRenderer>();
+
 			if (Page != null)
 			{
-				_renderer.RemoveAllViews();
+				for (int i = 0; i < _renderer.ChildCount; i++)
+					viewsToRemove.Add(_renderer.GetChildAt(i));
 
-				foreach (IVisualElementRenderer rootRenderer in _navModel.Roots.Select(Android.Platform.GetRenderer))
-					rootRenderer.Dispose();
+				foreach (var root in _navModel.Roots)
+					renderersToDispose.Add(Android.Platform.GetRenderer(root));
 
 				_navModel = new NavigationModel();
 
@@ -278,7 +282,10 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			}
 
 			if (newRoot == null)
+			{
+				Cleanup(viewsToRemove, renderersToDispose);
 				return;
+			}
 
 			_navModel.Push(newRoot, null);
 
@@ -286,8 +293,20 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 			Page.Platform = this;
 			AddChild(Page, layout);
 
+			Cleanup(viewsToRemove, renderersToDispose);
+
 			Application.Current.NavigationProxy.Inner = this;
 		}
+
+		void Cleanup(List<global::Android.Views.View> viewsToRemove, List<IVisualElementRenderer> renderersToDispose)
+		{
+			foreach (var view in viewsToRemove)
+				_renderer?.RemoveView(view);
+
+			foreach (IVisualElementRenderer rootRenderer in renderersToDispose)
+				rootRenderer?.Dispose();
+		}
+
 		void AddChild(Page page, bool layout = false)
 		{
 			if (page == null)
