@@ -1,11 +1,6 @@
 ﻿using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
 
-#if UITEST
-using Xamarin.UITest;
-using NUnit.Framework;
-#endif
-
 namespace Xamarin.Forms.Controls.Issues
 {
 	[Preserve(AllMembers = true)]
@@ -54,15 +49,5 @@ namespace Xamarin.Forms.Controls.Issues
 					})
 				});
 		}
-
-#if UITEST
-		[Test]
-		public void Issue3415Test ()
-		{
-			RunningApp.Screenshot ("I am at Issue 1");
-			RunningApp.WaitForElement (q => q.Marked ("IssuePageLabel"));
-			RunningApp.Screenshot ("I see the Label");
-		}
-#endif
 	}
 }
