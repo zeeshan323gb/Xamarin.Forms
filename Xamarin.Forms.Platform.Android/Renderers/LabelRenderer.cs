@@ -213,8 +213,12 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			if (Element.LineHeight == -1)
 				_view.SetLineSpacing(_lineSpacingExtraDefault, _lineSpacingMultiplierDefault);
+
 			else if (Element.LineHeight >= 0)
+			{
 				_view.SetLineSpacing(0, (float)Element.LineHeight);
+				_lastSizeRequest = null;
+			}
 		}
 
 		void UpdateText()

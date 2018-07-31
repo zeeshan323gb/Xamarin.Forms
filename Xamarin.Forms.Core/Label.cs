@@ -195,7 +195,8 @@ namespace Xamarin.Forms
 			InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
 
 		void IFontElement.OnFontChanged(Font oldValue, Font newValue) =>
-			 InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
+			InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
+
 		void ILineHeightElement.OnLineHeightChanged(double oldValue, double newValue) =>
 			InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
 
