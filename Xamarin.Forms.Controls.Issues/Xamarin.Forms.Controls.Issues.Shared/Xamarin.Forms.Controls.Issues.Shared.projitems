@@ -238,6 +238,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59248.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59457.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla59580.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue1469.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Effects\AttachedStateEffect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Effects\AttachedStateEffectLabel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Effects\AttachedStateEffectList.cs" />
@@ -247,6 +248,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Issue1556.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1799.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1931.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue3000.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue3053.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue2617.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue3087.cs" />
@@ -476,6 +478,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Issue2740.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1939.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Issue1666.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Issue2838.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)_Template.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla56298.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bugzilla42620.cs" />
