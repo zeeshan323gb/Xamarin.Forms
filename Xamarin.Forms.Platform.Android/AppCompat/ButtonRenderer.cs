@@ -79,6 +79,9 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 		protected override void Dispose(bool disposing)
 		{
+			//System.Diagnostics.Debug.WriteLine($"ButtonRenderer Dispose: {MyPersonalId} {Handle}");
+			//System.Diagnostics.Debug.WriteLine($"ButtonRenderer._backgroundTracker?._backgroundDrawable Dispose: {MyPersonalId} {_backgroundTracker?._backgroundDrawable?.Handle}");
+
 			if (_isDisposed)
 				return;
 

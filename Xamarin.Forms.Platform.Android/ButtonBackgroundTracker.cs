@@ -132,6 +132,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected virtual void Dispose(bool disposing)
 		{
+			//System.Diagnostics.Debug.WriteLine($"Button Background Tracker Dispose: {_backgroundDrawable?.Handle}");
+
 			if (!_disposed)
 			{
 				if (disposing)
@@ -151,6 +153,7 @@ namespace Xamarin.Forms.Platform.Android
 				}
 				_disposed = true;
 			}
+			//System.Diagnostics.Debug.WriteLine($"AFTER Button Background Tracker Dispose: {_backgroundDrawable?.Handle}");
 		}
 
 		void ButtonPropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -36,8 +36,11 @@ namespace Xamarin.Forms.Platform.Android
 			set { _paddingTop = value; }
 		}
 
+		
+		string MyPersonalId = Guid.NewGuid().ToString();
 		public ButtonDrawable(Func<double, float> convertToPixels, Color defaultColor)
 		{
+			
 			_convertToPixels = convertToPixels;
 			_pressed = false;
 			_defaultColor = defaultColor;
@@ -63,6 +66,9 @@ namespace Xamarin.Forms.Platform.Android
 			if (width <= 0 || height <= 0)
 				return;
 
+			//System.Diagnostics.Debug.WriteLine($"Draw: {Handle} _normalBitmap {_normalBitmap?.Handle} IsDisposed: {_normalBitmap?.IsDisposed() == true}");
+
+
 			if (_normalBitmap == null || _normalBitmap.Height != height || _normalBitmap.Width != width)
 			{
 				Reset();
@@ -70,6 +76,8 @@ namespace Xamarin.Forms.Platform.Android
 				_normalBitmap = CreateBitmap(false, width, height);
 				_pressedBitmap = CreateBitmap(true, width, height);
 			}
+
+			//System.Diagnostics.Debug.WriteLine($"Draw: {Handle} _normalBitmap {_normalBitmap?.Handle} IsDisposed: {_normalBitmap?.IsDisposed()}");
 
 			Bitmap bitmap = GetState().Contains(global::Android.Resource.Attribute.StatePressed) ? _pressedBitmap : _normalBitmap;
 			canvas.DrawBitmap(bitmap, 0, 0, new Paint());
@@ -91,20 +99,25 @@ namespace Xamarin.Forms.Platform.Android
 			return this;
 		}
 
+		
 		public void Reset()
 		{
 			if (_normalBitmap != null)
 			{
+				//System.Diagnostics.Debug.WriteLine($"_normalBitmap: Reset: {Handle}  {MyPersonalId}");
 				_normalBitmap.Recycle();
 				_normalBitmap.Dispose();
 				_normalBitmap = null;
+				//System.Diagnostics.Debug.WriteLine($"AFTER _normalBitmap: Reset: {Handle}  {MyPersonalId}");
 			}
 
 			if (_pressedBitmap != null)
 			{
+				//System.Diagnostics.Debug.WriteLine($"_pressedBitmap: Reset: {Handle}  {MyPersonalId}");
 				_pressedBitmap.Recycle();
 				_pressedBitmap.Dispose();
 				_pressedBitmap = null;
+				//System.Diagnostics.Debug.WriteLine($"AFTER _pressedBitmap: Reset: {Handle}  {MyPersonalId}");
 			}
 		}
 
@@ -117,10 +130,12 @@ namespace Xamarin.Forms.Platform.Android
 		}
 
 		public Color BackgroundColor => Button.BackgroundColor == Color.Default ? _defaultColor : Button.BackgroundColor;
+
 		public Color PressedBackgroundColor => BackgroundColor.AddLuminosity(-.12);//<item name="highlight_alpha_material_light" format="float" type="dimen">0.12</item>
 
 		protected override void Dispose(bool disposing)
 		{
+			//System.Diagnostics.Debug.WriteLine($"Button Drawable Dispose: {Handle} {MyPersonalId}");
 			if (_isDisposed)
 				return;
 
