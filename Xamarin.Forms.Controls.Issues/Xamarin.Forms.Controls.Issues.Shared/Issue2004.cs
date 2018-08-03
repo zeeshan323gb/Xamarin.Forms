@@ -81,11 +81,21 @@ namespace Xamarin.Forms.Controls.Issues
 			await UI(999);
 
 			//crash happens here
+			int i = 0;
+			Page.SomeRandomCallback = () =>
+			{
+				if (i == 2)
+				{
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+				}
+				i++;
+			};
 			SetPage(Issue2004.addressesPage);
 			await UI(999);
 
-			DisposedBitmapTest();
-			await UI(999);
+			//DisposedBitmapTest();
+			//await UI(999);
 
 			//SetPage(new ContentPage() { Content = new Label() { Text = "Success" } });
 		}

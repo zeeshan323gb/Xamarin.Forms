@@ -14,6 +14,8 @@ namespace Xamarin.Forms
 	[RenderWith(typeof(_PageRenderer))]
 	public class Page : VisualElement, ILayout, IPageController, IElementConfiguration<Page>, IPaddingElement
 	{
+
+		public static Action SomeRandomCallback;
 		public const string BusySetSignalName = "Xamarin.BusySet";
 
 		public const string AlertSignalName = "Xamarin.SendAlert";

@@ -69,6 +69,9 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected override void OnLayout(bool changed, int l, int t, int r, int b)
 		{
+			if (Page.SomeRandomCallback != null)
+				Page.SomeRandomCallback();
+
 			SetMeasuredDimension(r - l, b - t);
 			_canvas?.OnLayout(changed, l, t, r, b);
 		}
