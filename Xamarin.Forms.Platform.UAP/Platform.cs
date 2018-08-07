@@ -500,5 +500,14 @@ namespace Xamarin.Forms.Platform.UWP
 
 			return result == ContentDialogResult.Primary;
 		}
+
+		void OnBackRequested(object sender, BackRequestedEventArgs e)
+		{
+			Application app = Application.Current;
+			Page page = app?.MainPage;
+			if (page == null)
+				return;
+			e.Handled = BackButtonPressed();
+		}
 	}
 }
