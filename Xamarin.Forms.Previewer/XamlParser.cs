@@ -199,11 +199,38 @@ namespace  Xamarin.Forms.Previewer
     </Grid>
 </ContentPage>";
 
+		static string XamlLoginPage = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<ContentPage xmlns=""http://xamarin.com/schemas/2014/forms"" xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"" x:Class=""UISampleApp.Logins.LoginPage"" xmlns:local=""clr-namespace:UISampleApp.Effects"" BackgroundColor=""Black"">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key=""primary"">#ff3467</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout Spacing=""10"">
+                <Label HeightRequest=""110"" HorizontalOptions=""FillAndExpand"" Text=""UiApp"" BackgroundColor=""{StaticResource primary}"" TextColor=""White"" FontSize=""40"" HorizontalTextAlignment=""Center"" VerticalTextAlignment=""Center"" />
+                <Entry Margin=""20,40,20,0"" HeightRequest=""50"" Placeholder=""Email""/>
+                <Entry Margin=""20,0,20,0"" HeightRequest=""50"" IsPassword=""true"" Placeholder=""Password""/>
+		<StackLayout Orientation=""Horizontal"">
+		<Label Margin=""21,0,20,0""  TextColor=""White"" Text=""Save Credentials""/>
+		<Switch IsToggled=""True"" Margin=""21,0,20,0"" HorizontalOptions=""EndAndExpand""/>
+		</StackLayout>
+                <Button Margin=""20,0,20,0"" HeightRequest=""50"" TextColor=""White"" Text=""Login"" BackgroundColor=""{StaticResource primary}"" HorizontalOptions=""FillAndExpand"" />
+                <Button Margin=""20,0,20,0"" HeightRequest=""50"" TextColor=""White"" Text=""Register"" BackgroundColor=""Gray"" HorizontalOptions=""FillAndExpand"" />
+                <Label Text=""Forgot password"" HorizontalOptions=""Center"" TextColor=""{StaticResource primary}"" />
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>";
+
 		public static XamlSample[] Samples = {
 			new XamlSample("Simple",XamlSimpleString),
+			new XamlSample("Login Page",XamlLoginPage),
 			new XamlSample("Complex", XamlComplexSampleString),
 			new XamlSample("Playback Screen", XamlPlaybackScreen)
 		};
+
 		public class XamlSample
 		{
 			public XamlSample()
