@@ -9,27 +9,32 @@ namespace Xamarin.Forms.Previewer
 
 		public static readonly ScreenSize[] Sizes = {
 			new ScreenSize{
-				Description="iPhone X",
+				Description="375x812 (iPhone X)",
 				Width=375,
 				Height = 812
 			},
 			new ScreenSize{
-				Description="iPhone 6/7/8 Plus",
+				Description="412x732 (Pixel 2)",
+				Width=412,
+				Height = 732
+			},
+			new ScreenSize{
+				Description="5.5\" (iPhone 6/7/8 Plus)",
 				Width=414,
 				Height = 736
 			},
 			new ScreenSize{
-				Description="iPhone 6/7/8",
+				Description="4.7\" (iPhone 6/7/8)",
 				Width=375,
 				Height = 667
 			},
 			new ScreenSize {
-				Description = "iPhone 5",
+				Description = "4\" (iPhone 5)",
 				Width = 320,
 				Height = 568
 			},
 			new ScreenSize{
-				Description = "iPhone 4",
+				Description = "3.5\" (iPhone 4)",
 				Width = 320,
 				Height = 480,
 			},
