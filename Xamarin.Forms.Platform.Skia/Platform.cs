@@ -11,7 +11,7 @@ namespace Xamarin.Forms.Platform.Skia
 		{
 			SizeRequest? result = null;
 
-			if (view is Button || view is Label || view is Entry)
+			if (view is Button || view is Label || view is Entry || view is Editor)
 			{
 				string text = null;
 				TextDrawingData drawingData = null;
@@ -31,6 +31,11 @@ namespace Xamarin.Forms.Platform.Skia
 					text = entry.Text;
 					drawingData = new TextDrawingData(entry);
 				}
+				else if (view is Editor editor)
+				{
+					text = editor.Text;
+					drawingData = new TextDrawingData(editor);
+				}
 
 				if (string.IsNullOrEmpty(text))
 					text = " ";
@@ -38,6 +43,9 @@ namespace Xamarin.Forms.Platform.Skia
 				drawingData.Rect = new Rectangle(0, 0,
 					double.IsPositiveInfinity(widthConstraint) ? float.MaxValue : widthConstraint,
 					double.IsPositiveInfinity(heightConstraint) ? float.MaxValue : heightConstraint);
+
+				if (view is Editor)
+					drawingData.Rect = drawingData.Rect.Inflate(-8, 0);
 
 				Forms.GetTextLayout(text, drawingData, true, out var lines);
 
@@ -50,8 +58,8 @@ namespace Xamarin.Forms.Platform.Skia
 				if (view is Button)
 					size += new Size(28, 20);
 
-				if (view is Entry)
-					size += new Size(15, 15);
+				if (view is Entry || view is Editor)
+					size += new Size(16, 16);
 
 				return new SizeRequest(size);
 			}

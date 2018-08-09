@@ -256,6 +256,38 @@ namespace Xamarin.Forms.Platform.Skia
 			DrawVisualElement(page, canvas);
 		}
 
+		private static void DrawEntryBackground(VisualElement element, SKCanvas canvas)
+		{
+			var path = RoundedRect(element.Bounds.Inflate(-1, -1), new CornerRadius(3));
+			var paint = new SKPaint
+			{
+				IsAntialias = true,
+				Color = element.BackgroundColor.ToSKColor(Color.White),
+			};
+
+			canvas.DrawPath(path, paint);
+
+			paint = new SKPaint
+			{
+				IsStroke = true,
+				IsAntialias = true,
+				Color = SKColors.Black,
+				StrokeWidth = 2,
+			};
+
+			canvas.DrawPath(path, paint);
+		}
+
+		private static void DrawEditor(Editor editor, SKCanvas canvas)
+		{
+			DrawEntryBackground(editor, canvas);
+
+			var data = new TextDrawingData(editor);
+			data.Rect = data.Rect.Inflate(-8, -8);
+
+			DrawText(editor.Text, canvas, data);
+		}
+
 		private static void DrawElement(Element element, SKCanvas canvas, string drawRequest, Action redraw)
 		{
 			if (element is ContentPage page)
@@ -288,6 +320,10 @@ namespace Xamarin.Forms.Platform.Skia
 			else if (element is Entry entry)
 			{
 				DrawEntry(entry, canvas);
+			}
+			else if (element is Editor editor)
+			{
+				DrawEditor(editor, canvas);
 			}
 			else if (element is VisualElement ve)
 			{
@@ -403,24 +439,7 @@ namespace Xamarin.Forms.Platform.Skia
 
 		private static void DrawEntry(Entry entry, SKCanvas canvas)
 		{
-			var path = RoundedRect(entry.Bounds.Inflate(-1, -1), new CornerRadius(3));
-			var paint = new SKPaint
-			{
-				IsAntialias = true,
-				Color = entry.BackgroundColor.ToSKColor(Color.White),
-			};
-
-			canvas.DrawPath(path, paint);
-
-			paint = new SKPaint
-			{
-				IsStroke = true,
-				IsAntialias = true,
-				Color = SKColors.Black,
-				StrokeWidth = 2,
-			};
-
-			canvas.DrawPath(path, paint);
+			DrawEntryBackground(entry, canvas);
 
 			var data = new TextDrawingData(entry);
 			data.Rect = data.Rect.Inflate(-15, 0);
@@ -519,6 +538,17 @@ namespace Xamarin.Forms.Platform.Skia
 			HAlign = TextAlignment.Start;
 			VAlign = TextAlignment.Center;
 			Attributes = entry.FontAttributes;
+		}
+
+		public TextDrawingData(Editor editor)
+		{
+			Color = editor.TextColor;
+			Rect = editor.Bounds;
+			FontSize = editor.FontSize;
+			Wrapping = LineBreakMode.WordWrap;
+			HAlign = TextAlignment.Start;
+			VAlign = TextAlignment.Start;
+			Attributes = editor.FontAttributes;
 		}
 
 		public TextDrawingData(Label label)
