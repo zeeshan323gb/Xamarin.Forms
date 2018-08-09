@@ -142,7 +142,7 @@ namespace  Xamarin.Forms.Previewer
 		public static string XamlKitchenSinkString = @"<ContentPage xmlns=""http://xamarin.com/schemas/2014/forms""
              xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml""
              x:Class=""XamlSamples.GridDemoPage""
-             BackgroundColor=""Black""
+             BackgroundColor=""LightGray""
              Title=""Grid Demo Page"">
 	<StackLayout>
 		<Label Text=""Hello, XAML!""
