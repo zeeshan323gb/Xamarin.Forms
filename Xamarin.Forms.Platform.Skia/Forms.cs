@@ -511,7 +511,7 @@ namespace Xamarin.Forms.Platform.Skia
 		}
 		public void Dispose()
 		{
-			canvas.Dispose();
+			canvas.Restore();
 		}
 	}
 	public class TextDrawingData
