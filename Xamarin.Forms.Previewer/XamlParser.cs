@@ -158,6 +158,7 @@ namespace  Xamarin.Forms.Previewer
 	<Stepper/>
 	<Button BackgroundColor =""Red"" TextColor=""White"" Text=""Hello""/>
 	<Slider Value="".5""/>
+	<ActivityIndicator/>
 	</StackLayout>
 </ContentPage>";
 
