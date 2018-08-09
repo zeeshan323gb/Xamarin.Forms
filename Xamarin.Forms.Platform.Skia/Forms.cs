@@ -293,6 +293,13 @@ namespace Xamarin.Forms.Platform.Skia
 			{
 				DrawImage(image, canvas, drawRequest, redraw);
 			}
+			else if (element is Switch theSwitch)
+			{
+				using (new CanvasTransForm(theSwitch, canvas))
+				{
+					DrawSwitch(theSwitch, canvas);
+				}
+			}
 			else if (element is VisualElement ve)
 			{
 				DrawVisualElement(ve, canvas);
@@ -309,6 +316,100 @@ namespace Xamarin.Forms.Platform.Skia
 			}
 
 			canvas.Restore();
+		}
+		private static void DrawSwitch(Switch theSwitch, SKCanvas canvas)
+		{
+			bool switchState = theSwitch.IsToggled;
+			// Fill color for Rectangle Style
+			var RectangleStyleFillColor = switchState ? new SKColor(0, 150, 255, 255) : new SKColor(121, 121, 121, 255);
+
+			// New Rectangle Style fill paint
+			var RectangleStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = RectangleStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			// Frame color for Rectangle Style
+			var RectangleStyleFrameColor = new SKColor(0, 0, 0, 255);
+
+			// New Rectangle Style frame paint
+			var RectangleStyleFramePaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Stroke,
+				Color = RectangleStyleFrameColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				StrokeWidth = 1f,
+				StrokeMiter = 4f,
+				StrokeJoin = SKStrokeJoin.Miter,
+				StrokeCap = SKStrokeCap.Butt
+			};
+
+			// Draw Rectangle shape
+			canvas.DrawRect(new SKRect(1f, 0.6445313f, 81f, 27.64453f), RectangleStyleFillPaint);
+			canvas.DrawRect(new SKRect(1f, 0.6445313f, 81f, 27.64453f), RectangleStyleFramePaint);
+
+			// Fill color for Rectangle Style
+			var RectangleStyle1FillColor = new SKColor(254, 255, 255, 255);
+
+			// New Rectangle Style fill paint
+			var RectangleStyle1FillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = RectangleStyle1FillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			// Frame color for Rectangle Style
+			var RectangleStyle1FrameColor = new SKColor(0, 0, 0, 255);
+
+			// New Rectangle Style frame paint
+			var RectangleStyle1FramePaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Stroke,
+				Color = RectangleStyle1FrameColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				StrokeWidth = 1f,
+				StrokeMiter = 4f,
+				StrokeJoin = SKStrokeJoin.Miter,
+				StrokeCap = SKStrokeCap.Butt
+			};
+
+			var thumbRect = switchState ? new SKRect(53.35547f, 0.9570313f, 80.35547f, 27.95703f) : new SKRect(1.113281f, 0.9570313f, 28.11328f, 27.95703f);
+			// Draw Rectangle shape
+			canvas.DrawRect(thumbRect, RectangleStyle1FillPaint);
+			canvas.DrawRect(thumbRect, RectangleStyle1FramePaint);
+
+			// Fill color for Text Style
+			var TextStyleFillColor = new SKColor(254, 255, 255, 255);
+
+			// New Text Style fill paint
+			var TextStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = TextStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				Typeface = SKTypeface.FromFamilyName("Helvetica", SKTypefaceStyle.Normal),
+				TextSize = 14f,
+				TextAlign = SKTextAlign.Center,
+				IsVerticalText = false,
+				TextScaleX = 1f,
+				TextSkewX = 0f
+			};
+
+			if(switchState)
+				canvas.DrawText("On", 28.19141f, 20.24121f, TextStyleFillPaint);
+			else
+				canvas.DrawText("Off", 54.19141f, 20.24121f, TextStyleFillPaint);
+			// Draw Text shape
+
+
 		}
 
 		private static void DrawLabel(Label label, SKCanvas canvas)
@@ -367,7 +468,21 @@ namespace Xamarin.Forms.Platform.Skia
 			public float Width { get; set; }
 		}
 	}
+	public class CanvasTransForm : IDisposable
+	{
+		private readonly SKCanvas canvas;
+		public CanvasTransForm(VisualElement element, SKCanvas canvas)
+		{
+			this.canvas = canvas;
+			canvas.Save();
+			canvas.Translate((float)element.Bounds.X, (float)element.Bounds.Y);
 
+		}
+		public void Dispose()
+		{
+			canvas.Dispose();
+		}
+	}
 	public class TextDrawingData
 	{
 		private double _lineHeight = 1.0;
