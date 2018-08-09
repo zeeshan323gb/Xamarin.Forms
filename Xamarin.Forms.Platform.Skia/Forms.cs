@@ -37,22 +37,7 @@ namespace Xamarin.Forms.Platform.Skia
 				ve.Layout(region);
 			}
 
-			//Stack<Element> drawStack = new Stack<Element>();
-			//drawStack.Push(element);
-
 			DrawElement(element, canvas, currentDrawRequest, redraw);
-
-			//while (drawStack.Count > 0)
-			//{
-			//	var current = drawStack.Pop();
-
-			//	foreach (var child in current.LogicalChildren)
-			//	{
-			//		drawStack.Push(child);
-			//	}
-
-				
-			//}
 		}
 
 		public static void GetTextLayout(string text, TextDrawingData data, bool measure, out List<LineInfo> lines)
