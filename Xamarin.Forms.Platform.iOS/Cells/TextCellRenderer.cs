@@ -16,11 +16,12 @@ namespace Xamarin.Forms.Platform.iOS
 			if (tvc == null)
 				tvc = new CellTableViewCell(UITableViewCellStyle.Subtitle, item.GetType().FullName);
 			else
-				tvc.Cell.PropertyChanged -= tvc.HandlePropertyChanged;
+				tvc.CellPropertyChanged -= HandleCellPropertyChanged;
+
+			SetRealCell(item, tvc);
 
 			tvc.Cell = textCell;
-			textCell.PropertyChanged += tvc.HandlePropertyChanged;
-			tvc.PropertyChanged = HandlePropertyChanged;
+			tvc.CellPropertyChanged = HandleCellPropertyChanged;
 
 			tvc.TextLabel.Text = textCell.Text;
 			tvc.DetailTextLabel.Text = textCell.Detail;
@@ -36,10 +37,11 @@ namespace Xamarin.Forms.Platform.iOS
 			return tvc;
 		}
 
-		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs args)
+		protected virtual void HandleCellPropertyChanged(object sender, PropertyChangedEventArgs args)
 		{
-			var tvc = (CellTableViewCell)sender;
-			var textCell = (TextCell)tvc.Cell;
+			var textCell = (TextCell)sender;
+			var tvc = (CellTableViewCell)GetRealCell(textCell);
+
 			if (args.PropertyName == TextCell.TextProperty.PropertyName)
 			{
 				tvc.TextLabel.Text = ((TextCell)tvc.Cell).Text;
