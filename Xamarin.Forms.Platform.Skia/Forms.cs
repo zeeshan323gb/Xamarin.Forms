@@ -228,7 +228,7 @@ namespace Xamarin.Forms.Platform.Skia
 				rounding = 0;
 
 			// Draw Round Rectangle shape
-			var bounds = button.Bounds.Inflate(-4, -4);
+			var bounds = button.Bounds.Inflate(-2, -2);
 
 			canvas.DrawRoundRect(bounds.ToSKRect(), rounding, rounding, RoundRectangleStyleFillPaint);
 			canvas.DrawRoundRect(bounds.ToSKRect(), rounding, rounding, RoundRectangleStyleFramePaint);

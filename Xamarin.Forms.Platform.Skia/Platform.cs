@@ -48,7 +48,7 @@ namespace Xamarin.Forms.Platform.Skia
 					size = new Size();
 
 				if (view is Button)
-					size += new Size(10, 10);
+					size += new Size(28, 20);
 
 				if (view is Entry)
 					size += new Size(15, 15);
