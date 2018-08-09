@@ -104,6 +104,10 @@ namespace Xamarin.Forms.Platform.Skia
 			{
 				return new SizeRequest(new Size(81, 28));
 			}
+			else if(view is ProgressBar)
+			{
+				return new SizeRequest(new Size(12, 6));
+			}
 			else
 				result = new SizeRequest(new Size(100, 100));
 

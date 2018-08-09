@@ -138,6 +138,23 @@ namespace  Xamarin.Forms.Previewer
        TextColor=""Aqua"" />
 </ContentPage>";
 
+
+		public static string XamlKitchenSinkString = @"<ContentPage xmlns=""http://xamarin.com/schemas/2014/forms""
+             xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml""
+             x:Class=""XamlSamples.GridDemoPage""
+             BackgroundColor=""Black""
+             Title=""Grid Demo Page"">
+	<StackLayout>
+		<Label Text=""Hello, XAML!""
+	       VerticalOptions=""Center""
+	       FontAttributes=""Bold""
+	       FontSize=""Large""
+	       TextColor=""Aqua"" />
+	<Switch IsToggled=""true"" />
+	<ProgressBar Progress="".5""/>
+	</StackLayout>
+</ContentPage>";
+
 		public static string XamlComplexSampleString = @"<ContentPage xmlns=""http://xamarin.com/schemas/2014/forms""
              xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml""
              x:Class=""XamlSamples.GridDemoPage""
@@ -226,6 +243,7 @@ namespace  Xamarin.Forms.Previewer
 
 		public static XamlSample[] Samples = {
 			new XamlSample("Simple",XamlSimpleString),
+			new XamlSample("Kitchen Sink",XamlKitchenSinkString),
 			new XamlSample("Login Page",XamlLoginPage),
 			new XamlSample("Complex", XamlComplexSampleString),
 			new XamlSample("Playback Screen", XamlPlaybackScreen)

@@ -19,22 +19,22 @@ namespace Xamarin.Forms.Previewer
 				Height = 732
 			},
 			new ScreenSize{
-				Description="5.5\" (iPhone 6/7/8 Plus)",
+				Description="414x736 (iPhone 6/7/8 Plus)",
 				Width=414,
 				Height = 736
 			},
 			new ScreenSize{
-				Description="4.7\" (iPhone 6/7/8)",
+				Description="375x667 (iPhone 6/7/8)",
 				Width=375,
 				Height = 667
 			},
 			new ScreenSize {
-				Description = "4\" (iPhone 5)",
+				Description = "320x568 (iPhone 5)",
 				Width = 320,
 				Height = 568
 			},
 			new ScreenSize{
-				Description = "3.5\" (iPhone 4)",
+				Description = "320x480 (iPhone 4)",
 				Width = 320,
 				Height = 480,
 			},

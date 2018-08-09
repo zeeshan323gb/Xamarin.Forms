@@ -332,6 +332,14 @@ namespace Xamarin.Forms.Platform.Skia
 			{
 				DrawEditor(editor, canvas);
 			}
+			else if(element is ProgressBar progressBar)
+			{
+				using (new CanvasTransForm(progressBar, canvas))
+				{
+					DrawProgressBar(progressBar, canvas);
+				}
+			}
+			//This always goes last!
 			else if (element is VisualElement ve)
 			{
 				DrawVisualElement(ve, canvas);
@@ -439,8 +447,65 @@ namespace Xamarin.Forms.Platform.Skia
 				canvas.DrawText("On", 28.19141f, 20.24121f, TextStyleFillPaint);
 			else
 				canvas.DrawText("Off", 54.19141f, 20.24121f, TextStyleFillPaint);
-			// Draw Text shape
+		}
 
+		private static void DrawProgressBar(ProgressBar progressBar, SKCanvas canvas)
+		{
+			var bounds = progressBar.Bounds.Inflate(new Size(-1, 1));
+			const float progressHeight = 6;
+			var top = ((bounds.Height - progressHeight) / 2f) + 1;
+			var bottom = top + progressHeight;
+			var fullRect = new SKRect(1, (float)top, (float)bounds.Width, (float)bottom);
+
+
+			// Fill color for ProgressRectangle Style
+			var ProgressRectangleStyleFillColor = new SKColor(230, 230, 230, 255);
+
+			// New ProgressRectangle Style fill paint
+			var ProgressRectangleStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = ProgressRectangleStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			// Frame color for ProgressRectangle Style
+			var ProgressRectangleStyleFrameColor = new SKColor(0, 0, 0, 255);
+
+			// New ProgressRectangle Style frame paint
+			var ProgressRectangleStyleFramePaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Stroke,
+				Color = ProgressRectangleStyleFrameColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				StrokeWidth = 1f,
+				StrokeMiter = 4f,
+				StrokeJoin = SKStrokeJoin.Miter,
+				StrokeCap = SKStrokeCap.Butt
+			};
+
+			// Draw ProgressRectangle shape
+			canvas.DrawRect(fullRect, ProgressRectangleStyleFillPaint);
+			canvas.DrawRect(fullRect, ProgressRectangleStyleFramePaint);
+
+			// Fill color for ProgressFill Style
+			var ProgressFillStyleFillColor = new SKColor(0, 150, 255, 255);
+
+			// New ProgressFill Style fill paint
+			var ProgressFillStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = ProgressFillStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			var progressRect =  new SKRect(fullRect.Left,fullRect.Top, fullRect.Left + (fullRect.Width * (float)progressBar.Progress), fullRect.Bottom);
+			// Draw ProgressFill shape
+			canvas.DrawRect(progressRect, ProgressFillStyleFillPaint);
+			canvas.DrawRect(progressRect, ProgressRectangleStyleFramePaint);
 
 		}
 
