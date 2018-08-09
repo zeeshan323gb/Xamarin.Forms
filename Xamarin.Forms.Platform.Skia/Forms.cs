@@ -317,6 +317,13 @@ namespace Xamarin.Forms.Platform.Skia
 					DrawSwitch(theSwitch, canvas);
 				}
 			}
+			else if (element is Stepper stepper)
+			{
+				using (new CanvasTransForm(stepper, canvas))
+				{
+					DrawStepper(stepper, canvas);
+				}
+			}
 			else if (element is Entry entry)
 			{
 				DrawEntry(entry, canvas);
@@ -444,7 +451,43 @@ namespace Xamarin.Forms.Platform.Skia
 			var data = new TextDrawingData(entry);
 			data.Rect = data.Rect.Inflate(-15, 0);
 
-			DrawText(string.IsNullOrWhiteSpace(entry.Text) ? entry.Placeholder : entry.Text, canvas, data);
+			string text = null;
+			if (!string.IsNullOrEmpty(entry.Text))
+			{
+				for (int i = 0; i < entry.Text.Length; i++)
+				{
+					text += "•";
+				}
+			}
+			else
+				text = entry.Placeholder;
+
+			DrawText(text, canvas, data);
+		}
+
+		private static void DrawStepper(Stepper stepper, SKCanvas canvas)
+		{
+			var paint = new SKPaint
+			{
+				Color = stepper.BackgroundColor.ToSKColor(Color.Transparent),
+				IsAntialias = true,
+				IsStroke = false,
+				StrokeWidth = 1f
+			};
+
+			canvas.DrawRect(0.5f, 0.5f, 80, 27, paint);
+
+			paint.IsStroke = true;
+			paint.Color = SKColors.Black;
+
+			canvas.DrawRect(0.5f, 0.5f, 80, 27, paint);
+			canvas.DrawLine(40.5f, 0.5f, 40.5f, 27.5f, paint);
+
+			paint.StrokeWidth = 2f;
+
+			canvas.DrawLine(15f, 14f, 25f, 14f, paint);
+			canvas.DrawLine(60f, 9f, 60f, 19f, paint);
+			canvas.DrawLine(55f, 14f, 65f, 14f, paint);
 		}
 
 		private static void DrawLabel(Label label, SKCanvas canvas)

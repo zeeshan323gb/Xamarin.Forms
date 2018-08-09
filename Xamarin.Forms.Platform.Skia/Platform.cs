@@ -96,6 +96,10 @@ namespace Xamarin.Forms.Platform.Skia
 				}
 				return new SizeRequest(new Size(10, 10));
 			}
+			else if(view is Stepper)
+			{
+				return new SizeRequest(new Size(81, 28));
+			}
 			else if(view is Switch)
 			{
 				return new SizeRequest(new Size(81, 28));
