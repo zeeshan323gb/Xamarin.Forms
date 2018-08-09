@@ -247,10 +247,35 @@ namespace  Xamarin.Forms.Previewer
     </ContentPage.Content>
 </ContentPage>";
 
+		static string XamlListViewPage = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<ContentPage xmlns=""http://xamarin.com/schemas/2014/forms"" xmlns:x=""http://schemas.microsoft.com/winfx/2009/xaml"" x:Class=""FormsListViewSample.MainViewXaml""
+xmlns:local=""clr-namespace:FormsListViewSample;assembly=FormsListViewSample""
+Title=""ListView Xaml Sample""
+>
+	<ContentPage.Content>
+		<ListView  x:Name=""lstView"" RowHeight=""60"">
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<ViewCell>
+						<StackLayout Orientation=""Horizontal"" HorizontalOptions=""Fill"" BackgroundColor=""Olive"">
+							<StackLayout Orientation=""Vertical"">
+								<Label Text = ""Tomatoe"" FontSize=""24"" AbsoluteLayout.LayoutBounds=""0.25, 0.25, 400, 40""/>
+								<Label Text = ""Fruit"" AbsoluteLayout.LayoutBounds=""50, 35, 200, 25""/>
+							</StackLayout>
+							<Image Source=""https://github.com/xamarin/xamarin-forms-samples/raw/master/UserInterface/ListView/CustomCells/sample/iOS/Resources/tomato.png"" HorizontalOptions=""End"" AbsoluteLayout.LayoutBounds=""250.25, 0.25, 50, 50 ""/>
+						</StackLayout>
+					</ViewCell>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+	</ContentPage.Content>
+</ContentPage>";
+
 		public static XamlSample[] Samples = {
 			new XamlSample("Simple",XamlSimpleString),
 			new XamlSample("Kitchen Sink",XamlKitchenSinkString),
 			new XamlSample("Login Page",XamlLoginPage),
+			new XamlSample("ListView", XamlListViewPage),
 			new XamlSample("Complex", XamlComplexSampleString),
 			new XamlSample("Playback Screen", XamlPlaybackScreen)
 		};
