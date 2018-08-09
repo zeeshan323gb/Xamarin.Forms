@@ -11,7 +11,7 @@ namespace Xamarin.Forms.Platform.Skia
 		{
 			SizeRequest? result = null;
 
-			if (view is Button || view is Label)
+			if (view is Button || view is Label || view is Entry)
 			{
 				string text = null;
 				TextDrawingData drawingData = null;
@@ -26,6 +26,15 @@ namespace Xamarin.Forms.Platform.Skia
 					text = label.Text;
 					drawingData = new TextDrawingData(label);
 				}
+				else if (view is Entry entry)
+				{
+					text = entry.Text;
+					drawingData = new TextDrawingData(entry);
+				}
+
+				if (string.IsNullOrEmpty(text))
+					text = " ";
+
 				drawingData.Rect = new Rectangle(0, 0,
 					double.IsPositiveInfinity(widthConstraint) ? float.MaxValue : widthConstraint,
 					double.IsPositiveInfinity(heightConstraint) ? float.MaxValue : heightConstraint);
@@ -40,6 +49,9 @@ namespace Xamarin.Forms.Platform.Skia
 
 				if (view is Button)
 					size += new Size(10, 10);
+
+				if (view is Entry)
+					size += new Size(15, 15);
 
 				return new SizeRequest(size);
 			}

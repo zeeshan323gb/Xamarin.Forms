@@ -300,6 +300,10 @@ namespace Xamarin.Forms.Platform.Skia
 					DrawSwitch(theSwitch, canvas);
 				}
 			}
+			else if (element is Entry entry)
+			{
+				DrawEntry(entry, canvas);
+			}
 			else if (element is VisualElement ve)
 			{
 				DrawVisualElement(ve, canvas);
@@ -412,6 +416,33 @@ namespace Xamarin.Forms.Platform.Skia
 
 		}
 
+		private static void DrawEntry(Entry entry, SKCanvas canvas)
+		{
+			var path = RoundedRect(entry.Bounds.Inflate(-1, -1), new CornerRadius(3));
+			var paint = new SKPaint
+			{
+				IsAntialias = true,
+				Color = entry.BackgroundColor.ToSKColor(Color.White),
+			};
+
+			canvas.DrawPath(path, paint);
+
+			paint = new SKPaint
+			{
+				IsStroke = true,
+				IsAntialias = true,
+				Color = SKColors.Black,
+				StrokeWidth = 2,
+			};
+
+			canvas.DrawPath(path, paint);
+
+			var data = new TextDrawingData(entry);
+			data.Rect = data.Rect.Inflate(-15, 0);
+
+			DrawText(string.IsNullOrWhiteSpace(entry.Text) ? entry.Placeholder : entry.Text, canvas, data);
+		}
+
 		private static void DrawLabel(Label label, SKCanvas canvas)
 		{
 			DrawVisualElement(label, canvas);
@@ -489,6 +520,20 @@ namespace Xamarin.Forms.Platform.Skia
 
 		public TextDrawingData()
 		{
+		}
+
+		public TextDrawingData(Entry entry)
+		{
+			if (!string.IsNullOrEmpty(entry.Text))
+				Color = entry.TextColor.IsDefault ? Color.Black : entry.TextColor;
+			else
+				Color = entry.PlaceholderColor.IsDefault ? new Color(0.7) : entry.PlaceholderColor;
+			Rect = entry.Bounds;
+			FontSize = entry.FontSize;
+			Wrapping = LineBreakMode.NoWrap;
+			HAlign = TextAlignment.Start;
+			VAlign = TextAlignment.Center;
+			Attributes = entry.FontAttributes;
 		}
 
 		public TextDrawingData(Label label)
