@@ -384,10 +384,14 @@ namespace Xamarin.Forms.Platform.Skia
 					{
 						DrawListView(listView, canvas, drawRequest, redraw);
 					}
+					else if(element is Layout)
+					{
+						DrawVisualElement(ve, canvas);
+					}
 					//This always goes last!
 					else
 					{
-						DrawVisualElement(ve, canvas);
+						DrawUnknown(ve, canvas);
 					}
 				}
 			}
@@ -686,6 +690,89 @@ namespace Xamarin.Forms.Platform.Skia
 			canvas.DrawLine(15f, 14f, 25f, 14f, paint);
 			canvas.DrawLine(60f, 9f, 60f, 19f, paint);
 			canvas.DrawLine(55f, 14f, 65f, 14f, paint);
+		}
+
+		private static void DrawUnknown(VisualElement element, SKCanvas canvas)
+		{
+			// Fill color for Rectangle Style
+			var RectangleStyleFillColor = new SKColor(225, 250, 250, 255);
+
+			// New Rectangle Style fill paint
+			var RectangleStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = RectangleStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			// Frame color for Rectangle Style
+			var RectangleStyleFrameColor = new SKColor(0, 0, 0, 255);
+
+			// New Rectangle Style frame paint
+			var RectangleStyleFramePaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Stroke,
+				Color = RectangleStyleFrameColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				StrokeWidth = 1f,
+				StrokeMiter = 4f,
+				StrokeJoin = SKStrokeJoin.Miter,
+				StrokeCap = SKStrokeCap.Butt
+			};
+
+			var rect = element.Bounds.ToSKRect(false);
+
+			// Draw Rectangle shape
+			canvas.DrawRect(rect, RectangleStyleFillPaint);
+			canvas.DrawRect(rect, RectangleStyleFramePaint);
+
+			//Draw background for control
+			DrawVisualElement(element, canvas);
+
+			// Fill color for Line Style
+			var LineStyleFillColor = new SKColor(230, 230, 230, 255);
+
+			// New Line Style fill paint
+			var LineStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = LineStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			// Frame color for Line Style
+			var LineStyleFrameColor = new SKColor(255, 38, 0, 255);
+
+			// New Line Style frame paint
+			var LineStyleFramePaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Stroke,
+				Color = LineStyleFrameColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				StrokeWidth = 1f,
+				StrokeMiter = 4f,
+				StrokeJoin = SKStrokeJoin.Miter,
+				StrokeCap = SKStrokeCap.Butt
+			};
+
+			// Draw Line shape
+			canvas.DrawLine(new SKPoint(rect.Right, rect.Bottom), new SKPoint(rect.Left, rect.Top), LineStyleFramePaint);
+
+			// Draw Line shape
+			canvas.DrawLine(new SKPoint(rect.Left, rect.Bottom), new SKPoint(rect.Right, rect.Top),LineStyleFramePaint);
+
+			DrawText(element.GetType().Name, canvas, new TextDrawingData
+			{
+				Color = Color.Black,
+				HAlign = TextAlignment.Center,
+				VAlign = TextAlignment.Center,
+				FontSize = 12,
+				Rect = new Rectangle(Point.Zero, element.Bounds.Size),
+			});
 		}
 
 		private static void DrawLabel(Label label, SKCanvas canvas)
