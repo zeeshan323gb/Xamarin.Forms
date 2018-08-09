@@ -168,7 +168,7 @@ namespace Xamarin.Forms.Platform.Skia
 			if (bitmap != null)
 			{
 				var bounds = image.Bounds;
-				canvas.DrawBitmap(bitmap, bounds.ToSKRect());
+				canvas.DrawBitmap(bitmap, bounds.ToSKRect(false));
 			}
 		}
 
@@ -213,10 +213,11 @@ namespace Xamarin.Forms.Platform.Skia
 				rounding = 0;
 
 			// Draw Round Rectangle shape
-			var bounds = button.Bounds.Inflate(-2, -2);
+			var bounds = button.Bounds.ToSKRect(false);
+			bounds.Inflate(-2f, -2f);
 
-			canvas.DrawRoundRect(bounds.ToSKRect(), rounding, rounding, RoundRectangleStyleFillPaint);
-			canvas.DrawRoundRect(bounds.ToSKRect(), rounding, rounding, RoundRectangleStyleFramePaint);
+			canvas.DrawRoundRect(bounds, rounding, rounding, RoundRectangleStyleFillPaint);
+			canvas.DrawRoundRect(bounds, rounding, rounding, RoundRectangleStyleFramePaint);
 
 			DrawText(button.Text, canvas, new TextDrawingData(button));
 		}
@@ -248,7 +249,7 @@ namespace Xamarin.Forms.Platform.Skia
 			var color = box.Color.IsDefault ? box.BackgroundColor : box.Color;
 			paint.Color = color.ToSKColor(Color.Transparent);
 
-			canvas.DrawPath(RoundedRect(box.Bounds, box.CornerRadius), paint);
+			canvas.DrawPath(RoundedRect(new Rectangle(0, 0, box.Width, box.Height), box.CornerRadius), paint);
 		}
 
 		private static void DrawContentPage(ContentPage page, SKCanvas canvas)
@@ -258,7 +259,7 @@ namespace Xamarin.Forms.Platform.Skia
 
 		private static void DrawEntryBackground(VisualElement element, SKCanvas canvas)
 		{
-			var path = RoundedRect(element.Bounds.Inflate(-1, -1), new CornerRadius(3));
+			var path = RoundedRect(new Rectangle(0, 0, element.Width, element.Height).Inflate(-1, -1), new CornerRadius(3));
 			var paint = new SKPaint
 			{
 				IsAntialias = true,
@@ -290,67 +291,62 @@ namespace Xamarin.Forms.Platform.Skia
 
 		private static void DrawElement(Element element, SKCanvas canvas, string drawRequest, Action redraw)
 		{
-			if (element is ContentPage page)
+			if (element is VisualElement ve)
 			{
-				DrawContentPage(page, canvas);
-			}
-			else if (element is Label label)
-			{
-				DrawLabel(label, canvas);
-			}
-			else if (element is Button button)
-			{
-				DrawButton(button, canvas);
-			}
-			else if (element is BoxView box)
-			{
-				DrawBoxView(box, canvas);
-			}
-			else if (element is Image image)
-			{
-				DrawImage(image, canvas, drawRequest, redraw);
-			}
-			else if (element is ActivityIndicator aind)
-			{
-				using (new CanvasTransForm(aind, canvas))
+				using (new CanvasTransForm(ve, canvas))
 				{
-					DrawActivityInidicator(aind, canvas);
+					if (element is ContentPage page)
+					{
+						DrawContentPage(page, canvas);
+					}
+					else if (element is Label label)
+					{
+						DrawLabel(label, canvas);
+					}
+					else if (element is Button button)
+					{
+						DrawButton(button, canvas);
+					}
+					else if (element is BoxView box)
+					{
+						DrawBoxView(box, canvas);
+					}
+					else if (element is Image image)
+					{
+						DrawImage(image, canvas, drawRequest, redraw);
+					}
+					else if (element is ActivityIndicator aind)
+					{
+						DrawActivityInidicator(aind, canvas);
+					}
+					else if (element is Switch theSwitch)
+					{
+						DrawSwitch(theSwitch, canvas);
+					}
+					else if (element is Stepper stepper)
+					{
+						DrawStepper(stepper, canvas);
+					}
+					else if (element is Entry entry)
+					{
+						DrawEntry(entry, canvas);
+					}
+					else if (element is Editor editor)
+					{
+						DrawEditor(editor, canvas);
+					}
+					else if (element is ProgressBar progressBar)
+					{
+						DrawProgressBar(progressBar, canvas);
+					}
+					//This always goes last!
+					else
+					{
+						DrawVisualElement(ve, canvas);
+					}
 				}
 			}
-			else if (element is Switch theSwitch)
-			{
-				using (new CanvasTransForm(theSwitch, canvas))
-				{
-					DrawSwitch(theSwitch, canvas);
-				}
-			}
-			else if (element is Stepper stepper)
-			{
-				using (new CanvasTransForm(stepper, canvas))
-				{
-					DrawStepper(stepper, canvas);
-				}
-			}
-			else if (element is Entry entry)
-			{
-				DrawEntry(entry, canvas);
-			}
-			else if (element is Editor editor)
-			{
-				DrawEditor(editor, canvas);
-			}
-			else if(element is ProgressBar progressBar)
-			{
-				using (new CanvasTransForm(progressBar, canvas))
-				{
-					DrawProgressBar(progressBar, canvas);
-				}
-			}
-			//This always goes last!
-			else if (element is VisualElement ve)
-			{
-				DrawVisualElement(ve, canvas);
-			}
+			
 
 			canvas.Save();
 
@@ -635,7 +631,7 @@ namespace Xamarin.Forms.Platform.Skia
 		{
 			var paint = new SKPaint();
 			paint.Color = ve.BackgroundColor.ToSKColor(Color.Transparent);
-			canvas.DrawRect(ve.Bounds.ToSKRect(), paint);
+			canvas.DrawRect(ve.Bounds.ToSKRect(false), paint);
 		}
 
 		public class LineInfo
@@ -683,7 +679,7 @@ namespace Xamarin.Forms.Platform.Skia
 				Color = entry.TextColor.IsDefault ? Color.Black : entry.TextColor;
 			else
 				Color = entry.PlaceholderColor.IsDefault ? new Color(0.7) : entry.PlaceholderColor;
-			Rect = entry.Bounds;
+			Rect = new Rectangle(0, 0, entry.Width, entry.Height);
 			FontSize = entry.FontSize;
 			Wrapping = LineBreakMode.NoWrap;
 			HAlign = TextAlignment.Start;
@@ -694,7 +690,7 @@ namespace Xamarin.Forms.Platform.Skia
 		public TextDrawingData(Editor editor)
 		{
 			Color = editor.TextColor;
-			Rect = editor.Bounds;
+			Rect = new Rectangle(0, 0, editor.Width, editor.Height);
 			FontSize = editor.FontSize;
 			Wrapping = LineBreakMode.WordWrap;
 			HAlign = TextAlignment.Start;
@@ -705,7 +701,7 @@ namespace Xamarin.Forms.Platform.Skia
 		public TextDrawingData(Label label)
 		{
 			Color = label.TextColor;
-			Rect = label.Bounds;
+			Rect = new Rectangle(0, 0, label.Width, label.Height);
 			FontSize = label.FontSize;
 			Wrapping = label.LineBreakMode;
 			HAlign = label.HorizontalTextAlignment;
@@ -717,7 +713,7 @@ namespace Xamarin.Forms.Platform.Skia
 		public TextDrawingData(Button button)
 		{
 			Color = button.TextColor;
-			Rect = button.Bounds;
+			Rect = new Rectangle(0, 0, button.Width, button.Height);
 			FontSize = button.FontSize;
 			Wrapping = LineBreakMode.NoWrap;
 			HAlign = TextAlignment.Center;

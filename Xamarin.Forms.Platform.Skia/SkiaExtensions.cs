@@ -20,9 +20,11 @@ namespace Xamarin.Forms.Platform.Skia
 				(byte)(byte.MaxValue * color.A));
 		}
 
-		public static SKRect ToSKRect(this Rectangle rectangle)
+		public static SKRect ToSKRect(this Rectangle rectangle, bool includePosition = true)
 		{
-			return new SKRect((float)rectangle.Left, (float)rectangle.Top, (float)rectangle.Right, (float)rectangle.Bottom);
+			if (includePosition)
+				return new SKRect((float)rectangle.Left, (float)rectangle.Top, (float)rectangle.Right, (float)rectangle.Bottom);
+			return new SKRect(0, 0, (float)rectangle.Width, (float)rectangle.Height);
 		}
 	}
 }
