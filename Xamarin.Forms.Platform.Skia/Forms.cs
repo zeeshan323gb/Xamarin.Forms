@@ -310,6 +310,13 @@ namespace Xamarin.Forms.Platform.Skia
 			{
 				DrawImage(image, canvas, drawRequest, redraw);
 			}
+			else if (element is ActivityIndicator aind)
+			{
+				using (new CanvasTransForm(aind, canvas))
+				{
+					DrawActivityInidicator(aind, canvas);
+				}
+			}
 			else if (element is Switch theSwitch)
 			{
 				using (new CanvasTransForm(theSwitch, canvas))
@@ -519,15 +526,51 @@ namespace Xamarin.Forms.Platform.Skia
 			string text = null;
 			if (!string.IsNullOrEmpty(entry.Text))
 			{
-				for (int i = 0; i < entry.Text.Length; i++)
+				if (entry.IsPassword)
 				{
-					text += "•";
+					for (int i = 0; i < entry.Text.Length; i++)
+					{
+						text += "•";
+					}
+				}
+				else
+				{
+					text = entry.Text;
 				}
 			}
 			else
 				text = entry.Placeholder;
 
 			DrawText(text, canvas, data);
+		}
+
+		private static void DrawActivityInidicator(ActivityIndicator indicator, SKCanvas canvas)
+		{
+			DrawVisualElement(indicator, canvas);
+
+			var paint = new SKPaint
+			{
+				Color = indicator.Color.ToSKColor(Color.Black),
+				IsStroke = true,
+				IsAntialias = true,
+				StrokeWidth = 4f
+			};
+
+			float size = (float)Math.Min(indicator.Width, indicator.Height);
+			size -= 20;
+
+
+			var x = (float)((indicator.Width - size) / 2);
+			var y = (float)((indicator.Height - size) / 2);
+			var path = new SKPath();
+			path.ArcTo(
+				new SKRect(
+					x, 
+					y, 
+					x + size, 
+					y + size), 0, 270, true);
+
+			canvas.DrawPath(path, paint);
 		}
 
 		private static void DrawStepper(Stepper stepper, SKCanvas canvas)

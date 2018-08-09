@@ -103,10 +103,14 @@ namespace Xamarin.Forms.Platform.Skia
 			else if(view is Switch)
 			{
 				return new SizeRequest(new Size(81, 28));
-			}
-			else if(view is ProgressBar)
+			}]
+			else if (view is ProgressBar)
 			{
 				return new SizeRequest(new Size(12, 6));
+			}
+			else if (view is ActivityIndicator)
+			{
+				return new SizeRequest(new Size(81, 81));
 			}
 			else
 				result = new SizeRequest(new Size(100, 100));
