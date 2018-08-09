@@ -156,6 +156,8 @@ namespace  Xamarin.Forms.Previewer
 	<Switch IsToggled=""true"" />
 	<ProgressBar Progress="".5""/>
 	<Stepper/>
+	<Button BackgroundColor =""Red"" TextColor=""White"" Text=""Hello""/>
+	<Slider Value="".5""/>
 	</StackLayout>
 </ContentPage>";
 
