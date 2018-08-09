@@ -458,11 +458,12 @@ namespace Xamarin.Forms.Platform.Skia
 
 		private static void DrawProgressBar(ProgressBar progressBar, SKCanvas canvas)
 		{
-			var bounds = progressBar.Bounds.Inflate(new Size(-1, 1));
+			DrawVisualElement(progressBar, canvas);
+			var bounds = progressBar.Bounds.Inflate(-1,-1);
 			const float progressHeight = 6;
-			var top = ((bounds.Height - progressHeight) / 2f) + 1;
+			var top = ((bounds.Height - progressHeight) / 2f);
 			var bottom = top + progressHeight;
-			var fullRect = new SKRect(1, (float)top, (float)bounds.Width, (float)bottom);
+			var fullRect = new SKRect((float)bounds.Left, (float)top, (float)bounds.Width, (float)bottom);
 
 
 			// Fill color for ProgressRectangle Style
@@ -519,7 +520,6 @@ namespace Xamarin.Forms.Platform.Skia
 		private static void DrawEntry(Entry entry, SKCanvas canvas)
 		{
 			DrawEntryBackground(entry, canvas);
-
 			var data = new TextDrawingData(entry);
 			data.Rect = data.Rect.Inflate(-15, 0);
 
