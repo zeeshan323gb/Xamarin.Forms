@@ -150,8 +150,12 @@ namespace  Xamarin.Forms.Previewer
 	       FontAttributes=""Bold""
 	       FontSize=""Large""
 	       TextColor=""Aqua"" />
+	<Entry Placeholder=""Placeholder""/>
+	<Entry Placeholder=""Username"" Text=""Username""/>
+	<Entry Placeholder=""Password"" Text=""Password"" IsPassword=""true""/>
 	<Switch IsToggled=""true"" />
 	<ProgressBar Progress="".5""/>
+	<Stepper/>
 	</StackLayout>
 </ContentPage>";
 
