@@ -172,6 +172,43 @@ namespace Xamarin.Forms.Platform.Skia
 			}
 		}
 
+		private static void DrawListView(ListView listView, SKCanvas canvas, string drawRequest, Action redraw)
+		{
+			var template = listView.ItemTemplate;
+
+			if (template == null)
+				return;
+
+			if (template is DataTemplateSelector)
+				return;
+
+			var cell = (Cell)template.CreateContent();
+
+			if (cell is ViewCell vc)
+			{
+				var view = vc.View;
+
+				var rowHeight = listView.RowHeight;
+
+				view.Platform = Platform;
+				foreach (var e in view.Descendants())
+					if (e is VisualElement v)
+						v.IsPlatformEnabled = true;
+				if (view is VisualElement ve)
+				{
+					ve.IsPlatformEnabled = true;
+					ve.Layout(new Rectangle(0, 0, listView.Width, rowHeight));
+				}
+
+				canvas.Save();
+
+				canvas.Translate((float)listView.Bounds.X, (float)listView.Bounds.Y);
+				DrawElement(view, canvas, drawRequest, redraw);
+
+				canvas.Restore();
+			}
+		}
+
 		private static void DrawButton(Button button, SKCanvas canvas)
 		{
 			//-----------------------------------------------------------------------------
@@ -338,6 +375,10 @@ namespace Xamarin.Forms.Platform.Skia
 					else if (element is ProgressBar progressBar)
 					{
 						DrawProgressBar(progressBar, canvas);
+					}
+					else if (element is ListView listView)
+					{
+						DrawListView(listView, canvas, drawRequest, redraw);
 					}
 					//This always goes last!
 					else
