@@ -372,9 +372,13 @@ namespace Xamarin.Forms.Platform.Skia
 					{
 						DrawEditor(editor, canvas);
 					}
+					else if(element is Slider slider)
+					{
+						DrawSlider(slider, canvas);
+					}
 					else if (element is ProgressBar progressBar)
 					{
-						DrawProgressBar(progressBar, canvas);
+						DrawProgressBar(progressBar, (float)progressBar.Progress, canvas);
 					}
 					else if (element is ListView listView)
 					{
@@ -492,11 +496,60 @@ namespace Xamarin.Forms.Platform.Skia
 			else
 				canvas.DrawText("Off", 54.19141f, 20.24121f, TextStyleFillPaint);
 		}
-
-		private static void DrawProgressBar(ProgressBar progressBar, SKCanvas canvas)
+		private static void DrawSlider(Slider slider, SKCanvas canvas)
 		{
-			DrawVisualElement(progressBar, canvas);
-			var bounds = progressBar.Bounds.Inflate(-1,-1);
+			var progress = slider.Value * (slider.Maximum - slider.Minimum);
+
+			DrawProgressBar(slider,(float)progress, canvas);
+
+
+			var bounds = slider.Bounds.Inflate(-1, -1);
+
+			const float thumbSquare = 18;
+			var top = (float)(bounds.Height - thumbSquare) / 2f;
+			var left = (float)((bounds.Width - thumbSquare) * progress);
+			//var left =  (float)(bounds.Width *  progress)  - (thumbSquare / 2f);
+
+			var fullRect = new SKRect(left, top, left + thumbSquare, top + thumbSquare);
+
+
+			// Fill color for Thumb Style
+			var ThumbStyleFillColor = new SKColor(254, 255, 255, 255);
+
+			// New Thumb Style fill paint
+			var ThumbStyleFillPaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Fill,
+				Color = ThumbStyleFillColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true
+			};
+
+			// Frame color for Thumb Style
+			var ThumbStyleFrameColor = new SKColor(0, 0, 0, 255);
+
+			// New Thumb Style frame paint
+			var ThumbStyleFramePaint = new SKPaint()
+			{
+				Style = SKPaintStyle.Stroke,
+				Color = ThumbStyleFrameColor,
+				BlendMode = SKBlendMode.SrcOver,
+				IsAntialias = true,
+				StrokeWidth = 1f,
+				StrokeMiter = 4f,
+				StrokeJoin = SKStrokeJoin.Miter,
+				StrokeCap = SKStrokeCap.Butt
+			};
+
+			// Draw Thumb shape
+			canvas.DrawRect(fullRect, ThumbStyleFillPaint);
+			canvas.DrawRect(fullRect, ThumbStyleFramePaint);
+		}
+
+		private static void DrawProgressBar(VisualElement element, float progress, SKCanvas canvas)
+		{
+			DrawVisualElement(element, canvas);
+			var bounds = element.Bounds.Inflate(-1,-1);
 			const float progressHeight = 6;
 			var top = ((bounds.Height - progressHeight) / 2f);
 			var bottom = top + progressHeight;
@@ -547,7 +600,7 @@ namespace Xamarin.Forms.Platform.Skia
 				IsAntialias = true
 			};
 
-			var progressRect =  new SKRect(fullRect.Left,fullRect.Top, fullRect.Left + (fullRect.Width * (float)progressBar.Progress), fullRect.Bottom);
+			var progressRect =  new SKRect(fullRect.Left,fullRect.Top, fullRect.Left + (fullRect.Width * progress), fullRect.Bottom);
 			// Draw ProgressFill shape
 			canvas.DrawRect(progressRect, ProgressFillStyleFillPaint);
 			canvas.DrawRect(progressRect, ProgressRectangleStyleFramePaint);

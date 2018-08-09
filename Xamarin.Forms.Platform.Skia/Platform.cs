@@ -108,6 +108,10 @@ namespace Xamarin.Forms.Platform.Skia
 			{
 				return new SizeRequest(new Size(12, 6));
 			}
+			else if(view is Slider slider)
+			{
+				return new SizeRequest(new Size(18,30));
+			}
 			else if (view is ActivityIndicator)
 			{
 				return new SizeRequest(new Size(81, 81));
