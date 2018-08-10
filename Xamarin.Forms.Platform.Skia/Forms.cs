@@ -903,6 +903,7 @@ namespace Xamarin.Forms.Platform.Skia
 				Color = entry.PlaceholderColor.IsDefault ? new Color(0.7) : entry.PlaceholderColor;
 			Rect = new Rectangle(0, 0, entry.Width, entry.Height);
 			FontSize = entry.FontSize;
+			FontFamily = entry.FontFamily;
 			Wrapping = LineBreakMode.NoWrap;
 			HAlign = TextAlignment.Start;
 			VAlign = TextAlignment.Center;
@@ -914,6 +915,7 @@ namespace Xamarin.Forms.Platform.Skia
 			Color = editor.TextColor;
 			Rect = new Rectangle(0, 0, editor.Width, editor.Height);
 			FontSize = editor.FontSize;
+			FontFamily = editor.FontFamily;
 			Wrapping = LineBreakMode.WordWrap;
 			HAlign = TextAlignment.Start;
 			VAlign = TextAlignment.Start;
@@ -938,6 +940,7 @@ namespace Xamarin.Forms.Platform.Skia
 			Color = button.TextColor;
 			Rect = new Rectangle(0, 0, button.Width, button.Height);
 			FontSize = button.FontSize;
+			FontFamily = button.FontFamily;
 			Wrapping = LineBreakMode.NoWrap;
 			HAlign = TextAlignment.Center;
 			VAlign = TextAlignment.Center;
