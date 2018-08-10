@@ -398,6 +398,18 @@ namespace Xamarin.Forms.Platform.Skia
 					{
 						DrawEntry(entry, canvas);
 					}
+					else if (element is DatePicker datePicker)
+					{
+						DrawDatePicker(datePicker, canvas);
+					}
+					else if (element is TimePicker timePicker)
+					{
+						DrawTimePicker(timePicker, canvas);
+					}
+					else if (element is Picker picker)
+					{
+						DrawPicker(picker, canvas);
+					}
 					else if (element is Editor editor)
 					{
 						DrawEditor(editor, canvas);
@@ -668,6 +680,33 @@ namespace Xamarin.Forms.Platform.Skia
 			DrawText(text, canvas, data);
 		}
 
+		private static void DrawDatePicker(DatePicker entry, SKCanvas canvas)
+		{
+			DrawEntryBackground(entry, canvas);
+			var data = new TextDrawingData(entry);
+			data.Rect = data.Rect.Inflate(-15, 0);
+			string text = entry.Date.ToString(entry.Format);
+			DrawText(text, canvas, data);
+		}
+
+		private static void DrawTimePicker(TimePicker entry, SKCanvas canvas)
+		{
+			DrawEntryBackground(entry, canvas);
+			var data = new TextDrawingData(entry);
+			data.Rect = data.Rect.Inflate(-15, 0);
+			string text = entry.Time.ToString(entry.Format);
+			DrawText(text, canvas, data);
+		}
+
+		private static void DrawPicker(Picker entry, SKCanvas canvas)
+		{
+			DrawEntryBackground(entry, canvas);
+			var data = new TextDrawingData(entry);
+			data.Rect = data.Rect.Inflate(-15, 0);
+			string text = entry.SelectedItem?.ToString();
+			DrawText(text, canvas, data);
+		}
+
 		private static void DrawActivityInidicator(ActivityIndicator indicator, SKCanvas canvas)
 		{
 			DrawVisualElement(indicator, canvas);
@@ -908,6 +947,42 @@ namespace Xamarin.Forms.Platform.Skia
 			HAlign = TextAlignment.Start;
 			VAlign = TextAlignment.Center;
 			Attributes = entry.FontAttributes;
+		}
+
+		public TextDrawingData(DatePicker picker)
+		{
+			Color = picker.TextColor.IsDefault ? Color.Black : picker.TextColor;
+			Rect = new Rectangle(0, 0, picker.Width, picker.Height);
+			FontSize = picker.FontSize;
+			FontFamily = picker.FontFamily;
+			Wrapping = LineBreakMode.NoWrap;
+			HAlign = TextAlignment.Start;
+			VAlign = TextAlignment.Center;
+			Attributes = picker.FontAttributes;
+		}
+
+		public TextDrawingData(TimePicker picker)
+		{
+			Color = picker.TextColor.IsDefault ? Color.Black : picker.TextColor;
+			Rect = new Rectangle(0, 0, picker.Width, picker.Height);
+			FontSize = picker.FontSize;
+			FontFamily = picker.FontFamily;
+			Wrapping = LineBreakMode.NoWrap;
+			HAlign = TextAlignment.Start;
+			VAlign = TextAlignment.Center;
+			Attributes = picker.FontAttributes;
+		}
+
+		public TextDrawingData(Picker picker)
+		{
+			Color = picker.TextColor.IsDefault ? Color.Black : picker.TextColor;
+			Rect = new Rectangle(0, 0, picker.Width, picker.Height);
+			FontSize = picker.FontSize;
+			FontFamily = picker.FontFamily;
+			Wrapping = LineBreakMode.NoWrap;
+			HAlign = TextAlignment.Start;
+			VAlign = TextAlignment.Center;
+			Attributes = picker.FontAttributes;
 		}
 
 		public TextDrawingData(Editor editor)

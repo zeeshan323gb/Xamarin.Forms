@@ -11,7 +11,7 @@ namespace Xamarin.Forms.Platform.Skia
 		{
 			SizeRequest? result = null;
 
-			if (view is Button || view is Label || view is Entry || view is Editor)
+			if (view is Button || view is Label || view is Entry || view is Editor || view is DatePicker || view is TimePicker || view is Picker)
 			{
 				string text = null;
 				TextDrawingData drawingData = null;
@@ -35,6 +35,21 @@ namespace Xamarin.Forms.Platform.Skia
 				{
 					text = editor.Text;
 					drawingData = new TextDrawingData(editor);
+				}
+				else if(view is DatePicker datePicker)
+				{
+					text = datePicker.Date.ToString(datePicker.Format);
+					drawingData = new TextDrawingData(datePicker);
+				}
+				else if (view is TimePicker timePicker)
+				{
+					text = timePicker.Time.ToString(timePicker.Format);
+					drawingData = new TextDrawingData(timePicker);
+				}
+				else if (view is Picker picker)
+				{
+					text = picker.SelectedItem?.ToString();
+					drawingData = new TextDrawingData(picker);
 				}
 
 				if (string.IsNullOrEmpty(text))
