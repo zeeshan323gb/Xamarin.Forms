@@ -200,15 +200,18 @@ namespace Xamarin.Forms.Platform.Skia
 				var view = vc.View;
 				var rowHeight = listView.RowHeight <= 0 ? 48d : listView.RowHeight;
 
-				if(listView.HasUnevenRows)
-				{
-					rowHeight = vc.Height > 0 ? vc.Height : view.Measure(listView.Width, double.PositiveInfinity).Request.Height;
-				}
-
 				view.Platform = Platform;
+				view.Parent = listView;
 				foreach (var e in view.Descendants())
 					if (e is VisualElement v)
 						v.IsPlatformEnabled = true;
+
+				if (listView.HasUnevenRows)
+				{
+					var request = view.Measure(listView.Width, double.PositiveInfinity);
+					rowHeight = vc.Height > 0 ? vc.Height : request.Request.Height;
+				}
+
 				if (view is VisualElement ve)
 				{
 					ve.IsPlatformEnabled = true;
