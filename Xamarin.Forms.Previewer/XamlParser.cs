@@ -158,6 +158,9 @@ namespace  Xamarin.Forms.Previewer
 	<Stepper/>
 	<Button BackgroundColor =""Red"" TextColor=""White"" Text=""Hello""/>
 	<Slider Value="".5""/>
+	<DatePicker/>
+	<TimePicker/>
+	<Picker SelectedItem=""Selected Item"" />
 	<ActivityIndicator/>
 	</StackLayout>
 </ContentPage>";
