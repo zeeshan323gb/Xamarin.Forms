@@ -187,8 +187,12 @@ namespace Xamarin.Forms.Platform.Skia
 			if (cell is ViewCell vc)
 			{
 				var view = vc.View;
+				var rowHeight = listView.RowHeight <= 0 ? 48d : listView.RowHeight;
 
-				var rowHeight = listView.RowHeight;
+				if(listView.HasUnevenRows)
+				{
+					rowHeight = vc.Height > 0 ? vc.Height : view.Measure(listView.Width, double.PositiveInfinity).Request.Height;
+				}
 
 				view.Platform = Platform;
 				foreach (var e in view.Descendants())
