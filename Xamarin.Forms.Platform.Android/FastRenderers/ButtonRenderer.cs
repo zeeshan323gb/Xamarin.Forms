@@ -500,5 +500,10 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			UpdatePadding();
 		}
 
+		protected override void OnDraw(Canvas canvas)
+		{
+			System.Diagnostics.Debug.WriteLine($">>>>> ButtonRenderer OnDraw Elevation: {Elevation}");
+			base.OnDraw(canvas);
+		}
 	}
 }
