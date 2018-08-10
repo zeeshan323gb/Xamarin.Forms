@@ -179,7 +179,18 @@ namespace Xamarin.Forms.Platform.Skia
 			if (bitmap != null)
 			{
 				var bounds = image.Bounds;
-				canvas.DrawBitmap(bitmap, bounds.ToSKRect(false));
+				canvas.Save();
+				var rect = bounds.ToSKRect(false);
+				canvas.ClipRect(rect);
+				if(image.Aspect != Aspect.Fill) {
+					var hRatio = bounds.Height/ bitmap.Height;
+					var wRatio = bounds.Width / bitmap.Width;
+					var newRatio = image.Aspect == Aspect.AspectFit ? Math.Min(hRatio, wRatio) : Math.Max(hRatio, wRatio);
+					bounds = new Rectangle(bounds.X, bounds.Y, bitmap.Width * newRatio, bitmap.Height * newRatio);
+					rect = bounds.ToSKRect(false);
+				}
+				canvas.DrawBitmap(bitmap, rect);
+				canvas.Restore();
 			}
 		}
 
