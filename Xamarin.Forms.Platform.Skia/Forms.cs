@@ -196,6 +196,7 @@ namespace Xamarin.Forms.Platform.Skia
 
 		private static void DrawListView(ListView listView, SKCanvas canvas, string drawRequest, Action redraw)
 		{
+			DrawVisualElement(listView, canvas);
 			var template = listView.ItemTemplate;
 
 			if (template == null)
