@@ -53,6 +53,17 @@ namespace Xamarin.Forms.Platform.Skia
 				TextSize = (float)data.FontSize
 			};
 
+			string fontFamily = "System";
+			if (!string.IsNullOrEmpty(data.FontFamily))
+			{
+				fontFamily = data.FontFamily;
+			}
+
+			paint.Typeface = SKTypeface.FromFamilyName(fontFamily, 
+				data.Attributes.HasFlag(FontAttributes.Bold) ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal, 
+				SKFontStyleWidth.Normal, 
+				data.Attributes.HasFlag(FontAttributes.Italic) ? SKFontStyleSlant.Italic : SKFontStyleSlant.Upright);
+
 			lines = new List<LineInfo>();
 
 			var remaining = text;
@@ -797,6 +808,17 @@ namespace Xamarin.Forms.Platform.Skia
 
 			GetTextLayout(text, data, false, out var lines);
 
+			string fontFamily = "System";
+			if (!string.IsNullOrEmpty(data.FontFamily))
+			{
+				fontFamily = data.FontFamily;
+			}
+
+			paint.Typeface = SKTypeface.FromFamilyName(fontFamily,
+				data.Attributes.HasFlag(FontAttributes.Bold) ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
+				SKFontStyleWidth.Normal,
+				data.Attributes.HasFlag(FontAttributes.Italic) ? SKFontStyleSlant.Italic : SKFontStyleSlant.Upright);
+
 			foreach (var line in lines)
 			{
 				if (!string.IsNullOrWhiteSpace(line.Text))
@@ -884,6 +906,7 @@ namespace Xamarin.Forms.Platform.Skia
 			Color = label.TextColor;
 			Rect = new Rectangle(0, 0, label.Width, label.Height);
 			FontSize = label.FontSize;
+			FontFamily = label.FontFamily;
 			Wrapping = label.LineBreakMode;
 			HAlign = label.HorizontalTextAlignment;
 			VAlign = label.VerticalTextAlignment;
