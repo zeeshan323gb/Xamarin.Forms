@@ -254,7 +254,7 @@ xmlns:local=""clr-namespace:FormsListViewSample;assembly=FormsListViewSample""
 Title=""ListView Xaml Sample""
 >
 	<ContentPage.Content>
-		<ListView  x:Name=""lstView"" RowHeight=""60"">
+		<ListView  x:Name=""lstView"" RowHeight=""60"" BackgroundColor=""LightGray"">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<ViewCell>
