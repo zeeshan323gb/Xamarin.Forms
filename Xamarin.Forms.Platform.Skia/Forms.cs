@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.Xaml;
 
 namespace Xamarin.Forms.Platform.Skia
 {
@@ -834,11 +835,17 @@ namespace Xamarin.Forms.Platform.Skia
 			// Draw Line shape
 			canvas.DrawLine(new SKPoint(rect.Left, rect.Bottom), new SKPoint(rect.Right, rect.Top),LineStyleFramePaint);
 
-			DrawText(element.GetType().Name, canvas, new TextDrawingData
+			string displayName = element.GetType().Name;
+			if(element is UnknownView unknown)
+			{
+				displayName = $"{unknown.NamespaceUri} : {unknown.ClassName}";
+			}
+			DrawText(displayName, canvas, new TextDrawingData
 			{
 				Color = Color.Black,
 				HAlign = TextAlignment.Center,
 				VAlign = TextAlignment.Center,
+				Wrapping = LineBreakMode.WordWrap,
 				FontSize = 12,
 				Rect = new Rectangle(Point.Zero, element.Bounds.Size),
 			});
@@ -855,11 +862,19 @@ namespace Xamarin.Forms.Platform.Skia
 		{
 			canvas.Save();
 
+			// or:
+			var emojiChar = 0x1F680;
+
+			// ask the font manager for a font with that character
+			var fontManager = SKFontManager.Default;
+			var emojiTypeface = fontManager.MatchCharacter(emojiChar);
+
 			var paint = new SKPaint
 			{
 				Color = data.Color.ToSKColor(Color.Black),
 				IsAntialias = true,
-				TextSize = (float)data.FontSize
+				TextSize = (float)data.FontSize,
+				Typeface = emojiTypeface
 			};
 
 			canvas.ClipRect(data.Rect.ToSKRect());

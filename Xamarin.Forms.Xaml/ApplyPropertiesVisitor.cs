@@ -346,7 +346,7 @@ namespace Xamarin.Forms.Xaml
 			xpe = xpe ?? new XamlParseException($"Cannot assign property \"{localName}\": Property does not exist, or is not assignable, or mismatching type between value and property", lineInfo);
 			if (context.ExceptionHandler != null)
 				context.ExceptionHandler(xpe);
-			else
+			else if (!(xamlelement is UnknownView))
 				throw xpe;
 		}
 
@@ -373,7 +373,7 @@ namespace Xamarin.Forms.Xaml
 			xpe = xpe ?? new XamlParseException($"Property {localName} is not found or does not have an accessible getter", lineInfo);
 			if (context.ExceptionHandler != null)
 				context.ExceptionHandler(xpe);
-			else
+			else if(!(xamlElement is UnknownView))
 				throw xpe;
 
 			return null;

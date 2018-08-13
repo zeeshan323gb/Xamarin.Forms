@@ -1,5 +1,6 @@
 ﻿using System;
 using Xamarin.Forms.Xaml;
+using Xamarin.Forms.Internals;
 namespace  Xamarin.Forms.Previewer
 {
 	public class XamlParser
@@ -131,11 +132,14 @@ namespace  Xamarin.Forms.Previewer
              x:Class=""XamlSamples.GridDemoPage""
              BackgroundColor=""Blue""
              Title=""Grid Demo Page"">
-	<Label Text=""Hello, XAML!""
-       VerticalOptions=""Center""
-       FontAttributes=""Bold""
-       FontSize=""Large""
-       TextColor=""Aqua"" />
+	<StackLayout>
+		<Label Text=""Hello, XAML!""
+	       VerticalOptions=""CenterAndExpand""
+		   HorizontalOptions=""Center""
+	       FontAttributes=""Bold""
+	       FontSize=""Large""
+	       TextColor=""Aqua"" />
+	</StackLayout>
 </ContentPage>";
 
 
@@ -297,6 +301,11 @@ Title=""ListView Xaml Sample""
 			}
 			public string Description { get; set; }
 			public string Xaml { get; set; }
+		}
+
+		static XamlParser()
+		{
+			DesignMode.IsDesignModeEnabled = true;
 		}
 
 		public static (Element element, Exception error) ParseXaml(string xaml)

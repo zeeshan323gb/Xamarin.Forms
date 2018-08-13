@@ -98,6 +98,12 @@ namespace Xamarin.Forms.Xaml
 
 			Values[node] = value;
 
+			//Setup the data on the UnknownView for the Xaml Previwer
+			if(value is UnknownView unknownView)
+			{
+				unknownView.NamespaceUri = node.XmlType.NamespaceUri;
+				unknownView.ClassName = node.XmlType.Name;
+			}
 			var markup = value as IMarkupExtension;
 			if (markup != null && (value is TypeExtension || value is StaticExtension || value is ArrayExtension))
 			{

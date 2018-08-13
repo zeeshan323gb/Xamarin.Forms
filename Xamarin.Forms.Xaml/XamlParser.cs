@@ -397,7 +397,10 @@ namespace Xamarin.Forms.Xaml
 				}
 				type = type.MakeGenericType(args);
 			}
-
+			if(type == null && DesignMode.IsDesignModeEnabled)
+			{
+				type = typeof(UnknownView);
+			}
 			if (type == null)
 				exception = new XamlParseException($"Type {elementName} not found in xmlns {namespaceURI}", xmlInfo);
 

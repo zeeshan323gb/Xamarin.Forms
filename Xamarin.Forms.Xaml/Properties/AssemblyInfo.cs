@@ -7,6 +7,8 @@ using Xamarin.Forms.Internals;
 [assembly: InternalsVisibleTo("Xamarin.Forms.Build.Tasks")]
 [assembly: InternalsVisibleTo("Xamarin.Forms.Xaml.Design")]
 [assembly: InternalsVisibleTo("Xamarin.Forms.Loader")]
+[assembly: InternalsVisibleTo("Xamarin.Forms.Previewer")]
+[assembly: InternalsVisibleTo("Xamarin.Forms.Platform.Skia")]
 // Xamarin.Forms.Loader.dll Xamarin.Forms.Xaml.XamlLoader.Load(object, string), kzu@microsoft.com
 [assembly: Preserve]
 
