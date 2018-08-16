@@ -152,7 +152,6 @@ namespace Xamarin.Forms.Controls.Issues
 					var swittch = new SwitchCell();
 					swittch.SetBinding(SwitchCell.TextProperty, new Binding("Name"));
 					swittch.SetBinding(SwitchCell.OnProperty, new Binding("IsBusy"));
-					//swittch.Text = new Binding("Text");
 					return swittch;
 				})
 

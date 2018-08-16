@@ -8,7 +8,6 @@ namespace Xamarin.Forms.Platform.iOS
 	{
 		Cell _cell;
 		public Action<object, PropertyChangedEventArgs> CellPropertyChanged;
-		public Action<object, PropertyChangedEventArgs> PropertyChanged;
 		bool _disposed;
 
 		public CellTableViewCell(UITableViewCellStyle style, string key) : base(style, key)
@@ -44,11 +43,6 @@ namespace Xamarin.Forms.Platform.iOS
 		public void HandleCellPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			CellPropertyChanged?.Invoke(sender, e);
-		}
-
-		public void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			PropertyChanged?.Invoke(this, e);
 		}
 
 		internal static UITableViewCell GetNativeCell(UITableView tableView, Cell cell, bool recycleCells = false, string templateId = "")
@@ -111,7 +105,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (disposing)
 			{
-				PropertyChanged = null;
 				CellPropertyChanged = null;
 				if (_cell != null)
 				{
