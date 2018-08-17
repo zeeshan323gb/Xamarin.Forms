@@ -12,6 +12,8 @@ using NUnit.Framework;
 
 namespace Xamarin.Forms.Controls.Issues
 {
+	// This may crash for you on Android if you click too many buttons
+	// https://github.com/xamarin/Xamarin.Forms/issues/3603
 	[Preserve(AllMembers = true)]
 	[Issue(IssueTracker.Github, 3408, "System.ObjectDisposedException: from SwitchCellRenderer when changing ItemSource", PlatformAffected.iOS)]
 	public class Issue3408 : TestContentPage
