@@ -7,7 +7,9 @@ namespace Xamarin.Forms.Platform.iOS
 	public class CellTableViewCell : UITableViewCell, INativeElementView
 	{
 		Cell _cell;
-		public Action<object, PropertyChangedEventArgs> CellPropertyChanged;
+
+		public Action<object, PropertyChangedEventArgs> PropertyChanged;
+
 		bool _disposed;
 
 		public CellTableViewCell(UITableViewCellStyle style, string key) : base(style, key)
@@ -24,7 +26,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 				if (_cell != null)
 				{
-					_cell.PropertyChanged -= HandleCellPropertyChanged;
+					_cell.PropertyChanged -= HandlePropertyChanged;
 					Device.BeginInvokeOnMainThread(_cell.SendDisappearing);
 				}
 				this._cell = value;
@@ -32,7 +34,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 				if (_cell != null)
 				{
-					_cell.PropertyChanged += HandleCellPropertyChanged;
+					_cell.PropertyChanged += HandlePropertyChanged;
 					Device.BeginInvokeOnMainThread(_cell.SendAppearing);
 				}
 			}
@@ -40,9 +42,9 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public Element Element => Cell;
 
-		public void HandleCellPropertyChanged(object sender, PropertyChangedEventArgs e)
+		public void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			CellPropertyChanged?.Invoke(sender, e);
+			PropertyChanged?.Invoke(sender, e);
 		}
 
 		internal static UITableViewCell GetNativeCell(UITableView tableView, Cell cell, bool recycleCells = false, string templateId = "")
@@ -105,10 +107,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (disposing)
 			{
-				CellPropertyChanged = null;
+				PropertyChanged = null;
+
 				if (_cell != null)
 				{
-					_cell.PropertyChanged -= HandleCellPropertyChanged;
+					_cell.PropertyChanged -= HandlePropertyChanged;
 				}
 				_cell = null;
 			}

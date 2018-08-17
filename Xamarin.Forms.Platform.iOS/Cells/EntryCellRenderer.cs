@@ -18,7 +18,7 @@ namespace Xamarin.Forms.Platform.iOS
 				tvc = new EntryCellTableViewCell(item.GetType().FullName);
 			else
 			{
-				tvc.CellPropertyChanged -= OnCellPropertyChanged;
+				tvc.PropertyChanged -= HandlePropertyChanged;
 				tvc.TextFieldTextChanged -= OnTextFieldTextChanged;
 				tvc.KeyboardDoneButtonPressed -= OnKeyBoardDoneButtonPressed;
 			}
@@ -26,7 +26,7 @@ namespace Xamarin.Forms.Platform.iOS
 			SetRealCell(item, tvc);
 
 			tvc.Cell = item;
-			tvc.CellPropertyChanged += OnCellPropertyChanged;
+			tvc.PropertyChanged += HandlePropertyChanged;
 			tvc.TextFieldTextChanged += OnTextFieldTextChanged;
 			tvc.KeyboardDoneButtonPressed += OnKeyBoardDoneButtonPressed;
 
@@ -44,7 +44,7 @@ namespace Xamarin.Forms.Platform.iOS
 			return tvc;
 		}
 
-		static void OnCellPropertyChanged(object sender, PropertyChangedEventArgs e)
+		static void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			var entryCell = (EntryCell)sender;
 			var realCell = (EntryCellTableViewCell)GetRealCell(entryCell);
