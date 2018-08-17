@@ -162,6 +162,8 @@ namespace Xamarin.Forms.Controls.Issues
 			Content = grd;
 		}
 
+		// This work around exists because of this issue
+		// https://github.com/xamarin/Xamarin.Forms/issues/3602
 		object context = null;
 		protected override void OnBindingContextChanged()
 		{
@@ -194,6 +196,11 @@ namespace Xamarin.Forms.Controls.Issues
 
 		protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
 		{
+			if (item == null)
+			{
+				return null;
+			}
+
 			if (item is RecommendationsViewModel)
 			{
 				RecommendationsView.Value.BindingContext = item;
