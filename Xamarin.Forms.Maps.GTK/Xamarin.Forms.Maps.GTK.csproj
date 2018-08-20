@@ -104,10 +104,6 @@
       <Project>{7d13bac2-c6a4-416a-b07e-c169b199e52b}</Project>
       <Name>Xamarin.Forms.Maps</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Xamarin.Forms.Platform.GTK\Xamarin.Forms.Platform.GTK.csproj">
-      <Project>{1f058504-62f9-4279-ac8f-16738e0f4417}</Project>
-      <Name>Xamarin.Forms.Platform.GTK</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

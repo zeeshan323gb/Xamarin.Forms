@@ -86,12 +86,6 @@
       <Project>{D31A6537-ED9C-4EBD-B231-A8D4FE44126A}</Project>
       <Name>Xamarin.Forms.Platform</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Xamarin.Forms.ControlGallery.iOS\Xamarin.Forms.ControlGallery.iOS.csproj">
-      <Project>{C7131F14-274F-4B55-ACA9-E81731AD012F}</Project>
-      <Name>Xamarin.Forms.ControlGallery.iOS</Name>
-      <ReferenceOutputAssembly>False</ReferenceOutputAssembly>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
@@ -99,7 +93,7 @@
   <Import Project="..\Xamarin.Forms.Controls.Issues\Xamarin.Forms.Controls.Issues.Shared\Xamarin.Forms.Controls.Issues.Shared.projitems" Label="Shared" />
   <Import Project="..\Xamarin.Forms.Core.UITests.Shared\Xamarin.Forms.Core.UITests.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">  
-     <Delete Files="bin/$(Configuration)/System.Net.Http.dll" /> 
-  </Target> 
+  <Target Name="AfterBuild">
+    <Delete Files="bin/$(Configuration)/System.Net.Http.dll" />
+  </Target>
 </Project>
