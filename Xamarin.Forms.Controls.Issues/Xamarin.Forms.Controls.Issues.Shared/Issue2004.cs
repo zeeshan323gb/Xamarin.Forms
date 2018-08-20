@@ -292,8 +292,9 @@ namespace Xamarin.Forms.Controls.Issues
 
 #if UITEST
 		[Test]
-		public void NoCrashFromDisposedBitmapWhenSwitchingPages()
+		public async void NoCrashFromDisposedBitmapWhenSwitchingPages()
 		{
+			await Task.Delay(5000);
 			RunningApp.WaitForElement("Success");
 		}
 #endif
