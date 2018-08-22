@@ -12,16 +12,15 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			var textCell = (TextCell)item;
 
-			var tvc = reusableCell as CellTableViewCell;
-			if (tvc == null)
+			if (!(reusableCell is CellTableViewCell tvc))
 				tvc = new CellTableViewCell(UITableViewCellStyle.Subtitle, item.GetType().FullName);
 			else
-				tvc.PropertyChanged -= HandlePropertyChanged;
+				tvc.PropertyChanged -= HandleCellPropertyChanged;
 
 			SetRealCell(item, tvc);
 
 			tvc.Cell = textCell;
-			tvc.PropertyChanged = HandlePropertyChanged;
+			tvc.PropertyChanged = HandleCellPropertyChanged;
 
 			tvc.TextLabel.Text = textCell.Text;
 			tvc.DetailTextLabel.Text = textCell.Detail;
@@ -37,7 +36,7 @@ namespace Xamarin.Forms.Platform.iOS
 			return tvc;
 		}
 
-		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs args)
+		protected virtual void HandleCellPropertyChanged(object sender, PropertyChangedEventArgs args)
 		{
 			var textCell = (TextCell)sender;
 			var tvc = (CellTableViewCell)GetRealCell(textCell);
@@ -58,6 +57,13 @@ namespace Xamarin.Forms.Platform.iOS
 				tvc.DetailTextLabel.TextColor = textCell.DetailColor.ToUIColor(DefaultTextColor);
 			else if (args.PropertyName == Cell.IsEnabledProperty.PropertyName)
 				UpdateIsEnabled(tvc, textCell);
+
+			HandlePropertyChanged(tvc, args);
+		}
+
+		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs args)
+		{
+			//keeping this method for backwards compatability as the the sender here is a CellTableViewCell
 		}
 
 		static void UpdateIsEnabled(CellTableViewCell cell, TextCell entryCell)

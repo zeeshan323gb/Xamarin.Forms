@@ -21,7 +21,7 @@ namespace Xamarin.Forms.Platform.iOS
 			get { return _cell; }
 			set
 			{
-				if (this._cell == value)
+				if (_cell == value)
 					return;
 
 				if (_cell != null)
@@ -29,7 +29,6 @@ namespace Xamarin.Forms.Platform.iOS
 					_cell.PropertyChanged -= HandlePropertyChanged;
 					Device.BeginInvokeOnMainThread(_cell.SendDisappearing);
 				}
-				this._cell = value;
 				_cell = value;
 
 				if (_cell != null)
@@ -42,10 +41,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public Element Element => Cell;
 
-		public void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			PropertyChanged?.Invoke(sender, e);
-		}
+		public void HandlePropertyChanged(object sender, PropertyChangedEventArgs e) => PropertyChanged?.Invoke(sender, e);
 
 		internal static UITableViewCell GetNativeCell(UITableView tableView, Cell cell, bool recycleCells = false, string templateId = "")
 		{
