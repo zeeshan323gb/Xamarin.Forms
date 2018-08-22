@@ -63,7 +63,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void HandlePropertyChanged(object sender, PropertyChangedEventArgs args)
 		{
-			//keeping this method for backwards compatability as the the sender here is a CellTableViewCell
+			//keeping this method for backwards compatibility 
+			//as the the sender for this method is a CellTableViewCell
 		}
 
 		static void UpdateIsEnabled(CellTableViewCell cell, TextCell entryCell)
