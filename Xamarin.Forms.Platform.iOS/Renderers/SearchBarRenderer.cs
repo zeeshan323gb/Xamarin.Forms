@@ -130,8 +130,8 @@ namespace Xamarin.Forms.Platform.iOS
 		public override CoreGraphics.CGSize SizeThatFits(CoreGraphics.CGSize size)
 		{
 			if (nfloat.IsInfinity(size.Width) && Forms.IsiOS11OrNewer)
-				size.Width = nfloat.MaxValue;
-			
+				size.Width = (nfloat)(Element?.Parent is VisualElement parent ? parent.Width : Device.Info.ScaledScreenSize.Width);
+
 			return base.SizeThatFits(size);
 		}
 
