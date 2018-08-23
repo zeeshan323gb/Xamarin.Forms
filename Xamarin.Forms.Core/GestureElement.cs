@@ -9,6 +9,7 @@ namespace Xamarin.Forms
 	public class GestureElement : Element, ISpatialElement
 	{
 		readonly GestureRecognizerCollection _gestureRecognizers = new GestureRecognizerCollection();
+		internal event NotifyCollectionChangedEventHandler SpansCollectionChanged;
 
 		public GestureElement()
 		{
@@ -46,6 +47,8 @@ namespace Xamarin.Forms
 							item.Parent = this;
 						break;
 				}
+
+				SpansCollectionChanged?.Invoke(sender, args);
 			};
 		}
 
