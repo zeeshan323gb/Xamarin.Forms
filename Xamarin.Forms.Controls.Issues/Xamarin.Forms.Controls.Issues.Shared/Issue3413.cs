@@ -4,6 +4,7 @@ using Xamarin.Forms.Internals;
 #if UITEST
 using Xamarin.UITest;
 using NUnit.Framework;
+using Xamarin.Forms.Core.UITests;
 #endif
 
 namespace Xamarin.Forms.Controls.Issues
@@ -55,11 +56,12 @@ namespace Xamarin.Forms.Controls.Issues
 
 #if UITEST
 		[Test]
+		[Category(UITestCategories.ManualReview)]
 		public void Issue3413Test ()
 		{
 			RunningApp.WaitForElement (q => q.Marked ("srb_vertical"));
 			RunningApp.WaitForElement (q => q.Marked ("srb_horizontal"));
-			RunningApp.Screenshot ("Please verify we have 2 SearchBar's. One below the label, other side by side with the label");
+			RunningApp.Screenshot ("Please verify we have 2 SearchBars. One below the label, other side by side with the label");
 		}
 #endif
 	}
