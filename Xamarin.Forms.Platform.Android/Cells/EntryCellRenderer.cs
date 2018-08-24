@@ -9,9 +9,11 @@ namespace Xamarin.Forms.Platform.Android
 	public class EntryCellRenderer : CellRenderer
 	{
 		EntryCellView _view;
+		Context _context;
 
 		protected override global::Android.Views.View GetCellCore(Cell item, global::Android.Views.View convertView, ViewGroup parent, Context context)
 		{
+			_context = context;
 			if ((_view = convertView as EntryCellView) == null)
 				_view = new EntryCellView(context, item);
 			else
@@ -120,7 +122,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateLabelColor()
 		{
-			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, global::Android.Resource.Color.PrimaryTextDark);
+			global::Android.Util.TypedValue attributeValue  = new global::Android.Util.TypedValue();
+			_context.Theme.ResolveAttribute(global::Android.Resource.Attribute.TextColorPrimary, attributeValue, true);
+			var textColor = ((global::Android.Graphics.Drawables.ColorDrawable)_context.GetDrawable(attributeValue.ResourceId)).Color;
+			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, textColor);
 		}
 
 		void UpdateFlowDirection()
