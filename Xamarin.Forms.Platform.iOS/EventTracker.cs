@@ -125,8 +125,7 @@ namespace Xamarin.Forms.Platform.MacOS
 				var eventTracker = weakEventTracker.Target as EventTracker;
 				var view = eventTracker?._renderer?.Element as View;
 				var childGestures = GetChildGestures(sender, weakEventTracker, weakRecognizer, eventTracker, view);
-				if (childGestures == null) return;
-
+				
 				if (childGestures?.GetChildGesturesFor<TapGestureRecognizer>(x => x.NumberOfTapsRequired == (int)sender.NumberOfClicksRequired).Count() > 0)
 					return;
 
@@ -142,8 +141,7 @@ namespace Xamarin.Forms.Platform.MacOS
 				var eventTracker = weakEventTracker.Target as EventTracker;
 				var view = eventTracker?._renderer?.Element as View;
 				var childGestures = GetChildGestures(sender, weakEventTracker, weakRecognizer, eventTracker, view);
-				if (childGestures == null) return;
-
+				
 				var clickGestureRecognizer = ((ChildGestureRecognizer)weakRecognizer.Target).GestureRecognizer as ClickGestureRecognizer;
 				var recognizers = childGestures?.GetChildGesturesFor<ClickGestureRecognizer>(x => x.NumberOfClicksRequired == (int)sender.NumberOfClicksRequired);
 
@@ -163,7 +161,6 @@ namespace Xamarin.Forms.Platform.MacOS
 				View view = eventTracker?._renderer?.Element as View;
 
 				var childGestures = GetChildGestures(sender, weakEventTracker, weakRecognizer, eventTracker, view);
-				if (childGestures == null) return;
 
 				if (childGestures?.GetChildGesturesFor<TapGestureRecognizer>(x => x.NumberOfTapsRequired == (int)sender.NumberOfTapsRequired).Count() > 0)
 					return;
@@ -181,10 +178,8 @@ namespace Xamarin.Forms.Platform.MacOS
 				var view = eventTracker?._renderer?.Element as View;
 
 				var childGestures = GetChildGestures(sender, weakEventTracker, weakRecognizer, eventTracker, view);
-				if (childGestures == null) return;
 
 				var recognizers = childGestures?.GetChildGesturesFor<TapGestureRecognizer>(x => x.NumberOfTapsRequired == (int)sender.NumberOfTapsRequired);
-
 
 				var tapGestureRecognizer = ((ChildGestureRecognizer)weakRecognizer.Target).GestureRecognizer as TapGestureRecognizer;
 				foreach (var item in recognizers)
