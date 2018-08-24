@@ -22,17 +22,20 @@ namespace Xamarin.Forms.Platform.iOS
 
 		bool _disposed;
 		IDisposable _selectedTextRangeObserver;
-		bool _selectedTextRangeIsUpdating;
+		bool _nativeSelectionIsUpdating;
+
+		bool _cursorPositionChangePending;
+		bool _selectionLengthChangePending;
 
 		static readonly int baseHeight = 30;
 		static CGSize initialSize = CGSize.Empty;
 
-		public EntryRenderer() 
+		public EntryRenderer()
 		{
 			Frame = new RectangleF(0, 20, 320, 40);
 		}
 
-		public override SizeRequest GetDesiredSize(double widthConstraint, double heightConstraint) 
+		public override SizeRequest GetDesiredSize(double widthConstraint, double heightConstraint)
 		{
 			var baseResult = base.GetDesiredSize(widthConstraint, heightConstraint);
 
@@ -66,7 +69,7 @@ namespace Xamarin.Forms.Platform.iOS
 					Control.EditingDidBegin -= OnEditingBegan;
 					Control.EditingChanged -= OnEditingChanged;
 					Control.EditingDidEnd -= OnEditingEnded;
-                    Control.ShouldChangeCharacters -= ShouldChangeCharacters;
+					Control.ShouldChangeCharacters -= ShouldChangeCharacters;
 					_selectedTextRangeObserver?.Dispose();
 				}
 			}
@@ -99,9 +102,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 				textField.EditingDidBegin += OnEditingBegan;
 				textField.EditingDidEnd += OnEditingEnded;
-                textField.ShouldChangeCharacters += ShouldChangeCharacters;
+				textField.ShouldChangeCharacters += ShouldChangeCharacters;
 				_selectedTextRangeObserver = textField.AddObserver("selectedTextRange", NSKeyValueObservingOptions.New, UpdateCursorFromControl);
 			}
+
+			// When we set the control text, it triggers the UpdateCursorFromControl event, which updates CursorPosition and SelectionLength;
+			// These one-time-use variables will let us initialize a CursorPosition and SelectionLength via ctor/xaml/etc.
+			_cursorPositionChangePending = Element.IsSet(Entry.CursorPositionProperty);
+			_selectionLengthChangePending = Element.IsSet(Entry.SelectionLengthProperty);
 
 			UpdatePlaceholder();
 			UpdatePassword();
@@ -113,7 +121,10 @@ namespace Xamarin.Forms.Platform.iOS
 			UpdateAdjustsFontSizeToFitWidth();
 			UpdateMaxLength();
 			UpdateReturnType();
-			UpdateCursorSelection();
+
+			if (_cursorPositionChangePending || _selectionLengthChangePending)
+				UpdateCursorSelection();
+
 			UpdateCursorColor();
 		}
 
@@ -146,7 +157,7 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateColor();
 				UpdatePlaceholder();
 			}
-			else if (e.PropertyName == PlatformConfiguration.iOSSpecific.Entry.AdjustsFontSizeToFitWidthProperty.PropertyName)
+			else if (e.PropertyName == Specifics.AdjustsFontSizeToFitWidthProperty.PropertyName)
 				UpdateAdjustsFontSizeToFitWidth();
 			else if (e.PropertyName == VisualElement.FlowDirectionProperty.PropertyName)
 				UpdateAlignment();
@@ -154,7 +165,9 @@ namespace Xamarin.Forms.Platform.iOS
 				UpdateMaxLength();
 			else if (e.PropertyName == Entry.ReturnTypeProperty.PropertyName)
 				UpdateReturnType();
-			else if (e.PropertyName == Entry.CursorPositionProperty.PropertyName || e.PropertyName == Entry.SelectionLengthProperty.PropertyName)
+			else if (e.PropertyName == Entry.CursorPositionProperty.PropertyName)
+				UpdateCursorSelection();
+			else if (e.PropertyName == Entry.SelectionLengthProperty.PropertyName)
 				UpdateCursorSelection();
 			else if (e.PropertyName == Specifics.CursorColorProperty.PropertyName)
 				UpdateCursorColor();
@@ -164,6 +177,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnEditingBegan(object sender, EventArgs e)
 		{
+			UpdateCursorSelection();
+
 			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
 
@@ -315,42 +330,104 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void UpdateCursorFromControl(NSObservedChange obj)
 		{
-			var control = Control;
-			if (_selectedTextRangeIsUpdating || control == null || Element == null)
+			if (_nativeSelectionIsUpdating || Control == null || Element == null)
 				return;
 
-			var currentSelection = control.SelectedTextRange;
-			int selectionLength = (int)control.GetOffsetFromPosition(currentSelection.Start, currentSelection.End);
-			int newCursorPosition = (int)control.GetOffsetFromPosition(control.BeginningOfDocument, currentSelection.Start);
+			var currentSelection = Control.SelectedTextRange;
+			if (currentSelection != null)
+			{
+				if (!_cursorPositionChangePending)
+				{
+					int newCursorPosition = (int)Control.GetOffsetFromPosition(Control.BeginningOfDocument, currentSelection.Start);
+					if (newCursorPosition != Element.CursorPosition)
+					{
+						_nativeSelectionIsUpdating = true;
+						ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, newCursorPosition);
+					}
+				}
 
-			_selectedTextRangeIsUpdating = true;
-			if (newCursorPosition != Element.CursorPosition)
-				ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, newCursorPosition);
+				if (!_selectionLengthChangePending)
+				{
+					int selectionLength = (int)Control.GetOffsetFromPosition(currentSelection.Start, currentSelection.End);
 
-			if (selectionLength != Element.SelectionLength)
-				ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, selectionLength);
-			_selectedTextRangeIsUpdating = false;
+					if (selectionLength != Element.SelectionLength)
+					{
+						_nativeSelectionIsUpdating = true;
+						ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, selectionLength);
+					}
+				}
+			}
+
+			_nativeSelectionIsUpdating = false;
 		}
 
 		void UpdateCursorSelection()
 		{
-			var control = Control;
-			if (_selectedTextRangeIsUpdating || control == null || Element == null)
+			if (_nativeSelectionIsUpdating || Control == null || Element == null)
 				return;
 
-			if (Element.IsSet(Entry.CursorPositionProperty) || Element.IsSet(Entry.SelectionLengthProperty)) {
+			// If this is run from the ctor, the control is likely too early in its lifecycle to be first responder yet. 
+			// Anything done here will have no effect, so we'll skip this work until later.
+			// We'll try again when the control does become first responder later OnEditingBegan
+			if (Control.BecomeFirstResponder())
+			{
+				int cursorPosition = Element.CursorPosition;
 
-				control.BecomeFirstResponder();
-				var start = control.GetPosition(control.BeginningOfDocument, Element.CursorPosition);
-				var end = control.GetPosition(start, System.Math.Min(control.Text.Length - Element.CursorPosition, Element.SelectionLength));
-				var currentSelection = control.SelectedTextRange;
-				if (currentSelection.Start != start || currentSelection.End != end)
-				{
-					_selectedTextRangeIsUpdating = true;
-					control.SelectedTextRange = control.GetTextRange(start, end);
-					_selectedTextRangeIsUpdating = false;
-				}
+				UITextPosition start = GetSelectionStart(cursorPosition, out int startOffset);
+				UITextPosition end = GetSelectionEnd(cursorPosition, start, startOffset);
+
+				Control.SelectedTextRange = Control.GetTextRange(start, end);
+
+				_cursorPositionChangePending = _selectionLengthChangePending = false;
 			}
+		}
+
+		UITextPosition GetSelectionEnd(int cursorPosition, UITextPosition start, int startOffset)
+		{
+			UITextPosition end;
+			int endOffset = startOffset;
+			int selectionLength = Element.SelectionLength;
+
+			if (Element.IsSet(Entry.SelectionLengthProperty))
+			{
+				end = Control.GetPosition(start, Math.Max(startOffset, Math.Min(Control.Text.Length - cursorPosition, selectionLength))) ?? start;
+				endOffset = Math.Max(startOffset, (int)Control.GetOffsetFromPosition(Control.BeginningOfDocument, end));
+			}
+			else
+				end = start;
+
+			int newSelectionLength = Math.Max(0, endOffset - startOffset);
+			if (newSelectionLength != selectionLength)
+			{
+				_nativeSelectionIsUpdating = true;
+				ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, newSelectionLength);
+				_nativeSelectionIsUpdating = false;
+			}
+
+			return end;
+		}
+
+		UITextPosition GetSelectionStart(int cursorPosition, out int startOffset)
+		{
+			UITextPosition start;
+			startOffset = 0;
+
+			if (Element.IsSet(Entry.CursorPositionProperty))
+			{
+				start = Control.GetPosition(Control.BeginningOfDocument, cursorPosition) ?? Control.EndOfDocument;
+				startOffset = Math.Max(0, (int)Control.GetOffsetFromPosition(Control.BeginningOfDocument, start));
+			}
+			else
+				start = Control.EndOfDocument;
+
+			if (startOffset != cursorPosition)
+			{
+				_nativeSelectionIsUpdating = true;
+				ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, startOffset);
+				_nativeSelectionIsUpdating = false;
+			}
+
+			return start;
 		}
 
 		void UpdateCursorColor()
@@ -369,6 +446,4 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 	}
-
-
 }
