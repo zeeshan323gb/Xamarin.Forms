@@ -177,7 +177,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void OnEditingBegan(object sender, EventArgs e)
 		{
-			UpdateCursorSelection();
+			if (!_cursorPositionChangePending && !_selectionLengthChangePending)
+				UpdateCursorFromControl(null);
+			else
+				UpdateCursorSelection();
 
 			ElementController.SetValueFromRenderer(VisualElement.IsFocusedPropertyKey, true);
 		}
@@ -366,6 +369,8 @@ namespace Xamarin.Forms.Platform.iOS
 			if (_nativeSelectionIsUpdating || Control == null || Element == null)
 				return;
 
+			_cursorPositionChangePending = _selectionLengthChangePending = true;
+
 			// If this is run from the ctor, the control is likely too early in its lifecycle to be first responder yet. 
 			// Anything done here will have no effect, so we'll skip this work until later.
 			// We'll try again when the control does become first responder later OnEditingBegan
@@ -377,14 +382,13 @@ namespace Xamarin.Forms.Platform.iOS
 				UITextPosition end = GetSelectionEnd(cursorPosition, start, startOffset);
 
 				Control.SelectedTextRange = Control.GetTextRange(start, end);
-
 				_cursorPositionChangePending = _selectionLengthChangePending = false;
 			}
 		}
 
 		UITextPosition GetSelectionEnd(int cursorPosition, UITextPosition start, int startOffset)
 		{
-			UITextPosition end;
+			UITextPosition end = start;
 			int endOffset = startOffset;
 			int selectionLength = Element.SelectionLength;
 
@@ -393,8 +397,6 @@ namespace Xamarin.Forms.Platform.iOS
 				end = Control.GetPosition(start, Math.Max(startOffset, Math.Min(Control.Text.Length - cursorPosition, selectionLength))) ?? start;
 				endOffset = Math.Max(startOffset, (int)Control.GetOffsetFromPosition(Control.BeginningOfDocument, end));
 			}
-			else
-				end = start;
 
 			int newSelectionLength = Math.Max(0, endOffset - startOffset);
 			if (newSelectionLength != selectionLength)
@@ -409,16 +411,14 @@ namespace Xamarin.Forms.Platform.iOS
 
 		UITextPosition GetSelectionStart(int cursorPosition, out int startOffset)
 		{
-			UITextPosition start;
-			startOffset = 0;
+			UITextPosition start = Control.EndOfDocument;
+			startOffset = Control.Text.Length;
 
 			if (Element.IsSet(Entry.CursorPositionProperty))
 			{
 				start = Control.GetPosition(Control.BeginningOfDocument, cursorPosition) ?? Control.EndOfDocument;
 				startOffset = Math.Max(0, (int)Control.GetOffsetFromPosition(Control.BeginningOfDocument, start));
 			}
-			else
-				start = Control.EndOfDocument;
 
 			if (startOffset != cursorPosition)
 			{
