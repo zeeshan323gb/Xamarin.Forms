@@ -343,15 +343,11 @@ namespace Xamarin.Forms.Platform.UWP
 
 			if (Control.Focus(FocusState.Programmatic))
 			{
-				int selectionLength;
+				int selectionLength = 0;
 				int elemSelectionLength = Element.SelectionLength;
 
 				if (Element.IsSet(Entry.SelectionLengthProperty))
-				{
 					selectionLength = Math.Max(0, Math.Min(Control.Text.Length - Element.CursorPosition, elemSelectionLength));
-				}
-				else
-					selectionLength = 0;
 
 				if (elemSelectionLength != selectionLength)
 				{
@@ -373,13 +369,11 @@ namespace Xamarin.Forms.Platform.UWP
 
 			if (Control.Focus(FocusState.Programmatic))
 			{
-				int start;
+				int start = Control.Text.Length;
 				int cursorPosition = Element.CursorPosition;
 
 				if (Element.IsSet(Entry.CursorPositionProperty))
-					start = Math.Min(Control.Text.Length, cursorPosition);
-				else
-					start = Control.Text.Length;
+					start = Math.Min(start, cursorPosition);
 
 				if (start != cursorPosition)
 				{

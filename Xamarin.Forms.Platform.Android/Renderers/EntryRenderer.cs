@@ -349,14 +349,11 @@ namespace Xamarin.Forms.Platform.Android
 
 		int GetSelectionEnd(int start)
 		{
-			int end;
-			bool selectionLengthSet = Element.IsSet(Entry.SelectionLengthProperty);
+			int end = start;
 			int selectionLength = Element.SelectionLength;
 
-			if (selectionLengthSet)
+			if (Element.IsSet(Entry.SelectionLengthProperty))
 				end = System.Math.Max(start, System.Math.Min(Control.Length(), start + selectionLength));
-			else
-				end = start;
 
 			int newSelectionLength = System.Math.Max(0, end - start);
 			if (newSelectionLength != selectionLength)
@@ -371,14 +368,11 @@ namespace Xamarin.Forms.Platform.Android
 
 		int GetSelectionStart()
 		{
-			int start;
-			bool cursorPositionSet = Element.IsSet(Entry.CursorPositionProperty);
+			int start = Control.Length();
 			int cursorPosition = Element.CursorPosition;
 
-			if (cursorPositionSet)
+			if (Element.IsSet(Entry.CursorPositionProperty))
 				start = System.Math.Min(Control.Text.Length, cursorPosition);
-			else
-				start = Control.Length();
 
 			if (start != cursorPosition)
 			{
