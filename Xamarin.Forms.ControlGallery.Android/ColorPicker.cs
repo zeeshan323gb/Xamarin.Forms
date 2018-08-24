@@ -34,7 +34,7 @@ namespace Xamarin.Forms.ControlGallery.Android
 			SetMinimumWidth(minWidth);
 
 			imageViewPallete = new ImageView(context);
-			imageViewPallete.DrawingCacheEnabled = true;
+			//imageViewPallete.DrawingCacheEnabled = true;
 			imageViewPallete.Background = new Droid.Graphics.Drawables.GradientDrawable(Droid.Graphics.Drawables.GradientDrawable.Orientation.LeftRight, COLORS);
 
 			imageViewPallete.Touch += (object sender, TouchEventArgs e) =>
@@ -43,7 +43,7 @@ namespace Xamarin.Forms.ControlGallery.Android
 				{
 					currentPoint = new Droid.Graphics.Point((int)e.Event.GetX(), (int)e.Event.GetY());
 
-					previewColor = GetCurrentColor(imageViewPallete.GetDrawingCache(false), (int)e.Event.GetX(), (int)e.Event.GetY());
+					previewColor = GetCurrentColor(null, (int)e.Event.GetX(), (int)e.Event.GetY());
 				}
 				if (e.Event.Action == MotionEventActions.Up)
 				{
