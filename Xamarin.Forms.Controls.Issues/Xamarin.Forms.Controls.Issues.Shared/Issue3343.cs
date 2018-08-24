@@ -22,7 +22,7 @@ namespace Xamarin.Forms.Controls.Issues
 			entry.SelectionLength = entry.Text.Length;
 
 			Label entryLabel = new Label { VerticalOptions = LayoutOptions.Center, FontSize = 8 };
-			entryLabel.SetBinding(Label.TextProperty, new Binding(nameof(Entry.CursorPosition), stringFormat: "CursorPostion: {0}", source: entry));
+			entryLabel.SetBinding(Label.TextProperty, new Binding(nameof(Entry.CursorPosition), stringFormat: "CursorPosition: {0}", source: entry));
 
 			Label entryLabel2 = new Label { VerticalOptions = LayoutOptions.Center, FontSize = 8 };
 			entryLabel2.SetBinding(Label.TextProperty, new Binding(nameof(Entry.SelectionLength), stringFormat: "SelectionLength: {0}", source: entry));
@@ -36,7 +36,7 @@ namespace Xamarin.Forms.Controls.Issues
 			};
 
 			Label entry2Label = new Label { VerticalOptions = LayoutOptions.Center, FontSize = 8 };
-			entry2Label.SetBinding(Label.TextProperty, new Binding(nameof(Entry.CursorPosition), stringFormat: "CursorPostion: {0}", source: entry2));
+			entry2Label.SetBinding(Label.TextProperty, new Binding(nameof(Entry.CursorPosition), stringFormat: "CursorPosition: {0}", source: entry2));
 
 			Label entry2Label2 = new Label { VerticalOptions = LayoutOptions.Center, FontSize = 8 };
 			entry2Label2.SetBinding(Label.TextProperty, new Binding(nameof(Entry.SelectionLength), stringFormat: "SelectionLength: {0}", source: entry2));
