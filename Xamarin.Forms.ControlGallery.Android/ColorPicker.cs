@@ -34,19 +34,20 @@ namespace Xamarin.Forms.ControlGallery.Android
 			SetMinimumWidth(minWidth);
 
 			imageViewPallete = new ImageView(context);
-#pragma warning disable 618
-			imageViewPallete.DrawingCacheEnabled = true;
-#pragma warning restore 618
 			imageViewPallete.Background = new Droid.Graphics.Drawables.GradientDrawable(Droid.Graphics.Drawables.GradientDrawable.Orientation.LeftRight, COLORS);
 
 			imageViewPallete.Touch += (object sender, TouchEventArgs e) =>
 			{
 				if (e.Event.Action == MotionEventActions.Down || e.Event.Action == MotionEventActions.Move)
 				{
-					currentPoint = new Droid.Graphics.Point((int)e.Event.GetX(), (int)e.Event.GetY());
-#pragma warning disable 618
-					previewColor = GetCurrentColor(imageViewPallete.GetDrawingCache(false), (int)e.Event.GetX(), (int)e.Event.GetY());
-#pragma warning restore 618
+					using (Droid.Graphics.Bitmap bitmap = Droid.Graphics.Bitmap.CreateBitmap(imageViewPallete.Width, imageViewPallete.Height, Droid.Graphics.Bitmap.Config.Argb8888))
+					{
+						Droid.Graphics.Canvas canvas = new Droid.Graphics.Canvas(bitmap);
+						imageViewPallete.Background.Draw(canvas);
+
+						currentPoint = new Droid.Graphics.Point((int)e.Event.GetX(), (int)e.Event.GetY());
+						previewColor = GetCurrentColor(bitmap, (int)e.Event.GetX(), (int)e.Event.GetY());
+					}
 				}
 				if (e.Event.Action == MotionEventActions.Up)
 				{
