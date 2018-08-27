@@ -30,10 +30,6 @@ namespace Xamarin.Forms
 
 		static bool? s_isLollipopOrNewer;
 
-		static global::Android.Graphics.Color s_defaultThemeTextColor = global::Android.Graphics.Color.Black;
-		static bool s_defaultColorInitialized = false;
-
-
 		[Obsolete("Context is obsolete as of version 2.5. Please use a local context instead.")]
 		public static Context Context { get; internal set; }
 
@@ -47,7 +43,6 @@ namespace Xamarin.Forms
 		static Color _ColorButtonNormal = Color.Default;
 		public static Color ColorButtonNormalOverride { get; set; }
 
-		internal static global::Android.Graphics.Color DefaultTextColor => GetDefaultTextColor(ApplicationContext);
 		internal static bool IsLollipopOrNewer
 		{
 			get
@@ -146,7 +141,6 @@ namespace Xamarin.Forms
 				ResourceManager.Init(resourceAssembly);
 			}
 
-			GetDefaultTextColor(activity);
 			// We want this to be updated when we have a new activity (e.g. on a configuration change)
 			// This could change if the UI mode changes (e.g., if night mode is enabled)
 			Color.SetAccent(GetAccentColor(activity));
@@ -271,19 +265,6 @@ namespace Xamarin.Forms
 				}
 			}
 			return rc;
-		}
-
-		static global::Android.Graphics.Color GetDefaultTextColor(Context context)
-		{
-			if (!s_defaultColorInitialized)
-			{
-				var themeTextColorValue = new TypedValue();
-				context.Theme.ResolveAttribute(Resource.Attribute.TextColor, themeTextColorValue, true);
-				s_defaultThemeTextColor = new global::Android.Graphics.Color(themeTextColorValue.Data);
-				s_defaultColorInitialized = true;
-			}
-
-			return s_defaultThemeTextColor;
 		}
 
 		class AndroidDeviceInfo : DeviceInfo

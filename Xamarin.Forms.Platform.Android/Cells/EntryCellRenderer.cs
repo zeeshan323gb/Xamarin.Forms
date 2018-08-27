@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using Android.Content;
-using Android.Support.V4.Content;
 using Android.Text;
 using Android.Text.Method;
 using Android.Views;
@@ -121,7 +120,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateLabelColor()
 		{
-			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, Forms.DefaultTextColor);
+			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, global::Android.Resource.Attribute.TextColor);
 		}
 
 		void UpdateFlowDirection()
