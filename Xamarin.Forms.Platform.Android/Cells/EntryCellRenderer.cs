@@ -122,10 +122,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateLabelColor()
 		{
-			global::Android.Util.TypedValue attributeValue  = new global::Android.Util.TypedValue();
-			_context.Theme.ResolveAttribute(global::Android.Resource.Attribute.TextColorPrimary, attributeValue, true);
-			var textColor = ((global::Android.Graphics.Drawables.ColorDrawable)_context.GetDrawable(attributeValue.ResourceId)).Color;
-			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, textColor);
+			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, global::Android.Resource.Color.PrimaryTextDark);
 		}
 
 		void UpdateFlowDirection()
