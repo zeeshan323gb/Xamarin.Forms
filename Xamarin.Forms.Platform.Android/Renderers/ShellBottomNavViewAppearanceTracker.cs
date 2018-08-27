@@ -123,7 +123,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				if (disposing)
 				{
-					_defaultList.Dispose();
+					_defaultList?.Dispose();
 				}
 
 				_shellItem = null;
