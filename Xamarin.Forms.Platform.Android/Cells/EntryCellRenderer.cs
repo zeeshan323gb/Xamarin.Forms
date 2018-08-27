@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Android.Content;
+using Android.Support.V4.Content;
 using Android.Text;
 using Android.Text.Method;
 using Android.Views;
@@ -9,11 +10,9 @@ namespace Xamarin.Forms.Platform.Android
 	public class EntryCellRenderer : CellRenderer
 	{
 		EntryCellView _view;
-		Context _context;
 
 		protected override global::Android.Views.View GetCellCore(Cell item, global::Android.Views.View convertView, ViewGroup parent, Context context)
 		{
-			_context = context;
 			if ((_view = convertView as EntryCellView) == null)
 				_view = new EntryCellView(context, item);
 			else
@@ -122,7 +121,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateLabelColor()
 		{
-			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, global::Android.Resource.Color.PrimaryTextDark);
+			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, Forms.DefaultTextColor);
 		}
 
 		void UpdateFlowDirection()
