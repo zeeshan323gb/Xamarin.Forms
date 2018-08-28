@@ -79,10 +79,8 @@ namespace Xamarin.Forms.Platform.UWP
 			if (_selectionLengthChangePending)
 				UpdateSelectionLength();
 
-			_nativeSelectionIsUpdating = true;
-			ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, Control.SelectionStart);
-			ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, Control.SelectionLength);
-			_nativeSelectionIsUpdating = false;
+			SetCursorPositionFromRenderer(Control.SelectionStart);
+			SetSelectionLengthFromRenderer(Control.SelectionLength);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -150,7 +148,7 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 
 			// By default some platforms have alternate default background colors when focused
-			BrushHelpers.UpdateColor(Element.BackgroundColor, ref _backgroundColorFocusedDefaultBrush, 
+			BrushHelpers.UpdateColor(Element.BackgroundColor, ref _backgroundColorFocusedDefaultBrush,
 				() => Control.BackgroundFocusBrush, brush => Control.BackgroundFocusBrush = brush);
 		}
 
@@ -247,10 +245,10 @@ namespace Xamarin.Forms.Platform.UWP
 		{
 			Color placeholderColor = Element.PlaceholderColor;
 
-			BrushHelpers.UpdateColor(placeholderColor, ref _placeholderDefaultBrush, 
+			BrushHelpers.UpdateColor(placeholderColor, ref _placeholderDefaultBrush,
 				() => Control.PlaceholderForegroundBrush, brush => Control.PlaceholderForegroundBrush = brush);
 
-			BrushHelpers.UpdateColor(placeholderColor, ref _defaultPlaceholderColorFocusBrush, 
+			BrushHelpers.UpdateColor(placeholderColor, ref _defaultPlaceholderColorFocusBrush,
 				() => Control.PlaceholderForegroundFocusBrush, brush => Control.PlaceholderForegroundFocusBrush = brush);
 		}
 
@@ -269,7 +267,7 @@ namespace Xamarin.Forms.Platform.UWP
 			BrushHelpers.UpdateColor(textColor, ref _defaultTextColorFocusBrush,
 				() => Control.ForegroundFocusBrush, brush => Control.ForegroundFocusBrush = brush);
 		}
-    
+
 		void UpdateMaxLength()
 		{
 			Control.MaxLength = Element.MaxLength;
@@ -279,7 +277,7 @@ namespace Xamarin.Forms.Platform.UWP
 			if (currentControlText.Length > Element.MaxLength)
 				Control.Text = currentControlText.Substring(0, Element.MaxLength);
 		}
-    
+
 		void UpdateDetectReadingOrderFromContent()
 		{
 			if (Element.IsSet(Specifics.DetectReadingOrderFromContentProperty))
@@ -315,10 +313,7 @@ namespace Xamarin.Forms.Platform.UWP
 				var start = cursorPosition;
 				int selectionStart = Control.SelectionStart;
 				if (selectionStart != start)
-				{
-					_nativeSelectionIsUpdating = true;
-					ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, selectionStart);
-				}
+					SetCursorPositionFromRenderer(selectionStart);
 			}
 
 			if (!_selectionLengthChangePending)
@@ -327,13 +322,8 @@ namespace Xamarin.Forms.Platform.UWP
 
 				int controlSelectionLength = Control.SelectionLength;
 				if (controlSelectionLength != elementSelectionLength)
-				{
-					_nativeSelectionIsUpdating = true;
-					ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, controlSelectionLength);
-				}
+					SetSelectionLengthFromRenderer(controlSelectionLength);
 			}
-
-			_nativeSelectionIsUpdating = false;
 		}
 
 		void UpdateSelectionLength()
@@ -343,22 +333,27 @@ namespace Xamarin.Forms.Platform.UWP
 
 			if (Control.Focus(FocusState.Programmatic))
 			{
-				int selectionLength = 0;
-				int elemSelectionLength = Element.SelectionLength;
-
-				if (Element.IsSet(Entry.SelectionLengthProperty))
-					selectionLength = Math.Max(0, Math.Min(Control.Text.Length - Element.CursorPosition, elemSelectionLength));
-
-				if (elemSelectionLength != selectionLength)
+				try
 				{
-					_nativeSelectionIsUpdating = true;
-					ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, selectionLength);
-					_nativeSelectionIsUpdating = false;
+					int selectionLength = 0;
+					int elemSelectionLength = Element.SelectionLength;
+
+					if (Element.IsSet(Entry.SelectionLengthProperty))
+						selectionLength = Math.Max(0, Math.Min(Control.Text.Length - Element.CursorPosition, elemSelectionLength));
+
+					if (elemSelectionLength != selectionLength)
+						SetSelectionLengthFromRenderer(selectionLength);
+
+					Control.SelectionLength = selectionLength;
 				}
-
-				Control.SelectionLength = selectionLength;
-
-				_selectionLengthChangePending = false;
+				catch (Exception ex)
+				{
+					Log.Warning("Entry", $"Failed to set Control.SelectionLength from SelectionLength: {ex}");
+				}
+				finally
+				{
+					_selectionLengthChangePending = false;
+				}
 			}
 		}
 
@@ -369,25 +364,64 @@ namespace Xamarin.Forms.Platform.UWP
 
 			if (Control.Focus(FocusState.Programmatic))
 			{
-				int start = Control.Text.Length;
-				int cursorPosition = Element.CursorPosition;
-
-				if (Element.IsSet(Entry.CursorPositionProperty))
-					start = Math.Min(start, cursorPosition);
-
-				if (start != cursorPosition)
+				try
 				{
-					_nativeSelectionIsUpdating = true;
-					ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, start);
-					_nativeSelectionIsUpdating = false;
+					int start = Control.Text.Length;
+					int cursorPosition = Element.CursorPosition;
+
+					if (Element.IsSet(Entry.CursorPositionProperty))
+						start = Math.Min(start, cursorPosition);
+
+					if (start != cursorPosition)
+						SetCursorPositionFromRenderer(start);
+
+					Control.SelectionStart = start;
+
+					// Length is dependent on start, so we'll need to update it
+					UpdateSelectionLength();
 				}
+				catch (Exception ex)
+				{
+					Log.Warning("Entry", $"Failed to set Control.SelectionStart from CursorPosition: {ex}");
+				}
+				finally
+				{
+					_cursorPositionChangePending = false;
+				}
+			}
+		}
 
-				Control.SelectionStart = start;
+		void SetCursorPositionFromRenderer(int start)
+		{
+			try
+			{
+				_nativeSelectionIsUpdating = true;
+				ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, start);
+			}
+			catch (Exception ex)
+			{
+				Log.Warning("Entry", $"Failed to set CursorPosition from renderer: {ex}");
+			}
+			finally
+			{
+				_nativeSelectionIsUpdating = false;
+			}
+		}
 
-				// Length is dependent on start, so we'll need to update it
-				UpdateSelectionLength();
-
-				_cursorPositionChangePending = false;
+		void SetSelectionLengthFromRenderer(int selectionLength)
+		{
+			try
+			{
+				_nativeSelectionIsUpdating = true;
+				ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, selectionLength);
+			}
+			catch (Exception ex)
+			{
+				Log.Warning("Entry", $"Failed to set SelectionLength from renderer: {ex}");
+			}
+			finally
+			{
+				_nativeSelectionIsUpdating = false;
 			}
 		}
 	}

@@ -343,10 +343,7 @@ namespace Xamarin.Forms.Platform.iOS
 				{
 					int newCursorPosition = (int)Control.GetOffsetFromPosition(Control.BeginningOfDocument, currentSelection.Start);
 					if (newCursorPosition != Element.CursorPosition)
-					{
-						_nativeSelectionIsUpdating = true;
-						ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, newCursorPosition);
-					}
+						SetCursorPositionFromRenderer(newCursorPosition);
 				}
 
 				if (!_selectionLengthChangePending)
@@ -354,14 +351,9 @@ namespace Xamarin.Forms.Platform.iOS
 					int selectionLength = (int)Control.GetOffsetFromPosition(currentSelection.Start, currentSelection.End);
 
 					if (selectionLength != Element.SelectionLength)
-					{
-						_nativeSelectionIsUpdating = true;
-						ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, selectionLength);
-					}
+						SetSelectionLengthFromRenderer(selectionLength);
 				}
 			}
-
-			_nativeSelectionIsUpdating = false;
 		}
 
 		void UpdateCursorSelection()
@@ -376,13 +368,23 @@ namespace Xamarin.Forms.Platform.iOS
 			// We'll try again when the control does become first responder later OnEditingBegan
 			if (Control.BecomeFirstResponder())
 			{
-				int cursorPosition = Element.CursorPosition;
+				try
+				{
+					int cursorPosition = Element.CursorPosition;
 
-				UITextPosition start = GetSelectionStart(cursorPosition, out int startOffset);
-				UITextPosition end = GetSelectionEnd(cursorPosition, start, startOffset);
+					UITextPosition start = GetSelectionStart(cursorPosition, out int startOffset);
+					UITextPosition end = GetSelectionEnd(cursorPosition, start, startOffset);
 
-				Control.SelectedTextRange = Control.GetTextRange(start, end);
-				_cursorPositionChangePending = _selectionLengthChangePending = false;
+					Control.SelectedTextRange = Control.GetTextRange(start, end);
+				}
+				catch (Exception ex)
+				{
+					Internals.Log.Warning("Entry", $"Failed to set Control.SelectedTextRange from CursorPosition/SelectionLength: {ex}");
+				}
+				finally
+				{
+					_cursorPositionChangePending = _selectionLengthChangePending = false;
+				}
 			}
 		}
 
@@ -400,11 +402,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			int newSelectionLength = Math.Max(0, endOffset - startOffset);
 			if (newSelectionLength != selectionLength)
-			{
-				_nativeSelectionIsUpdating = true;
-				ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, newSelectionLength);
-				_nativeSelectionIsUpdating = false;
-			}
+				SetSelectionLengthFromRenderer(newSelectionLength);
 
 			return end;
 		}
@@ -421,11 +419,7 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 
 			if (startOffset != cursorPosition)
-			{
-				_nativeSelectionIsUpdating = true;
-				ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, startOffset);
-				_nativeSelectionIsUpdating = false;
-			}
+				SetCursorPositionFromRenderer(startOffset);
 
 			return start;
 		}
@@ -443,6 +437,40 @@ namespace Xamarin.Forms.Platform.iOS
 					control.TintColor = _defaultCursorColor;
 				else
 					control.TintColor = color.ToUIColor();
+			}
+		}
+
+		void SetCursorPositionFromRenderer(int start)
+		{
+			try
+			{
+				_nativeSelectionIsUpdating = true;
+				ElementController?.SetValueFromRenderer(Entry.CursorPositionProperty, start);
+			}
+			catch (Exception ex)
+			{
+				Internals.Log.Warning("Entry", $"Failed to set CursorPosition from renderer: {ex}");
+			}
+			finally
+			{
+				_nativeSelectionIsUpdating = false;
+			}
+		}
+
+		void SetSelectionLengthFromRenderer(int selectionLength)
+		{
+			try
+			{
+				_nativeSelectionIsUpdating = true;
+				ElementController?.SetValueFromRenderer(Entry.SelectionLengthProperty, selectionLength);
+			}
+			catch (Exception ex)
+			{
+				Internals.Log.Warning("Entry", $"Failed to set SelectionLength from renderer: {ex}");
+			}
+			finally
+			{
+				_nativeSelectionIsUpdating = false;
 			}
 		}
 	}
