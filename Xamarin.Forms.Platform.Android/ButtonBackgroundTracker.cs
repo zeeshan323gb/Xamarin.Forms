@@ -148,6 +148,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				if (disposing)
 				{
+					_nativeButton.SetBackground(null);
 					_backgroundDrawable?.Dispose();
 					_backgroundDrawable = null;
 					_defaultDrawable?.Dispose();

@@ -11,6 +11,7 @@ using Android.OS;
 
 namespace Xamarin.Forms.Platform.Android
 {
+
 	public class MasterDetailRenderer : DrawerLayout, IVisualElementRenderer, DrawerLayout.IDrawerListener
 	{
 		//from Android source code

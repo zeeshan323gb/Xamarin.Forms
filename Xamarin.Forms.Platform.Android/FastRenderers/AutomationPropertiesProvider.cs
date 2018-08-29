@@ -24,7 +24,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		internal static void SetContentDescription(
 			AView control, 
-			VisualElement element, 
+			BindableObject element, 
 			ref string defaultContentDescription,
 			ref string defaultHint)
 		{
@@ -89,7 +89,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			}
 		}
 
-		static bool SetHint(AView Control, VisualElement Element, ref string defaultHint)
+		static bool SetHint(AView Control, BindableObject Element, ref string defaultHint)
 		{
 			if (Element == null || Control == null)
 			{
@@ -174,7 +174,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		bool SetHint()
 			=> SetHint(Control, Element, ref _defaultHint);
 
-		internal static string ConcatenateNameAndHelpText(Element Element)
+		internal static string ConcatenateNameAndHelpText(BindableObject Element)
 		{
 			var name = (string)Element.GetValue(AutomationProperties.NameProperty);
 			var helpText = (string)Element.GetValue(AutomationProperties.HelpTextProperty);

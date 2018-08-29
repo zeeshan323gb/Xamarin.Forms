@@ -88,7 +88,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public static async Task UpdateBitmap(this AImageView imageView, Image newImage, Image previousImage = null)
 		{
-			await UpdateBitmap(imageView, newImage, newImage?.Source, previousImage, previousImage?.Source);
+			await UpdateBitmap(imageView, newImage, newImage?.Source, previousImage, previousImage?.Source).ConfigureAwait(false);
 
 		}
 	}
