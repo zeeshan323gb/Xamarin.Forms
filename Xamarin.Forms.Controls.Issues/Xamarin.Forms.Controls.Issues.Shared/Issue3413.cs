@@ -46,11 +46,21 @@ namespace Xamarin.Forms.Controls.Issues
 			layout1.Children.Add(new Label { Text = "Horizontal" });
 			layout1.Children.Add(searchBar1);
 
+			var searchBar2 = new SearchBar
+			{
+				BackgroundColor = Color.Blue,
+				Text = "i m with expand",
+				HorizontalOptions = LayoutOptions.CenterAndExpand,
+				AutomationId = "srb_grid"
+			};
+
 			var grid = new Grid();
 			grid.Children.Add(layout);
 			Grid.SetRow(layout, 0);
 			grid.Children.Add(layout1);
 			Grid.SetRow(layout1, 1);
+			grid.Children.Add(searchBar2);
+			Grid.SetRow(searchBar2, 2);
 			Content = grid;
 		}
 
