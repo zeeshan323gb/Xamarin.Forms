@@ -132,16 +132,15 @@ namespace Xamarin.Forms.Platform.iOS
 			if (!nfloat.IsInfinity(size.Width))
 				return base.SizeThatFits(size);
 
+			size.Width = (nfloat)(Element?.Parent is VisualElement parent ? parent.Width : Device.Info.ScaledScreenSize.Width);
+
 			if (Forms.IsiOS11OrNewer)
-			{
-				size.Width = (nfloat)(Element?.Parent is VisualElement parent ? parent.Width : Device.Info.ScaledScreenSize.Width);
 				return base.SizeThatFits(size);
-			}
 
 			//iOS10 hack because SizeThatFits always returns a width of 0
 			var sizeThatFits = Control.SizeThatFits(size);
 			if (sizeThatFits.Width == 0)
-				sizeThatFits.Width = (nfloat)(Element?.Parent is VisualElement parent ? parent.Width : Device.Info.ScaledScreenSize.Width);
+				sizeThatFits.Width = size.Width;
 
 			return sizeThatFits;
 		}
