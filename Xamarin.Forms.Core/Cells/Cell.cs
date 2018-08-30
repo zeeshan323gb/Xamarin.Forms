@@ -16,9 +16,6 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty SelectedItemBackgroundColorProperty =
 		BindableProperty.Create(nameof(SelectedItemBackgroundColor), typeof(Color), typeof(Cell), Color.Default);
 
-		/// <summary>
-		/// Gets or sets the SelectedBackgroundColor.
-		/// </summary>
 		public Color SelectedItemBackgroundColor
 		{
 			get { return (Color)GetValue(SelectedItemBackgroundColorProperty); }
