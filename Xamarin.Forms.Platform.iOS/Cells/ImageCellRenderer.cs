@@ -8,22 +8,12 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class ImageCellRenderer : TextCellRenderer
 	{
-		//UIColor defaultSelectedItemColor;
 
 		public override UITableViewCell GetCell(Cell item, UITableViewCell reusableCell, UITableView tv)
 		{
 			var result = (CellTableViewCell)base.GetCell(item, reusableCell, tv);
 
 			var imageCell = (ImageCell)item;
-
-			//if (item.SelectedBackgroundColor != Color.Default)
-			//{
-			//	defaultSelectedItemColor = result.SelectedBackgroundView.BackgroundColor;
-			//	result.SelectedBackgroundView = new UIView()
-			//	{
-			//		BackgroundColor = item.SelectedBackgroundColor.ToUIColor()
-			//	};
-			//}
 
 			WireUpForceUpdateSizeRequested(item, result, tv);
 
@@ -41,17 +31,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			if (args.PropertyName == ImageCell.ImageSourceProperty.PropertyName)
 				SetImage(imageCell, tvc);
-			//else if (args.PropertyName == ImageCell.SelectedBackgroundColorProperty.PropertyName)
-			//	UpdateSelectedItemBackgroundColor(imageCell, tvc);
 		}
-
-		//private void UpdateSelectedItemBackgroundColor(ImageCell cell, CellTableViewCell target)
-		//{
-		//	if (cell.SelectedBackgroundColor == Color.Default)
-		//		target.SelectedBackgroundView.BackgroundColor = defaultSelectedItemColor;
-		//	else
-		//		target.SelectedBackgroundView.BackgroundColor = cell.SelectedBackgroundColor.ToUIColor();
-		//}
 
 		async void SetImage(ImageCell cell, CellTableViewCell target)
 		{
