@@ -632,7 +632,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void SetupSelection(UITableView table)
 		{
-			for (var i = 0; i < table.GestureRecognizers.Length; i++)
+			for (var i = 0; i < table.GestureRecognizers?.Length; i++)
 			{
 				var r = table.GestureRecognizers[i] as SelectGestureRecognizer;
 				if (r != null)
