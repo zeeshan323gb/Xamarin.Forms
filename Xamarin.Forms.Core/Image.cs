@@ -11,7 +11,7 @@ namespace Xamarin.Forms
 	public class Image : View, IImageController, IElementConfiguration<Image>, IViewController
 	{
 		public static readonly BindableProperty SourceProperty = BindableProperty.Create(nameof(Source), typeof(ImageSource), typeof(Image), default(ImageSource),
-			propertyChanging: ImageElementManager.ImageSourceChanging, propertyChanged: ImageElementManager.ImageSourceChanged);
+			propertyChanging: OnImageSourceChanging, propertyChanged: OnImageSourceChanged);
 
 		public static readonly BindableProperty AspectProperty = BindableProperty.Create(nameof(Aspect), typeof(Aspect), typeof(Image), Aspect.AspectFit);
 
@@ -21,8 +21,6 @@ namespace Xamarin.Forms
 
 		public static readonly BindableProperty IsLoadingProperty = IsLoadingPropertyKey.BindableProperty;
 
-
-		event EventHandler _imageSourcesSourceChanged;
 		readonly Lazy<PlatformConfigurationRegistry<Image>> _platformConfigurationRegistry;
 
 		public Image()
@@ -82,8 +80,31 @@ namespace Xamarin.Forms
 		BindableProperty IImageController.AspectProperty => AspectProperty;
 		BindableProperty IImageController.IsOpaqueProperty => IsOpaqueProperty;
 
-		private void OnSourceChanged(object sender, EventArgs e) =>
-			_imageSourcesSourceChanged?.Invoke(this, EventArgs.Empty);
+		private void OnImageSourcesSourceChanged(object sender, EventArgs e) =>
+			ImageElementManager.ImageSourcesSourceChanged(this, EventArgs.Empty);
+
+		private static void OnImageSourceChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			ImageSource newSource = (ImageSource)newValue;
+			Image image = (Image)bindable;
+			if (newSource != null)
+			{
+				newSource.SourceChanged += image.OnImageSourcesSourceChanged;
+			}
+			ImageElementManager.ImageSourceChanged(bindable, newSource);
+		}
+
+		private static void OnImageSourceChanging(BindableObject bindable, object oldValue, object newValue)
+		{
+			ImageSource oldSource = (ImageSource)oldValue;
+			Image image = (Image)bindable;
+
+			if (oldSource != null)
+			{
+				oldSource.SourceChanged -= image.OnImageSourcesSourceChanged;
+			}
+			ImageElementManager.ImageSourceChanging(oldSource);
+		}
 
 		void IImageController.RaiseImageSourcePropertyChanged() => OnPropertyChanged(nameof(Source));
 	}

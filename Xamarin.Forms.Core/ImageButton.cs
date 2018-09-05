@@ -25,7 +25,7 @@ namespace Xamarin.Forms
 		public static readonly BindableProperty BorderColorProperty = BorderElement.BorderColorProperty;
 
 		public static readonly BindableProperty SourceProperty = BindableProperty.Create(nameof(Source), typeof(ImageSource), typeof(ImageButton), default(ImageSource),
-			propertyChanging: ImageElementManager.ImageSourceChanging, propertyChanged: ImageElementManager.ImageSourceChanged);
+			propertyChanging: OnImageSourceChanging, propertyChanged: OnImageSourceChanged);
 
 		public static readonly BindableProperty AspectProperty = BindableProperty.Create(nameof(Aspect), typeof(Aspect), typeof(ImageButton), Aspect.AspectFit);
 
@@ -196,19 +196,42 @@ namespace Xamarin.Forms
 
 		BindableProperty IImageController.IsOpaqueProperty => IsOpaqueProperty;
 
+		private void OnImageSourcesSourceChanged(object sender, EventArgs e) =>
+			ImageElementManager.ImageSourcesSourceChanged(this, EventArgs.Empty);
+
+		private static void OnImageSourceChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			ImageSource newSource = (ImageSource)newValue;
+			ImageButton button = (ImageButton)bindable;
+			if (newSource != null)
+			{
+				newSource.SourceChanged += button.OnImageSourcesSourceChanged;
+			}
+			ImageElementManager.ImageSourceChanged(bindable, newSource);
+		}
+
+		private static void OnImageSourceChanging(BindableObject bindable, object oldValue, object newValue)
+		{
+			ImageSource oldSource = (ImageSource)oldValue;
+			ImageButton button = (ImageButton)bindable;
+
+			if (oldSource != null)
+			{
+				oldSource.SourceChanged -= button.OnImageSourcesSourceChanged;
+			}
+			ImageElementManager.ImageSourceChanging(oldSource);
+		}
+
 		private void OnCommandCanExecuteChanged(object sender, EventArgs e) =>
 			ButtonElementManager.CommandCanExecuteChanged(this, EventArgs.Empty);
 
 		private static void OnCommandChanged(BindableObject bo, object o, object n)
 		{
 			var button = (ImageButton)bo;
-			if (n != null)
-			{
-				var newCommand = n as ICommand;
+			if (n is ICommand newCommand)
 				newCommand.CanExecuteChanged += button.OnCommandCanExecuteChanged;
-			}
 
-			ButtonElementManager.CommandChanged(bo, new BindableValueChangedEventArgs(bo, o, n));
+			ButtonElementManager.CommandChanged(button);
 		}
 
 		private static void OnCommandChanging(BindableObject bo, object o, object n)
@@ -218,8 +241,6 @@ namespace Xamarin.Forms
 			{
 				(o as ICommand).CanExecuteChanged -= button.OnCommandCanExecuteChanged;
 			}
-
-			ButtonElementManager.CommandChanged(bo, new BindableValueChangedEventArgs(bo, o, n));
 		}
 	}
 }

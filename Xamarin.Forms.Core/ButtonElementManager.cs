@@ -9,16 +9,15 @@ namespace Xamarin.Forms
 	{
 		public const string PressedVisualState = "Pressed";
 
-		public static void CommandChanged(object sender, BindableValueChangedEventArgs e)
+		public static void CommandChanged(IButtonController sender)
 		{
-			IButtonController ButtonElementManager = (IButtonController)sender;
-			if (ButtonElementManager.Command != null)
+			if (sender.Command != null)
 			{
-				CommandCanExecuteChanged(ButtonElementManager, EventArgs.Empty);
+				CommandCanExecuteChanged(sender, EventArgs.Empty);
 			}
 			else
 			{
-				ButtonElementManager.IsEnabledCore = true;
+				sender.IsEnabledCore = true;
 			}
 		}
 

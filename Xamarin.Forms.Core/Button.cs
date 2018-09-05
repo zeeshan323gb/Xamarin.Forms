@@ -14,9 +14,7 @@ namespace Xamarin.Forms
 		const int DefaultBorderRadius = 5;
 		const int DefaultCornerRadius = -1;
 
-		public static readonly BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(Button), null,
-					propertyChanged: OnCommandChanged
-				);
+		public static readonly BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(Button), null, propertyChanging: OnCommandChanging, propertyChanged: OnCommandChanged);
 
 		public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(Button), null,
 			propertyChanged: (bindable, oldvalue, newvalue) => ButtonElementManager.CommandCanExecuteChanged(bindable, EventArgs.Empty));
@@ -49,8 +47,9 @@ namespace Xamarin.Forms
 			propertyChanged: CornerRadiusPropertyChanged);
 
 		public static readonly BindableProperty ImageProperty = BindableProperty.Create(nameof(Image), typeof(FileImageSource), typeof(Button), default(FileImageSource),
-			propertyChanging: ImageElementManager.ImageSourceChanging,
-			propertyChanged: ImageElementManager.ImageSourceChanged);
+			propertyChanging: OnImageSourceChanging,
+			propertyChanged: OnImageSourceChanged);
+
 
 		public static readonly BindableProperty PaddingProperty = PaddingElement.PaddingProperty;
 
@@ -231,18 +230,6 @@ namespace Xamarin.Forms
 			base.OnBindingContextChanged();
 		}
 
-		protected override void OnPropertyChanging(string propertyName = null)
-		{
-			if (propertyName == CommandProperty.PropertyName)
-			{
-				ICommand cmd = Command;
-				if (cmd != null)
-					cmd.CanExecuteChanged -= OnCommandCanExecuteChanged;
-			}
-
-			base.OnPropertyChanging(propertyName);
-		}
-
 		void IFontElement.OnFontFamilyChanged(string oldValue, string newValue) =>
 			InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
 
@@ -327,16 +314,51 @@ namespace Xamarin.Forms
 		{
 		}
 
+		private void OnImageSourcesSourceChanged(object sender, EventArgs e) =>
+			ImageElementManager.ImageSourcesSourceChanged(this, EventArgs.Empty);
+
+		private static void OnImageSourceChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			ImageSource newSource = (ImageSource)newValue;
+			Button button = (Button)bindable;
+			if (newSource != null)
+			{
+				newSource.SourceChanged += button.OnImageSourcesSourceChanged;
+			}
+			ImageElementManager.ImageSourceChanged(bindable, newSource);
+		}
+
+		private static void OnImageSourceChanging(BindableObject bindable, object oldValue, object newValue)
+		{
+			ImageSource oldSource = (ImageSource)oldValue;
+			Button button = (Button)bindable;
+
+			if (oldSource != null)
+			{
+				oldSource.SourceChanged -= button.OnImageSourcesSourceChanged;
+			}
+			ImageElementManager.ImageSourceChanging(oldSource);
+		}
+
+
 		private void OnCommandCanExecuteChanged(object sender, EventArgs e) =>
 			ButtonElementManager.CommandCanExecuteChanged(this, EventArgs.Empty);
 
 		private static void OnCommandChanged(BindableObject bo, object o, object n)
 		{
 			var button = (Button)bo;
-			if (n != null)
-			{
-				var newCommand = n as ICommand;
+			if (n is ICommand newCommand)
 				newCommand.CanExecuteChanged += button.OnCommandCanExecuteChanged;
+
+			ButtonElementManager.CommandChanged(button);
+		}
+
+		private static void OnCommandChanging(BindableObject bo, object o, object n)
+		{
+			var button = (Button)bo;
+			if (o != null)
+			{
+				(o as ICommand).CanExecuteChanged -= button.OnCommandCanExecuteChanged;
 			}
 		}
 

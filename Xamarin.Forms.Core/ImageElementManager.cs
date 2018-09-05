@@ -72,16 +72,9 @@ namespace Xamarin.Forms
 		}
 
 
-		public static async void ImageSourceChanging(BindableObject bindable, object oldvalue, object newvalue)
+		public static async void ImageSourceChanging(ImageSource oldImageSource)
 		{
-			ImageSource oldImageSource = ((ImageSource)oldvalue);
-			if (oldImageSource != null)
-			{
-				((ImageSource)oldvalue).SourceChanged -= ImageSourcesSourceChanged;
-			}
-			if (oldvalue == null)
-				return;
-
+			if (oldImageSource == null) return;
 			try
 			{
 				await oldImageSource.Cancel().ConfigureAwait(false);
@@ -92,15 +85,11 @@ namespace Xamarin.Forms
 			}
 		}
 
-		public static void ImageSourceChanged(BindableObject bindable, object oldvalue, object newvalue)
+		public static void ImageSourceChanged(BindableObject bindable, ImageSource newSource)
 		{
-			if (newvalue != null)
-				((ImageSource)newvalue).SourceChanged += ImageSourcesSourceChanged;
-			
 			var visualElement = (VisualElement)bindable;
-			if (newvalue != null)
-				BindableObject.SetInheritedBindingContext(visualElement, visualElement?.BindingContext);
-
+			if (newSource != null)
+				BindableObject.SetInheritedBindingContext(newSource, visualElement?.BindingContext);
 
 			visualElement?.InvalidateMeasureInternal(InvalidationTrigger.MeasureChanged);
 		}
