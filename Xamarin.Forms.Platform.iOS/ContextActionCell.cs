@@ -114,6 +114,14 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			return ContentCell.SizeThatFits(size);
 		}
+		public override void RemoveFromSuperview()
+		{
+			base.RemoveFromSuperview();
+			//Some cells are removed  when using ScrollTo but Disposed is not called causing leaks
+			//ListviewRenderer disposes it's subviews but there's a chance these were removed already
+			//but the dispose logic wasn't called.
+			Dispose(true);
+		}
 
 		public void Update(UITableView tableView, Cell cell, UITableViewCell nativeCell)
 		{
