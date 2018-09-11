@@ -24,6 +24,7 @@ namespace Xamarin.Forms.Platform.iOS
 		UIButton _moreButton;
 		UIScrollView _scroller;
 		UITableView _tableView;
+		bool _isDiposed;
 
 		static ContextActionsCell()
 		{
@@ -269,8 +270,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (disposing && !_isDiposed)
 			{
+				_isDiposed = true;
+
 				if (_scroller != null)
 				{
 					_scroller.Dispose();
@@ -650,7 +653,7 @@ namespace Xamarin.Forms.Platform.iOS
 					return;
 			}
 
-			_tableView.AddGestureRecognizer(new SelectGestureRecognizer());
+			table.AddGestureRecognizer(new SelectGestureRecognizer());
 		}
 
 		class SelectGestureRecognizer : UITapGestureRecognizer
