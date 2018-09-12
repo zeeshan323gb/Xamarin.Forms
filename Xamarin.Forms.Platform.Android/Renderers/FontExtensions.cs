@@ -62,7 +62,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			else if (Regex.IsMatch(self.FontFamily, LoadFromAssetsRegex))
 			{
-				result = Typeface.CreateFromAsset(AApplication.Context.Assets, FontNameToFontFile(self.FontFamily));
+				result = ResourceLoader.ResourceProvider?.Invoke(null, self.FontFamily)?.ToTypeface() ?? Typeface.CreateFromAsset(AApplication.Context.Assets, FontNameToFontFile(self.FontFamily));
 			}
 			else
 			{
@@ -94,7 +94,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 			else if (Regex.IsMatch(self.FontFamily, LoadFromAssetsRegex))
 			{
-				result = Typeface.CreateFromAsset(AApplication.Context.Assets, FontNameToFontFile(self.FontFamily));
+				result = ResourceLoader.ResourceProvider?.Invoke(null, self.FontFamily)?.ToTypeface() ?? Typeface.CreateFromAsset(AApplication.Context.Assets, FontNameToFontFile(self.FontFamily));
 			}
 			else
 			{
@@ -123,6 +123,13 @@ namespace Xamarin.Forms.Platform.Android
 				return fontFamily.Substring(0, hashtagIndex);
 
 			throw new InvalidOperationException($"Can't parse the {nameof(fontFamily)} {fontFamily}");
+		}
+
+		static Typeface ToTypeface(this string b64encodedfont)
+		{
+			var tmpfile = System.IO.Path.GetTempFileName();
+			System.IO.File.WriteAllBytes(tmpfile, System.Convert.FromBase64String(b64encodedfont));
+			return Typeface.CreateFromFile(tmpfile);
 		}
 	}
 }
