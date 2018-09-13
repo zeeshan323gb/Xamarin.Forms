@@ -10,9 +10,27 @@ namespace Xamarin.Forms.Platform.Skia
 	{
 		public static IPlatform Platform = new Platform();
 
+		public static byte[] DrawToPng(Element element, Rectangle region, Action redraw)
+		{
+			var bitmap = new SKBitmap((int)region.Width, (int)region.Height);
+			var canvas = new SKCanvas(bitmap);
+			Draw(element, region, canvas, redraw);
+			canvas.Save();
+			using (var image = SKImage.FromBitmap(bitmap))
+			using (var data = image.Encode(SKEncodedImageFormat.Png, 80))
+			{
+				return data.ToArray();
+			}
+		}
+
 		static string currentDrawRequest;
 		static Element currentElement;
-		public static void Draw (Element element, Rectangle region, SKSurface surface, Action redraw)
+
+		public static void Draw(Element element, Rectangle region, SKSurface surface, Action redraw)
+		{
+			Draw(element, region, surface.Canvas, redraw);
+		}
+		public static void Draw (Element element, Rectangle region, SKCanvas canvas, Action redraw)
 		{
 			if (!string.IsNullOrWhiteSpace(currentDrawRequest) && currentElement != element)
 			{
@@ -24,7 +42,6 @@ namespace Xamarin.Forms.Platform.Skia
 				currentElement = element;
 			}
 
-			var canvas = surface.Canvas;
 
 			canvas.Clear(SKColors.White);
 
