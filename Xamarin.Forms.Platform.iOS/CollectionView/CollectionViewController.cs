@@ -55,6 +55,9 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
+		// TODO hartez 2018/09/12 17:05:48 Get this set from the CollectionView	
+		bool _uniformSize = true;
+
 		void DetermineCellSize(nfloat layoutConstrainedDimension)
 		{
 			// TODO hartez This seems to be working for estimates, need to try it for itemsize
@@ -62,25 +65,31 @@ namespace Xamarin.Forms.Platform.iOS
 			// TODO hartez Also, what about situations where there is no data which matches the path?
 
 			var indexPath = NSIndexPath.Create(0,0);
-			var prototype = CollectionView.DequeueReusableCell(DetermineCellReusedId(), indexPath) as UICollectionViewCell;
-			
-			if (!(prototype is TemplatedCell cell))
+			var prototype = CollectionView.DequeueReusableCell(DetermineCellReusedId(), indexPath) as IConstrainedCell;
+
+			if (prototype == null)
 			{
-				// TODO hartez 2018/09/12 11:13:40 What about getting an initial size for UniformSize with text cells?	
 				return;
 			}
 
-			ApplyTemplateAndData(cell, indexPath);
+			//if (!(prototype is TemplatedCell cell))
+			//{
+			//	// TODO hartez 2018/09/12 11:13:40 What about getting an initial size for UniformSize with text cells?	
+			//	return;
+			//}
 
-			if (cell is IConstrainedCell constrainedCell)
+			UpdateContent(prototype, indexPath);
+
+			prototype.Constrain(layoutConstrainedDimension);
+
+			if (_uniformSize)
 			{
-				constrainedCell.Constrain(layoutConstrainedDimension);
+				_layout.ItemSize = prototype.Measure();
 			}
-
-			cell.Layout();
-
-			_layout.EstimatedItemSize = cell.VisualElementRenderer.NativeView.Frame.Size;
-			Debug.WriteLine($">>>>> CollectionViewController ViewWillLayoutSubviews 65: Setting estimate to {_layout.EstimatedItemSize}");
+			else
+			{
+				_layout.EstimatedItemSize = prototype.Measure();
+			}
 		}
 
 		public override nint GetItemsCount(UICollectionView collectionView, nint section)
@@ -122,10 +131,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		protected virtual void UpdateDefaultCell(DefaultCell defaultCell, NSIndexPath indexPath)
 		{
-			if (_itemsSource is IList list)
-			{
-				defaultCell.Label.Text = list[indexPath.Row].ToString();
-			}
+			UpdateContent(defaultCell, indexPath);
 
 			if (defaultCell is IConstrainedCell constrainedCell)
 			{
@@ -140,6 +146,26 @@ namespace Xamarin.Forms.Platform.iOS
 			if (cell is IConstrainedCell constrainedCell)
 			{
 				_layout.PrepareCellForLayout(constrainedCell);
+			}
+		}
+
+		void UpdateContent(IConstrainedCell cell, NSIndexPath indexPath)
+		{
+			if (cell is TemplatedCell templatedCell)
+			{
+				ApplyTemplateAndData(templatedCell, indexPath);
+			}
+			else if(cell is DefaultCell defaultCell)
+			{
+				UpdateContent(defaultCell, indexPath);
+			}
+		}
+
+		void UpdateContent(DefaultCell cell, NSIndexPath indexPath)
+		{
+			if (_itemsSource is IList list)
+			{
+				cell.Label.Text = list[indexPath.Row].ToString();
 			}
 		}
 
