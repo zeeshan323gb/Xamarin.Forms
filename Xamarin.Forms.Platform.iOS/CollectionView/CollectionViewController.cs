@@ -60,7 +60,6 @@ namespace Xamarin.Forms.Platform.iOS
 
 		void DetermineCellSize(nfloat layoutConstrainedDimension)
 		{
-			// TODO hartez This seems to be working for estimates, need to try it for itemsize
 			// TODO hartez assuming this works, we'll need to evaluate using this nsindexpath (what about groups?)
 			// TODO hartez Also, what about situations where there is no data which matches the path?
 
@@ -71,12 +70,6 @@ namespace Xamarin.Forms.Platform.iOS
 			{
 				return;
 			}
-
-			//if (!(prototype is TemplatedCell cell))
-			//{
-			//	// TODO hartez 2018/09/12 11:13:40 What about getting an initial size for UniformSize with text cells?	
-			//	return;
-			//}
 
 			UpdateContent(prototype, indexPath);
 
