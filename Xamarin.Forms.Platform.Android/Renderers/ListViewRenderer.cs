@@ -27,6 +27,10 @@ namespace Xamarin.Forms.Platform.Android
 		IListViewController Controller => Element;
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
 
+
+		protected ListViewRenderer(IntPtr javaReference, global::Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
+		{
+		}
 		public ListViewRenderer(Context context) : base(context)
 		{
 			AutoPackage = false;
@@ -106,7 +110,10 @@ namespace Xamarin.Forms.Platform.Android
 			base.OnDetachedFromWindow();
 
 			_isAttached = false;
-			_adapter.IsAttachedToWindow = _isAttached;
+
+			if (_adapter != null)
+				_adapter.IsAttachedToWindow = _isAttached;
+			
 		}
 
 		protected override AListView CreateNativeControl()

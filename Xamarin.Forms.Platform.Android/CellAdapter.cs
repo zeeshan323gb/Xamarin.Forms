@@ -24,6 +24,10 @@ namespace Xamarin.Forms.Platform.Android
 		AView _contextView;
 		global::Android.Support.V7.View.ActionMode _supportActionMode;
 
+		protected CellAdapter(IntPtr javaReference, global::Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
+		{
+		}
+
 		protected CellAdapter(Context context)
 		{
 			if (context == null)
