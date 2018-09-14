@@ -7,6 +7,24 @@ namespace Xamarin.Forms.Core.UITests
 {
 	internal static class Gestures
 	{
+		static AppRect GetAppRect(this IApp app, Func<AppQuery, AppQuery> elementQuery)
+		{
+			int tryCount = 0;
+			var elements = app.Query(elementQuery);
+			while (elements.Count() == 0 && tryCount < 10)
+			{
+				elements = app.WaitForElement(elementQuery);
+				tryCount++;
+			}
+
+			if(elements.Count() == 0)
+			{
+				throw new Exception("Failed to Retreive Element from elementQuery");
+			}
+
+			return elements.First().Rect;
+		}
+			
 		public static bool ScrollForElement (this IApp app, string query, Drag drag, int maxSteps = 25)
 		{
 			Func<AppQuery, AppQuery> elementQuery = q => q.Raw (query);
@@ -23,7 +41,7 @@ namespace Xamarin.Forms.Core.UITests
 			// check to see if the element is visible already
 			if (app.Query (elementQuery).Length == 1) {
 				// centering an element whos CenterX is close to the bounding rectangle's center X can sometime register the swipe as a tap
-				float elementDistanceToDragCenter = Math.Abs (app.Query (elementQuery).First ().Rect.CenterY - drag.DragBounds.CenterY);
+				float elementDistanceToDragCenter = Math.Abs (app.GetAppRect(elementQuery).CenterY - drag.DragBounds.CenterY);
  				if (elementDistanceToDragCenter > centerTolerance)
 					app.CenterElementInView (elementQuery, drag.DragBounds, drag.DragDirection);
 				return true;
@@ -36,8 +54,15 @@ namespace Xamarin.Forms.Core.UITests
 			}
 
 			if (count != maxSteps) {
+				var elements = app.Query(elementQuery);
+				while (elements.Count() == 0)
+				{
+					app.WaitForElement(elementQuery);
+					elements = app.Query(elementQuery);
+				}
+
 				// centering an element whos CenterX is close to the bounding rectangle's center X can sometime register the swipe as a tap
-				float elementDistanceToDragCenter = Math.Abs (app.Query (elementQuery).First ().Rect.CenterY - drag.DragBounds.CenterY);
+				float elementDistanceToDragCenter = Math.Abs (app.GetAppRect(elementQuery).CenterY - drag.DragBounds.CenterY);
 				if (elementDistanceToDragCenter > centerTolerance)
 					app.CenterElementInView (elementQuery, drag.DragBounds, drag.DragDirection);
 				return true;
@@ -65,7 +90,7 @@ namespace Xamarin.Forms.Core.UITests
 
 			if (direction == Drag.Direction.BottomToTop || direction == Drag.Direction.TopToBottom) {
 
-				var elementBounds = app.Query (element).First ().Rect;
+				var elementBounds = app.GetAppRect(element);
 
 				bool elementCenterBelowContainerCenter = elementBounds.CenterY > containingView.CenterY;
 				bool elementCenterAboveContainerCenter = elementBounds.CenterY < containingView.CenterY;
