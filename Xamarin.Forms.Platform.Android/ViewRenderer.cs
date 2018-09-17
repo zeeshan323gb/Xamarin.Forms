@@ -28,9 +28,6 @@ namespace Xamarin.Forms.Platform.Android
 
 	public abstract class ViewRenderer<TView, TNativeView> : VisualElementRenderer<TView>, IViewRenderer, AView.IOnFocusChangeListener where TView : View where TNativeView : AView
 	{
-		protected ViewRenderer(IntPtr javaReference, global::Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
-		{
-		}
 		protected ViewRenderer(Context context) : base(context)
 		{
 		}

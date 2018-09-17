@@ -44,9 +44,6 @@ namespace Xamarin.Forms.Platform.Android
 		IListViewController Controller => _listView;
 		protected ITemplatedItemsView<Cell> TemplatedItemsView => _listView;
 
-		protected ListViewAdapter(IntPtr javaReference, global::Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
-		{
-		}
 		public ListViewAdapter(Context context, AListView realListView, ListView listView) : base(context)
 		{
 			_context = context;
@@ -77,7 +74,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			get
 			{
-				if (_listCount == -1 && TemplatedItemsView != null)
+				if (_listCount == -1)
 				{
 					var templatedItems = TemplatedItemsView.TemplatedItems;
 					int count = templatedItems.Count;
