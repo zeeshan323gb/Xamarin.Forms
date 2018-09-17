@@ -78,6 +78,8 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			if (args.Mode == ScrollToMode.Position)
 			{
+				// TODO hartez 2018/09/17 16:42:54 This will need to be overridden to account for grouping	
+
 				var indexPath = NSIndexPath.Create(0, args.Index);
 
 				// TODO hartez 2018/09/17 16:21:19 Handle LTR	
