@@ -47,7 +47,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		internal ListViewAdapter(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
 		{
-			throw new Exception("Unexpected ListViewAdapter ressurection.");
+			throw new Exception("Unexpected ListViewAdapter resurrection.");
 		}
 
 		public ListViewAdapter(Context context, AListView realListView, ListView listView) : base(context)
