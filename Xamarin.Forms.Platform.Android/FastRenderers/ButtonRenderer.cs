@@ -15,7 +15,7 @@ using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 namespace Xamarin.Forms.Platform.Android.FastRenderers
 {
 	internal sealed class ButtonRenderer : AppCompatButton, IVisualElementRenderer, AView.IOnAttachStateChangeListener,
-		AView.IOnFocusChangeListener, IEffectControlProvider, AView.IOnClickListener, AView.IOnTouchListener, IViewRenderer, ITabStop, IBorderVisualElementRenderer
+		AView.IOnFocusChangeListener, AView.IOnClickListener, AView.IOnTouchListener, IViewRenderer, ITabStop, IBorderVisualElementRenderer
 	{
 		float _defaultFontSize;
 		int? _defaultLabelFor;
