@@ -58,22 +58,7 @@
 			return config;
 		}
 
-		public static readonly BindableProperty UseSafeAreaProperty = BindableProperty.Create("UseSafeArea", typeof(bool), typeof(Page), false, propertyChanged: (bindable, oldValue, newValue) =>
-		{
-			if (Device.RuntimePlatform != Device.iOS) return;
-
-			var page = bindable as Xamarin.Forms.Page;
-			if ((bool)oldValue && !(bool)newValue)
-			{
-				var safeAreaInsets = GetSafeAreaInsets(page);
-				if (safeAreaInsets == page.Padding)
-					page.Padding = default(Thickness);
-			}
-			else
-			{
-				UpdatePadding(GetSafeAreaInsets(page), page);
-			}
-		});
+		public static readonly BindableProperty UseSafeAreaProperty = BindableProperty.Create("UseSafeArea", typeof(bool), typeof(Page), false);
 
 		public static bool GetUseSafeArea(BindableObject element)
 		{
@@ -119,17 +104,7 @@
 			return config;
 		}
 
-		static readonly BindablePropertyKey SafeAreaInsetsPropertyKey = BindableProperty.CreateReadOnly(nameof(SafeAreaInsets), typeof(Thickness), typeof(Page), default(Thickness), propertyChanged: (bindable, oldValue, newValue) =>
-		{
-			var page = bindable as Xamarin.Forms.Page;
-			UpdatePadding((Thickness)newValue, page);
-		});
-
-		static void UpdatePadding(Thickness thickness, FormsElement page)
-		{
-			if (page.On<iOS>().UsingSafeArea())
-				page.Padding = thickness;
-		}
+		static readonly BindablePropertyKey SafeAreaInsetsPropertyKey = BindableProperty.CreateReadOnly(nameof(SafeAreaInsets), typeof(Thickness), typeof(Page), default(Thickness));
 
 		public static readonly BindableProperty SafeAreaInsetsProperty = SafeAreaInsetsPropertyKey.BindableProperty;
 
