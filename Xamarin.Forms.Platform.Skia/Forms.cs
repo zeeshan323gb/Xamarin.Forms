@@ -337,6 +337,30 @@ namespace Xamarin.Forms.Platform.Skia
 			canvas.DrawPath(RoundedRect(new Rectangle(0, 0, box.Width, box.Height), box.CornerRadius), paint);
 		}
 
+		private static void DrawFrameView(Frame frame, SKCanvas canvas)
+		{
+			//TODO: Draw Shadow
+
+			var path = RoundedRect(new Rectangle(0, 0, frame.Width, frame.Height).Inflate(-1 , -1), new CornerRadius(frame.CornerRadius));
+			var paint = new SKPaint
+			{
+				IsAntialias = true,
+				Color = frame.BackgroundColor.ToSKColor(Color.Transparent),
+			};
+
+			canvas.DrawPath(path, paint);
+
+			paint = new SKPaint
+			{
+				IsStroke = true,
+				IsAntialias = true,
+				Color = (frame.BorderColor.IsDefault ? frame.OutlineColor : frame.BorderColor).ToSKColor(Color.Transparent),
+				StrokeWidth = 2,
+			};
+
+			canvas.DrawPath(path, paint);
+		}
+
 		private static void DrawContentPage(ContentPage page, SKCanvas canvas)
 		{
 			DrawVisualElement(page, canvas);
@@ -395,6 +419,10 @@ namespace Xamarin.Forms.Platform.Skia
 					else if (element is BoxView box)
 					{
 						DrawBoxView(box, canvas);
+					}
+					else if (element is Frame frame)
+					{
+						DrawFrameView(frame, canvas);
 					}
 					else if (element is Image image)
 					{
