@@ -951,7 +951,26 @@ namespace Xamarin.Forms.Platform.Skia
 			this.canvas = canvas;
 			canvas.Save();
 			canvas.Translate((float)element.Bounds.X, (float)element.Bounds.Y);
+			canvas.Translate((float)element.TranslationX, (float)element.TranslationY);
 
+			float centerX = (float)((element.Bounds.Width / 2) + element.Bounds.X);
+			float centerY = (float)((element.Bounds.Height / 2) + element.Bounds.Y);
+
+			var transform = SKMatrix44.CreateTranslate(-centerX, -centerY, 0);
+			transform.PostConcat(SKMatrix44.CreateRotationDegrees(1, 0, 0, (float)element.RotationX));
+			transform.PostConcat(SKMatrix44.CreateRotationDegrees(0, 1, 0, (float)element.RotationY));
+			transform.PostConcat(SKMatrix44.CreateRotationDegrees(0, 0, 1, (float)element.Rotation));
+
+			var perspective = SKMatrix44.CreateIdentity();
+			perspective[3, 2] = -1 / 250f;
+			transform.PostConcat(perspective);
+
+			var target = canvas.TotalMatrix;
+			SKMatrix.PostConcat(ref target, transform.Matrix);
+
+			SKMatrix.PostConcat(ref target, SKMatrix.MakeTranslation(centerX, centerY));
+
+			canvas.SetMatrix(target);
 		}
 		public void Dispose()
 		{
