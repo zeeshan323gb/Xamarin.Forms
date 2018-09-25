@@ -453,21 +453,13 @@ namespace Xamarin.Forms.Platform.Skia
 					{
 						DrawUnknown(ve, canvas);
 					}
+
+					foreach (var child in element.LogicalChildren)
+					{
+						DrawElement(child, canvas, drawRequest, redraw);
+					}
 				}
 			}
-			
-
-			canvas.Save();
-
-			if (element is VisualElement v)
-				canvas.Translate((float)v.Bounds.X, (float)v.Bounds.Y);
-
-			foreach (var child in element.LogicalChildren)
-			{
-				DrawElement(child, canvas, drawRequest, redraw);
-			}
-
-			canvas.Restore();
 		}
 		private static void DrawSwitch(Switch theSwitch, SKCanvas canvas)
 		{
@@ -957,6 +949,9 @@ namespace Xamarin.Forms.Platform.Skia
 			float centerY = (float)((element.Bounds.Height / 2) + element.Bounds.Y);
 
 			var transform = SKMatrix44.CreateTranslate(-centerX, -centerY, 0);
+
+			transform.PostConcat(SKMatrix44.CreateScale((float)(element.ScaleX * element.Scale), (float)(element.ScaleY * element.Scale), 1));
+
 			transform.PostConcat(SKMatrix44.CreateRotationDegrees(1, 0, 0, (float)element.RotationX));
 			transform.PostConcat(SKMatrix44.CreateRotationDegrees(0, 1, 0, (float)element.RotationY));
 			transform.PostConcat(SKMatrix44.CreateRotationDegrees(0, 0, 1, (float)element.Rotation));
