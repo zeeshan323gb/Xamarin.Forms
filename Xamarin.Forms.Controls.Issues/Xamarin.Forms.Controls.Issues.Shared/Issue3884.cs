@@ -40,8 +40,7 @@ namespace Xamarin.Forms.Controls.Issues
 		[Category(UITestCategories.ManualReview)]
 		public void Issue3884Test() 
 		{
-			// Delete this and all other UITEST sections if there is no way to automate the test. Otherwise, be sure to rename the test and update the Category attribute on the class. Note that you can add multiple categories.
-			RunningApp.Screenshot ("I am at Issue 1");
+			RunningApp.Screenshot ("I see a blue circle");
 		}
 #endif
 	}
