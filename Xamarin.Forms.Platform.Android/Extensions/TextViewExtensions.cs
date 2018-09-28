@@ -14,11 +14,12 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (maxLines == (int)Label.MaxLinesProperty.DefaultValue)
 			{
-				// MaxLines has not been explicitly set, so just let it be whatever was set by LineBreakMode
+				// MaxLines is not explicitly set, so just let it be whatever gets set by LineBreakMode
+				textView.SetLineBreakMode(label);
 				return;
 			}
 
-			textView.SetMaxLines(maxLines);	
+			textView.SetMaxLines(maxLines);
 		}
 
 		static void SetMaxLines(this TextView textView, Label label, int lines)
