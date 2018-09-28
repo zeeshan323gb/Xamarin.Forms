@@ -46,11 +46,9 @@ namespace Xamarin.Forms.Platform.Android
 					break;
 				case LineBreakMode.WordWrap:
 					textView.Ellipsize = null;
-					maxLines = int.MaxValue;
 					break;
 				case LineBreakMode.CharacterWrap:
 					textView.Ellipsize = null;
-					maxLines = int.MaxValue;
 					break;
 				case LineBreakMode.HeadTruncation:
 					maxLines = 1;
